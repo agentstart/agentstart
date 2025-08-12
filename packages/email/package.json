@@ -1,0 +1,36 @@
+{
+  "name": "@acme/email",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./templates": "./emails/index.ts",
+    "./env": "./env.ts"
+  },
+  "scripts": {
+    "dev": "email dev --port 3001",
+    "clean": "rm -rf .cache .turbo node_modules",
+    "lint": "eslint --cache --cache-location .cache/.eslintcache",
+    "lint:fix": "eslint --fix --cache --cache-location .cache/.eslintcache",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@react-email/components": "^0.5.0",
+    "@t3-oss/env-nextjs": "catalog:",
+    "consola": "catalog:",
+    "react": "catalog:react19",
+    "react-dom": "catalog:react19",
+    "resend": "^6.0.1",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@acme/eslint-config": "workspace:*",
+    "@acme/prettier-config": "workspace:*",
+    "@acme/tsconfig": "workspace:*",
+    "@types/bun": "catalog:",
+    "react-email": "4.2.8",
+    "typescript": "catalog:"
+  },
+  "prettier": "@acme/prettier-config"
+}
