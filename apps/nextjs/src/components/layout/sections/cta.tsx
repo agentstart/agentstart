@@ -1,16 +1,16 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/auth/client";
+import { useAuth } from "@/hooks/use-auth";
 import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 export const CTASection = () => {
-  const { data: session } = authClient.useSession();
+  const { user } = useAuth();
 
   return (
     <section className="relative overflow-hidden py-24 sm:py-32">
-      <div className="container relative">
+      <div className="relative container">
         <div className="mx-auto max-w-3xl">
           <div className="border-border/40 bg-card rounded-3xl border p-8 text-center shadow-lg sm:p-12">
             {/* Sparkle decoration */}
@@ -33,7 +33,7 @@ export const CTASection = () => {
                 size="lg"
                 className="shadow-primary/25 hover:shadow-primary/30 group h-12 px-8 font-semibold shadow-lg transition-all hover:shadow-xl"
               >
-                <Link href={session?.user.id ? "/dashboard" : "/auth/sign-in"}>
+                <Link href={user?.id ? "/dashboard" : "/auth/sign-in"}>
                   Get Started
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>

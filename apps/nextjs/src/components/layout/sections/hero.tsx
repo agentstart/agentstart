@@ -1,16 +1,16 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/auth/client";
+import { useAuth } from "@/hooks/use-auth";
 import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 export const HeroSection = () => {
-  const { data: session } = authClient.useSession();
+  const { user } = useAuth();
 
   return (
     <section className="relative flex min-h-[90vh] w-full items-center overflow-hidden">
-      <div className="container relative z-10">
+      <div className="relative z-10 container">
         <div className="mx-auto max-w-5xl">
           <div className="flex flex-col items-center space-y-8 text-center">
             {/* Announcement Badge */}
@@ -48,7 +48,7 @@ export const HeroSection = () => {
                 size="lg"
                 className="shadow-primary/25 hover:shadow-primary/30 group h-12 px-8 font-semibold shadow-lg transition-all hover:shadow-xl"
               >
-                <Link href={session?.user.id ? "/dashboard" : "/auth/sign-in"}>
+                <Link href={user?.id ? "/dashboard" : "/auth/sign-in"}>
                   Start Building
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>

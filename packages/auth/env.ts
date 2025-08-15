@@ -11,6 +11,10 @@ export const env = createEnv({
         : z.string().min(1).optional(),
     NODE_ENV: z.enum(["development", "production"]).optional(),
 
+    // Stripe
+    STRIPE_SECRET_KEY: z.string().min(1),
+    STRIPE_WEBHOOK_SECRET: z.string().min(1),
+
     // OAuth providers - all optional
     // GitHub
     AUTH_GITHUB_CLIENT_ID: z.string().min(1).optional(),
@@ -56,7 +60,13 @@ export const env = createEnv({
     AUTH_GITLAB_CLIENT_ID: z.string().min(1).optional(),
     AUTH_GITLAB_CLIENT_SECRET: z.string().min(1).optional(),
   },
-  experimental__runtimeEnv: {},
+  client: {
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1),
+  },
+  experimental__runtimeEnv: {
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
+      process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+  },
   skipValidation:
     !!process.env.CI || process.env.npm_lifecycle_event === "lint",
 });

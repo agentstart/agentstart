@@ -18,13 +18,17 @@
     "generate": "dotenv -e ../../.env -- bunx @better-auth/cli generate --output ../db/src/auth-schema.ts"
   },
   "dependencies": {
+    "@acme/config": "*",
     "@acme/db": "*",
     "@acme/email": "*",
+    "@better-auth/stripe": "catalog:",
+    "@stripe/stripe-js": "^7.8.0",
     "@t3-oss/env-nextjs": "catalog:",
-    "better-auth": "1.2.12",
+    "better-auth": "catalog:",
     "next": "^15.4.6",
     "react": "catalog:react19",
     "react-dom": "catalog:react19",
+    "stripe": "^18.4.0",
     "zod": "catalog:"
   },
   "devDependencies": {

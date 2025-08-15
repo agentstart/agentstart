@@ -22,8 +22,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler";
 import Link from "next/link";
-import { authClient } from "@/lib/auth/client";
 import { UserDropdown } from "@/components/layout/user-dropdown";
+import { useAuth } from "@/hooks/use-auth";
 
 interface RouteProps {
   href: string;
@@ -37,16 +37,8 @@ interface FeatureProps {
 
 const routeList: RouteProps[] = [
   {
-    href: "#features",
-    label: "Features",
-  },
-  {
-    href: "#showcase",
-    label: "Examples",
-  },
-  {
-    href: "#faq",
-    label: "FAQ",
+    href: "/pricing",
+    label: "Pricing",
   },
 ];
 
@@ -70,7 +62,7 @@ const featureList: FeatureProps[] = [
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const { data: session } = authClient.useSession();
+  const { user } = useAuth();
 
   return (
     <header className="container flex items-center justify-between py-4">
@@ -122,8 +114,8 @@ export const Navbar = () => {
               <div className="flex w-full items-center justify-between px-4 py-2">
                 <AnimatedThemeToggler />
 
-                {session?.user ? (
-                  <UserDropdown user={session.user} />
+                {user ? (
+                  <UserDropdown user={user} />
                 ) : (
                   <Button size="sm" asChild>
                     <Link href="/auth/sign-in">Sign In</Link>
@@ -190,8 +182,8 @@ export const Navbar = () => {
       <div className="hidden items-center gap-2 lg:flex">
         <AnimatedThemeToggler />
 
-        {session?.user ? (
-          <UserDropdown user={session.user} />
+        {user ? (
+          <UserDropdown user={user} />
         ) : (
           <Button aria-label="Get Started" asChild>
             <Link href="/auth/sign-in">Get Started</Link>

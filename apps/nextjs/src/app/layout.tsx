@@ -2,9 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { cn } from "@/lib/utils";
+import { Providers } from "@/components/layout/client-layout";
 
 import "@/app/globals.css";
-import { Providers } from "@/components/layout/client-layout";
 
 export const metadata: Metadata = {
   title: "Agent Stack - The AI-First Fullstack Template",

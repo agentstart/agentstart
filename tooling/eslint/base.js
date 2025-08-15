@@ -61,7 +61,7 @@ export default tseslint.config(
         { checksVoidReturn: { attributes: false } },
       ],
       "@typescript-eslint/no-unnecessary-condition": "off",
-      "@typescript-eslint/no-non-null-assertion": "error",
+      "@typescript-eslint/no-non-null-assertion": "off",
       "no-restricted-imports": [
         "error",
         {

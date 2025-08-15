@@ -6,6 +6,10 @@ export const users = pgTable("users", (t) => ({
   email: t.text().notNull().unique(),
   emailVerified: t.boolean().notNull(),
   image: t.text(),
+  /**
+   * The Stripe customer ID
+   */
+  stripeCustomerId: t.text(),
   createdAt: t.timestamp().notNull(),
   updatedAt: t.timestamp().notNull(),
 }));
@@ -50,4 +54,52 @@ export const verifications = pgTable("verifications", (t) => ({
   expiresAt: t.timestamp().notNull(),
   createdAt: t.timestamp(),
   updatedAt: t.timestamp(),
+}));
+
+export const subscriptions = pgTable("subscriptions", (t) => ({
+  id: t.text().primaryKey(),
+  /**
+   * The name of the subscription plan
+   */
+  plan: t.text().notNull(),
+  /**
+   * The ID this subscription is associated with (user ID by default)
+   */
+  referenceId: t.text().notNull(),
+  /**
+   * The Stripe customer ID
+   */
+  stripeCustomerId: t.text(),
+  /**
+   * The Stripe subscription ID
+   */
+  stripeSubscriptionId: t.text(),
+  /**
+   * The status of the subscription (active, canceled, etc.)
+   */
+  status: t.text().notNull(),
+  /**
+   * Start date of the current billing period
+   */
+  periodStart: t.timestamp(),
+  /**
+   * End date of the current billing period
+   */
+  periodEnd: t.timestamp(),
+  /**
+   * Whether the subscription will be cancelled at the end of the period
+   */
+  cancelAtPeriodEnd: t.boolean(),
+  /**
+   * Number of seats for team plans
+   */
+  seats: t.integer(),
+  /**
+   * Start date of the trial period
+   */
+  trialStart: t.timestamp(),
+  /**
+   * End date of the trial period
+   */
+  trialEnd: t.timestamp(),
 }));
