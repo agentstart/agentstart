@@ -1,6 +1,6 @@
-import { Navbar } from "@/components/layout/sections/navbar";
-import { PricingSection } from "@/components/layout/sections/pricing";
-import { FooterSection } from "@/components/layout/sections/footer";
+import { Navbar } from "@/components/sections/navbar";
+import { PricingSection } from "@/components/sections/pricing";
+import { FooterSection } from "@/components/sections/footer";
 
 export default function Pricing() {
   return (
