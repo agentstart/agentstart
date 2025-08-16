@@ -10,15 +10,15 @@ import { FooterSection } from "@/components/layout/sections/footer";
 
 export default function Home() {
   return (
-    <div className="relative min-h-screen bg-background">
+    <div className="bg-background relative min-h-screen">
       <Navbar />
       <HeroSection />
       <FeaturesGrid />
       <ShowcaseSection />
       <StatsSection />
       <PricingSection />
-      <CTASection />
       <FAQSection />
+      <CTASection />
       <FooterSection />
     </div>
   );
