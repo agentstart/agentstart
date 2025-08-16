@@ -37,6 +37,9 @@ export function Providers({ children }: { children: ReactNode }) {
             social={{
               providers: ["github", "google"],
             }}
+            account={{
+              basePath: "/dashboard", // Settings views will be at /dashboard/settings, /dashboard/security, etc.
+            }}
           >
             {children}
           </AuthUIProvider>

@@ -22,7 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler";
 import Link from "next/link";
-import { UserDropdown } from "@/components/layout/user-dropdown";
+import { UserButton } from "@daveyplate/better-auth-ui";
 import { useAuth } from "@/hooks/use-auth";
 
 interface RouteProps {
@@ -115,7 +115,7 @@ export const Navbar = () => {
                 <AnimatedThemeToggler />
 
                 {user ? (
-                  <UserDropdown user={user} />
+                  <UserButton size="icon" />
                 ) : (
                   <Button size="sm" asChild>
                     <Link href="/auth/sign-in">Sign In</Link>
@@ -183,7 +183,7 @@ export const Navbar = () => {
         <AnimatedThemeToggler />
 
         {user ? (
-          <UserDropdown user={user} />
+          <UserButton size="icon" />
         ) : (
           <Button aria-label="Get Started" asChild>
             <Link href="/auth/sign-in">Get Started</Link>
