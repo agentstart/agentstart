@@ -24,8 +24,8 @@
   "devDependencies": {
     "@acme/prettier-config": "*",
     "prettier": "catalog:",
-    "taze": "^19.1.0",
-    "turbo": "^2.5.5",
+    "taze": "^19.3.0",
+    "turbo": "^2.5.6",
     "typescript": "catalog:"
   },
   "prettier": "@acme/prettier-config",
@@ -67,6 +67,7 @@
       "tailwindcss": "4.1.11",
       "tailwindcss-animate": "^1.0.7",
       "typescript": "^5.9.2",
+      "ts-pattern": "^5.8.0",
       "lucide-react": "^0.537.0",
       "uuid": "^11.1.0",
       "zod": "^4.0.15",

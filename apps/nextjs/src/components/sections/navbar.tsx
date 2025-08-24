@@ -20,9 +20,9 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
-import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler";
 import Link from "next/link";
-import { UserButton } from "@daveyplate/better-auth-ui";
+import { UserDropmenu } from "@/components/controls/user-dropmenu";
+import { SimpleThemeSwitch } from "@/components/controls/theme-switch";
 import { useAuth } from "@/hooks/use-auth";
 
 interface RouteProps {
@@ -112,10 +112,10 @@ export const Navbar = () => {
               <Separator className="mb-2" />
 
               <div className="flex w-full items-center justify-between px-4 py-2">
-                <AnimatedThemeToggler />
+                <SimpleThemeSwitch />
 
                 {user ? (
-                  <UserButton size="icon" />
+                  <UserDropmenu size="icon" />
                 ) : (
                   <Button size="sm" asChild>
                     <Link href="/auth/sign-in">Sign In</Link>
@@ -180,10 +180,10 @@ export const Navbar = () => {
       </NavigationMenu>
 
       <div className="hidden items-center gap-2 lg:flex">
-        <AnimatedThemeToggler />
+        <SimpleThemeSwitch />
 
         {user ? (
-          <UserButton size="icon" />
+          <UserDropmenu size="icon" />
         ) : (
           <Button aria-label="Get Started" asChild>
             <Link href="/auth/sign-in">Get Started</Link>

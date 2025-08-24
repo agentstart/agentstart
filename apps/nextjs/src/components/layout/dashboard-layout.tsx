@@ -22,8 +22,8 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { UserButton } from "@daveyplate/better-auth-ui";
 import { NavSecondary } from "./nav-secondary";
+import { UserDropmenu } from "@/components/controls/user-dropmenu";
 
 const data = {
   navMain: [
@@ -98,7 +98,7 @@ export function DashboardLayout({
           <NavSecondary items={data.navSecondary} className="mt-auto" />
         </SidebarContent>
         <SidebarFooter>
-          <UserButton />
+          <UserDropmenu />
         </SidebarFooter>
       </Sidebar>
 
