@@ -14,7 +14,8 @@ interface FAQProps {
 const FAQList: FAQProps[] = [
   {
     question: "What makes this different from other Next.js templates?",
-    answer: "This is the first template designed specifically for AI agents, not developers. Every decision - from file structure to error messages - is optimized for AI comprehension and token efficiency. It includes AGENT.md documentation that serves as a single source of truth for AI tools.",
+    answer:
+      "This is the first template designed specifically for AI agents, not developers. Every decision - from file structure to error messages - is optimized for AI comprehension and token efficiency. It includes AGENTS.md documentation that serves as a single source of truth for AI tools.",
     value: "item-1",
   },
   {
@@ -31,12 +32,14 @@ const FAQList: FAQProps[] = [
   },
   {
     question: "How does it reduce token usage?",
-    answer: "Through convention over configuration, clear module boundaries, and the AGENT.md file that provides instant context. AI agents spend less time understanding your codebase structure and more time building features. We've seen 90% reduction in token usage compared to traditional templates.",
+    answer:
+      "Through convention over configuration, clear module boundaries, and the AGENTS.md file that provides instant context. AI agents spend less time understanding your codebase structure and more time building features. We've seen 90% reduction in token usage compared to traditional templates.",
     value: "item-4",
   },
   {
     question: "Which AI tools does it work with?",
-    answer: "Optimized for Claude, Cursor, GitHub Copilot, and any LLM-based coding assistant. The template's clear structure and conventions are universally understood by AI agents, making it compatible with current and future AI coding tools.",
+    answer:
+      "Optimized for Claude, Cursor, GitHub Copilot, and any LLM-based coding assistant. The template's clear structure and conventions are universally understood by AI agents, making it compatible with current and future AI coding tools.",
     value: "item-5",
   },
 ];
@@ -49,7 +52,7 @@ export const FAQSection = () => {
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
             Frequently Asked Questions
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="text-muted-foreground mt-4 text-lg">
             Everything you need to know about building with AI agents
           </p>
         </div>
@@ -60,15 +63,15 @@ export const FAQSection = () => {
               <AccordionItem
                 key={value}
                 value={value}
-                className="rounded-lg border border-muted/50 bg-card/50 px-6 backdrop-blur transition-all hover:border-muted data-[state=open]:border-primary/50"
+                className="border-muted/50 bg-card/50 hover:border-muted data-[state=open]:border-primary/50 rounded-lg border px-6 backdrop-blur transition-all"
               >
                 <AccordionTrigger className="text-left hover:no-underline">
                   <span className="text-sm font-medium sm:text-base">
                     {question}
                   </span>
                 </AccordionTrigger>
-                
-                <AccordionContent className="pt-2 text-sm text-muted-foreground">
+
+                <AccordionContent className="text-muted-foreground pt-2 text-sm">
                   {answer}
                 </AccordionContent>
               </AccordionItem>

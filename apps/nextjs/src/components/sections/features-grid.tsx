@@ -17,7 +17,7 @@ const features = [
   {
     name: "AI-First Architecture",
     description:
-      "AGENT.md driven development with clear conventions. Every decision optimized for AI comprehension and token efficiency.",
+      "AGENTS.md driven development with clear conventions. Every decision optimized for AI comprehension and token efficiency.",
     href: "/docs/ai-first",
     cta: "Learn more",
     className: "col-span-3 lg:col-span-2",
@@ -73,7 +73,7 @@ const features = [
     className: "col-span-3 lg:col-span-2",
     background: (
       <div>
-        <div className="absolute right-4 bottom-4 flex flex-col gap-2 text-sm">
+        <div className="absolute bottom-4 right-4 flex flex-col gap-2 text-sm">
           <div className="bg-accent flex items-center gap-2 rounded px-3 py-1.5 backdrop-blur-sm">
             <code className="text-muted-foreground">// AGENT: Purpose</code>
           </div>

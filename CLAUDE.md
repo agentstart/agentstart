@@ -11,7 +11,7 @@
 
 ### **最关键的三件事**
 
-1. **AGENT.md** - 让 agent 5 秒内理解项目
+1. **AGENTS.md** - 让 agent 5 秒内理解项目
 2. **capabilities.ts** - 让 agent 知道能做什么
 3. **约定大于配置** - 让 agent 不用思考就知道文件在哪
 
@@ -19,7 +19,7 @@
 
 #### 第一优先级：即时可查的文档
 
-**AGENT.md - 单一真相源**
+**AGENTS.md - 单一真相源**
 
 - 位置固定：根目录，agent 第一个会查看
 - 内容精简：不超过 500 行，避免 token 浪费
@@ -323,7 +323,7 @@ export async function signIn(credentials) {
 ### 2. **依赖关系图**
 
 ```yaml
-# AGENT.md
+# AGENTS.md
 ## Feature Dependencies
 - Payment → requires Auth
 - AI Chat → requires Auth + Rate Limiting
@@ -351,9 +351,9 @@ export async function signIn(credentials) {
 
 ## 结构与说明
 
-### 1. 核心文档：`AGENT.md`
+### 1. 核心文档：`AGENTS.md`
 
-参考 [https://ampcode.com/AGENT.md](https://ampcode.com/AGENT.md#migration)，内容包括：
+参考 [https://ampcode.com/AGENTS.md](https://ampcode.com/AGENTS.md#migration)，内容包括：
 
 - **Project Overview**: Brief description of the project’s purpose and architecture
 - **Build & Commands**: Development, testing, and deployment commands

@@ -50,7 +50,7 @@ export const FooterSection = () => {
                   href="#features"
                   className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                 >
-                  AGENT.md
+                  AGENTS.md
                 </Link>
               </li>
             </ul>
