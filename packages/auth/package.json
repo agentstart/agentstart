@@ -22,7 +22,7 @@
     "@acme/db": "*",
     "@acme/email": "*",
     "@better-auth/stripe": "catalog:",
-    "@stripe/stripe-js": "^7.8.0",
+    "@stripe/stripe-js": "^7.9.0",
     "@t3-oss/env-nextjs": "catalog:",
     "better-auth": "catalog:",
     "next": "^15.5.0",
