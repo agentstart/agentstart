@@ -1,0 +1,8 @@
+// AGENT: defineConfig function for type-safe configuration
+// USAGE: import { defineConfig } from '@acme/config'
+
+import type { AppConfig } from "./types";
+
+export function defineConfig(config: AppConfig): AppConfig {
+  return config;
+}
