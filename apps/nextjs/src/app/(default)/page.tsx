@@ -2,7 +2,6 @@ import { Navbar } from "@/components/sections/navbar";
 import { HeroSection } from "@/components/sections/hero";
 import { FeaturesGrid } from "@/components/sections/features-grid";
 import { ShowcaseSection } from "@/components/sections/showcase";
-import { StatsSection } from "@/components/sections/stats";
 import { PricingSection } from "@/components/sections/pricing";
 import { CTASection } from "@/components/sections/cta";
 import { FAQSection } from "@/components/sections/faq";
@@ -15,7 +14,6 @@ export default function Home() {
       <HeroSection />
       <FeaturesGrid />
       <ShowcaseSection />
-      <StatsSection />
       <PricingSection />
       <FAQSection />
       <CTASection />

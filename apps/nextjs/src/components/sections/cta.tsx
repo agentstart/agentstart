@@ -9,7 +9,7 @@ export const CTASection = () => {
   const { user } = useAuth();
 
   return (
-    <section className="relative overflow-hidden py-24 sm:py-32">
+    <section id="cta" className="relative overflow-hidden py-24 sm:py-32">
       <div className="relative container">
         <div className="mx-auto max-w-3xl">
           <div className="border-border/40 bg-card rounded-3xl border p-8 text-center shadow-lg sm:p-12">

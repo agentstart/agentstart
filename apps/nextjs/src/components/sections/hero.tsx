@@ -9,7 +9,7 @@ export const HeroSection = () => {
   const { user } = useAuth();
 
   return (
-    <section className="relative flex min-h-[90vh] w-full items-center overflow-hidden">
+    <section id="hero" className="relative flex min-h-[90vh] w-full items-center overflow-hidden">
       <div className="relative z-10 container">
         <div className="mx-auto max-w-5xl">
           <div className="flex flex-col items-center space-y-8 text-center">

@@ -40,7 +40,7 @@ const showcaseItems = [
 
 export const ShowcaseSection = () => {
   return (
-    <section className="relative py-24 sm:py-32 overflow-hidden">
+    <section id="showcase" className="relative py-24 sm:py-32 overflow-hidden">
 
       <div className="container">
         <div className="mx-auto max-w-2xl text-center mb-16">
