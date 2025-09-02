@@ -4,6 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { CornerBorders } from "./corner-borders";
 
 interface FAQProps {
   question: string;
@@ -46,8 +47,10 @@ const FAQList: FAQProps[] = [
 
 export const FAQSection = () => {
   return (
-    <section id="faq" className="relative py-24 sm:py-32">
-      <div className="container">
+    <section id="faq" className="relative border-b py-24 sm:py-32">
+      <CornerBorders position="all" />
+
+      <div className="container px-4">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
             Frequently Asked Questions
@@ -63,7 +66,7 @@ export const FAQSection = () => {
               <AccordionItem
                 key={value}
                 value={value}
-                className="border-muted/50 bg-card/50 hover:border-muted data-[state=open]:border-primary/50 rounded-lg border px-6 backdrop-blur transition-all"
+                className="border-muted/50 bg-card/50 hover:border-muted data-[state=open]:border-primary/50 border px-6 backdrop-blur transition-all"
               >
                 <AccordionTrigger className="text-left hover:no-underline">
                   <span className="text-sm font-medium sm:text-base">

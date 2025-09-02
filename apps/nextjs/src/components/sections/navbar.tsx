@@ -10,7 +10,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Separator } from "@/components/ui/separator";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -25,6 +24,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { useScroll, useMotionValueEvent } from "motion/react";
 import { cn } from "@/lib/utils";
 import { useActiveSection } from "@/hooks/use-active-section";
+import { CornerBorders } from "./corner-borders";
+import { siteConfig } from "@acme/config";
 
 interface RouteProps {
   href: string;
@@ -77,15 +78,29 @@ export const Navbar = () => {
   });
 
   return (
-    <header className="sticky top-4 z-50 flex w-full items-center justify-center">
+    <header
+      className={cn(
+        "sticky z-50 flex w-full items-center justify-center border-y transition-all duration-800 ease-in-out",
+        {
+          // Default state (not scrolled)
+          "top-0 border-transparent": !isScrolled,
+          // Scrolled state
+          "border-border bg-background/75 top-4 backdrop-blur-xl": isScrolled,
+        },
+      )}
+    >
+      <CornerBorders
+        className={cn(isScrolled ? "opacity-100" : "opacity-0", "duration-800")}
+      />
+
       <div
         className={cn(
-          "border-border bg-background/75 flex w-full items-center justify-between border px-6 py-2.5 transition-all duration-300",
+          "flex w-full max-w-6xl items-center justify-between px-6 py-2.5 transition-all duration-800 ease-in-out",
           {
             // Default state (not scrolled)
-            "container border-transparent": !isScrolled,
+            "border-transparent": !isScrolled,
             // Scrolled state
-            "border-border max-w-4xl rounded-2xl backdrop-blur-xl": isScrolled,
+            "": isScrolled,
           },
         )}
       >
@@ -105,13 +120,13 @@ export const Navbar = () => {
 
             <SheetContent
               side="left"
-              className="bg-card border-secondary flex flex-col justify-between rounded-tr-2xl rounded-br-2xl"
+              className="bg-card border-secondary flex flex-col justify-between"
             >
               <div>
                 <SheetHeader className="mb-4 ml-4">
                   <SheetTitle className="flex items-center">
                     <Link href="/" className="flex items-center font-bold">
-                      AgentStack
+                      {siteConfig.name}
                     </Link>
                   </SheetTitle>
                 </SheetHeader>
@@ -125,7 +140,7 @@ export const Navbar = () => {
                       variant={
                         activeSection === sectionId ? "secondary" : "ghost"
                       }
-                      className="justify-start text-base"
+                      className="justify-start rounded-none text-base"
                     >
                       <Link href={href}>{label}</Link>
                     </Button>
@@ -134,8 +149,6 @@ export const Navbar = () => {
               </div>
 
               <SheetFooter className="flex-col items-start justify-start sm:flex-col">
-                <Separator className="mb-2" />
-
                 <div className="flex w-full items-center justify-between px-4 py-2">
                   <SimpleThemeSwitch />
 

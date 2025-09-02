@@ -4,15 +4,18 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { CornerBorders } from "./corner-borders";
 
 export const CTASection = () => {
   const { user } = useAuth();
 
   return (
-    <section id="cta" className="relative overflow-hidden py-24 sm:py-32">
-      <div className="relative container">
+    <section id="cta" className="relative py-24 sm:py-32">
+      <CornerBorders position="all" />
+
+      <div className="container px-4">
         <div className="mx-auto max-w-3xl">
-          <div className="border-border/40 bg-card rounded-3xl border p-8 text-center shadow-lg sm:p-12">
+          <div className="border-border/40 bg-card border p-8 text-center sm:p-12">
             {/* Sparkle decoration */}
             <div className="bg-primary/10 mb-6 inline-flex h-12 w-12 items-center justify-center rounded-full">
               <Sparkles className="text-primary h-6 w-6" />
@@ -31,7 +34,7 @@ export const CTASection = () => {
               <Button
                 asChild
                 size="lg"
-                className="shadow-primary/25 hover:shadow-primary/30 group h-12 px-8 font-semibold shadow-lg transition-all hover:shadow-xl"
+                className="shadow-primary/25 hover:shadow-primary/30 group h-12 rounded-none px-8 font-semibold transition-all"
               >
                 <Link href={user?.id ? "/dashboard" : "/auth/sign-in"}>
                   Get Started
@@ -42,7 +45,7 @@ export const CTASection = () => {
               <Button
                 variant="outline"
                 size="lg"
-                className="h-12 px-8 font-semibold"
+                className="h-12 rounded-none px-8 font-semibold"
               >
                 View Documentation
               </Button>

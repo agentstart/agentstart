@@ -4,19 +4,34 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { AnimatedGridPattern } from "@/components/magicui/animated-grid-pattern";
+import { CornerBorders } from "./corner-borders";
 
 export const HeroSection = () => {
   const { user } = useAuth();
 
   return (
-    <section id="hero" className="relative flex min-h-[90vh] w-full items-center overflow-hidden">
+    <section
+      id="hero"
+      className="relative flex min-h-[90vh] w-full items-center border-b"
+    >
+      <AnimatedGridPattern
+        className="mask-t-from-50% mask-b-from-50% mask-radial-[50%_90%] mask-radial-from-80% stroke-gray-400/15"
+        numSquares={30}
+        maxOpacity={0.05}
+        duration={3}
+      />
+
+      <CornerBorders position="bl" />
+      <CornerBorders position="br" />
+
       <div className="relative z-10 container">
         <div className="mx-auto max-w-5xl">
           <div className="flex flex-col items-center space-y-8 text-center">
             {/* Announcement Badge */}
             <Link
               href="#features"
-              className="border-border/40 bg-background/60 hover:border-primary/40 group inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm backdrop-blur-sm transition-all"
+              className="border-border/40 bg-background/60 hover:border-primary/40 group inline-flex items-center gap-2 border px-4 py-1.5 text-sm backdrop-blur-sm transition-all"
             >
               <Sparkles className="text-primary h-3.5 w-3.5" />
               <span className="text-muted-foreground">
@@ -46,7 +61,7 @@ export const HeroSection = () => {
               <Button
                 asChild
                 size="lg"
-                className="shadow-primary/25 hover:shadow-primary/30 group h-12 px-8 font-semibold shadow-lg transition-all hover:shadow-xl"
+                className="shadow-primary/25 hover:shadow-primary/30 group h-12 rounded-none px-8 font-semibold transition-all"
               >
                 <Link href={user?.id ? "/dashboard" : "/auth/sign-in"}>
                   Start Building

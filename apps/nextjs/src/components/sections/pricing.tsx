@@ -16,6 +16,7 @@ import { MagicCard } from "@/components/magicui/magic-card";
 import { BorderBeam } from "@/components/magicui/border-beam";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/hooks/use-auth";
+import { CornerBorders } from "./corner-borders";
 
 interface PricingCardProps {
   plan: PricingPlan;
@@ -41,10 +42,10 @@ function PricingCard({
     <MagicCard
       gradientColor={theme === "dark" ? "#262626" : "#D9D9D955"}
       className={cn(
-        "relative overflow-hidden rounded-2xl",
+        "relative overflow-hidden",
         isEnterprise ? "bg-card" : "bg-card/50",
       )}
-      containerClassName="h-full rounded-2xl"
+      containerClassName="bg-accent/20 h-full"
     >
       {isPopular && <BorderBeam />}
       <div className="flex h-full flex-col p-8">
@@ -98,7 +99,7 @@ function PricingCard({
         <Button
           onClick={() => handleCheckout(plan)}
           disabled={isLoading === plan.priceId || isCurrentPlan}
-          className="w-full"
+          className="w-full rounded-none"
           variant={isFree ? "outline" : "default"}
         >
           {isLoading === plan.priceId ? (
@@ -166,7 +167,12 @@ export function PricingSection() {
   };
 
   return (
-    <section id={pricingConfig.name} className="py-20">
+    <section
+      id={pricingConfig.name}
+      className="relative border-b py-24 sm:py-32"
+    >
+      <CornerBorders position="all" />
+
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-12 text-center">
@@ -185,13 +191,13 @@ export function PricingSection() {
           className="mb-12"
         >
           <div className="flex justify-center">
-            <TabsList>
-              <TabsTrigger value="monthly" className="px-4 py-2">
+            <TabsList className="rounded-none">
+              <TabsTrigger value="monthly" className="rounded-none px-4 py-2">
                 Monthly
               </TabsTrigger>
               <TabsTrigger
                 value="annual"
-                className="flex items-center gap-2 px-4 py-2"
+                className="flex items-center gap-2 rounded-none px-4 py-2"
               >
                 Annual
                 <Badge variant="secondary" className="ml-1">
@@ -203,7 +209,7 @@ export function PricingSection() {
 
           <TabsContent value="monthly" className="mt-8">
             {/* Pricing Cards */}
-            <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-3">
+            <div className="mx-auto grid max-w-6xl gap-4 md:grid-cols-3">
               {pricingPlans.map((plan) => {
                 const price = plan.monthlyPrice;
 
@@ -223,7 +229,7 @@ export function PricingSection() {
 
           <TabsContent value="annual" className="mt-8">
             {/* Pricing Cards */}
-            <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-3">
+            <div className="mx-auto grid max-w-6xl gap-4 md:grid-cols-3">
               {pricingPlans.map((plan) => {
                 const price = Math.round(plan.annualPrice / 12);
 

@@ -1,15 +1,23 @@
+"use client";
+
 import Link from "next/link";
+import { siteConfig } from "@acme/config";
+import { CssDotMatrixText } from "@/components/magicui/css-dot-matrix-text";
+import { FlickeringGrid } from "@/components/magicui/flickering-grid";
+import { useTheme } from "next-themes";
 
 export const FooterSection = () => {
+  const { resolvedTheme } = useTheme();
+
   return (
     <footer className="relative border-t">
       {/* Links Section */}
-      <div className="container py-12">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="container pt-12">
+        <div className="grid gap-8 px-8 sm:grid-cols-2 lg:grid-cols-5">
           {/* Logo and Description */}
           <div className="lg:col-span-2">
             <div className="mb-4 flex items-center gap-2">
-              <span className="text-lg font-bold">AgentStack</span>
+              <span className="text-xl font-bold">{siteConfig.name}</span>
             </div>
             <p className="text-muted-foreground text-sm">
               The first fullstack template built for AI agents, not humans. Zero
@@ -133,6 +141,22 @@ export const FooterSection = () => {
               </li>
             </ul>
           </div>
+        </div>
+
+        <div className="relative z-0 mt-8 flex h-48 w-full items-center justify-center text-center md:h-64">
+          <FlickeringGrid
+            className="absolute inset-0 z-0 size-full mask-t-from-50% mask-radial-[50%_90%] mask-radial-from-80%"
+            squareSize={2}
+            gridGap={4}
+            maxOpacity={0.1}
+            flickerChance={0.1}
+            color={
+              resolvedTheme === "dark" ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)"
+            }
+          />
+          <CssDotMatrixText className="text-6xl font-bold tracking-tighter md:text-8xl">
+            {siteConfig.name}
+          </CssDotMatrixText>
         </div>
       </div>
     </footer>

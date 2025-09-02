@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpRight, Clock, Cpu } from "lucide-react";
 import Link from "next/link";
+import { CornerBorders } from "./corner-borders";
 
 const showcaseItems = [
   {
@@ -40,37 +41,34 @@ const showcaseItems = [
 
 export const ShowcaseSection = () => {
   return (
-    <section id="showcase" className="relative py-24 sm:py-32 overflow-hidden">
+    <section id="showcase" className="relative border-b py-24 sm:py-32">
+      <CornerBorders position="all" />
 
-      <div className="container">
-        <div className="mx-auto max-w-2xl text-center mb-16">
+      <div className="container px-4">
+        <div className="mx-auto mb-16 max-w-2xl text-center">
           <Badge className="mb-4" variant="outline">
             See It In Action
           </Badge>
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
             Real World Examples
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="text-muted-foreground mt-4 text-lg">
             Discover how developers are shipping faster with Agent Stack
           </p>
         </div>
 
         <div className="mx-auto max-w-6xl">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {showcaseItems.map((item, index) => (
-              <Link
-                key={index}
-                href="#"
-                className="group"
-              >
-                <Card className="overflow-hidden border-border/40 bg-card transition-all hover:border-primary/40 hover:shadow-lg">
+              <Link key={index} href="#" className="group">
+                <Card className="rounded-none py-0 shadow-none">
                   {/* Image placeholder */}
-                  <div className="relative aspect-video overflow-hidden bg-muted">
+                  <div className="bg-muted relative aspect-video overflow-hidden">
                     <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]" />
-                    
+
                     {/* Play button overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="rounded-full bg-background/90 backdrop-blur-sm p-4 shadow-lg">
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+                      <div className="bg-background/90 rounded-full p-4 shadow-lg backdrop-blur-sm">
                         <ArrowUpRight className="h-6 w-6" />
                       </div>
                     </div>
@@ -80,22 +78,26 @@ export const ShowcaseSection = () => {
                     {/* Tags */}
                     <div className="mb-3 flex flex-wrap gap-2">
                       {item.tags.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
+                        <Badge
+                          key={tag}
+                          variant="secondary"
+                          className="text-xs"
+                        >
                           {tag}
                         </Badge>
                       ))}
                     </div>
 
                     {/* Title & Description */}
-                    <h3 className="mb-2 font-semibold text-lg group-hover:text-primary transition-colors">
+                    <h3 className="group-hover:text-primary mb-2 text-lg font-semibold transition-colors">
                       {item.title}
                     </h3>
-                    <p className="text-sm text-muted-foreground line-clamp-2">
+                    <p className="text-muted-foreground line-clamp-2 text-sm">
                       {item.description}
                     </p>
 
                     {/* Stats */}
-                    <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
+                    <div className="text-muted-foreground mt-4 flex items-center gap-4 text-xs">
                       <div className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
                         <span>{item.stats.time}</span>
@@ -115,7 +117,7 @@ export const ShowcaseSection = () => {
           <div className="mt-12 text-center">
             <Link
               href="#"
-              className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+              className="text-primary inline-flex items-center gap-2 text-sm font-medium hover:underline"
             >
               View all examples
               <ArrowUpRight className="h-4 w-4" />
