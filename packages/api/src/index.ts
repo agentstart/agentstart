@@ -1,34 +1,12 @@
-// AGENT: tRPC API package main export
-// PURPOSE: Export tRPC router and type inference helpers
-// USAGE: import { appRouter, type AppRouter } from '@acme/api'
+// AGENT: API package main export (oRPC)
+// PURPOSE: Export oRPC routers and utilities
+// USAGE:
+//   - oRPC: import { router as orpcRouter } from '@acme/api'
 // EXPORTS:
-//   - appRouter: Main tRPC router instance
-//   - AppRouter: Router type for client
-//   - RouterInputs/RouterOutputs: Type inference helpers
-// SEARCHABLE: trpc api, api package, router exports
+//   - oRPC exports
+// SEARCHABLE: api package, router exports, orpc
 
-import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
-
-import type { AppRouter } from "./root";
-import { appRouter } from "./root";
-
-/**
- * Inference helpers for input types
- * @example
- * type PostByIdInput = RouterInputs['post']['byId']
- *      ^? { id: number }
- **/
-type RouterInputs = inferRouterInputs<AppRouter>;
-
-/**
- * Inference helpers for output types
- * @example
- * type AllPostsOutput = RouterOutputs['post']['all']
- *      ^? Post[]
- **/
-type RouterOutputs = inferRouterOutputs<AppRouter>;
-
-export { appRouter };
-export type { AppRouter, RouterInputs, RouterOutputs };
-
-export * from "./trpc";
+// oRPC exports (new API)
+export * from "./router";
+export * from "./context";
+export * from "./procedures";

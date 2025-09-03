@@ -38,7 +38,7 @@ const FAQList: FAQProps[] = [
   {
     question: "What's included out of the box?",
     answer:
-      "Everything you need for production: Better Auth for authentication, Stripe for payments, Drizzle ORM for database, tRPC for type-safe APIs, AI SDK for LLM integrations, and smart error handling with auto-fix commands. All pre-configured and ready to use.",
+      "Everything you need for production: Better Auth for authentication, Stripe for payments, Drizzle ORM for database, oRPC for type-safe APIs, AI SDK for LLM integrations, and smart error handling with auto-fix commands. All pre-configured and ready to use.",
     value: "item-3",
   },
   {

@@ -3,7 +3,7 @@
 // FEATURES:
 //   - Global metadata configuration
 //   - Font setup (Geist and Geist Mono)
-//   - All client-side providers (theme, auth, trpc, etc.)
+//   - All client-side providers (theme, auth, tanstack query, etc.)
 //   - Global CSS import
 // SEARCHABLE: root layout, app layout, metadata, providers
 

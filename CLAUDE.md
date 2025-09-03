@@ -197,7 +197,7 @@ await auth.signIn({
 
 #### 第五优先级：开发体验
 
-- **类型安全**: 完整的 TypeScript 类型、tRPC 端到端类型安全、Zod schema 验证
+- **类型安全**: 完整的 TypeScript 类型、oRPC 端到端类型安全、Zod schema 验证
 - **即时反馈**:
   ```bash
   bun check     # lint + typecheck + test
@@ -215,8 +215,8 @@ await auth.signIn({
 5. **AI SDK**
    - 集成 [AI SDK Elements](https://ai-sdk.dev/elements/components/actions)
    - 集成 [Prompt Kit](https://www.prompt-kit.com/)
-6. **tRPC** - https://trpc.io/
-   - 使用 [trpc-to-openapi](https://github.com/mcampa/trpc-to-openapi) 实现自动 API 文档
+6. **oRPC** - https://orpc.unnoq.com/docs/getting-started
+   - 使用 [orpc-openapi](https://orpc.unnoq.com/docs/openapi/openapi-handler) 实现自动 API 文档
 7. **Google Analytics**
 8. **i18n** - [next-intl](https://next-intl.dev/)
 9. **错误处理标准化**
@@ -396,7 +396,7 @@ apps/
 
 ## 开发工具集成
 
-1. **API Playground** - tRPC + OpenAPI 自动生成的文档
+1. **API Playground** - oRPC + OpenAPI 自动生成的文档
 2. **Database Studio** - Drizzle Studio 可视化数据库
 3. **Storybook** - UI 组件展示，agent 可以快速理解可用组件
 

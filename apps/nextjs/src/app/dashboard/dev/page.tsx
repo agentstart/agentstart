@@ -10,8 +10,6 @@
 "use client";
 
 import { useState } from "react";
-import type { RouterOutputs } from "@acme/api";
-import { trpc } from "@/lib/trpc/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -63,13 +61,18 @@ import {
   Database,
   Loader2,
 } from "lucide-react";
-import { useQueryClient, keepPreviousData } from "@tanstack/react-query";
-import { getQueryKey } from "@trpc/react-query";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
 import { Checkbox } from "@/components/ui/checkbox";
+import { orpc } from "@/lib/orpc";
+import type { User } from "better-auth";
 
 // Type definitions
-type User = RouterOutputs["dev"]["listUsers"]["users"][0];
-type ListUsersOutput = RouterOutputs["dev"]["listUsers"];
+type ListUsersOutput = Awaited<ReturnType<(typeof orpc.dev.listUsers)["call"]>>; // Will be inferred from oRPC response
 
 export default function DevPage() {
   const queryClient = useQueryClient();
@@ -99,10 +102,22 @@ export default function DevPage() {
     image: "",
   });
 
-  // TRPC Queries
-  const { data: usersData, isLoading: isLoadingUsers } =
-    trpc.dev.listUsers.useQuery(
-      {
+  // Common query key for listUsers
+  const listUsersQueryKey = orpc.dev.listUsers.queryKey({
+    input: {
+      page,
+      limit: 10,
+      search,
+      verified: verifiedFilter,
+      sortBy,
+      sortOrder,
+    },
+  });
+
+  // oRPC Queries
+  const { data: usersData, isLoading: isLoadingUsers } = useQuery(
+    orpc.dev.listUsers.queryOptions({
+      input: {
         page,
         limit: 10,
         search,
@@ -110,231 +125,222 @@ export default function DevPage() {
         sortBy,
         sortOrder,
       },
-      {
-        // Refetch every 30 seconds for real-time feel
-        refetchInterval: 30000,
-        // Keep previous data while fetching new data
-        placeholderData: keepPreviousData,
-      },
-    );
-
-  const { data: stats, isLoading: isLoadingStats } = trpc.dev.getStats.useQuery(
-    undefined,
-    {
-      refetchInterval: 10000, // Refetch stats every 10 seconds
-    },
+      // Refetch every 30 seconds for real-time feel
+      refetchInterval: 30000,
+      // Keep previous data while fetching new data
+      placeholderData: keepPreviousData,
+    }),
   );
 
-  // TRPC Mutations with optimistic updates
-  const createUserMutation = trpc.dev.createUser.useMutation({
-    onMutate: async (newUser) => {
-      // Cancel outgoing refetches
-      await queryClient.cancelQueries({
-        queryKey: getQueryKey(trpc.dev.listUsers, undefined, "query"),
-      });
+  const { data: stats, isLoading: isLoadingStats } = useQuery(
+    orpc.dev.getStats.queryOptions({
+      refetchInterval: 10000, // Refetch stats every 10 seconds
+    }),
+  );
 
-      // Snapshot previous value
-      const previousUsers = queryClient.getQueryData(
-        getQueryKey(trpc.dev.listUsers, undefined, "query"),
-      );
+  // oRPC Mutations with optimistic updates
+  const createUserMutation = useMutation(
+    orpc.dev.createUser.mutationOptions({
+      onMutate: async (newUser) => {
+        // Cancel outgoing refetches
+        await queryClient.cancelQueries({
+          queryKey: listUsersQueryKey,
+        });
 
-      // Optimistically update
-      queryClient.setQueryData(
-        getQueryKey(trpc.dev.listUsers, undefined, "query"),
-        (old: ListUsersOutput | undefined) => {
-          if (!old) return old;
-          return {
-            ...old,
-            users: [
-              {
-                ...newUser,
-                id: `temp-${Date.now()}`,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-                emailVerified: false,
-              },
-              ...old.users,
-            ],
-          };
-        },
-      );
+        // Snapshot previous value
+        const previousUsers = queryClient.getQueryData(listUsersQueryKey);
 
-      return { previousUsers };
-    },
-    onError: (err, newUser, context) => {
-      // Rollback on error
-      queryClient.setQueryData(
-        getQueryKey(trpc.dev.listUsers, undefined, "query"),
-        context?.previousUsers,
-      );
-      toast.error(err.message);
-    },
-    onSuccess: () => {
-      toast.success("User created successfully");
-      setCreateDialogOpen(false);
-      setFormData({ name: "", email: "", image: "" });
-    },
-    onSettled: () => {
-      // Always refetch after error or success
-      queryClient.invalidateQueries({
-        queryKey: getQueryKey(trpc.dev.listUsers, undefined, "query"),
-      });
-      queryClient.invalidateQueries({
-        queryKey: getQueryKey(trpc.dev.getStats, undefined, "query"),
-      });
-    },
-  });
+        // Optimistically update
+        queryClient.setQueryData(
+          listUsersQueryKey,
+          (old: ListUsersOutput | undefined) => {
+            if (!old) return old;
+            return {
+              ...old,
+              users: [
+                {
+                  ...newUser,
+                  image: newUser.image || null,
+                  id: `temp-${Date.now()}`,
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+                  emailVerified: false,
+                },
+                ...old.users,
+              ],
+            };
+          },
+        );
 
-  const updateUserMutation = trpc.dev.updateUser.useMutation({
-    onMutate: async (updatedUser) => {
-      await queryClient.cancelQueries({
-        queryKey: getQueryKey(trpc.dev.listUsers, undefined, "query"),
-      });
-      const previousUsers = queryClient.getQueryData(
-        getQueryKey(trpc.dev.listUsers, undefined, "query"),
-      );
+        return { previousUsers };
+      },
+      onError: (err, newUser, context) => {
+        // Rollback on error
+        queryClient.setQueryData(listUsersQueryKey, context?.previousUsers);
+        toast.error(err.message);
+      },
+      onSuccess: () => {
+        toast.success("User created successfully");
+        setCreateDialogOpen(false);
+        setFormData({ name: "", email: "", image: "" });
+      },
+      onSettled: () => {
+        // Always refetch after error or success
+        queryClient.invalidateQueries({
+          queryKey: listUsersQueryKey,
+        });
+        queryClient.invalidateQueries({
+          queryKey: orpc.dev.getStats.queryKey(),
+        });
+      },
+    }),
+  );
 
-      queryClient.setQueryData(
-        getQueryKey(trpc.dev.listUsers, undefined, "query"),
-        (old: ListUsersOutput | undefined) => {
-          if (!old) return old;
-          return {
-            ...old,
-            users: old.users.map((user) =>
-              user.id === updatedUser.id ? { ...user, ...updatedUser } : user,
-            ),
-          };
-        },
-      );
+  const updateUserMutation = useMutation(
+    orpc.dev.updateUser.mutationOptions({
+      onMutate: async (updatedUser) => {
+        await queryClient.cancelQueries({
+          queryKey: listUsersQueryKey,
+        });
+        const previousUsers = queryClient.getQueryData(listUsersQueryKey);
 
-      return { previousUsers };
-    },
-    onError: (err, updatedUser, context) => {
-      queryClient.setQueryData(
-        getQueryKey(trpc.dev.listUsers, undefined, "query"),
-        context?.previousUsers,
-      );
-      toast.error(err.message);
-    },
-    onSuccess: () => {
-      toast.success("User updated successfully");
-      setEditDialogOpen(false);
-      setSelectedUser(null);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: getQueryKey(trpc.dev.listUsers, undefined, "query"),
-      });
-    },
-  });
+        queryClient.setQueryData(
+          listUsersQueryKey,
+          (old: ListUsersOutput | undefined) => {
+            if (!old) return old;
+            return {
+              ...old,
+              users: old.users.map((user) =>
+                user.id === updatedUser.id ? { ...user, ...updatedUser } : user,
+              ),
+            };
+          },
+        );
 
-  const deleteUserMutation = trpc.dev.deleteUser.useMutation({
-    onMutate: async (deletedUser) => {
-      await queryClient.cancelQueries({
-        queryKey: getQueryKey(trpc.dev.listUsers, undefined, "query"),
-      });
-      const previousUsers = queryClient.getQueryData(
-        getQueryKey(trpc.dev.listUsers, undefined, "query"),
-      );
+        return { previousUsers };
+      },
+      onError: (err, updatedUser, context) => {
+        queryClient.setQueryData(listUsersQueryKey, context?.previousUsers);
+        toast.error(err.message);
+      },
+      onSuccess: () => {
+        toast.success("User updated successfully");
+        setEditDialogOpen(false);
+        setSelectedUser(null);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({
+          queryKey: listUsersQueryKey,
+        });
+      },
+    }),
+  );
 
-      queryClient.setQueryData(
-        getQueryKey(trpc.dev.listUsers, undefined, "query"),
-        (old: ListUsersOutput | undefined) => {
-          if (!old) return old;
-          return {
-            ...old,
-            users: old.users.filter((user) => user.id !== deletedUser.id),
-          };
-        },
-      );
+  const deleteUserMutation = useMutation(
+    orpc.dev.deleteUser.mutationOptions({
+      onMutate: async (deletedUser) => {
+        await queryClient.cancelQueries({
+          queryKey: listUsersQueryKey,
+        });
+        const previousUsers = queryClient.getQueryData(listUsersQueryKey);
 
-      return { previousUsers };
-    },
-    onError: (err, deletedUser, context) => {
-      queryClient.setQueryData(
-        getQueryKey(trpc.dev.listUsers, undefined, "query"),
-        context?.previousUsers,
-      );
-      toast.error(err.message);
-    },
-    onSuccess: () => {
-      toast.success("User deleted successfully");
-      setDeleteDialogOpen(false);
-      setSelectedUser(null);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: getQueryKey(trpc.dev.listUsers, undefined, "query"),
-      });
-      queryClient.invalidateQueries({
-        queryKey: getQueryKey(trpc.dev.getStats, undefined, "query"),
-      });
-    },
-  });
+        queryClient.setQueryData(
+          listUsersQueryKey,
+          (old: ListUsersOutput | undefined) => {
+            if (!old) return old;
+            return {
+              ...old,
+              users: old.users.filter((user) => user.id !== deletedUser.id),
+            };
+          },
+        );
 
-  const deleteUsersMutation = trpc.dev.deleteUsers.useMutation({
-    onMutate: async (payload) => {
-      await queryClient.cancelQueries({
-        queryKey: getQueryKey(trpc.dev.listUsers, undefined, "query"),
-      });
-      const previousUsers = queryClient.getQueryData(
-        getQueryKey(trpc.dev.listUsers, undefined, "query"),
-      );
+        return { previousUsers };
+      },
+      onError: (err, deletedUser, context) => {
+        queryClient.setQueryData(listUsersQueryKey, context?.previousUsers);
+        toast.error(err.message);
+      },
+      onSuccess: () => {
+        toast.success("User deleted successfully");
+        setDeleteDialogOpen(false);
+        setSelectedUser(null);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({
+          queryKey: listUsersQueryKey,
+        });
+        queryClient.invalidateQueries({
+          queryKey: orpc.dev.getStats.queryKey(),
+        });
+      },
+    }),
+  );
 
-      queryClient.setQueryData(
-        getQueryKey(trpc.dev.listUsers, undefined, "query"),
-        (old: ListUsersOutput | undefined) => {
-          if (!old) return old;
-          return {
-            ...old,
-            users: old.users.filter((user) => !payload.ids.includes(user.id)),
-          };
-        },
-      );
+  const deleteUsersMutation = useMutation(
+    orpc.dev.deleteUsers.mutationOptions({
+      onMutate: async (payload) => {
+        await queryClient.cancelQueries({
+          queryKey: listUsersQueryKey,
+        });
+        const previousUsers = queryClient.getQueryData(listUsersQueryKey);
 
-      return { previousUsers };
-    },
-    onError: (err, payload, context) => {
-      queryClient.setQueryData(
-        getQueryKey(trpc.dev.listUsers, undefined, "query"),
-        context?.previousUsers,
-      );
-      toast.error(err.message);
-    },
-    onSuccess: (data) => {
-      toast.success(`Deleted ${data.deleted} users`);
-      setSelectedUsers(new Set());
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: getQueryKey(trpc.dev.listUsers, undefined, "query"),
-      });
-      queryClient.invalidateQueries({
-        queryKey: getQueryKey(trpc.dev.getStats, undefined, "query"),
-      });
-    },
-  });
+        queryClient.setQueryData(
+          listUsersQueryKey,
+          (old: ListUsersOutput | undefined) => {
+            if (!old) return old;
+            return {
+              ...old,
+              users: old.users.filter((user) => !payload.ids.includes(user.id)),
+            };
+          },
+        );
 
-  const seedDataMutation = trpc.dev.seedDemoData.useMutation({
-    onSuccess: (data) => {
-      toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: getQueryKey(trpc.dev) });
-    },
-    onError: (err) => {
-      toast.error(err.message);
-    },
-  });
+        return { previousUsers };
+      },
+      onError: (err, payload, context) => {
+        queryClient.setQueryData(listUsersQueryKey, context?.previousUsers);
+        toast.error(err.message);
+      },
+      onSuccess: (data) => {
+        toast.success(`Deleted ${data.deleted} users`);
+        setSelectedUsers(new Set());
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({
+          queryKey: listUsersQueryKey,
+        });
+        queryClient.invalidateQueries({
+          queryKey: orpc.dev.getStats.queryKey(),
+        });
+      },
+    }),
+  );
 
-  const clearDataMutation = trpc.dev.clearDemoData.useMutation({
-    onSuccess: (data) => {
-      toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: getQueryKey(trpc.dev) });
-      setSelectedUsers(new Set());
-    },
-    onError: (err) => {
-      toast.error(err.message);
-    },
-  });
+  const seedDataMutation = useMutation(
+    orpc.dev.seedDemoData.mutationOptions({
+      onSuccess: (data) => {
+        toast.success(data.message);
+        queryClient.invalidateQueries();
+      },
+      onError: (err) => {
+        toast.error(err.message);
+      },
+    }),
+  );
+
+  const clearDataMutation = useMutation(
+    orpc.dev.clearDemoData.mutationOptions({
+      onSuccess: (data) => {
+        toast.success(data.message);
+        queryClient.invalidateQueries();
+        setSelectedUsers(new Set());
+      },
+      onError: (err) => {
+        toast.error(err.message);
+      },
+    }),
+  );
 
   // Computed values
   const totalPages = usersData?.pagination.totalPages ?? 0;
@@ -747,7 +753,7 @@ export default function DevPage() {
             <CardHeader>
               <CardTitle>TanStack Query Features</CardTitle>
               <CardDescription>
-                Demonstrating key features of TanStack Query
+                Demonstrating key features of TanStack Query with oRPC
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -787,7 +793,7 @@ export default function DevPage() {
                   Selective cache invalidation after mutations
                 </p>
                 <code className="bg-muted block rounded p-2 text-xs">
-                  {`queryClient.invalidateQueries({ queryKey: getQueryKey(trpc.dev.listUsers, undefined, "query") })`}
+                  {`queryClient.invalidateQueries({ queryKey: orpc.dev.listUsers.queryKey() })`}
                 </code>
               </div>
 
@@ -841,7 +847,7 @@ export default function DevPage() {
                 </Button>
                 <Button
                   variant="destructive"
-                  onClick={() => clearDataMutation.mutate()}
+                  onClick={() => clearDataMutation.mutate({})}
                   disabled={clearDataMutation.isPending}
                 >
                   {clearDataMutation.isPending ? (
@@ -859,9 +865,7 @@ export default function DevPage() {
                 <Button
                   variant="outline"
                   onClick={() => {
-                    queryClient.invalidateQueries({
-                      queryKey: getQueryKey(trpc.dev),
-                    });
+                    queryClient.invalidateQueries();
                     toast.success("All queries have been invalidated");
                   }}
                 >

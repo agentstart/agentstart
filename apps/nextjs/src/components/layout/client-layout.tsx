@@ -3,7 +3,7 @@
 // USAGE: <Providers>{children}</Providers> in root layout
 // PROVIDERS:
 //   - ThemeProvider: Dark/light mode support
-//   - TRPCReactProvider: tRPC client context
+//   - QueryClientProvider: TanStack Query provider
 //   - AuthUIProvider: Authentication UI components
 //   - Toaster: Toast notifications
 // SEARCHABLE: providers, client providers, app providers
@@ -18,13 +18,15 @@ import { Suspense } from "react";
 import { ThemeProvider } from "next-themes";
 
 import { authClient } from "@/lib/auth/client";
-import { TRPCReactProvider } from "@/lib/trpc/client";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 
 // AGENT: Main providers wrapper
 // CUSTOMIZATION: Add new providers here as needed
 export function Providers({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const [queryClient] = useState(() => new QueryClient());
 
   return (
     <Suspense
@@ -35,7 +37,7 @@ export function Providers({ children }: { children: ReactNode }) {
       }
     >
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <TRPCReactProvider>
+        <QueryClientProvider client={queryClient}>
           <AuthUIProvider
             authClient={authClient}
             navigate={router.push}
@@ -55,7 +57,7 @@ export function Providers({ children }: { children: ReactNode }) {
           >
             {children}
           </AuthUIProvider>
-        </TRPCReactProvider>
+        </QueryClientProvider>
 
         <Toaster />
       </ThemeProvider>

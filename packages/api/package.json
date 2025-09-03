@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./env": "./env.ts"
   },
   "license": "MIT",
   "scripts": {
@@ -16,8 +17,7 @@
   "dependencies": {
     "@acme/auth": "*",
     "@acme/db": "*",
-    "@trpc/server": "catalog:",
-    "superjson": "2.2.2",
+    "@orpc/server": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

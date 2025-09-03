@@ -15,10 +15,11 @@ import { z } from "zod/v4";
 
 import { env as authEnv } from "@acme/auth/env";
 import { env as emailEnv } from "@acme/email/env";
+import { env as apiEnv } from "@acme/api/env";
 
 export const env = createEnv({
-  // AGENT: Inherit environment configs from auth, email packages and Vercel
-  extends: [authEnv, emailEnv, vercel()],
+  // AGENT: Inherit environment configs from auth, email, api packages and Vercel
+  extends: [authEnv, emailEnv, apiEnv, vercel()],
   shared: {
     NODE_ENV: z
       .enum(["development", "production", "test"])

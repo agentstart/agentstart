@@ -9,7 +9,7 @@ bun typecheck        # 类型检查
 ## Architecture Overview
 
 ```
-Next.js App ──▶ tRPC API ──▶ PostgreSQL
+Next.js App ──▶ oRPC API ──▶ PostgreSQL
      │              │            │
      └──────────────┴────────────┘
                     │
@@ -21,22 +21,22 @@ Next.js App ──▶ tRPC API ──▶ PostgreSQL
 ### Add API Endpoint
 
 ```typescript
-// 1. Create: packages/api/src/router/[name].ts
-export const nameRouter = createTRPCRouter({
-  create: publicProcedure
-    .input(z.object({ title: z.string() }))
-    .mutation(({ input }) => {
+// 1. Create: packages/api/src/routers/[name].ts
+export const nameRouter = {
+  create: protectedProcedure
+    .input(type<{ title: string }>())
+    .handler(({ input, context }) => {
       /* logic */
     }),
-});
+};
 
-// 2. Export: packages/api/src/root.ts
-export const appRouter = createTRPCRouter({
+// 2. Export: packages/api/src/router.ts
+export const appRouter = {
   name: nameRouter,
-});
+};
 
 // 3. Use: apps/nextjs/src/app/page.tsx
-const { mutate } = api.name.create.useMutation();
+const { mutate } = useMutation(orpc.name.create.mutationOptions());
 ```
 
 ### Add Database Table
@@ -74,8 +74,8 @@ export default async function Dashboard() {
 // AGENT: All available capabilities in one place
 import { auth } from "@acme/auth"; // Better Auth
 import { db } from "@acme/db"; // Drizzle ORM
-import { api } from "~/trpc/react"; // tRPC client
-import { appRouter } from "@acme/api"; // tRPC server
+import { orpc } from "@/lib/orpc"; // oRPC client
+import { appRouter } from "@acme/api"; // oRPC server
 
 // Auth operations
 const session = await auth.api.getSession({ headers });
@@ -89,8 +89,8 @@ await db.update(posts).set({ title }).where(eq(posts.id, 1));
 await db.delete(posts).where(eq(posts.id, 1));
 
 // API operations (client-side)
-const { data } = api.post.all.useQuery();
-const { mutate } = api.post.create.useMutation();
+const { data } = useQuery(orpc.post.all.queryOptions());
+const { mutate } = useMutation(orpc.post.create.mutationOptions());
 ```
 
 ## File Locations
@@ -103,7 +103,7 @@ apps/nextjs/
   src/lib/             # Utilities
 
 packages/
-  api/src/router/      # API endpoints
+  api/src/routers/     # API endpoints
   auth/               # Auth config
   db/src/schema/      # Database tables
 ```
@@ -160,7 +160,7 @@ bun ui-add [name]    # Add shadcn component
 
 ✅ Database (Drizzle)
 ✅ Auth (Better Auth)
-✅ API (tRPC)
+✅ API (oRPC)
 ✅ Type Safety (TypeScript + Zod)
 ⏳ Payment (Stripe via Better Auth plugin)
 ⏳ AI SDK (Vercel AI SDK)

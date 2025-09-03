@@ -7,6 +7,7 @@ import type { PricingPlan, PricingConfig, SiteConfig } from "./types";
 // Site configuration
 export const siteConfig: SiteConfig = config.site || {
   name: "Agent Stack",
+  title: "Agent Stack",
   description: "Agent-First Next.js Fullstack Template",
 };
 
