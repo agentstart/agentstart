@@ -3,6 +3,7 @@
 // USAGE: import { env } from '@acme/api/env'
 // VARIABLES:
 //   - OPENROUTER_API_KEY: OpenRouter API key
+//   - AI_GATEWAY_API_KEY: AI Gateway API key
 // SEARCHABLE: config env, stripe price ids, pricing configuration
 
 import { createEnv } from "@t3-oss/env-nextjs";
@@ -13,6 +14,7 @@ export const env = createEnv({
     NODE_ENV: z.enum(["development", "production"]).optional(),
     // AI SDK configuration - at least one provider must be configured
     OPENROUTER_API_KEY: z.string().optional(),
+    AI_GATEWAY_API_KEY: z.string().optional(),
   },
   client: {},
   experimental__runtimeEnv: {},

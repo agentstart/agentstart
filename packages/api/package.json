@@ -17,7 +17,10 @@
   "dependencies": {
     "@acme/auth": "*",
     "@acme/db": "*",
+    "@openrouter/ai-sdk-provider": "^1.1.2",
     "@orpc/server": "catalog:",
+    "@t3-oss/env-nextjs": "catalog:",
+    "ai": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

@@ -40,8 +40,11 @@ bun test # 运行测试
 
 ## Add new API endpoint
 
-1. Create: app/api/[name]/route.ts
-2. Use: await fetch('/api/[name]')
+1. Create: packages/api/src/routers/[name].ts (使用 oRPC)
+2. Export in: packages/api/src/router.ts
+3. Use in frontend: 通过 oRPC client 调用
+
+重要：所有 API 都必须写在 @packages/api/src/routers，不要在 app/api 下创建 route.ts
 ```
 
 **packages/capabilities.ts - 功能入口**

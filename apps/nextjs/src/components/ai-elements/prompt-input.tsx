@@ -159,7 +159,7 @@ export const PromptInputSubmit = ({
   let Icon = <ArrowUpIcon className="size-5" />;
 
   if (status === "submitted") {
-    Icon = <Loader className="size-4" />;
+    Icon = <Loader />;
   } else if (status === "streaming") {
     Icon = <SquareIcon className="size-4" />;
   } else if (status === "error") {

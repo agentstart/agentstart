@@ -41,7 +41,12 @@ export function ChatConversation({
             onEdit={onEdit}
           />
         ))}
-        {status === "submitted" && <Loader />}
+        {status === "submitted" && (
+          <div className="flex items-center gap-1.5">
+            <Loader variant="pulse" size="sm" />
+            <Loader variant="text-shimmer" text="Thinking and working..." />
+          </div>
+        )}
       </ConversationContent>
       <ConversationScrollButton />
     </Conversation>

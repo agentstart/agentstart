@@ -90,7 +90,7 @@
         "ts-pattern": "catalog:",
         "use-stick-to-bottom": "^1.1.1",
         "vaul": "^1.1.2",
-        "zod": "^4.1.5",
+        "zod": "catalog:",
         "zustand": "catalog:",
       },
       "devDependencies": {
@@ -118,7 +118,10 @@
       "dependencies": {
         "@acme/auth": "*",
         "@acme/db": "*",
+        "@openrouter/ai-sdk-provider": "^1.1.2",
         "@orpc/server": "catalog:",
+        "@t3-oss/env-nextjs": "catalog:",
+        "ai": "catalog:",
         "zod": "catalog:",
       },
       "devDependencies": {
