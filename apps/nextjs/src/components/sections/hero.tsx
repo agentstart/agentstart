@@ -80,6 +80,15 @@ export const HeroSection = () => {
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
+
+              <Button
+                variant="outline"
+                size="lg"
+                className="h-12 rounded-none px-8 font-semibold"
+                asChild
+              >
+                <Link href="/docs">View Documentation</Link>
+              </Button>
             </div>
 
             {/* Stats */}

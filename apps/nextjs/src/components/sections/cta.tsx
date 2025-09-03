@@ -55,8 +55,9 @@ export const CTASection = () => {
                 variant="outline"
                 size="lg"
                 className="h-12 rounded-none px-8 font-semibold"
+                asChild
               >
-                View Documentation
+                <Link href="/docs">View Documentation</Link>
               </Button>
             </div>
 
