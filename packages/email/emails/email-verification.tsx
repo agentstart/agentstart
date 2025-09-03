@@ -1,3 +1,13 @@
+// AGENT: Email verification template
+// PURPOSE: Verify user email address during registration
+// USAGE: Sent after user signs up with email
+// PROPS:
+//   - validationCode: Verification code
+//   - name: User's name (optional)
+//   - url: Verification link (optional)
+//   - expiresIn: Code expiration time
+// SEARCHABLE: email verification, verify email, confirmation email
+
 import {
   Body,
   Container,

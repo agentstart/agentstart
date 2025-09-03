@@ -1,3 +1,13 @@
+// AGENT: Hero section component for landing page
+// PURPOSE: Eye-catching hero section with animated background and CTA buttons
+// USAGE: <HeroSection /> - place at top of landing page
+// FEATURES:
+//   - Animated grid pattern background
+//   - Responsive typography
+//   - Auth-aware CTAs (different for logged in users)
+//   - Corner border decorations
+// SEARCHABLE: hero section, landing hero, homepage hero
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -7,6 +17,8 @@ import Link from "next/link";
 import { AnimatedGridPattern } from "@/components/magicui/animated-grid-pattern";
 import { CornerBorders } from "./corner-borders";
 
+// AGENT: Main hero section export
+// CUSTOMIZATION: Modify text, badges, or CTAs as needed
 export const HeroSection = () => {
   const { user } = useAuth();
 

@@ -1,3 +1,14 @@
+// AGENT: Environment variable configuration with type safety
+// PURPOSE: Validate and type environment variables at build/runtime
+// USAGE: import { env } from '@/env'
+// FEATURES:
+//   - Type-safe env access (env.DATABASE_URL)
+//   - Build-time validation
+//   - Extends auth and email env configs
+//   - Vercel env preset included
+// ERRORS: Will fail at build if required env vars missing
+// SEARCHABLE: environment variables, env config, env validation
+
 import { createEnv } from "@t3-oss/env-nextjs";
 import { vercel } from "@t3-oss/env-nextjs/presets-zod";
 import { z } from "zod/v4";
@@ -6,6 +17,7 @@ import { env as authEnv } from "@acme/auth/env";
 import { env as emailEnv } from "@acme/email/env";
 
 export const env = createEnv({
+  // AGENT: Inherit environment configs from auth, email packages and Vercel
   extends: [authEnv, emailEnv, vercel()],
   shared: {
     NODE_ENV: z
@@ -17,7 +29,7 @@ export const env = createEnv({
    * This way you can ensure the app isn't built with invalid env vars.
    */
   server: {
-    POSTGRES_URL: z.string().url(),
+    POSTGRES_URL: z.url(),
   },
 
   /**

@@ -1,3 +1,13 @@
+// AGENT: tRPC server configuration and procedures
+// PURPOSE: Define context, middleware, and base procedures for tRPC
+// EXPORTS:
+//   - createTRPCContext: Context factory with auth and db
+//   - createTRPCRouter: Router factory
+//   - publicProcedure: Unprotected endpoints
+//   - protectedProcedure: Auth-required endpoints
+// CUSTOMIZATION: Modify context or add new procedure types here
+// SEARCHABLE: trpc config, trpc context, trpc middleware, procedures
+
 /**
  * YOU PROBABLY DON'T NEED TO EDIT THIS FILE, UNLESS:
  * 1. You want to modify request context (see Part 1)

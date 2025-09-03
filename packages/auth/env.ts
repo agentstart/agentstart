@@ -1,3 +1,14 @@
+// AGENT: Authentication package environment configuration
+// PURPOSE: Type-safe environment variables for auth package
+// FEATURES:
+//   - Auth secret validation
+//   - OAuth provider credentials
+//   - Stripe integration keys
+// USAGE: import { env } from '@acme/auth/env'
+// REQUIRED: AUTH_SECRET, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
+// OPTIONAL: OAuth provider credentials (GitHub, Google, etc.)
+// SEARCHABLE: auth env, environment variables, oauth config
+
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod/v4";
 import { env as emailEnv } from "@acme/email/env";

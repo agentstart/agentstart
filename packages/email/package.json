@@ -21,7 +21,7 @@
     "consola": "catalog:",
     "react": "catalog:react19",
     "react-dom": "catalog:react19",
-    "resend": "^6.0.1",
+    "resend": "^6.0.2",
     "zod": "catalog:"
   },
   "devDependencies": {

@@ -1,3 +1,11 @@
+// AGENT: Client-side tRPC setup with React Query
+// PURPOSE: Provides tRPC client for React components
+// USAGE: 
+//   - Wrap app with <TRPCReactProvider>
+//   - Use hooks: trpc.example.hello.useQuery()
+// EXPORTS: trpc (hooks), TRPCReactProvider (wrapper)
+// SEARCHABLE: trpc client, react query, api hooks
+
 "use client";
 
 import type { QueryClient } from "@tanstack/react-query";
@@ -11,6 +19,8 @@ import type { AppRouter } from "@acme/api";
 
 import { createQueryClient } from "./query-client";
 
+// AGENT: tRPC React hooks instance
+// USAGE: trpc.[router].[procedure].useQuery() or .useMutation()
 export const trpc = createTRPCReact<AppRouter>();
 let clientQueryClientSingleton: QueryClient;
 function getQueryClient() {
@@ -28,6 +38,9 @@ function getUrl() {
   })();
   return `${base}/api/trpc`;
 }
+// AGENT: Provider component for tRPC and React Query
+// USAGE: Wrap your app or layout with this provider
+// EXAMPLE: <TRPCReactProvider>{children}</TRPCReactProvider>
 export function TRPCReactProvider(
   props: Readonly<{
     children: React.ReactNode;

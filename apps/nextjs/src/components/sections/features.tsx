@@ -1,3 +1,14 @@
+// AGENT: Features grid section using Bento layout
+// PURPOSE: Showcase product features in a visually appealing grid
+// USAGE: <FeaturesSection /> - typically after hero section
+// FEATURES:
+//   - Responsive bento grid layout
+//   - Interactive hover effects
+//   - Icon integration with lucide-react
+//   - Corner border decorations
+// CUSTOMIZATION: Modify features array to change content
+// SEARCHABLE: features section, bento grid, product features
+
 "use client";
 
 import React from "react";

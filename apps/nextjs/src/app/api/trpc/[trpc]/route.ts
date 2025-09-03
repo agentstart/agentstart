@@ -1,3 +1,10 @@
+// AGENT: tRPC API route handler
+// PURPOSE: Handles all tRPC procedure calls as HTTP endpoints
+// ENDPOINTS: Dynamic based on your routers in @acme/api
+// USAGE: Called automatically by tRPC client
+// FEATURES: CORS support, error logging, auth context
+// SEARCHABLE: trpc api, api handler, rpc endpoint
+
 import type { NextRequest } from "next/server";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 

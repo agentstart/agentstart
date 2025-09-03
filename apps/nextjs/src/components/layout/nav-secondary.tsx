@@ -1,3 +1,11 @@
+// AGENT: Secondary navigation component for sidebar
+// PURPOSE: Display secondary navigation items in sidebar
+// USAGE: <NavSecondary items={[{title, url, icon}]} />
+// PROPS:
+//   - items: Array of navigation items with title, url, and icon
+// FEATURES: Icon support, small button style
+// SEARCHABLE: secondary nav, sidebar navigation, menu items
+
 import * as React from "react";
 import { type LucideIcon } from "lucide-react";
 
@@ -9,6 +17,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
+// AGENT: Secondary navigation menu component
+// CUSTOMIZATION: Pass different items array for different sections
 export function NavSecondary({
   items,
   ...props

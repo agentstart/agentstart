@@ -1,5 +1,16 @@
+// AGENT: Authentication pages layout
+// PURPOSE: Layout wrapper for all auth pages (sign-in, sign-up, etc.)
+// FEATURES:
+//   - Responsive viewport configuration
+//   - Centered content container
+//   - Mobile-optimized viewport settings
+// ROUTES: /auth/*, /auth/sign-in, /auth/sign-up
+// SEARCHABLE: auth layout, authentication wrapper
+
 import type { Viewport } from "next";
 
+// AGENT: Mobile-optimized viewport settings
+// PURPOSE: Prevent zoom and ensure proper mobile display
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,

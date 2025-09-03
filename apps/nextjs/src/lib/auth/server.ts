@@ -1,3 +1,12 @@
+// AGENT: Server-side authentication configuration and initialization
+// PURPOSE: Handles server authentication with Better Auth, including social providers
+// USAGE: import { auth } from '@/lib/auth/server'
+// COMMON TASKS: auth.api.signIn(), auth.api.signOut(), auth.api.getSession()
+// REQUIRES: AUTH_SECRET in env, optional social provider credentials
+// RETURNS: Configured auth instance with all server methods
+// ERRORS: AUTH_SECRET_MISSING if secret not configured
+// SEARCHABLE: authentication, server auth, better auth, social login, github oauth, google oauth
+
 import "server-only";
 
 import { cache } from "react";
@@ -36,6 +45,10 @@ export const auth = initAuth({
   },
 });
 
+// AGENT: Get current user session from server components
+// USAGE: const session = await getSession()
+// RETURNS: User session object or null if not authenticated
+// CACHED: React cache ensures single request per render
 export const getSession = cache(async () =>
   auth.api.getSession({ headers: await headers() }),
 );

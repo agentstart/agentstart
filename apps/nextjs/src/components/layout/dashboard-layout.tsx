@@ -63,7 +63,7 @@ export function DashboardLayout({
         } as React.CSSProperties
       }
     >
-      <Sidebar variant="floating" {...props}>
+      <Sidebar variant="sidebar" {...props}>
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>

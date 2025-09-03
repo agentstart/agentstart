@@ -1,3 +1,12 @@
+// AGENT: Call-to-action section component
+// PURPOSE: Conversion-focused section with prominent action buttons
+// USAGE: <CTASection /> - typically near page bottom
+// FEATURES:
+//   - Auth-aware CTAs (different for logged in users)
+//   - Corner border decorations
+//   - Responsive design
+// SEARCHABLE: cta section, call to action, conversion section
+
 "use client";
 
 import { Button } from "@/components/ui/button";

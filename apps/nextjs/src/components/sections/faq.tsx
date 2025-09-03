@@ -1,3 +1,13 @@
+// AGENT: FAQ section component
+// PURPOSE: Display frequently asked questions with expandable answers
+// USAGE: <FAQSection /> - typically on landing or support pages
+// FEATURES:
+//   - Accordion-style Q&A layout
+//   - Corner border decorations
+//   - Customizable FAQ list
+// CUSTOMIZATION: Modify FAQList array to update questions
+// SEARCHABLE: faq section, questions, frequently asked questions
+
 import {
   Accordion,
   AccordionContent,

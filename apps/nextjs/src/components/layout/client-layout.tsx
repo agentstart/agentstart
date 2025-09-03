@@ -1,3 +1,13 @@
+// AGENT: Client-side providers wrapper component
+// PURPOSE: Wrap application with all necessary client providers
+// USAGE: <Providers>{children}</Providers> in root layout
+// PROVIDERS:
+//   - ThemeProvider: Dark/light mode support
+//   - TRPCReactProvider: tRPC client context
+//   - AuthUIProvider: Authentication UI components
+//   - Toaster: Toast notifications
+// SEARCHABLE: providers, client providers, app providers
+
 "use client";
 
 import { AuthUIProvider } from "@daveyplate/better-auth-ui";
@@ -11,6 +21,8 @@ import { authClient } from "@/lib/auth/client";
 import { TRPCReactProvider } from "@/lib/trpc/client";
 import { Toaster } from "@/components/ui/sonner";
 
+// AGENT: Main providers wrapper
+// CUSTOMIZATION: Add new providers here as needed
 export function Providers({ children }: { children: ReactNode }) {
   const router = useRouter();
 

@@ -7,7 +7,9 @@ import { defineConfig } from "@acme/config";
 export default defineConfig({
   site: {
     name: "Agent Stack",
-    description: "Agent-First Next.js Fullstack Template",
+    title: "Agent Stack - Agent-First Next.js Fullstack Template",
+    description:
+      "The first fullstack template built for AI agents, not humans - agent-optimized architecture that makes vibe coding actually work",
     url: "https://agent-stack.dev",
     keywords: ["nextjs", "agent", "fullstack", "template", "ai", "typescript"],
     author: {

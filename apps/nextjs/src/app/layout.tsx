@@ -1,36 +1,45 @@
+// AGENT: Root layout component for the entire application
+// PURPOSE: Sets up global providers, fonts, metadata for all pages
+// FEATURES:
+//   - Global metadata configuration
+//   - Font setup (Geist and Geist Mono)
+//   - All client-side providers (theme, auth, trpc, etc.)
+//   - Global CSS import
+// SEARCHABLE: root layout, app layout, metadata, providers
+
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { cn } from "@/lib/utils";
 import { Providers } from "@/components/layout/client-layout";
+import { siteConfig } from "@acme/config";
 
 import "@/app/globals.css";
 
 export const metadata: Metadata = {
-  title: "Agent Stack - The AI-First Fullstack Template",
-  description:
-    "The first fullstack template built for AI agents, not humans - agent-optimized architecture that makes vibe coding actually work",
+  title: siteConfig.title,
+  description: siteConfig.description,
+  keywords: siteConfig.keywords,
+  authors: siteConfig.author,
   openGraph: {
     type: "website",
-    url: "https://agent-stack.dev",
-    title: "Agent Stack - The AI-First Fullstack Template",
-    description:
-      "The first fullstack template built for AI agents, not humans - agent-optimized architecture that makes vibe coding actually work",
+    url: siteConfig.url,
+    title: siteConfig.title,
+    description: siteConfig.description,
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Agent Stack - AI-First Fullstack Template",
+        alt: siteConfig.title,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     site: "@agentstackdev",
-    title: "Agent Stack - The AI-First Fullstack Template",
-    description:
-      "The first fullstack template built for AI agents, not humans - agent-optimized architecture that makes vibe coding actually work",
+    title: siteConfig.title,
+    description: siteConfig.description,
     images: ["/og-image.png"],
   },
 };

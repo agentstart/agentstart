@@ -1,3 +1,13 @@
+// AGENT: Dashboard main page
+// PURPOSE: Main dashboard view with sidebar layout
+// FEATURES:
+//   - Breadcrumb navigation
+//   - Sidebar trigger button
+//   - Grid layout for dashboard widgets
+//   - Placeholder content areas
+// CUSTOMIZATION: Replace placeholder divs with actual dashboard content
+// SEARCHABLE: dashboard, main dashboard, dashboard home
+
 import {
   Breadcrumb,
   BreadcrumbItem,

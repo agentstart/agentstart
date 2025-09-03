@@ -25,10 +25,10 @@
     "@stripe/stripe-js": "^7.9.0",
     "@t3-oss/env-nextjs": "catalog:",
     "better-auth": "catalog:",
-    "next": "^15.5.0",
+    "next": "catalog:",
     "react": "catalog:react19",
     "react-dom": "catalog:react19",
-    "stripe": "^18.4.0",
+    "stripe": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

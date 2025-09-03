@@ -1,3 +1,13 @@
+// AGENT: Showcase section component
+// PURPOSE: Display featured demos, tutorials, or case studies
+// USAGE: <ShowcaseSection /> - typically on landing page
+// FEATURES:
+//   - Card-based showcase items
+//   - Tags and stats display
+//   - Corner border decorations
+// CUSTOMIZATION: Modify showcaseItems array for content
+// SEARCHABLE: showcase section, demo section, case studies
+
 "use client";
 
 import { Card } from "@/components/ui/card";

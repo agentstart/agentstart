@@ -1,9 +1,20 @@
+// AGENT: React Query client configuration for tRPC
+// PURPOSE: Configure React Query with SSR support and SuperJSON serialization
+// USAGE: Used internally by tRPC client and server
+// FEATURES:
+//   - 30 second stale time for SSR optimization
+//   - SuperJSON serialization for complex data types
+//   - Proper error handling for Next.js
+// SEARCHABLE: query client, react query config, tanstack query
+
 import {
   defaultShouldDehydrateQuery,
   QueryClient,
 } from "@tanstack/react-query";
 import SuperJSON from "superjson";
 
+// AGENT: Create configured QueryClient instance
+// CUSTOMIZATION: Adjust staleTime for different caching behavior
 export const createQueryClient = () =>
   new QueryClient({
     defaultOptions: {

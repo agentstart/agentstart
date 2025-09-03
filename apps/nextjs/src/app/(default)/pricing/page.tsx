@@ -1,3 +1,12 @@
+// AGENT: Pricing page
+// PURPOSE: Dedicated page for displaying pricing plans
+// ROUTE: /pricing
+// SECTIONS:
+//   - Navbar: Navigation menu
+//   - PricingSection: Pricing plans with Stripe integration
+//   - FooterSection: Site footer
+// SEARCHABLE: pricing page, subscription plans page
+
 import { Navbar } from "@/components/sections/navbar";
 import { PricingSection } from "@/components/sections/pricing";
 import { FooterSection } from "@/components/sections/footer";

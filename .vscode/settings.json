@@ -1,3 +1,12 @@
+// AGENT: VS Code workspace settings
+// PURPOSE: Configure VS Code for optimal development experience
+// FEATURES:
+//   - Auto-fix ESLint on save
+//   - Format with Prettier on save
+//   - TypeScript workspace version
+//   - Tailwind CSS class sorting
+// SEARCHABLE: vscode settings, editor config, workspace settings
+
 {
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"

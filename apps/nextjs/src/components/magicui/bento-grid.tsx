@@ -1,3 +1,12 @@
+// AGENT: Bento grid layout component
+// PURPOSE: Create responsive grid layouts with feature cards
+// USAGE: <BentoGrid><BentoCard /></BentoGrid>
+// FEATURES:
+//   - Responsive auto-rows grid
+//   - Interactive hover effects
+//   - Icon and background support
+// SEARCHABLE: bento grid, feature grid, card layout
+
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";

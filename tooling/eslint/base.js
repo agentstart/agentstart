@@ -1,15 +1,27 @@
+// AGENT: Base ESLint configuration for monorepo
+// PURPOSE: Shared ESLint rules and configurations
+// FEATURES:
+//   - TypeScript ESLint integration
+//   - Unused imports detection
+//   - Environment variable access restrictions
+//   - Gitignore-based file ignoring
+// USAGE: Extended by packages and apps
+// SEARCHABLE: eslint config, linting rules, code quality
+
 /// <reference types="./types.d.ts" />
 
 import * as path from "node:path";
 import { includeIgnoreFile } from "@eslint/compat";
 import eslint from "@eslint/js";
+import { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
 import unusedImports from "eslint-plugin-unused-imports";
 
 /**
+ * AGENT: Restrict direct process.env access
  * All packages that leverage t3-env should use this rule
  */
-export const restrictEnvAccess = tseslint.config(
+export const restrictEnvAccess = defineConfig(
   { ignores: ["**/env.ts"] },
   {
     files: ["**/*.js", "**/*.ts", "**/*.tsx"],
@@ -36,7 +48,7 @@ export const restrictEnvAccess = tseslint.config(
   },
 );
 
-export default tseslint.config(
+export default defineConfig(
   // Ignore files not tracked by VCS and any config files
   includeIgnoreFile(path.join(import.meta.dirname, "../../.gitignore")),
   { ignores: ["**/*.config.*"] },

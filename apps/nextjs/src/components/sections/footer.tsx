@@ -1,3 +1,13 @@
+// AGENT: Footer section component
+// PURPOSE: Site footer with links, resources, and branding
+// USAGE: <FooterSection /> - typically at page bottom
+// FEATURES:
+//   - Multi-column link layout
+//   - Animated background effects
+//   - Social links
+//   - Copyright notice
+// SEARCHABLE: footer section, site footer, footer links
+
 "use client";
 
 import Link from "next/link";

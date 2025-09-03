@@ -1,3 +1,13 @@
+// AGENT: Decorative corner borders component
+// PURPOSE: Add aesthetic corner borders to sections
+// USAGE: <CornerBorders position="all" size={10} thickness={1.5} />
+// PROPS:
+//   - position: Which corners to show (tl/tr/bl/br/all)
+//   - size: Size of corner borders in pixels
+//   - thickness: Border line thickness
+//   - className: Additional CSS classes
+// SEARCHABLE: corner borders, decorative borders, section decoration
+
 import { cn } from "@/lib/utils";
 
 interface CornerBordersProps {
@@ -7,11 +17,13 @@ interface CornerBordersProps {
   thickness?: number;
 }
 
+// AGENT: Corner border decorations for visual enhancement
+// CUSTOMIZATION: Adjust size and thickness for different styles
 export const CornerBorders = ({
   position = "all",
   className,
   size = 10,
-  thickness = 2,
+  thickness = 1.5,
 }: CornerBordersProps) => {
   const cornerStyles = {
     tl: {
