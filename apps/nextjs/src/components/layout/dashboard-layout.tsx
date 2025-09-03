@@ -25,6 +25,7 @@ import {
 import Link from "next/link";
 import { NavSecondary } from "./nav-secondary";
 import { UserDropmenu } from "@/components/controls/user-dropmenu";
+import { siteConfig } from "@acme/config";
 
 const data = {
   navMain: [
@@ -79,7 +80,7 @@ export function DashboardLayout({
                     <MessageSquare className="size-4" />
                   </div>
                   <div className="flex flex-col gap-0.5 leading-none">
-                    <span className="font-medium">AgentStack</span>
+                    <span className="font-medium">{siteConfig.name}</span>
                   </div>
                 </Link>
               </SidebarMenuButton>

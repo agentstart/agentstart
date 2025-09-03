@@ -8,6 +8,7 @@
 //   - expiresIn: Expiration time in seconds
 // SEARCHABLE: sign in email, otp email, magic link email
 
+import { siteConfig } from "@acme/config";
 import {
   Body,
   Container,
@@ -45,13 +46,13 @@ export const SignInEmail = ({
   return (
     <Html>
       <Head />
-      <Preview>Sign in to AgentStack</Preview>
+      <Preview>Sign in to {siteConfig.name}</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Heading style={h1}>Sign in to {name ?? "AgentStack"}</Heading>
+          <Heading style={h1}>Sign in to {name ?? siteConfig.name}</Heading>
 
           <Text style={text}>
-            We received a sign-in request for your {name ?? "AgentStack"}{" "}
+            We received a sign-in request for your {name ?? siteConfig.name}{" "}
             account.
           </Text>
 
@@ -71,12 +72,12 @@ export const SignInEmail = ({
           <Hr style={hr} />
 
           <Text style={footer}>
-            If you didn't create an account on {name ?? "AgentStack"}, you can
-            safely ignore this email.
+            If you didn't create an account on {name ?? siteConfig.name}, you
+            can safely ignore this email.
           </Text>
 
-          <Link href={url ?? "https://agent-stack.dev"} style={footerLink}>
-            {url ? new URL(url).hostname : "agent-stack.dev"}
+          <Link href={url ?? siteConfig.url} style={footerLink}>
+            {url ? new URL(url).hostname : siteConfig.url}
           </Link>
         </Container>
       </Body>
@@ -86,8 +87,8 @@ export const SignInEmail = ({
 
 SignInEmail.PreviewProps = {
   validationCode: "123456",
-  name: "AgentStack",
-  url: "https://agent-stack.dev",
+  name: siteConfig.name,
+  url: siteConfig.url,
   expiresIn: 300,
 } as SignInEmailProps;
 

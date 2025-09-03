@@ -118,7 +118,7 @@ export const Navbar = () => {
         )}
       >
         <Link href="/" className="flex items-center text-lg font-bold">
-          AgentStack
+          {siteConfig.name}
         </Link>
 
         {/* <!-- Mobile --> */}

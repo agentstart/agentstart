@@ -11,10 +11,9 @@ import "server-only";
 
 import { cache } from "react";
 import { headers } from "next/headers";
-
 import { initAuth } from "@acme/auth";
-
 import { env } from "@/env";
+import { siteConfig } from "@acme/config";
 
 const baseUrl =
   env.NODE_ENV === "production"
@@ -23,7 +22,7 @@ const baseUrl =
 
 export const auth = initAuth({
   baseUrl,
-  productionUrl: `https://${env.VERCEL_PROJECT_PRODUCTION_URL ?? "agent-stack.dev"}`,
+  productionUrl: `https://${env.VERCEL_PROJECT_PRODUCTION_URL ?? siteConfig.url}`,
   secret: env.AUTH_SECRET,
   socialProviders: {
     github:

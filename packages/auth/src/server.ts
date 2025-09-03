@@ -20,7 +20,7 @@ import { stripe as betterAuthStripe } from "@better-auth/stripe";
 import Stripe from "stripe";
 
 import { resend } from "@acme/email";
-import { pricingPlans } from "@acme/config";
+import { pricingPlans, siteConfig } from "@acme/config";
 import {
   SignInEmail,
   EmailVerificationEmail,
@@ -73,7 +73,7 @@ export function initAuth(options: AuthOptions) {
       emailOTP({
         sendVerificationOnSignUp: true,
         sendVerificationOTP: async ({ email, otp, type }) => {
-          const name = "AgentStack";
+          const name = siteConfig.name;
           let emailTemplate;
           let subject = `[${name}] `;
 

@@ -8,6 +8,7 @@
 //   - expiresIn: Code expiration time
 // SEARCHABLE: email verification, verify email, confirmation email
 
+import { siteConfig } from "@acme/config";
 import {
   Body,
   Container,
@@ -45,14 +46,14 @@ export const EmailVerificationEmail = ({
   return (
     <Html>
       <Head />
-      <Preview>Verify your email for AgentStack</Preview>
+      <Preview>Verify your email for {siteConfig.name}</Preview>
       <Body style={main}>
         <Container style={container}>
           <Heading style={h1}>Verify your email address</Heading>
 
           <Text style={text}>
-            Welcome to {name ?? "AgentStack"}! Please verify your email address
-            to activate your account.
+            Welcome to {name ?? siteConfig.name}! Please verify your email
+            address to activate your account.
           </Text>
 
           <Text style={text}>
@@ -66,18 +67,18 @@ export const EmailVerificationEmail = ({
           <Text style={text}>
             This verification code will expire in {formatExpiry(expiresIn)}.
             After verification, you'll have full access to all{" "}
-            {name ?? "AgentStack"} features.
+            {name ?? siteConfig.name} features.
           </Text>
 
           <Hr style={hr} />
 
           <Text style={footer}>
-            If you didn't create an account on {name ?? "AgentStack"}, you can
-            safely ignore this email.
+            If you didn't create an account on {name ?? siteConfig.name}, you
+            can safely ignore this email.
           </Text>
 
-          <Link href={url ?? "https://agent-stack.dev"} style={footerLink}>
-            {url ? new URL(url).hostname : "agent-stack.dev"}
+          <Link href={url ?? siteConfig.url} style={footerLink}>
+            {url ? new URL(url).hostname : siteConfig.url}
           </Link>
         </Container>
       </Body>
@@ -87,8 +88,8 @@ export const EmailVerificationEmail = ({
 
 EmailVerificationEmail.PreviewProps = {
   validationCode: "123456",
-  name: "AgentStack",
-  url: "https://agent-stack.dev",
+  name: siteConfig.name,
+  url: siteConfig.url,
   expiresIn: 86400,
 } as EmailVerificationProps;
 

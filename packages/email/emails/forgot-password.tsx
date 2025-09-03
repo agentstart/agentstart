@@ -8,6 +8,7 @@
 //   - expiresIn: Code expiration time in seconds
 // SEARCHABLE: forgot password email, password reset email, recovery email
 
+import { siteConfig } from "@acme/config";
 import {
   Body,
   Container,
@@ -45,7 +46,7 @@ export const ForgotPasswordEmail = ({
   return (
     <Html>
       <Head />
-      <Preview>Reset your AgentStack password</Preview>
+      <Preview>Reset your {siteConfig.name} password</Preview>
       <Body style={main}>
         <Container style={container}>
           <Heading style={h1}>Reset your password</Heading>
@@ -53,7 +54,8 @@ export const ForgotPasswordEmail = ({
           <Text style={text}>Hi,</Text>
 
           <Text style={text}>
-            We received a request to reset the password for your AgentStack
+            We received a request to reset the password for your{" "}
+            {siteConfig.name}
             account.
           </Text>
 
@@ -75,10 +77,10 @@ export const ForgotPasswordEmail = ({
               • Never share your password or verification codes with anyone
             </Text>
             <Text style={securityText}>
-              • AgentStack staff will never ask for your password
+              • {siteConfig.name} staff will never ask for your password
             </Text>
             <Text style={securityText}>
-              • Always ensure you're on agent-stack.dev when entering your
+              • Always ensure you're on {siteConfig.url} when entering your
               password
             </Text>
           </Section>
@@ -86,12 +88,12 @@ export const ForgotPasswordEmail = ({
           <Hr style={hr} />
 
           <Text style={footer}>
-            If you didn't create an account on {name ?? "AgentStack"}, you can
-            safely ignore this email.
+            If you didn't create an account on {name ?? siteConfig.name}, you
+            can safely ignore this email.
           </Text>
 
-          <Link href={url ?? "https://agent-stack.dev"} style={footerLink}>
-            {url ? new URL(url).hostname : "agent-stack.dev"}
+          <Link href={url ?? siteConfig.url} style={footerLink}>
+            {url ? new URL(url).hostname : siteConfig.url}
           </Link>
         </Container>
       </Body>
@@ -101,8 +103,8 @@ export const ForgotPasswordEmail = ({
 
 ForgotPasswordEmail.PreviewProps = {
   validationCode: "123456",
-  name: "AgentStack",
-  url: "https://agent-stack.dev",
+  name: siteConfig.name,
+  url: siteConfig.url,
   expiresIn: 3600,
 } as ForgotPasswordEmailProps;
 
