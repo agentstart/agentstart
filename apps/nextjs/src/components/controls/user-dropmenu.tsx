@@ -29,6 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useSidebar } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/use-auth";
 import { ThemeSwitch } from "./theme-switch";
 
@@ -38,6 +39,7 @@ interface UserDropmenuProps {
 
 export function UserDropmenu({ size = "default" }: UserDropmenuProps) {
   const router = useRouter();
+  const { isMobile } = useSidebar();
 
   const { user, isLoading } = useAuth();
 
@@ -125,7 +127,11 @@ export function UserDropmenu({ size = "default" }: UserDropmenuProps) {
             </Button>
           ))}
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-[270px] text-base">
+      <DropdownMenuContent
+        className="w-[270px] text-base"
+        side={isMobile ? "bottom" : "right"}
+        align="end"
+      >
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-2">
             <p className="text-base leading-none font-medium">

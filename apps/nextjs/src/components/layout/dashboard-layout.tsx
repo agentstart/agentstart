@@ -1,3 +1,5 @@
+"use client";
+
 // AGENT: Main navigation menu data
 // USAGE: Define sidebar menu items with icons and routes
 
@@ -26,6 +28,8 @@ import Link from "next/link";
 import { NavSecondary } from "./nav-secondary";
 import { UserDropmenu } from "@/components/controls/user-dropmenu";
 import { siteConfig } from "@acme/config";
+import { Logo } from "@/components/logo";
+import { usePathname } from "next/navigation";
 
 const data = {
   navMain: [
@@ -62,6 +66,8 @@ const data = {
 export function DashboardLayout({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
+  const pathname = usePathname();
+
   return (
     <SidebarProvider
       style={
@@ -76,12 +82,10 @@ export function DashboardLayout({
             <SidebarMenuItem>
               <SidebarMenuButton size="lg" asChild>
                 <Link href="/dashboard">
-                  <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                    <MessageSquare className="size-4" />
-                  </div>
-                  <div className="flex flex-col gap-0.5 leading-none">
-                    <span className="font-medium">{siteConfig.name}</span>
-                  </div>
+                  <Logo background />
+                  <span className="text-base font-semibold">
+                    {siteConfig.name}
+                  </span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -89,10 +93,14 @@ export function DashboardLayout({
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
-            <SidebarMenu className="gap-2">
+            <SidebarMenu>
               {data.navMain.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip={item.title}
+                    isActive={item.url === pathname}
+                  >
                     <a href={item.url} className="font-medium">
                       {item.icon && <item.icon />}
                       {item.title}
