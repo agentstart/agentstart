@@ -15,6 +15,8 @@ import { siteConfig } from "@acme/config";
 import { CssDotMatrixText } from "@/components/magicui/css-dot-matrix-text";
 import { FlickeringGrid } from "@/components/magicui/flickering-grid";
 import { useTheme } from "next-themes";
+import { Logo } from "@/components/logo";
+import { ThemeSwitch } from "@/components/controls/theme-switch";
 
 export const FooterSection = () => {
   const { resolvedTheme } = useTheme();
@@ -25,14 +27,21 @@ export const FooterSection = () => {
       <div className="container pt-12">
         <div className="grid gap-8 px-8 sm:grid-cols-2 lg:grid-cols-5">
           {/* Logo and Description */}
-          <div className="lg:col-span-2">
-            <div className="mb-4 flex items-center gap-2">
-              <span className="text-xl font-bold">{siteConfig.name}</span>
+          <div className="flex flex-col justify-between gap-4">
+            <div>
+              <div className="mb-4 flex items-center gap-1">
+                <Logo />
+                <span className="text-lg font-semibold">{siteConfig.name}</span>
+              </div>
+              <p className="text-muted-foreground text-sm">
+                The first fullstack template built for AI agents, not humans.
+                Zero config, maximum efficiency, true vibe coding.
+              </p>
             </div>
-            <p className="text-muted-foreground text-sm">
-              The first fullstack template built for AI agents, not humans. Zero
-              config, maximum efficiency, true vibe coding.
-            </p>
+
+            <div>
+              <ThemeSwitch />
+            </div>
           </div>
 
           {/* Features Links */}

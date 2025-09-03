@@ -65,12 +65,8 @@ export function ThemeSwitch() {
   const { theme, setTheme } = useTheme();
 
   return (
-    <Tabs
-      className="h-8 overflow-hidden rounded-full"
-      value={theme}
-      onValueChange={(value) => setTheme(value)}
-    >
-      <TabsList>
+    <Tabs value={theme} onValueChange={(value) => setTheme(value)}>
+      <TabsList className="h-8 overflow-hidden rounded-full">
         <ThemeSwitchTrigger value="system">
           <MonitorCog className="size-4" strokeWidth={2} aria-hidden="true" />
         </ThemeSwitchTrigger>

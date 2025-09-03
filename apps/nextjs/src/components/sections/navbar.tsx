@@ -39,6 +39,7 @@ import { cn } from "@/lib/utils";
 import { useActiveSection } from "@/hooks/use-active-section";
 import { CornerBorders } from "./corner-borders";
 import { siteConfig } from "@acme/config";
+import { Logo } from "../logo";
 
 interface RouteProps {
   href: string;
@@ -117,7 +118,11 @@ export const Navbar = () => {
           },
         )}
       >
-        <Link href="/" className="flex items-center text-lg font-bold">
+        <Link
+          href="/"
+          className="flex items-center gap-1 text-lg font-semibold"
+        >
+          <Logo />
           {siteConfig.name}
         </Link>
 
@@ -199,8 +204,6 @@ export const Navbar = () => {
         </NavigationMenu>
 
         <div className="hidden items-center gap-2 lg:flex">
-          <SimpleThemeSwitch />
-
           {user ? (
             <UserDropmenu size="icon" />
           ) : (
