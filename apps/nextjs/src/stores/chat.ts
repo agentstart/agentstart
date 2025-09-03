@@ -17,7 +17,7 @@ interface ChatState {
   toggleWebSearch: () => void;
 }
 
-const DEFAULT_MODEL = "openai/gpt-5";
+const DEFAULT_MODEL = "deepseek/deepseek-chat-v3.1";
 
 export const useChatStore = create<ChatState>()((set) => ({
   model: DEFAULT_MODEL,

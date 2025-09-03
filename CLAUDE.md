@@ -56,7 +56,10 @@ export { payment } from "./payment"; // 支付功能
 #### 第二优先级：清晰的代码组织
 
 - **Convention over Configuration**
-  - 文件命名约定：`*.server.ts`、`*.client.tsx`
+  - 文件命名约定：
+    - 所有文件名使用小写字母和中划线：`chat-message.tsx`、`use-auth.ts`
+    - 服务端专用：`*.server.ts`
+    - 客户端专用：`*.client.tsx`
   - 目录结构约定：`features/[feature-name]/`
   - API 路由约定：与 Next.js 保持一致
 

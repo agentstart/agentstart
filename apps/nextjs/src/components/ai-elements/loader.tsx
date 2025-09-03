@@ -17,7 +17,7 @@ export function Loader({
               "absolute",
               "h-[8%] w-[24%]",
               "top-[46%] left-[38%]",
-              "bg-foreground/80 rounded-[20%]",
+              "rounded-[20%] bg-white/80",
               "animate-spinner transition-colors",
               innerClassName,
             )}

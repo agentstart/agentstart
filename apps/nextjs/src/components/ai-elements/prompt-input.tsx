@@ -11,20 +11,21 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import type { ChatStatus } from "ai";
-import { Loader2Icon, SendIcon, SquareIcon, XIcon } from "lucide-react";
+import { ArrowUpIcon, SquareIcon, XIcon } from "lucide-react";
 import type {
   ComponentProps,
   HTMLAttributes,
   KeyboardEventHandler,
 } from "react";
 import { Children } from "react";
+import { Loader } from "./loader";
 
 export type PromptInputProps = HTMLAttributes<HTMLFormElement>;
 
 export const PromptInput = ({ className, ...props }: PromptInputProps) => (
   <form
     className={cn(
-      "bg-background w-full divide-y overflow-hidden rounded-xl border shadow-sm",
+      "bg-background w-full divide-y overflow-hidden rounded-3xl border transition-colors focus-within:border-black/20 dark:focus-within:border-white/20",
       className,
     )}
     {...props}
@@ -68,11 +69,15 @@ export const PromptInputTextarea = ({
   return (
     <Textarea
       className={cn(
-        "w-full resize-none rounded-none border-none p-3 shadow-none ring-0 outline-none",
+        "w-full resize-none rounded-none border-none p-3 pl-4 shadow-none ring-0 outline-none md:text-base",
         "field-sizing-content max-h-[6lh] bg-transparent dark:bg-transparent",
         "focus-visible:ring-0",
         className,
       )}
+      style={{
+        minHeight,
+        maxHeight,
+      }}
       name="message"
       onChange={(e) => {
         onChange?.(e);
@@ -121,7 +126,7 @@ export const PromptInputButton = ({
   ...props
 }: PromptInputButtonProps) => {
   const newSize =
-    (size ?? Children.count(props.children) > 1) ? "default" : "icon";
+    size ?? (Children.count(props.children) > 1 ? "default" : "icon");
 
   return (
     <Button
@@ -151,10 +156,10 @@ export const PromptInputSubmit = ({
   children,
   ...props
 }: PromptInputSubmitProps) => {
-  let Icon = <SendIcon className="size-4" />;
+  let Icon = <ArrowUpIcon className="size-5" />;
 
   if (status === "submitted") {
-    Icon = <Loader2Icon className="size-4 animate-spin" />;
+    Icon = <Loader className="size-4" />;
   } else if (status === "streaming") {
     Icon = <SquareIcon className="size-4" />;
   } else if (status === "error") {
