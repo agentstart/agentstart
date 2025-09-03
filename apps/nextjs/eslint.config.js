@@ -4,7 +4,7 @@ import nextjsConfig from "@acme/eslint-config/nextjs";
 /** @type {import('typescript-eslint').Config} */
 export default [
   {
-    ignores: [".next/**"],
+    ignores: [".next/**", ".source/**"],
   },
   ...baseConfig,
   ...nextjsConfig,

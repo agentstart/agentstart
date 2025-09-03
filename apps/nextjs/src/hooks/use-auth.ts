@@ -23,31 +23,31 @@ export const subscriptionsOptions = queryOptions({
 
 /**
  * Universal authentication and subscription state management hook
- * 
+ *
  * Features:
  * 1. Get user authentication status and basic information
  * 2. Get user subscription information and current plan
  * 3. Provide convenient permission checks and feature validation methods
- * 
+ *
  * @example
  * ```tsx
- * const { 
- *   user, 
- *   isAuthenticated, 
- *   isSubscribed, 
- *   currentPlan, 
- *   hasFeature, 
- *   canAccess 
+ * const {
+ *   user,
+ *   isAuthenticated,
+ *   isSubscribed,
+ *   currentPlan,
+ *   hasFeature,
+ *   canAccess
  * } = useAuth();
- * 
+ *
  * // Check if user is logged in
  * if (!isAuthenticated) return <LoginPrompt />;
- * 
+ *
  * // Check if user has a specific feature
  * if (hasFeature("API access")) {
  *   // Show API related features
  * }
- * 
+ *
  * // Check if user can access a specific plan level feature
  * if (canAccess("pro")) {
  *   // Show Pro level features
@@ -77,18 +77,20 @@ export function useAuth() {
   // ============ Computed derived state ============
   const isAuthenticated = !!session?.user; // Whether user is logged in
   const isLoading = sessionLoading || (isAuthenticated && subscriptionsLoading); // Whether data is loading
-  const isSubscribed = !!activeSubscription && activeSubscription.status === "active"; // Whether user has paid subscription
-  const isTrialing = !!activeSubscription && activeSubscription.status === "trialing"; // Whether user is in trial period
+  const isSubscribed =
+    !!activeSubscription && activeSubscription.status === "active"; // Whether user has paid subscription
+  const isTrialing =
+    !!activeSubscription && activeSubscription.status === "trialing"; // Whether user is in trial period
   const planName = currentPlan?.name || null; // Current plan name
   const planLimits = currentPlan?.limits || null; // Current plan limits
 
   // ============ Utility functions ============
-  
+
   /**
    * Check if current plan includes a specific feature
    * @param feature - Feature name (case insensitive)
    * @returns Whether the feature is included
-   * 
+   *
    * @example
    * hasFeature("API access") // Check if user has API access
    * hasFeature("unlimited") // Check if user has unlimited features
@@ -105,7 +107,7 @@ export function useAuth() {
    * Based on plan hierarchy: hobby < pro < ultra
    * @param requiredPlan - Required minimum plan level
    * @returns Whether user has access permission
-   * 
+   *
    * @example
    * canAccess("pro") // Check if user is Pro level or higher
    * canAccess("hobby") // All users can access hobby level features
@@ -123,7 +125,7 @@ export function useAuth() {
   /**
    * Get user's remaining credits count
    * @returns Remaining credits, or null if unavailable
-   * 
+   *
    * @todo Implement based on actual credit tracking system
    * Currently returns plan limit as example
    */
@@ -137,25 +139,25 @@ export function useAuth() {
 
   return {
     // ============ Basic authentication info ============
-    session,           // Complete session object (includes user and session data)
+    session, // Complete session object (includes user and session data)
     user: session?.user, // Basic user information (id, email, name, image, etc.)
-    isAuthenticated,   // Whether user is logged in
-    isLoading,         // Whether data is currently loading
+    isAuthenticated, // Whether user is logged in
+    isLoading, // Whether data is currently loading
 
     // ============ Subscription info ============
-    subscriptions,     // All subscription records
+    subscriptions, // All subscription records
     activeSubscription, // Currently active subscription
-    isSubscribed,      // Whether user has paid subscription (status is active)
-    isTrialing,        // Whether user is in trial period (status is trialing)
+    isSubscribed, // Whether user has paid subscription (status is active)
+    isTrialing, // Whether user is in trial period (status is trialing)
 
     // ============ Plan info ============
-    currentPlan,       // Complete current plan information (from config)
-    planName,          // Current plan name (\"hobby\" | \"pro\" | \"ultra\")
-    planLimits,        // Current plan limits (credits, projects, etc.)
+    currentPlan, // Complete current plan information (from config)
+    planName, // Current plan name (\"hobby\" | \"pro\" | \"ultra\")
+    planLimits, // Current plan limits (credits, projects, etc.)
 
     // ============ Utility functions ============
-    hasFeature,        // Check if user has a specific feature
-    canAccess,         // Check if user can access a specific plan level
+    hasFeature, // Check if user has a specific feature
+    canAccess, // Check if user can access a specific plan level
     getRemainingCredits, // Get remaining credits count
   };
 }

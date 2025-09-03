@@ -12,7 +12,8 @@
     "start": "bun with-env next start",
     "typecheck": "tsc --noEmit",
     "with-env": "dotenv -e ../../.env --",
-    "ui-add": "bun x --bun shadcn@latest add && prettier src --write --list-different"
+    "ui-add": "bun x --bun shadcn@latest add && prettier src --write --list-different",
+    "postinstall": "fumadocs-mdx"
   },
   "dependencies": {
     "@acme/api": "*",
@@ -58,12 +59,16 @@
     "@radix-ui/react-use-controllable-state": "^1.2.2",
     "@t3-oss/env-nextjs": "catalog:",
     "@tanstack/react-query": "catalog:",
+    "@types/mdx": "^2.0.13",
     "ai": "^5.0.30",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
+    "fumadocs-core": "^15.7.8",
+    "fumadocs-mdx": "^11.8.3",
+    "fumadocs-ui": "^15.7.8",
     "harden-react-markdown": "^1.0.5",
     "input-otp": "^1.4.2",
     "katex": "^0.16.22",

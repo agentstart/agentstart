@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
 @source "../../../../node_modules/@daveyplate/better-auth-ui";
 @source "../../../../node_modules/streamdown/dist/index.js";
 @import "./theme.css";

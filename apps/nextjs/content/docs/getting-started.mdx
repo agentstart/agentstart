@@ -1,0 +1,156 @@
+---
+title: Getting Started
+description: Set up your Agent Stack development environment in minutes
+---
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- **Node.js** 18.x or later
+- **Bun** (recommended) or npm/yarn/pnpm
+- **PostgreSQL** (for database)
+- **Git** for version control
+
+## Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/yourusername/agent-stack.git
+cd agent-stack
+```
+
+### 2. Install Dependencies
+
+We recommend using Bun for faster installation:
+
+```bash
+bun install
+```
+
+Alternatively, you can use npm, yarn, or pnpm:
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+### 3. Environment Setup
+
+Copy the example environment file:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and configure the following:
+
+#### Required Variables
+
+```
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/agentstack"
+
+# Authentication
+AUTH_URL="http://localhost:3000"
+AUTH_SECRET="your-auth-secret-here" # Generate with: openssl rand -hex 32
+```
+
+#### Optional Variables
+
+```
+# AI Providers (choose one or more)
+OPENAI_API_KEY="sk-..."
+ANTHROPIC_API_KEY="sk-ant-..."
+OPENROUTER_API_KEY="sk-or-..."
+GOOGLE_GENERATIVE_AI_API_KEY="..."
+
+# Payment (Stripe)
+STRIPE_SECRET_KEY="sk_test_..."
+STRIPE_WEBHOOK_SECRET="whsec_..."
+
+# Email
+RESEND_API_KEY="re_..."
+```
+
+### 4. Database Setup
+
+Initialize the database schema:
+
+```bash
+bun db:push
+```
+
+Seed the database with sample data (optional):
+
+```bash
+bun db:seed
+```
+
+### 5. Start Development Server
+
+```bash
+bun dev
+```
+
+Your application will be available at:
+
+- **Application**: http://localhost:3000
+- **Database Studio**: http://localhost:3000/api/db-studio (development only)
+
+## Project Structure
+
+```
+apps/nextjs/
+├── src/
+│   ├── app/           # Next.js app directory
+│   ├── components/    # React components
+│   ├── lib/          # Utility functions
+│   └── styles/       # Global styles
+├── content/
+│   └── docs/         # Documentation MDX files
+└── public/           # Static assets
+```
+
+## Common Commands
+
+```bash
+# Development
+bun dev              # Start development server
+bun build           # Build for production
+bun start           # Start production server
+
+# Database
+bun db:push         # Push schema changes
+bun db:migrate      # Run migrations
+bun db:seed         # Seed database
+bun db:studio       # Open Drizzle Studio
+
+# Code Quality
+bun lint            # Run ESLint
+bun format          # Format with Prettier
+bun typecheck       # TypeScript type checking
+
+# Testing
+bun test            # Run tests
+```
+
+## Next Steps
+
+Now that your development environment is set up, you can:
+
+1. **Explore the Dashboard**: Visit `/dashboard` to see the authenticated user area
+2. **Read the Documentation**: Continue through our guides
+3. **Start Building**: Begin creating your application
+
+### Recommended Reading Order
+
+1. [Configuration Guide](/docs/configuration)
+2. [API Development](/docs/api)
+3. [Authentication Setup](/docs/auth)
+4. [Database Operations](/docs/database)
+5. [Deployment Guide](/docs/deployment)

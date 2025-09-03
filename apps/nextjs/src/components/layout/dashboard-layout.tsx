@@ -51,8 +51,8 @@ const data = {
       icon: Settings,
     },
     {
-      title: "Get Help",
-      url: "#",
+      title: "Docs",
+      url: "/docs",
       icon: HelpingHand,
     },
     {

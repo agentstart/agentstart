@@ -4,9 +4,11 @@
 //   - Environment validation at build time
 //   - Monorepo package transpilation
 //   - Image optimization configuration
-// SEARCHABLE: next config, build configuration, image domains
+//   - MDX support for Fumadocs
+// SEARCHABLE: next config, build configuration, image domains, mdx, fumadocs
 
 import { createJiti } from "jiti";
+import { createMDX } from "fumadocs-mdx/next";
 
 const jiti = createJiti(import.meta.url);
 
@@ -46,4 +48,5 @@ const config = {
   },
 };
 
-export default config;
+const withMDX = createMDX();
+export default withMDX(config);

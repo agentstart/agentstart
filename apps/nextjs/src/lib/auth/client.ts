@@ -1,7 +1,7 @@
 // AGENT: Client-side authentication instance
 // PURPOSE: Provides auth methods for client components and hooks
 // USAGE: import { authClient } from '@/lib/auth/client'
-// COMMON TASKS: 
+// COMMON TASKS:
 //   - authClient.signIn.email({ email, password })
 //   - authClient.signIn.social({ provider: 'github' })
 //   - authClient.signOut()

@@ -1,0 +1,234 @@
+---
+title: API Development
+description: Build type-safe APIs with oRPC
+---
+
+## Overview
+
+Agent Stack uses [oRPC](https://orpc.unnoq.com/) for building type-safe APIs. All API routes are defined in `packages/api/src/routers`.
+
+## Important Convention
+
+**All APIs must be written in `@packages/api/src/routers`, not in `app/api`**. This ensures:
+
+- Centralized API logic
+- Better code organization
+- Type safety across the monorepo
+- Reusability across different apps
+
+## Creating an API Route
+
+### 1. Create a Router
+
+Create a new file in `packages/api/src/routers/`:
+
+```typescript
+// packages/api/src/routers/user.ts
+import { protectedProcedure, publicProcedure } from "../procedures";
+import { z } from "zod";
+
+export const userRouter = {
+  // Public endpoint - no authentication required
+  getPublicProfile: publicProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+      }),
+    )
+    .handler(async ({ input }) => {
+      // Your logic here
+      return {
+        id: input.userId,
+        name: "John Doe",
+        bio: "Software Developer",
+      };
+    }),
+
+  // Protected endpoint - requires authentication
+  updateProfile: protectedProcedure
+    .input(
+      z.object({
+        name: z.string().min(1).max(100),
+        bio: z.string().max(500).optional(),
+      }),
+    )
+    .handler(async ({ input, context }) => {
+      const userId = context.user.id; // Access authenticated user
+
+      // Update logic here
+      return {
+        success: true,
+        user: {
+          id: userId,
+          ...input,
+        },
+      };
+    }),
+};
+```
+
+### 2. Export in Main Router
+
+Add your router to `packages/api/src/router.ts`:
+
+```typescript
+import { userRouter } from "./routers/user";
+
+export const appRouter = {
+  chat: chatRouter,
+  dev: devRouter,
+  user: userRouter, // Add your router here
+};
+```
+
+### 3. Use in Frontend
+
+Import and use the oRPC client:
+
+```typescript
+// In a React component
+import { client } from "@/lib/orpc";
+
+// In a component
+function UserProfile() {
+  const [profile, setProfile] = useState(null);
+
+  const fetchProfile = async () => {
+    const data = await client.user.getPublicProfile({
+      userId: "123",
+    });
+    setProfile(data);
+  };
+
+  const updateProfile = async () => {
+    const result = await client.user.updateProfile({
+      name: "Jane Doe",
+      bio: "Full Stack Developer",
+    });
+    console.log(result);
+  };
+
+  // ...
+}
+```
+
+## Using with TanStack Query
+
+For better data fetching, use the TanStack Query integration:
+
+```typescript
+import { orpc } from "@/lib/orpc";
+
+function UserProfile() {
+  // Query data
+  const { data, isLoading } = orpc.user.getPublicProfile.useQuery({
+    userId: "123",
+  });
+
+  // Mutation
+  const updateMutation = orpc.user.updateProfile.useMutation({
+    onSuccess: (data) => {
+      console.log("Profile updated:", data);
+    },
+  });
+
+  const handleUpdate = () => {
+    updateMutation.mutate({
+      name: "New Name",
+      bio: "New Bio",
+    });
+  };
+
+  // ...
+}
+```
+
+## Procedures
+
+Agent Stack provides two main procedures:
+
+### Public Procedure
+
+Use for endpoints that don't require authentication:
+
+```typescript
+import { publicProcedure } from "../procedures";
+
+export const publicEndpoint = publicProcedure
+  .input(
+    z.object({
+      /* ... */
+    }),
+  )
+  .handler(async ({ input }) => {
+    // Your logic
+  });
+```
+
+### Protected Procedure
+
+Use for endpoints that require an authenticated user:
+
+```typescript
+import { protectedProcedure } from "../procedures";
+
+export const protectedEndpoint = protectedProcedure
+  .input(
+    z.object({
+      /* ... */
+    }),
+  )
+  .handler(async ({ input, context }) => {
+    const user = context.user; // Authenticated user
+    // Your logic
+  });
+```
+
+## Input Validation
+
+Always validate inputs using Zod:
+
+```typescript
+import { z } from "zod";
+
+const schema = z.object({
+  email: z.string().email(),
+  age: z.number().min(0).max(150),
+  tags: z.array(z.string()).optional(),
+  role: z.enum(["admin", "user", "guest"]),
+});
+```
+
+## Error Handling
+
+Throw errors for proper error responses:
+
+```typescript
+handler: async ({ input }) => {
+  const user = await db.user.findById(input.id);
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  return user;
+};
+```
+
+## Best Practices
+
+1. **Keep routers focused**: One router per domain (users, posts, etc.)
+2. **Use proper procedures**: `publicProcedure` vs `protectedProcedure`
+3. **Validate everything**: Always use Zod schemas for inputs
+4. **Handle errors gracefully**: Provide meaningful error messages
+5. **Document your endpoints**: Use comments to explain complex logic
+
+## OpenAPI Documentation
+
+oRPC can generate OpenAPI documentation automatically. Access it at:
+
+```
+http://localhost:3000/api/openapi
+```
+
+This provides a Swagger UI for testing your APIs.

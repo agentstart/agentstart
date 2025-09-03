@@ -2,6 +2,7 @@
 // PURPOSE: Wrap application with all necessary client providers
 // USAGE: <Providers>{children}</Providers> in root layout
 // PROVIDERS:
+//   - RootProvider: Fumadocs root provider
 //   - ThemeProvider: Dark/light mode support
 //   - QueryClientProvider: TanStack Query provider
 //   - AuthUIProvider: Authentication UI components
@@ -16,6 +17,7 @@ import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { Suspense } from "react";
 import { ThemeProvider } from "next-themes";
+import { RootProvider } from "fumadocs-ui/provider";
 
 import { authClient } from "@/lib/auth/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -29,38 +31,40 @@ export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
 
   return (
-    <Suspense
-      fallback={
-        <div className="flex h-screen w-screen items-center justify-center">
-          Loading...
-        </div>
-      }
-    >
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <QueryClientProvider client={queryClient}>
-          <AuthUIProvider
-            authClient={authClient}
-            navigate={router.push}
-            replace={router.replace}
-            onSessionChange={() => {
-              // Clear router cache (protected routes)
-              router.refresh();
-            }}
-            Link={Link}
-            emailOTP
-            social={{
-              providers: ["github", "google"],
-            }}
-            account={{
-              basePath: "/dashboard", // Settings views will be at /dashboard/settings, /dashboard/security, etc.
-            }}
-          >
-            {children}
-          </AuthUIProvider>
-        </QueryClientProvider>
+    <RootProvider>
+      <Suspense
+        fallback={
+          <div className="flex h-screen w-screen items-center justify-center">
+            Loading...
+          </div>
+        }
+      >
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <QueryClientProvider client={queryClient}>
+            <AuthUIProvider
+              authClient={authClient}
+              navigate={router.push}
+              replace={router.replace}
+              onSessionChange={() => {
+                // Clear router cache (protected routes)
+                router.refresh();
+              }}
+              Link={Link}
+              emailOTP
+              social={{
+                providers: ["github", "google"],
+              }}
+              account={{
+                basePath: "/dashboard", // Settings views will be at /dashboard/settings, /dashboard/security, etc.
+              }}
+            >
+              {children}
+            </AuthUIProvider>
+          </QueryClientProvider>
 
-        <Toaster />
-      </ThemeProvider>
-    </Suspense>
+          <Toaster />
+        </ThemeProvider>
+      </Suspense>
+    </RootProvider>
   );
 }

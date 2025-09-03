@@ -50,3 +50,6 @@ dist/
 
 # turbo
 .turbo
+
+# fumadocs
+.source/
