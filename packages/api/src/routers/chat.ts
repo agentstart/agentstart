@@ -42,13 +42,18 @@ export const chatRouter = {
         model,
         messages: convertToModelMessages(input.messages),
         system: `You are a helpful AI assistant. You provide clear, concise, and accurate responses. 
-                 When providing code examples, use appropriate syntax highlighting.
-                 Be friendly and professional in your communication.`,
+When providing code examples, use appropriate syntax highlighting.
+Be friendly and professional in your communication.`,
       });
 
       // Return the streaming response
       // Note: In actual implementation, you might need to handle streaming differently
       // depending on your client setup
-      return streamToEventIterator(result.toUIMessageStream());
+      return streamToEventIterator(
+        result.toUIMessageStream({
+          sendSources: true,
+          sendReasoning: true,
+        }),
+      );
     }),
 };

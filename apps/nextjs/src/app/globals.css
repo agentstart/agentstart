@@ -65,4 +65,13 @@
       background-position: bottom center;
     }
   }
+  --animate-spinner: spinner 0.7s linear infinite;
+  @keyframes spinner {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
 }

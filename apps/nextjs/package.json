@@ -90,7 +90,8 @@
     "ts-pattern": "catalog:",
     "use-stick-to-bottom": "^1.1.1",
     "vaul": "^1.1.2",
-    "zod": "^4.1.5"
+    "zod": "catalog:",
+    "zustand": "catalog:"
   },
   "devDependencies": {
     "@acme/eslint-config": "*",

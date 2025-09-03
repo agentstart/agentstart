@@ -1,12 +1,5 @@
 "use client";
 
-import { Loader2Icon, SendIcon, SquareIcon, XIcon } from "lucide-react";
-import type {
-  ComponentProps,
-  HTMLAttributes,
-  KeyboardEventHandler,
-} from "react";
-import { Children } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -18,13 +11,20 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import type { ChatStatus } from "ai";
+import { Loader2Icon, SendIcon, SquareIcon, XIcon } from "lucide-react";
+import type {
+  ComponentProps,
+  HTMLAttributes,
+  KeyboardEventHandler,
+} from "react";
+import { Children } from "react";
 
 export type PromptInputProps = HTMLAttributes<HTMLFormElement>;
 
 export const PromptInput = ({ className, ...props }: PromptInputProps) => (
   <form
     className={cn(
-      "w-full divide-y overflow-hidden rounded-xl border bg-background shadow-sm",
+      "bg-background w-full divide-y overflow-hidden rounded-xl border shadow-sm",
       className,
     )}
     {...props}
@@ -40,12 +40,17 @@ export const PromptInputTextarea = ({
   onChange,
   className,
   placeholder = "What would you like to know?",
-  minHeight: _minHeight = 48,
-  maxHeight: _maxHeight = 164,
+  minHeight = 48,
+  maxHeight = 164,
   ...props
 }: PromptInputTextareaProps) => {
   const handleKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
     if (e.key === "Enter") {
+      // Don't submit if IME composition is in progress
+      if (e.nativeEvent.isComposing) {
+        return;
+      }
+
       if (e.shiftKey) {
         // Allow newline
         return;
@@ -63,8 +68,8 @@ export const PromptInputTextarea = ({
   return (
     <Textarea
       className={cn(
-        "w-full resize-none rounded-none border-none p-3 shadow-none outline-none ring-0",
-        "bg-transparent dark:bg-transparent field-sizing-content max-h-[6lh]",
+        "w-full resize-none rounded-none border-none p-3 shadow-none ring-0 outline-none",
+        "field-sizing-content max-h-[6lh] bg-transparent dark:bg-transparent",
         "focus-visible:ring-0",
         className,
       )}
@@ -185,7 +190,7 @@ export const PromptInputModelSelectTrigger = ({
 }: PromptInputModelSelectTriggerProps) => (
   <SelectTrigger
     className={cn(
-      "border-none bg-transparent font-medium text-muted-foreground shadow-none transition-colors",
+      "text-muted-foreground border-none bg-transparent font-medium shadow-none transition-colors",
       'hover:bg-accent hover:text-foreground [&[aria-expanded="true"]]:bg-accent [&[aria-expanded="true"]]:text-foreground',
       className,
     )}

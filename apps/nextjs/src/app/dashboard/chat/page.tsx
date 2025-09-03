@@ -47,6 +47,7 @@ import {
 import { Loader } from "@/components/ai-elements/loader";
 import { eventIteratorToStream } from "@orpc/client";
 import { client } from "@/lib/orpc";
+import { useChatStore } from "@/stores/chat";
 
 const models = [
   {
@@ -65,24 +66,27 @@ const models = [
 
 const ChatPage = () => {
   const [input, setInput] = useState("");
-  const [model, setModel] = useState<string>(models[0].value);
-  const [webSearch, setWebSearch] = useState(false);
+  const { model, webSearch, setModel, toggleWebSearch } = useChatStore();
   const { messages, sendMessage, status } = useChat({
     transport: {
       async sendMessages(options) {
+        const body = options.body as {
+          model: (typeof models)[number]["value"];
+          webSearch: boolean;
+        };
         return eventIteratorToStream(
           await client.chat.stream(
             {
               chatId: options.chatId,
               messages: options.messages,
-              model: model,
-              webSearch: webSearch,
+              model: body.model,
+              webSearch: body.webSearch,
             },
             { signal: options.abortSignal },
           ),
         );
       },
-      reconnectToStream(options) {
+      reconnectToStream() {
         throw new Error("Unsupported");
       },
     },
@@ -95,8 +99,8 @@ const ChatPage = () => {
         { text: input },
         {
           body: {
-            model: model,
-            webSearch: webSearch,
+            model,
+            webSearch,
           },
         },
       );
@@ -176,17 +180,12 @@ const ChatPage = () => {
             <PromptInputTools>
               <PromptInputButton
                 variant={webSearch ? "default" : "ghost"}
-                onClick={() => setWebSearch(!webSearch)}
+                onClick={toggleWebSearch}
               >
                 <GlobeIcon size={16} />
                 <span>Search</span>
               </PromptInputButton>
-              <PromptInputModelSelect
-                onValueChange={(value) => {
-                  setModel(value);
-                }}
-                value={model}
-              >
+              <PromptInputModelSelect onValueChange={setModel} value={model}>
                 <PromptInputModelSelectTrigger>
                   <PromptInputModelSelectValue />
                 </PromptInputModelSelectTrigger>

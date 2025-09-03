@@ -71,7 +71,8 @@
       "lucide-react": "^0.542.0",
       "uuid": "^11.1.0",
       "zod": "^4.1.3",
-      "vitest": "^3.2.4"
+      "vitest": "^3.2.4",
+      "zustand": "^5.0.8"
     },
     "catalogs": {
       "react19": {
