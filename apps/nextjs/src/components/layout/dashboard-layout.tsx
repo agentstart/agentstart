@@ -4,6 +4,7 @@
 import * as React from "react";
 import {
   MessageSquare,
+  SquareTerminal,
   Settings,
   MessageCircle,
   HelpingHand,
@@ -31,6 +32,11 @@ const data = {
       title: "Chat",
       url: "/dashboard/chat",
       icon: MessageSquare,
+    },
+    {
+      title: "Developer",
+      url: "/dashboard/dev",
+      icon: SquareTerminal,
     },
   ],
   navSecondary: [
@@ -87,6 +93,7 @@ export function DashboardLayout({
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <a href={item.url} className="font-medium">
+                      {item.icon && <item.icon />}
                       {item.title}
                     </a>
                   </SidebarMenuButton>

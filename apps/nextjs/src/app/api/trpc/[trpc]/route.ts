@@ -32,6 +32,7 @@ export const OPTIONS = () => {
 };
 
 const handler = async (req: NextRequest) => {
+  const session = await auth.api.getSession({ headers: req.headers });
   const response = await fetchRequestHandler({
     endpoint: "/api/trpc",
     router: appRouter,
@@ -40,6 +41,7 @@ const handler = async (req: NextRequest) => {
       createTRPCContext({
         auth: auth,
         headers: req.headers,
+        session,
       }),
     onError({ error, path }) {
       console.error(`>>> tRPC Error on '${path}'`, error);

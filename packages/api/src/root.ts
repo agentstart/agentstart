@@ -1,22 +1,15 @@
-// AGENT: Root tRPC router configuration
-// PURPOSE: Combine all sub-routers into the main app router
-// USAGE: Used by tRPC server and client initialization
-// ROUTERS:
-//   - auth: Authentication related procedures
-//   - post: Post/content management procedures
-// CUSTOMIZATION: Add new routers here as needed
-// SEARCHABLE: root router, main router, trpc router
+// AGENT: Main tRPC router combining all sub-routers
+// PURPOSE: Central router that aggregates all API routes
+// USAGE: import { appRouter } from '@acme/api'
+// SEARCHABLE: main router, api routes, trpc router
 
-import { authRouter } from "./router/auth";
-import { postRouter } from "./router/post";
 import { createTRPCRouter } from "./trpc";
+import { authRouter } from "./router/auth";
+import { devRouter } from "./router/dev";
 
-// AGENT: Main application router
-// ADD NEW ROUTERS: Import and add to this object
 export const appRouter = createTRPCRouter({
   auth: authRouter,
-  post: postRouter,
+  dev: devRouter,
 });
 
-// export type definition of API
 export type AppRouter = typeof appRouter;
