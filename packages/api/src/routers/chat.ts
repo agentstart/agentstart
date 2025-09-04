@@ -8,11 +8,32 @@
 // SEARCHABLE: chat router, ai api, openrouter, streaming chat
 
 import type { UIMessage } from "ai";
-import { convertToModelMessages, streamText } from "ai";
+import { convertToModelMessages, streamText, tool } from "ai";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { protectedProcedure } from "../procedures";
 import { streamToEventIterator, type } from "@orpc/server";
 import { env } from "../../env";
+import { z } from "zod/v4";
+
+const tools = {
+  time: tool({
+    description: "Get current time in a specific timezone or system timezone",
+    inputSchema: z.object({
+      timezone: z
+        .string()
+        .describe(
+          "IANA timezone name (e.g., 'America/New_York', 'Europe/London')",
+        ),
+    }),
+    execute: async ({ timezone }) => {
+      const date = new Date();
+      return {
+        timezone,
+        time: date.toLocaleTimeString("en-US", { timeZone: timezone }),
+      };
+    },
+  }),
+};
 
 export const chatRouter = {
   stream: protectedProcedure
@@ -44,6 +65,7 @@ export const chatRouter = {
         system: `You are a helpful AI assistant. You provide clear, concise, and accurate responses. 
 When providing code examples, use appropriate syntax highlighting.
 Be friendly and professional in your communication.`,
+        tools,
       });
 
       // Return the streaming response

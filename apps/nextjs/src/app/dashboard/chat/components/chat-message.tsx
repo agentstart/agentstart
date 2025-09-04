@@ -23,8 +23,20 @@ import {
 } from "@/components/ai-elements/reasoning";
 import { Actions, Action } from "@/components/ai-elements/actions";
 import { Image } from "@/components/ai-elements/image";
+import {
+  Tool,
+  ToolContent,
+  ToolHeader,
+  ToolInput,
+  ToolOutput,
+} from "@/components/ai-elements/tool";
 import { CopyIcon, RefreshCcwIcon, PencilIcon } from "lucide-react";
-import type { UIMessage, ChatStatus, AbstractChat } from "ai";
+import {
+  type UIMessage,
+  type ChatStatus,
+  type AbstractChat,
+  isToolUIPart,
+} from "ai";
 import { useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -164,26 +176,43 @@ export function ChatMessage({
             </div>
           ) : (
             message.parts.map((part, i) => {
-              switch (part.type) {
-                case "text":
-                  return (
-                    <Response key={`${message.id}-text-${i}`}>
-                      {part.text}
-                    </Response>
-                  );
-                case "reasoning":
-                  return (
-                    <Reasoning
-                      key={`${message.id}-reasoning-${i}`}
-                      className="w-full"
-                      isStreaming={status === "streaming"}
-                    >
-                      <ReasoningTrigger />
-                      <ReasoningContent>{part.text}</ReasoningContent>
-                    </Reasoning>
-                  );
-                default:
-                  return null;
+              if (part.type === "text") {
+                return (
+                  <Response key={`${message.id}-text-${i}`}>
+                    {part.text}
+                  </Response>
+                );
+              } else if (part.type === "reasoning") {
+                return (
+                  <Reasoning
+                    key={`${message.id}-reasoning-${i}`}
+                    className="w-full"
+                    isStreaming={status === "streaming"}
+                  >
+                    <ReasoningTrigger />
+                    <ReasoningContent>{part.text}</ReasoningContent>
+                  </Reasoning>
+                );
+              } else if (isToolUIPart(part)) {
+                return (
+                  <Tool defaultOpen={true}>
+                    <ToolHeader type={part.type} state={part.state} />
+                    <ToolContent>
+                      <ToolInput input={part.input} />
+                      <ToolOutput
+                        output={
+                          <Response>
+                            {JSON.stringify(part.output) || ""}
+                          </Response>
+                        }
+                        errorText={part.errorText}
+                      />
+                    </ToolContent>
+                  </Tool>
+                );
+                return;
+              } else {
+                return null;
               }
             })
           )}
