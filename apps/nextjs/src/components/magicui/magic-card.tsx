@@ -4,6 +4,7 @@ import { motion, useMotionTemplate, useMotionValue } from "motion/react";
 import React, { useCallback, useEffect, useRef } from "react";
 
 import { cn } from "@/lib/utils";
+import { useMount } from "@/hooks/use-mount";
 
 interface MagicCardProps {
   children?: React.ReactNode;
@@ -26,6 +27,7 @@ export function MagicCard({
   gradientFrom = "#9E7AFF",
   gradientTo = "#FE8BBB",
 }: MagicCardProps) {
+  const mounted = useMount();
   const cardRef = useRef<HTMLDivElement>(null);
   const mouseX = useMotionValue(-gradientSize);
   const mouseY = useMotionValue(-gradientSize);
@@ -77,6 +79,33 @@ export function MagicCard({
     mouseY.set(-gradientSize);
   }, [gradientSize, mouseX, mouseY]);
 
+  const background = useMotionTemplate`
+    radial-gradient(${gradientSize}px circle at ${mouseX}px ${mouseY}px, ${gradientColor}, transparent 100%)
+  `;
+
+  const borderBackground = useMotionTemplate`
+    radial-gradient(${gradientSize}px circle at ${mouseX}px ${mouseY}px,
+    ${gradientFrom}, 
+    ${gradientTo}, 
+    var(--border) 100%
+    )
+  `;
+
+  // Don't render motion divs until after hydration to avoid mismatch
+  if (!mounted) {
+    return (
+      <div
+        ref={cardRef}
+        className={cn("group relative rounded-[inherit]", className)}
+      >
+        <div className="bg-border pointer-events-none absolute inset-0 rounded-[inherit] duration-300" />
+        <div className="bg-background absolute inset-px rounded-[inherit]" />
+        <div className="pointer-events-none absolute inset-px rounded-[inherit]" />
+        <div className={cn("relative", containerClassName)}>{children}</div>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={cardRef}
@@ -85,22 +114,14 @@ export function MagicCard({
       <motion.div
         className="bg-border pointer-events-none absolute inset-0 rounded-[inherit] duration-300 group-hover:opacity-100"
         style={{
-          background: useMotionTemplate`
-          radial-gradient(${gradientSize}px circle at ${mouseX}px ${mouseY}px,
-          ${gradientFrom}, 
-          ${gradientTo}, 
-          var(--border) 100%
-          )
-          `,
+          background: borderBackground,
         }}
       />
       <div className="bg-background absolute inset-px rounded-[inherit]" />
       <motion.div
         className="pointer-events-none absolute inset-px rounded-[inherit] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{
-          background: useMotionTemplate`
-            radial-gradient(${gradientSize}px circle at ${mouseX}px ${mouseY}px, ${gradientColor}, transparent 100%)
-          `,
+          background,
           opacity: gradientOpacity,
         }}
       />

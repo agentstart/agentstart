@@ -10,6 +10,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useMount } from "@/hooks/use-mount";
 import { MonitorCog, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import React, { useEffect, useState } from "react";
@@ -63,9 +64,13 @@ export function SimpleThemeSwitch() {
 
 export function ThemeSwitch() {
   const { theme, setTheme } = useTheme();
+  const mounted = useMount();
+
+  // Prevent hydration mismatch - use a default value until mounted
+  const currentTheme = mounted ? theme : "system";
 
   return (
-    <Tabs value={theme} onValueChange={(value) => setTheme(value)}>
+    <Tabs value={currentTheme} onValueChange={(value) => setTheme(value)}>
       <TabsList className="h-8 overflow-hidden rounded-full">
         <ThemeSwitchTrigger value="system">
           <MonitorCog className="size-4" strokeWidth={2} aria-hidden="true" />

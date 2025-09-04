@@ -204,7 +204,7 @@ export const Navbar = () => {
           </NavigationMenuList>
         </NavigationMenu>
 
-        <div className="hidden items-center gap-2 lg:flex">
+        <div className="hidden items-center gap-4 lg:flex">
           <FeedbackButton size="sm" />
 
           {user ? (
