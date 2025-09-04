@@ -22,6 +22,7 @@ import {
   ReasoningTrigger,
 } from "@/components/ai-elements/reasoning";
 import { Actions, Action } from "@/components/ai-elements/actions";
+import { Image } from "@/components/ai-elements/image";
 import { CopyIcon, RefreshCcwIcon, PencilIcon } from "lucide-react";
 import type { UIMessage, ChatStatus, AbstractChat } from "ai";
 import { useState } from "react";
@@ -92,6 +93,7 @@ export function ChatMessage({
 
   return (
     <div className="group relative space-y-1">
+      {/* Sources */}
       {message.role === "assistant" && sourceParts.length > 0 && (
         <Sources>
           <SourcesTrigger count={sourceParts.length} />
@@ -102,7 +104,39 @@ export function ChatMessage({
           ))}
         </Sources>
       )}
-      <Message from={message.role}>
+
+      <Message
+        className={cn("flex-col", {
+          "items-start": message.role === "assistant",
+          "items-end": message.role === "user",
+        })}
+        from={message.role}
+      >
+        {/* Files */}
+        {message.role === "user" &&
+        message.parts.some((part) => part.type === "file") ? (
+          <div className="flex items-center gap-2">
+            {message.parts.map((part, i) => {
+              if (part.type === "file") {
+                return (
+                  <div
+                    key={`${message.id}-file-${i}`}
+                    className="flex items-center"
+                  >
+                    <Image
+                      className="max-w-[200px]"
+                      src={part.url}
+                      alt={part.filename}
+                    />
+                  </div>
+                );
+              }
+              return null;
+            })}
+          </div>
+        ) : null}
+
+        {/* Text */}
         <MessageContent>
           {message.role === "assistant" && <Logo className="mb-1 size-7" />}
 

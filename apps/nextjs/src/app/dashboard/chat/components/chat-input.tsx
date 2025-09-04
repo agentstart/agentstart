@@ -21,26 +21,50 @@ import {
   PromptInputToolbar,
   PromptInputTools,
 } from "@/components/ai-elements/prompt-input";
-import { GlobeIcon } from "lucide-react";
+import { GlobeIcon, PaperclipIcon, X } from "lucide-react";
 import { useChatStore } from "@/stores/chat";
 import { CHAT_MODELS } from "../constants";
-import { useState } from "react";
-import type { ChatStatus } from "ai";
+import { useRef, useState } from "react";
+import type { ChatStatus, FileUIPart } from "ai";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 
 interface ChatInputProps {
-  onSubmit: (text: string) => void;
+  onSubmit: ({
+    text,
+    files,
+  }: {
+    text: string;
+    files: FileList | FileUIPart[];
+  }) => void;
   onStop: () => void;
   status?: ChatStatus;
 }
 
 export function ChatInput({ onSubmit, onStop, status }: ChatInputProps) {
   const [input, setInput] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const { model, webSearch, setModel, toggleWebSearch } = useChatStore();
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      const newFiles = Array.from(event.target.files);
+      setFiles((prev) => [...prev, ...newFiles]);
+    }
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+    if (fileInputRef?.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,14 +73,52 @@ export function ChatInput({ onSubmit, onStop, status }: ChatInputProps) {
       onStop();
     } else {
       if (input.trim()) {
-        onSubmit(input);
+        // Create a new FileList by DataTransfer
+        const dataTransfer = new DataTransfer();
+        for (const file of files) {
+          const newFile = new File([file], file.name, {
+            type: file.type,
+          });
+          dataTransfer.items.add(newFile);
+        }
+
+        onSubmit({ text: input, files: dataTransfer.files });
         setInput("");
+        setFiles([]);
+
+        // Clear the file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
       }
     }
   };
 
   return (
     <PromptInput onSubmit={handleSubmit} className="mt-4">
+      {files.length > 0 && (
+        <div className="flex flex-wrap gap-2 pt-2 pl-3">
+          {files.map((file, index) => (
+            <div
+              key={index}
+              className="bg-muted flex items-center gap-2 rounded-lg px-2 py-1 text-sm"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <PaperclipIcon className="size-4" />
+              <span className="max-w-[120px] truncate">{file.name}</span>
+              <Button
+                onClick={() => handleRemoveFile(index)}
+                className="size-5 rounded-full"
+                size="icon"
+                variant="ghost"
+              >
+                <X className="size-3" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
       <PromptInputTextarea
         onChange={(e) => setInput(e.target.value)}
         value={input}
@@ -64,6 +126,23 @@ export function ChatInput({ onSubmit, onStop, status }: ChatInputProps) {
       />
       <PromptInputToolbar className="p-2">
         <PromptInputTools>
+          <PromptInputButton
+            variant="ghost"
+            title="Attach files"
+            className="!rounded-xl"
+            size="icon"
+          >
+            <label htmlFor="file-upload" className="cursor-pointer">
+              <input
+                type="file"
+                multiple
+                onChange={handleFileChange}
+                className="hidden"
+                id="file-upload"
+              />
+              <PaperclipIcon className="size-4" />
+            </label>
+          </PromptInputButton>
           <Tooltip>
             <TooltipTrigger asChild>
               <PromptInputButton

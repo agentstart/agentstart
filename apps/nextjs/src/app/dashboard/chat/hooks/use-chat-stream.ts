@@ -13,6 +13,7 @@ import { client } from "@/lib/orpc";
 import { useChatStore } from "@/stores/chat";
 import type { ChatModel } from "../constants";
 import { toast } from "sonner";
+import type { FileUIPart } from "ai";
 
 export function useChatStream() {
   const { model, webSearch } = useChatStore();
@@ -46,9 +47,15 @@ export function useChatStream() {
       },
     });
 
-  const handleSendMessage = (text: string) => {
+  const handleSendMessage = ({
+    text,
+    files,
+  }: {
+    text: string;
+    files: FileList | FileUIPart[];
+  }) => {
     sendMessage(
-      { text },
+      { text, files },
       {
         body: {
           model,
