@@ -10,6 +10,7 @@
 
 import { devRouter } from "./routers/dev";
 import { chatRouter } from "./routers/chat";
+import { feedbackRouter } from "./routers/feedback";
 
 /**
  * Main API router combining all procedures
@@ -18,6 +19,7 @@ import { chatRouter } from "./routers/chat";
 export const appRouter = {
   chat: chatRouter,
   dev: devRouter,
+  feedback: feedbackRouter,
 };
 
 // Export the router type for client usage

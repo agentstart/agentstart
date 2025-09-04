@@ -44,7 +44,87 @@ bun test # 运行测试
 2. Export in: packages/api/src/router.ts
 3. Use in frontend: 通过 oRPC client 调用
 
-重要：所有 API 都必须写在 @packages/api/src/routers，不要在 app/api 下创建 route.ts
+重要：
+- 所有 API 都必须写在 @packages/api/src/routers，不要在 app/api 下创建 route.ts
+- 前端调用 oRPC API 时，统一使用: import { orpc } from "@/lib/orpc"
+
+## Frontend API 调用规范 (oRPC + TanStack Query)
+
+### Query (数据查询)
+```typescript
+import { useQuery } from "@tanstack/react-query";
+import { orpc } from "@/lib/orpc";
+
+// 使用 oRPC 的 queryOptions
+const { data, isLoading } = useQuery(
+  orpc.dev.listUsers.queryOptions({
+    input: { page: 1, limit: 10 },
+    refetchInterval: 30000, // 自动刷新
+    placeholderData: keepPreviousData, // 分页时保留旧数据
+  })
+);
+```
+
+### Mutation (数据变更) with 乐观更新
+```typescript
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { orpc } from "@/lib/orpc";
+
+const queryClient = useQueryClient();
+
+const createUserMutation = useMutation(
+  orpc.dev.createUser.mutationOptions({
+    onMutate: async (newUser) => {
+      // 1. 取消相关查询
+      await queryClient.cancelQueries({ queryKey: listUsersQueryKey });
+      
+      // 2. 保存当前数据快照
+      const previousUsers = queryClient.getQueryData(listUsersQueryKey);
+      
+      // 3. 乐观更新
+      queryClient.setQueryData(listUsersQueryKey, (old) => ({
+        ...old,
+        users: [newUser, ...old.users],
+      }));
+      
+      return { previousUsers };
+    },
+    onError: (err, newUser, context) => {
+      // 出错时回滚
+      queryClient.setQueryData(listUsersQueryKey, context?.previousUsers);
+      toast.error(err.message);
+    },
+    onSuccess: () => {
+      toast.success("Created successfully");
+    },
+    onSettled: () => {
+      // 无论成功失败都重新获取数据
+      queryClient.invalidateQueries({ queryKey: listUsersQueryKey });
+    },
+  })
+);
+
+// 使用
+createUserMutation.mutate({ name: "John", email: "john@example.com" });
+```
+
+### Query Key 管理
+```typescript
+// 获取 query key 用于缓存管理
+const listUsersQueryKey = orpc.dev.listUsers.queryKey({
+  input: { page, limit: 10 }
+});
+
+// 失效查询
+queryClient.invalidateQueries({ queryKey: listUsersQueryKey });
+```
+
+关键点：
+- 使用 oRPC 的 queryOptions/mutationOptions 获得类型安全
+- onMutate 中实现乐观更新，提升用户体验
+- onError 中回滚数据，保证一致性
+- onSettled 中刷新数据，确保与服务器同步
+- 使用 toast 提供用户反馈
 ```
 
 **packages/capabilities.ts - 功能入口**

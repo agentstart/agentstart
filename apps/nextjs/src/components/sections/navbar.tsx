@@ -40,6 +40,7 @@ import { useActiveSection } from "@/hooks/use-active-section";
 import { CornerBorders } from "./corner-borders";
 import { siteConfig } from "@acme/config";
 import { Logo } from "../logo";
+import { FeedbackButton } from "@/components/feedback";
 
 interface RouteProps {
   href: string;
@@ -204,10 +205,12 @@ export const Navbar = () => {
         </NavigationMenu>
 
         <div className="hidden items-center gap-2 lg:flex">
+          <FeedbackButton size="sm" />
+
           {user ? (
             <UserDropmenu size="icon" />
           ) : (
-            <Button aria-label="Get Started" asChild>
+            <Button aria-label="Get Started" asChild size="sm">
               <Link href="/auth/sign-in">Get Started</Link>
             </Button>
           )}
