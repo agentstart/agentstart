@@ -32,7 +32,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { UserDropmenu } from "@/components/controls/user-dropmenu";
-import { SimpleThemeSwitch } from "@/components/controls/theme-switch";
+import { ThemeSwitch } from "@/components/controls/theme-switch";
 import { useAuth } from "@/hooks/use-auth";
 import { useScroll, useMotionValueEvent } from "motion/react";
 import { cn } from "@/lib/utils";
@@ -121,7 +121,7 @@ export const Navbar = () => {
       >
         <Link
           href="/"
-          className="flex items-center gap-1 text-lg font-semibold"
+          className="flex items-center gap-2 text-lg font-semibold"
         >
           <Logo />
           {siteConfig.name}
@@ -142,34 +142,34 @@ export const Navbar = () => {
               className="bg-card border-secondary flex flex-col justify-between"
             >
               <div>
-                <SheetHeader className="mb-4 ml-4">
+                <SheetHeader className="mb-4">
                   <SheetTitle className="flex items-center">
-                    <Link href="/" className="flex items-center font-bold">
+                    <Link
+                      href="/"
+                      className="flex items-center gap-2 font-bold"
+                    >
+                      <Logo />
                       {siteConfig.name}
                     </Link>
                   </SheetTitle>
                 </SheetHeader>
 
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-4">
                   {sectionList.map(({ href, label, sectionId }) => (
-                    <Button
-                      key={href}
-                      onClick={() => setIsOpen(false)}
-                      asChild
-                      variant={
-                        activeSection === sectionId ? "secondary" : "ghost"
-                      }
-                      className="justify-start rounded-none text-base"
+                    <Link
+                      key={sectionId}
+                      className="text-muted-foreground hover:text-foreground px-4 text-xl transition-all duration-300 hover:text-2xl"
+                      href={href}
                     >
-                      <Link href={href}>{label}</Link>
-                    </Button>
+                      {label}
+                    </Link>
                   ))}
                 </div>
               </div>
 
               <SheetFooter className="flex-col items-start justify-start sm:flex-col">
-                <div className="flex w-full items-center justify-between px-4 py-2">
-                  <SimpleThemeSwitch />
+                <div className="flex w-full items-center justify-between py-2">
+                  <ThemeSwitch />
 
                   {user ? (
                     <UserDropmenu size="icon" />

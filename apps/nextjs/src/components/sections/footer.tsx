@@ -25,11 +25,11 @@ export const FooterSection = () => {
     <footer className="relative border-t">
       {/* Links Section */}
       <div className="container pt-12">
-        <div className="grid gap-8 px-8 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-8 px-8 sm:grid-cols-1 lg:grid-cols-5">
           {/* Logo and Description */}
-          <div className="flex flex-col justify-between gap-4">
+          <div className="flex flex-col justify-between gap-4 lg:col-span-2">
             <div>
-              <div className="mb-4 flex items-center gap-1">
+              <div className="mb-4 flex items-center gap-2">
                 <Logo />
                 <span className="text-lg font-semibold">{siteConfig.name}</span>
               </div>

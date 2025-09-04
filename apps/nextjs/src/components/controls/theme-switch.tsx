@@ -87,7 +87,7 @@ function ThemeSwitchTrigger({
 }: React.PropsWithChildren<{ value: string }>) {
   return (
     <TabsTrigger
-      className="flex size-[26px] items-center justify-center rounded-full p-0 transition-colors data-[state=active]:border-none data-[state=active]:bg-white data-[state=inactive]:border-none dark:data-[state=active]:bg-transparent"
+      className="dark:data-[state=active]:bg-input flex size-[26px] items-center justify-center rounded-full p-0 transition-colors data-[state=active]:border-none data-[state=active]:bg-white data-[state=inactive]:border-none"
       value={value}
     >
       {children}
