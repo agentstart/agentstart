@@ -11,7 +11,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bun run lint"
+            "command": "bun run lint-and-format"
           }
         ]
       },
@@ -20,7 +20,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bun run lint"
+            "command": "bun run lint-and-format"
           }
         ]
       }

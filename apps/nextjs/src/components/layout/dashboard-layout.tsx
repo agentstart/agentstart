@@ -10,6 +10,7 @@ import {
   Settings,
   MessageCircle,
   HelpingHand,
+  MessageSquareHeart,
 } from "lucide-react";
 
 import {
@@ -39,9 +40,14 @@ const data = {
       icon: MessageSquare,
     },
     {
-      title: "Developer",
-      url: "/dashboard/dev",
+      title: "Users",
+      url: "/console/users",
       icon: SquareTerminal,
+    },
+    {
+      title: "Feedbacks",
+      url: "/console/feedbacks",
+      icon: MessageSquareHeart,
     },
   ],
   navSecondary: [
