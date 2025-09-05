@@ -1,17 +1,10 @@
 "use client";
 
-// AGENT: Main navigation menu data
-// USAGE: Define sidebar menu items with icons and routes
+// AGENT: Generic sidebar layout component
+// USAGE: Pass navigation data through props for flexible sidebar layouts
 
 import * as React from "react";
-import {
-  MessageSquare,
-  SquareTerminal,
-  Settings,
-  MessageCircle,
-  HelpingHand,
-  MessageSquareHeart,
-} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 import {
   Sidebar,
@@ -32,53 +25,37 @@ import { siteConfig } from "@acme/config";
 import { Logo } from "@/components/logo";
 import { usePathname } from "next/navigation";
 
-const data = {
-  navMain: [
-    {
-      title: "Chat",
-      url: "/dashboard/chat",
-      icon: MessageSquare,
-    },
-    {
-      title: "Users",
-      url: "/console/users",
-      icon: SquareTerminal,
-    },
-    {
-      title: "Feedbacks",
-      url: "/console/feedbacks",
-      icon: MessageSquareHeart,
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "/dashboard/settings",
-      icon: Settings,
-    },
-    {
-      title: "Docs",
-      url: "/docs",
-      icon: HelpingHand,
-    },
-    {
-      title: "Feedback",
-      url: "/dashboard/feedback",
-      icon: MessageCircle,
-    },
-  ],
-};
+export interface NavItem {
+  title: string;
+  url: string;
+  icon?: LucideIcon;
+}
 
-export function DashboardLayout({
+export interface SidebarLayoutProps
+  extends React.ComponentProps<typeof Sidebar> {
+  navMain: NavItem[];
+  navSecondary: NavItem[];
+  logoHref?: string;
+  showUserMenu?: boolean;
+  sidebarWidth?: string;
+}
+
+export function SidebarLayout({
+  navMain,
+  navSecondary,
+  logoHref = "/dashboard",
+  showUserMenu = true,
+  sidebarWidth = "19rem",
+  children,
   ...props
-}: React.ComponentProps<typeof Sidebar>) {
+}: SidebarLayoutProps) {
   const pathname = usePathname();
 
   return (
     <SidebarProvider
       style={
         {
-          "--sidebar-width": "19rem",
+          "--sidebar-width": sidebarWidth,
         } as React.CSSProperties
       }
     >
@@ -87,7 +64,7 @@ export function DashboardLayout({
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton size="lg" asChild>
-                <Link href="/dashboard">
+                <Link href={logoHref}>
                   <Logo background />
                   <span className="text-base font-semibold">
                     {siteConfig.name}
@@ -100,7 +77,7 @@ export function DashboardLayout({
         <SidebarContent>
           <SidebarGroup>
             <SidebarMenu>
-              {data.navMain.map((item) => (
+              {navMain.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
@@ -117,14 +94,16 @@ export function DashboardLayout({
             </SidebarMenu>
           </SidebarGroup>
 
-          <NavSecondary items={data.navSecondary} className="mt-auto" />
+          <NavSecondary items={navSecondary} className="mt-auto" />
         </SidebarContent>
-        <SidebarFooter>
-          <UserDropmenu />
-        </SidebarFooter>
+        {showUserMenu && (
+          <SidebarFooter>
+            <UserDropmenu />
+          </SidebarFooter>
+        )}
       </Sidebar>
 
-      <SidebarInset>{props.children}</SidebarInset>
+      <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>
   );
 }
