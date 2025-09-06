@@ -17,8 +17,8 @@
     "@better-auth/stripe": "catalog:"
   },
   "devDependencies": {
-    "@acme/eslint-config": "workspace:*",
-    "@acme/tsconfig": "workspace:*",
+    "@acme/eslint-config": "*",
+    "@acme/tsconfig": "*",
     "eslint": "catalog:",
     "typescript": "catalog:"
   }

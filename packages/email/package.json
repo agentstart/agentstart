@@ -16,21 +16,21 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@acme/config": "workspace:*",
-    "@react-email/components": "^0.5.1",
+    "@acme/config": "*",
+    "@react-email/components": "catalog:",
     "@t3-oss/env-nextjs": "catalog:",
     "consola": "catalog:",
     "react": "catalog:react19",
     "react-dom": "catalog:react19",
-    "resend": "^6.0.2",
+    "resend": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@acme/eslint-config": "workspace:*",
-    "@acme/prettier-config": "workspace:*",
-    "@acme/tsconfig": "workspace:*",
+    "@acme/eslint-config": "*",
+    "@acme/prettier-config": "*",
+    "@acme/tsconfig": "*",
     "@types/bun": "catalog:",
-    "react-email": "4.2.8",
+    "react-email": "catalog:",
     "typescript": "catalog:"
   },
   "prettier": "@acme/prettier-config"
