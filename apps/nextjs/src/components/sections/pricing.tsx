@@ -1,4 +1,4 @@
-// AGENT: Pricing section with monthly/annual toggle
+// AGENT: Pricing section with monthly/annual toggle and i18n support
 // PURPOSE: Display pricing plans with Stripe checkout integration
 // USAGE: <PricingSection /> - typically on pricing page or landing
 // FEATURES:
@@ -7,6 +7,7 @@
 //   - Auth-aware (shows current plan)
 //   - Animated cards with MagicCard
 //   - BorderBeam effect on popular plan
+//   - i18n support using next-intl
 // REQUIRES: Stripe configured, pricing plans in @acme/config
 // SEARCHABLE: pricing section, subscription plans, stripe checkout
 
@@ -29,6 +30,7 @@ import { BorderBeam } from "@/components/magicui/border-beam";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/hooks/use-auth";
 import { CornerBorders } from "./corner-borders";
+import { useTranslations } from "next-intl";
 
 interface PricingCardProps {
   plan: PricingPlan;
@@ -50,6 +52,8 @@ function PricingCard({
   const isFree = plan.name === "hobby" || plan.monthlyPrice === 0;
   const { theme } = useTheme();
 
+  const t = useTranslations("sections.pricing");
+
   return (
     <MagicCard
       gradientColor={theme === "dark" ? "#262626" : "#D9D9D955"}
@@ -69,7 +73,9 @@ function PricingCard({
         {/* Price */}
         <div className="mb-2">
           {isEnterprise ? (
-            <div className="text-4xl font-bold">Custom</div>
+            <div className="text-4xl font-bold">
+              {t("plans.enterprise.price")}
+            </div>
           ) : (
             <div className="flex items-baseline">
               <span className="text-4xl font-bold">${price}</span>
@@ -120,7 +126,7 @@ function PricingCard({
               Loading...
             </span>
           ) : isCurrentPlan ? (
-            "Current Plan"
+            t("currentPlan")
           ) : (
             plan.button.title
           )}
@@ -137,6 +143,7 @@ export function PricingSection() {
     "monthly",
   );
   const [isLoading, setIsLoading] = useState<string | null>(null);
+  const t = useTranslations("sections.pricing");
 
   const handleCheckout = async (plan: PricingPlan) => {
     try {
@@ -188,9 +195,9 @@ export function PricingSection() {
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-12 text-center">
-          <h2 className="mb-4 text-5xl font-bold">{pricingConfig.title}</h2>
+          <h2 className="mb-4 text-5xl font-bold">{t("title")}</h2>
           <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
-            {pricingConfig.description}
+            {t("subtitle")}
           </p>
         </div>
 
@@ -205,15 +212,15 @@ export function PricingSection() {
           <div className="flex justify-center">
             <TabsList className="rounded-none">
               <TabsTrigger value="monthly" className="rounded-none px-4 py-2">
-                Monthly
+                {t("monthly")}
               </TabsTrigger>
               <TabsTrigger
                 value="annual"
                 className="flex items-center gap-2 rounded-none px-4 py-2"
               >
-                Annual
+                {t("annually")}
                 <Badge variant="secondary" className="ml-1">
-                  {pricingConfig.annualDiscount}
+                  {t("save")}
                 </Badge>
               </TabsTrigger>
             </TabsList>

@@ -43,6 +43,9 @@
     "ui-add": {
       "cache": false,
       "interactive": true
+    },
+    "i18n": {
+      "cache": false
     }
   },
   "globalEnv": [

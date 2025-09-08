@@ -1,0 +1,198 @@
+{
+  "sections": {
+    "cta": {
+      "title": "准备好",
+      "titleHighlight": "10倍速发布？",
+      "description": "加入数千名使用AI代理构建的开发者。使用我们的模板，在几分钟内发布您的第一个功能。",
+      "getStarted": "开始使用",
+      "viewDocs": "查看文档"
+    },
+    "hero": {
+      "badge": "介绍 Agent Stack v1.0",
+      "title": "使用AI构建",
+      "titleHighlight": "10倍速发布",
+      "description": "第一个专为AI代理设计的全栈模板。零配置，最高效率，真正的vibe coding。",
+      "getStarted": "开始构建",
+      "viewDocs": "查看文档",
+      "stats": {
+        "active": "活跃开发中",
+        "developersCount": "1,000+",
+        "developers": "开发者",
+        "tokensPercent": "90%",
+        "lessTokens": "更少Token"
+      }
+    },
+    "features": {
+      "title": "您需要的一切",
+      "subtitle": "预配置企业级功能，专为AI开发优化",
+      "items": {
+        "aiFirst": {
+          "title": "AI优先架构",
+          "description": "AGENTS.md驱动开发，具有清晰的约定。每个决策都针对AI理解和Token效率进行了优化。",
+          "cta": "了解更多"
+        },
+        "production": {
+          "title": "生产就绪技术栈",
+          "description": "Better Auth、Drizzle ORM、Stripe支付 - 所有必需品都已预配置和集成。从第一天就准备好发布。",
+          "cta": "探索技术栈"
+        },
+        "monorepo": {
+          "title": "Monorepo设置",
+          "description": "使用Turborepo，包含auth、db和API的共享包。轻松扩展。",
+          "cta": "了解"
+        },
+        "documentation": {
+          "title": "文档驱动",
+          "description": "所有代码都包含全面的注释，确保代理理解每个文件的用途和使用模式。",
+          "cta": "查看文档"
+        }
+      }
+    },
+    "faq": {
+      "title": "常见问题",
+      "subtitle": "关于使用AI代理构建您需要了解的一切",
+      "items": {
+        "different": {
+          "question": "这与其他Next.js模板有什么不同？",
+          "answer": "这是第一个专门为AI代理而非开发者设计的模板。从文件结构到错误消息的每个决策都针对AI理解和Token效率进行了优化。它包含AGENTS.md文档，作为AI工具的单一真相源。"
+        },
+        "vibe": {
+          "question": "什么是'vibe coding'，这个模板如何实现它？",
+          "answer": "Vibe coding是通过自然语言进行开发 - 您描述想要什么，AI来构建它。我们的模板通过清晰的约定、智能默认值和代理优化架构使这真正可行。不再需要与AI争论配置或文件位置。"
+        },
+        "included": {
+          "question": "开箱即用包含什么？",
+          "answer": "生产所需的一切：用于身份验证的Better Auth、用于支付的Stripe、用于数据库的Drizzle ORM、用于类型安全API的oRPC、用于LLM集成的AI SDK，以及带有自动修复命令的智能错误处理。全部预配置并准备使用。"
+        },
+        "tokens": {
+          "question": "它如何减少Token使用量？",
+          "answer": "通过约定优于配置、清晰的模块边界，以及提供即时上下文的AGENTS.md文件。AI代理花更少时间理解您的代码库结构，更多时间构建功能。与传统模板相比，我们看到Token使用量减少了90%。"
+        },
+        "aitools": {
+          "question": "它可以与哪些AI工具配合使用？",
+          "answer": "针对Claude、Cursor、GitHub Copilot和任何基于LLM的编码助手进行了优化。模板的清晰结构和约定被AI代理普遍理解，使其与当前和未来的AI编码工具兼容。"
+        }
+      }
+    },
+    "footer": {
+      "tagline": "第一个为AI代理而非人类构建的全栈模板。零配置，最高效率，真正的vibe coding。",
+      "product": {
+        "title": "产品",
+        "features": "功能",
+        "pricing": "定价",
+        "showcase": "案例",
+        "changelog": "更新日志"
+      },
+      "resources": {
+        "title": "资源",
+        "docs": "文档",
+        "blog": "博客",
+        "guides": "指南",
+        "support": "支持"
+      },
+      "company": {
+        "title": "公司",
+        "about": "关于",
+        "privacy": "隐私",
+        "terms": "条款"
+      },
+      "connect": {
+        "title": "联系"
+      },
+      "copyright": "© {year} Agent Stack. 保留所有权利。"
+    },
+    "navbar": {
+      "home": "首页",
+      "features": "功能",
+      "pricing": "定价",
+      "showcase": "案例",
+      "faq": "常见问题",
+      "docs": "文档",
+      "blog": "博客",
+      "signIn": "登录",
+      "getStarted": "开始使用",
+      "dashboard": "控制台"
+    },
+    "pricing": {
+      "title": "简单、透明的定价",
+      "subtitle": "免费开始，随着增长扩展",
+      "monthly": "月付",
+      "annually": "年付",
+      "save": "节省20%",
+      "getStarted": "开始使用",
+      "contactSales": "联系销售",
+      "currentPlan": "当前计划",
+      "plans": {
+        "free": {
+          "name": "免费版",
+          "description": "适合个人项目",
+          "price": "¥0",
+          "features": [
+            "最多3个项目",
+            "1,000次API调用/月",
+            "社区支持",
+            "基础分析"
+          ]
+        },
+        "pro": {
+          "name": "专业版",
+          "description": "适合成长中的创业公司",
+          "price": "¥199",
+          "badge": "最受欢迎",
+          "features": [
+            "无限项目",
+            "100,000次API调用/月",
+            "优先支持",
+            "高级分析",
+            "自定义域名",
+            "团队协作"
+          ]
+        },
+        "enterprise": {
+          "name": "企业版",
+          "description": "适合大型团队",
+          "price": "定制",
+          "features": [
+            "专业版的所有功能",
+            "无限API调用",
+            "专属支持",
+            "SLA保证",
+            "自定义集成",
+            "本地部署选项"
+          ]
+        }
+      }
+    },
+    "showcase": {
+      "badge": "实际效果",
+      "title": "真实案例",
+      "subtitle": "了解开发者如何使用Agent Stack更快地发布",
+      "viewAll": "查看所有案例",
+      "items": {
+        "vibeCoding": {
+          "title": "Vibe Coding实战",
+          "description": "观看自然语言如何转化为生产就绪的代码",
+          "tags": ["实时演示", "AI代理"]
+        },
+        "ideaToDeployment": {
+          "title": "从想法到部署",
+          "description": "在10分钟内构建和部署完整的SaaS应用",
+          "tags": ["教程", "全栈"]
+        },
+        "errorResolution": {
+          "title": "智能错误解决",
+          "description": "查看AI代理如何自动诊断和修复问题",
+          "tags": ["错误处理", "开发体验"]
+        }
+      },
+      "stats": {
+        "projects": "1,000+",
+        "projectsLabel": "构建项目",
+        "developers": "5,000+",
+        "developersLabel": "活跃开发者",
+        "stars": "2,500+",
+        "starsLabel": "GitHub星标"
+      }
+    }
+  }
+}

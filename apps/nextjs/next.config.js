@@ -9,6 +9,7 @@
 
 import { createJiti } from "jiti";
 import { createMDX } from "fumadocs-mdx/next";
+import createNextIntlPlugin from "next-intl/plugin";
 
 const jiti = createJiti(import.meta.url);
 
@@ -49,4 +50,11 @@ const config = {
 };
 
 const withMDX = createMDX();
-export default withMDX(config);
+const withNextIntl = createNextIntlPlugin({
+  experimental: {
+    // Provide the path to the messages that you're using in `AppConfig`
+    createMessagesDeclaration: "./src/i18n/messages/en.json",
+  },
+});
+
+export default withNextIntl(withMDX(config));

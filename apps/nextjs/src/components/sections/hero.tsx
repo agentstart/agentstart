@@ -6,21 +6,24 @@
 //   - Responsive typography
 //   - Auth-aware CTAs (different for logged in users)
 //   - Corner border decorations
+//   - i18n support
 // SEARCHABLE: hero section, landing hero, homepage hero
 
 "use client";
 
+import { AnimatedGridPattern } from "@/components/magicui/animated-grid-pattern";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { AnimatedGridPattern } from "@/components/magicui/animated-grid-pattern";
 import { CornerBorders } from "./corner-borders";
 
 // AGENT: Main hero section export
 // CUSTOMIZATION: Modify text, badges, or CTAs as needed
 export const HeroSection = () => {
   const { user } = useAuth();
+  const t = useTranslations("sections.hero");
 
   return (
     <section
@@ -46,25 +49,22 @@ export const HeroSection = () => {
               className="border-border/40 bg-background/60 hover:border-primary/40 group inline-flex items-center gap-2 border px-4 py-1.5 text-sm backdrop-blur-sm transition-all"
             >
               <Sparkles className="text-primary h-3.5 w-3.5" />
-              <span className="text-muted-foreground">
-                Introducing Agent Stack v1.0
-              </span>
+              <span className="text-muted-foreground">{t("badge")}</span>
               <ArrowRight className="text-muted-foreground h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </Link>
 
             {/* Main Heading */}
             <div className="space-y-4">
               <h1 className="text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
-                <span className="inline-block">Build with AI</span>
+                <span className="inline-block">{t("title")}</span>
                 <br />
                 <span className="text-primary inline-block">
-                  Ship 10x Faster
+                  {t("titleHighlight")}
                 </span>
               </h1>
 
               <p className="text-muted-foreground mx-auto max-w-2xl text-lg sm:text-xl">
-                The first fullstack template designed for AI agents. Zero
-                config, maximum efficiency, true vibe coding.
+                {t("description")}
               </p>
             </div>
 
@@ -76,7 +76,7 @@ export const HeroSection = () => {
                 className="shadow-primary/25 hover:shadow-primary/30 group h-12 rounded-none px-8 font-semibold transition-all"
               >
                 <Link href={user?.id ? "/dashboard" : "/auth/sign-in"}>
-                  Start Building
+                  {t("getStarted")}
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
@@ -87,7 +87,7 @@ export const HeroSection = () => {
                 className="h-12 rounded-none px-8 font-semibold"
                 asChild
               >
-                <Link href="/docs">View Documentation</Link>
+                <Link href="/docs">{t("viewDocs")}</Link>
               </Button>
             </div>
 
@@ -95,15 +95,19 @@ export const HeroSection = () => {
             <div className="text-muted-foreground flex items-center gap-8 pt-8 text-sm">
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
-                <span>Active Development</span>
+                <span>{t("stats.active")}</span>
               </div>
               <div className="hidden items-center gap-2 sm:flex">
-                <span className="text-foreground font-semibold">1,000+</span>
-                <span>Developers</span>
+                <span className="text-foreground font-semibold">
+                  {t("stats.developersCount")}
+                </span>
+                <span>{t("stats.developers")}</span>
               </div>
               <div className="hidden items-center gap-2 sm:flex">
-                <span className="text-foreground font-semibold">90%</span>
-                <span>Less Tokens</span>
+                <span className="text-foreground font-semibold">
+                  {t("stats.tokensPercent")}
+                </span>
+                <span>{t("stats.lessTokens")}</span>
               </div>
             </div>
           </div>

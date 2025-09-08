@@ -9,7 +9,8 @@
       "@@/*": ["./*"]
     },
     "plugins": [{ "name": "next" }],
-    "module": "esnext"
+    "module": "esnext",
+    "allowArbitraryExtensions": true
   },
   "include": [".", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]

@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "with-env": "dotenv -e ../../.env --",
     "ui-add": "bun x --bun shadcn@latest add && prettier src --write --list-different",
-    "postinstall": "fumadocs-mdx"
+    "postinstall": "fumadocs-mdx",
+    "i18n": "lobe-i18n"
   },
   "dependencies": {
     "@acme/api": "*",
@@ -74,6 +75,7 @@
     "lucide-react": "catalog:",
     "motion": "catalog:",
     "next": "catalog:",
+    "next-intl": "catalog:",
     "next-themes": "catalog:",
     "react": "catalog:react19",
     "react-day-picker": "catalog:",

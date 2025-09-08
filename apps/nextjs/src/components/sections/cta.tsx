@@ -5,6 +5,7 @@
 //   - Auth-aware CTAs (different for logged in users)
 //   - Corner border decorations
 //   - Responsive design
+//   - i18n support
 // SEARCHABLE: cta section, call to action, conversion section
 
 "use client";
@@ -12,11 +13,13 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { CornerBorders } from "./corner-borders";
 
 export const CTASection = () => {
   const { user } = useAuth();
+  const t = useTranslations("sections.cta");
 
   return (
     <section id="cta" className="relative py-24 sm:py-32">
@@ -31,12 +34,12 @@ export const CTASection = () => {
             </div>
 
             <h2 className="mb-4 text-3xl font-bold sm:text-4xl">
-              Ready to Ship <span className="text-primary">10x Faster?</span>
+              {t("title")}{" "}
+              <span className="text-primary">{t("titleHighlight")}</span>
             </h2>
 
             <p className="text-muted-foreground mx-auto mb-8 max-w-2xl text-lg">
-              Join thousands of developers building with AI agents. Start with
-              our template and ship your first feature in minutes.
+              {t("description")}
             </p>
 
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
@@ -46,7 +49,7 @@ export const CTASection = () => {
                 className="shadow-primary/25 hover:shadow-primary/30 group h-12 rounded-none px-8 font-semibold transition-all"
               >
                 <Link href={user?.id ? "/dashboard" : "/auth/sign-in"}>
-                  Get Started
+                  {t("getStarted")}
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
@@ -57,13 +60,9 @@ export const CTASection = () => {
                 className="h-12 rounded-none px-8 font-semibold"
                 asChild
               >
-                <Link href="/docs">View Documentation</Link>
+                <Link href="/docs">{t("viewDocs")}</Link>
               </Button>
             </div>
-
-            <p className="text-muted-foreground mt-8 text-sm">
-              No credit card required • Free forever for individuals
-            </p>
           </div>
         </div>
       </div>

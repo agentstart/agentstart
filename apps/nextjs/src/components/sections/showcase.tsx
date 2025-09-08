@@ -1,10 +1,11 @@
-// AGENT: Showcase section component
+// AGENT: Showcase section component with i18n support
 // PURPOSE: Display featured demos, tutorials, or case studies
 // USAGE: <ShowcaseSection /> - typically on landing page
 // FEATURES:
 //   - Card-based showcase items
 //   - Tags and stats display
 //   - Corner border decorations
+//   - i18n support using next-intl
 // CUSTOMIZATION: Modify showcaseItems array for content
 // SEARCHABLE: showcase section, demo section, case studies
 
@@ -15,41 +16,49 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowUpRight, Clock, Cpu } from "lucide-react";
 import Link from "next/link";
 import { CornerBorders } from "./corner-borders";
-
-const showcaseItems = [
-  {
-    title: "Vibe Coding in Action",
-    description: "Watch how natural language turns into production-ready code",
-    image: "/api/placeholder/600/400",
-    tags: ["Live Demo", "AI Agents"],
-    stats: {
-      time: "2 min",
-      tokens: "1.2k",
-    },
-  },
-  {
-    title: "From Idea to Deployment",
-    description: "Build and deploy a full SaaS app in under 10 minutes",
-    image: "/api/placeholder/600/400",
-    tags: ["Tutorial", "Full Stack"],
-    stats: {
-      time: "10 min",
-      tokens: "5k",
-    },
-  },
-  {
-    title: "Smart Error Resolution",
-    description: "See how AI agents self-diagnose and fix issues automatically",
-    image: "/api/placeholder/600/400",
-    tags: ["Error Handling", "DX"],
-    stats: {
-      time: "30 sec",
-      tokens: "500",
-    },
-  },
-];
+import { useTranslations } from "next-intl";
 
 export const ShowcaseSection = () => {
+  const t = useTranslations("sections.showcase");
+
+  const showcaseItems = [
+    {
+      title: t("items.vibeCoding.title"),
+      description: t("items.vibeCoding.description"),
+      image: "/api/placeholder/600/400",
+      tags: [t("items.vibeCoding.tags.0"), t("items.vibeCoding.tags.1")],
+      stats: {
+        time: "2 min",
+        tokens: "1.2k",
+      },
+    },
+    {
+      title: t("items.ideaToDeployment.title"),
+      description: t("items.ideaToDeployment.description"),
+      image: "/api/placeholder/600/400",
+      tags: [
+        t("items.ideaToDeployment.tags.0"),
+        t("items.ideaToDeployment.tags.1"),
+      ],
+      stats: {
+        time: "10 min",
+        tokens: "5k",
+      },
+    },
+    {
+      title: t("items.errorResolution.title"),
+      description: t("items.errorResolution.description"),
+      image: "/api/placeholder/600/400",
+      tags: [
+        t("items.errorResolution.tags.0"),
+        t("items.errorResolution.tags.1"),
+      ],
+      stats: {
+        time: "30 sec",
+        tokens: "500",
+      },
+    },
+  ];
   return (
     <section id="showcase" className="relative border-b py-24 sm:py-32">
       <CornerBorders position="all" />
@@ -57,14 +66,12 @@ export const ShowcaseSection = () => {
       <div className="container px-4">
         <div className="mx-auto mb-16 max-w-2xl text-center">
           <Badge className="mb-4" variant="outline">
-            See It In Action
+            {t("badge")}
           </Badge>
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-            Real World Examples
+            {t("title")}
           </h2>
-          <p className="text-muted-foreground mt-4 text-lg">
-            Discover how developers are shipping faster with Agent Stack
-          </p>
+          <p className="text-muted-foreground mt-4 text-lg">{t("subtitle")}</p>
         </div>
 
         <div className="mx-auto max-w-6xl">
@@ -129,7 +136,7 @@ export const ShowcaseSection = () => {
               href="#"
               className="text-primary inline-flex items-center gap-2 text-sm font-medium hover:underline"
             >
-              View all examples
+              {t("viewAll")}
               <ArrowUpRight className="h-4 w-4" />
             </Link>
           </div>

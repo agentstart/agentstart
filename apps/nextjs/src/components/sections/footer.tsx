@@ -1,4 +1,4 @@
-// AGENT: Footer section component
+// AGENT: Footer section component with i18n support
 // PURPOSE: Site footer with links, resources, and branding
 // USAGE: <FooterSection /> - typically at page bottom
 // FEATURES:
@@ -6,6 +6,7 @@
 //   - Animated background effects
 //   - Social links
 //   - Copyright notice
+//   - i18n support using next-intl
 // SEARCHABLE: footer section, site footer, footer links
 
 "use client";
@@ -17,9 +18,11 @@ import { FlickeringGrid } from "@/components/magicui/flickering-grid";
 import { useTheme } from "next-themes";
 import { Logo } from "@/components/logo";
 import { ThemeSwitch } from "@/components/controls/theme-switch";
+import { useTranslations } from "next-intl";
 
 export const FooterSection = () => {
   const { resolvedTheme } = useTheme();
+  const t = useTranslations("sections.footer");
 
   return (
     <footer className="relative border-t">
@@ -33,10 +36,7 @@ export const FooterSection = () => {
                 <Logo />
                 <span className="text-lg font-semibold">{siteConfig.name}</span>
               </div>
-              <p className="text-muted-foreground text-sm">
-                The first fullstack template built for AI agents, not humans.
-                Zero config, maximum efficiency, true vibe coding.
-              </p>
+              <p className="text-muted-foreground text-sm">{t("tagline")}</p>
             </div>
 
             <div>
@@ -44,110 +44,55 @@ export const FooterSection = () => {
             </div>
           </div>
 
-          {/* Features Links */}
+          {/* Product Links */}
           <div>
-            <h3 className="mb-4 font-semibold">Features</h3>
+            <h3 className="mb-4 font-semibold">{t("product.title")}</h3>
             <ul className="space-y-3">
               <li>
                 <Link
                   href="#features"
                   className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                 >
-                  AI-First Architecture
+                  {t("product.features")}
                 </Link>
               </li>
               <li>
                 <Link
-                  href="#features"
+                  href="#pricing"
                   className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                 >
-                  Token Efficient
+                  {t("product.pricing")}
                 </Link>
               </li>
               <li>
                 <Link
-                  href="#features"
+                  href="#showcase"
                   className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                 >
-                  Smart Errors
+                  {t("product.showcase")}
                 </Link>
               </li>
               <li>
                 <Link
-                  href="#features"
+                  href="/changelog"
                   className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                 >
-                  AGENTS.md
+                  {t("product.changelog")}
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Built-in */}
+          {/* Resources */}
           <div>
-            <h3 className="mb-4 font-semibold">Built-in</h3>
+            <h3 className="mb-4 font-semibold">{t("resources.title")}</h3>
             <ul className="space-y-3">
-              <li>
-                <Link
-                  href="#features"
-                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
-                >
-                  Authentication
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#features"
-                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
-                >
-                  Payments
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#features"
-                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
-                >
-                  Database
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#features"
-                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
-                >
-                  AI SDK
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Resources Links */}
-          <div>
-            <h3 className="mb-4 font-semibold">Resources</h3>
-            <ul className="space-y-3">
-              <li>
-                <Link
-                  href="https://github.com"
-                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
-                >
-                  GitHub
-                </Link>
-              </li>
               <li>
                 <Link
                   href="/docs"
                   className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                 >
-                  Documentation
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/examples"
-                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
-                >
-                  Examples
+                  {t("resources.docs")}
                 </Link>
               </li>
               <li>
@@ -155,7 +100,62 @@ export const FooterSection = () => {
                   href="/blog"
                   className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                 >
-                  Blog
+                  {t("resources.blog")}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/guides"
+                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                >
+                  {t("resources.guides")}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/support"
+                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                >
+                  {t("resources.support")}
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Company Links */}
+          <div>
+            <h3 className="mb-4 font-semibold">{t("company.title")}</h3>
+            <ul className="space-y-3">
+              <li>
+                <Link
+                  href="/about"
+                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                >
+                  {t("company.about")}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/privacy"
+                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                >
+                  {t("company.privacy")}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/terms"
+                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                >
+                  {t("company.terms")}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="https://github.com"
+                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                >
+                  GitHub
                 </Link>
               </li>
             </ul>

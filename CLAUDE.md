@@ -305,6 +305,9 @@ await auth.signIn({
    - 使用 [orpc-openapi](https://orpc.unnoq.com/docs/openapi/openapi-handler) 实现自动 API 文档
 7. **Google Analytics**
 8. **i18n** - [next-intl](https://next-intl.dev/)
+   - 完整的国际化支持，使用 next-intl
+   - 消息文件位于 `apps/nextjs/src/i18n/messages/`
+   - 支持服务端和客户端组件的共享使用
 9. **错误处理标准化**
    - 统一的错误格式，让 agent 容易理解和处理
    - AppError 类，包含 code、message、statusCode
@@ -495,3 +498,123 @@ apps/
 - 使用 **Changesets** 管理包版本
 - 自动生成 CHANGELOG
 - 语义化版本控制
+
+## 国际化 (i18n) 使用指南
+
+### 使用 next-intl 实现国际化
+
+#### 1. 基础设置
+- 消息文件位置：`apps/nextjs/src/i18n/messages/`
+  - `en.json` - 英文翻译
+  - `zh.json` - 中文翻译
+- 路由配置：`apps/nextjs/src/i18n/routing.ts`
+- 导航配置：`apps/nextjs/src/i18n/navigation.ts`
+
+#### 2. 在组件中使用
+
+**客户端组件 (Client Components)**
+```typescript
+"use client";
+
+import { useTranslations } from "next-intl";
+
+export function MyComponent() {
+  const t = useTranslations("sections.hero");
+  
+  return (
+    <div>
+      <h1>{t("title")}</h1>
+      <p>{t("description")}</p>
+    </div>
+  );
+}
+```
+
+**服务端组件 (Server Components)**
+```typescript
+import { getTranslations } from "next-intl/server";
+
+export async function MyServerComponent() {
+  const t = await getTranslations("sections.hero");
+  
+  return (
+    <div>
+      <h1>{t("title")}</h1>
+      <p>{t("description")}</p>
+    </div>
+  );
+}
+```
+
+**共享组件 (Shared Components)**
+```typescript
+// 这个组件可以在服务端或客户端使用
+import { useTranslations } from "next-intl";
+
+export function SharedComponent() {
+  const t = useTranslations("sections.features");
+  
+  return <h2>{t("title")}</h2>;
+}
+```
+
+#### 3. 消息文件结构
+```json
+{
+  "sections": {
+    "hero": {
+      "title": "Build AI Apps",
+      "description": "Full-stack template"
+    },
+    "features": {
+      "items": {
+        "auth": {
+          "title": "Authentication",
+          "description": "Complete auth system"
+        }
+      }
+    }
+  }
+}
+```
+
+#### 4. 嵌套消息访问
+```typescript
+const t = useTranslations("sections.features");
+
+// 访问嵌套消息
+t("items.auth.title"); // "Authentication"
+t("items.auth.description"); // "Complete auth system"
+```
+
+#### 5. 动态消息
+```typescript
+// 在消息文件中
+{
+  "greeting": "Hello {name}!"
+}
+
+// 在组件中
+t("greeting", { name: "John" }); // "Hello John!"
+```
+
+#### 6. 数组消息
+```typescript
+// 对于数组形式的翻译
+const features = ["Feature 1", "Feature 2", "Feature 3"];
+
+// 使用索引访问
+t(`features.${index}`);
+```
+
+#### 7. 添加新语言
+1. 在 `apps/nextjs/src/i18n/messages/` 创建新的语言文件（如 `ja.json`）
+2. 更新 `routing.ts` 添加新语言代码
+3. 复制现有翻译文件结构并翻译内容
+
+#### 8. 最佳实践
+- 保持消息键名简洁且有意义
+- 使用嵌套结构组织相关翻译
+- 避免在翻译中包含 HTML 标记
+- 对于复杂的格式化，使用组件组合而非翻译字符串
+- 共享组件优先使用 `useTranslations` 钩子以支持两种渲染模式

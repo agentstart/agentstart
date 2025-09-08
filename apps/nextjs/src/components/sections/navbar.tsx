@@ -1,4 +1,4 @@
-// AGENT: Navigation bar with responsive design
+// AGENT: Navigation bar with responsive design and i18n support
 // PURPOSE: Main navigation with auth state, theme toggle, and mobile menu
 // USAGE: <NavBar /> - typically in root layout
 // FEATURES:
@@ -8,6 +8,7 @@
 //   - Scroll-based active section highlighting
 //   - Hide on scroll behavior
 //   - Corner border decorations
+//   - i18n support using next-intl
 // CUSTOMIZATION: Modify routeList for navigation items
 // SEARCHABLE: navbar, navigation, header, menu
 
@@ -41,6 +42,8 @@ import { CornerBorders } from "./corner-borders";
 import { siteConfig } from "@acme/config";
 import { Logo } from "../logo";
 import { FeedbackButton } from "@/components/feedback";
+import { useTranslations } from "next-intl";
+import { LanguageSwitcher } from "@/components/controls/language-switcher";
 
 interface RouteProps {
   href: string;
@@ -48,39 +51,40 @@ interface RouteProps {
   sectionId?: string;
 }
 
-const sectionList: RouteProps[] = [
-  {
-    href: "/",
-    label: "Home",
-    sectionId: "hero",
-  },
-  {
-    href: "#features",
-    label: "Features",
-    sectionId: "features",
-  },
-  {
-    href: "#showcase",
-    label: "Showcase",
-    sectionId: "showcase",
-  },
-  {
-    href: "#pricing",
-    label: "Pricing",
-    sectionId: "pricing",
-  },
-  {
-    href: "#faq",
-    label: "FAQ",
-    sectionId: "faq",
-  },
-];
-
 export const Navbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
   const { user } = useAuth();
   const { scrollY } = useScroll();
+  const t = useTranslations("sections.navbar");
+
+  const sectionList: RouteProps[] = [
+    {
+      href: "/",
+      label: t("home"),
+      sectionId: "hero",
+    },
+    {
+      href: "#features",
+      label: t("features"),
+      sectionId: "features",
+    },
+    {
+      href: "#showcase",
+      label: t("showcase"),
+      sectionId: "showcase",
+    },
+    {
+      href: "#pricing",
+      label: t("pricing"),
+      sectionId: "pricing",
+    },
+    {
+      href: "#faq",
+      label: t("faq"),
+      sectionId: "faq",
+    },
+  ];
 
   // Track active section for highlighting
   const activeSection = useActiveSection(
@@ -169,13 +173,16 @@ export const Navbar = () => {
 
               <SheetFooter className="flex-col items-start justify-start sm:flex-col">
                 <div className="flex w-full items-center justify-between py-2">
-                  <ThemeSwitch />
+                  <div className="flex items-center gap-2">
+                    <ThemeSwitch />
+                    <LanguageSwitcher />
+                  </div>
 
                   {user ? (
                     <UserDropmenu size="icon" />
                   ) : (
                     <Button size="sm" asChild>
-                      <Link href="/auth/sign-in">Sign In</Link>
+                      <Link href="/auth/sign-in">{t("signIn")}</Link>
                     </Button>
                   )}
                 </div>
@@ -205,13 +212,14 @@ export const Navbar = () => {
         </NavigationMenu>
 
         <div className="hidden items-center gap-4 lg:flex">
+          <LanguageSwitcher />
           <FeedbackButton size="sm" />
 
           {user ? (
             <UserDropmenu size="icon" />
           ) : (
-            <Button aria-label="Get Started" asChild size="sm">
-              <Link href="/auth/sign-in">Get Started</Link>
+            <Button aria-label={t("getStarted")} asChild size="sm">
+              <Link href="/auth/sign-in">{t("getStarted")}</Link>
             </Button>
           )}
         </div>

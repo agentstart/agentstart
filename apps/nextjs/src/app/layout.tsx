@@ -9,6 +9,7 @@
 
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
 
 import { cn } from "@/lib/utils";
 import { Providers } from "@/components/layout/client-layout";
@@ -70,7 +71,9 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           geistMono.variable,
         )}
       >
-        <Providers>{props.children}</Providers>
+        <NextIntlClientProvider>
+          <Providers>{props.children}</Providers>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

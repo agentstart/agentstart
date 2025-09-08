@@ -53,3 +53,6 @@ dist/
 
 # fumadocs
 .source/
+
+# next-intl
+*.d.json.ts
