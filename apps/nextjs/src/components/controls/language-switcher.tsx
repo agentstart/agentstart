@@ -19,7 +19,6 @@ import {
 import { i18nConfig } from "@acme/config";
 import type { Locale } from "next-intl";
 import { useLocale } from "next-intl";
-import { Globe } from "lucide-react";
 import { usePathname, useRouter } from "@/i18n/navigation";
 
 export function LanguageSwitcher() {
@@ -39,7 +38,6 @@ export function LanguageSwitcher() {
     <Select value={locale} onValueChange={handleLanguageChange}>
       <SelectTrigger size="sm">
         <div className="flex items-center gap-2">
-          <Globe className="size-4" />
           <SelectValue>
             {currentLanguage?.nativeName || locale.toUpperCase()}
           </SelectValue>
