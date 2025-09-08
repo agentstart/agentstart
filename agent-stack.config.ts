@@ -19,6 +19,14 @@ export default defineConfig({
     },
   },
 
+  i18n: {
+    defaultLocale: "en",
+    locales: [
+      { code: "en", name: "English", nativeName: "English" },
+      { code: "zh", name: "Chinese", nativeName: "中文" },
+    ],
+  },
+
   pricing: {
     title: "Pricing",
     description: "Choose the plan that works for you",

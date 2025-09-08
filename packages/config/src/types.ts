@@ -39,7 +39,19 @@ export interface SiteConfig {
   };
 }
 
+export interface I18nLocale {
+  code: string;
+  name: string;
+  nativeName: string;
+}
+
+export interface I18nConfig {
+  defaultLocale: string;
+  locales: I18nLocale[];
+}
+
 export interface AppConfig {
   site?: SiteConfig;
   pricing?: PricingConfig;
+  i18n?: I18nConfig;
 }

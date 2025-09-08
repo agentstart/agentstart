@@ -1,5 +1,5 @@
 // AGENT: Main entry point for @acme/config package
-// USAGE: import { defineConfig, siteConfig, pricingConfig, pricingPlans } from '@acme/config'
+// USAGE: import { defineConfig, siteConfig, pricingConfig, pricingPlans, i18nConfig } from '@acme/config'
 
 // Export defineConfig function for use in agent-stack.config.ts
 export { defineConfig } from "./define-config";
@@ -8,4 +8,4 @@ export { defineConfig } from "./define-config";
 export * from "./types";
 
 // Export convenient config sections
-export { siteConfig, pricingConfig, pricingPlans, appConfig } from "./exports";
+export { siteConfig, pricingConfig, pricingPlans, i18nConfig, appConfig } from "./exports";
