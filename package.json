@@ -17,7 +17,6 @@
     "lint:fix": "turbo run lint --continue -- --fix --cache --cache-location .cache/.eslintcache",
     "lint:ws": "bunx sherif@latest -f",
     "lint-and-format": "bun run lint:fix && bun run format:fix && bun run lint:ws",
-    "postinstall": "bun run lint:ws",
     "typecheck": "turbo run typecheck",
     "ui-add": "turbo run ui-add",
     "stripe:webhook": "stripe listen --forward-to localhost:3000/api/auth/stripe/webhook",
