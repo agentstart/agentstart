@@ -13,13 +13,14 @@ import { createEnv } from "@t3-oss/env-nextjs";
 import { vercel } from "@t3-oss/env-nextjs/presets-zod";
 import { z } from "zod/v4";
 
+import { env as dbEnv } from "@acme/db/env";
 import { env as authEnv } from "@acme/auth/env";
 import { env as emailEnv } from "@acme/email/env";
 import { env as apiEnv } from "@acme/api/env";
 
 export const env = createEnv({
   // AGENT: Inherit environment configs from auth, email, api packages and Vercel
-  extends: [authEnv, emailEnv, apiEnv, vercel()],
+  extends: [dbEnv, authEnv, emailEnv, apiEnv, vercel()],
   shared: {
     NODE_ENV: z
       .enum(["development", "production", "test"])
@@ -29,9 +30,7 @@ export const env = createEnv({
    * Specify your server-side environment variables schema here.
    * This way you can ensure the app isn't built with invalid env vars.
    */
-  server: {
-    POSTGRES_URL: z.url(),
-  },
+  server: {},
 
   /**
    * Specify your client-side environment variables schema here.
