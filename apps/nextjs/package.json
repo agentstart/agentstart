@@ -1,5 +1,5 @@
 {
-  "name": "@acme/nextjs",
+  "name": "@agent-stack/nextjs",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -18,10 +18,10 @@
     "i18n": "lobe-i18n"
   },
   "dependencies": {
-    "@acme/api": "*",
-    "@acme/auth": "*",
-    "@acme/config": "*",
-    "@acme/db": "*",
+    "@agent-stack/api": "*",
+    "@agent-stack/auth": "*",
+    "@agent-stack/config": "*",
+    "@agent-stack/db": "*",
     "@ai-sdk/anthropic": "catalog:",
     "@ai-sdk/openai": "catalog:",
     "@ai-sdk/react": "catalog:",
@@ -101,9 +101,9 @@
     "zustand": "catalog:"
   },
   "devDependencies": {
-    "@acme/eslint-config": "*",
-    "@acme/prettier-config": "*",
-    "@acme/tsconfig": "*",
+    "@agent-stack/eslint-config": "*",
+    "@agent-stack/prettier-config": "*",
+    "@agent-stack/tsconfig": "*",
     "@tailwindcss/postcss": "catalog:",
     "@types/mdx": "catalog:",
     "@types/node": "catalog:",
@@ -119,5 +119,5 @@
     "tw-animate-css": "catalog:",
     "typescript": "catalog:"
   },
-  "prettier": "@acme/prettier-config"
+  "prettier": "@agent-stack/prettier-config"
 }

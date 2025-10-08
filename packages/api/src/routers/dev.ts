@@ -12,7 +12,7 @@ agent-frontmatter:end */
 
 import { z } from "zod/v4";
 import { publicProcedure, protectedProcedure } from "../procedures";
-import { users, sessions, accounts } from "@acme/db/schema";
+import { users, sessions, accounts } from "@agent-stack/db/schema";
 import { eq, desc, asc, like, and, sql } from "drizzle-orm";
 import { ORPCError } from "@orpc/server";
 

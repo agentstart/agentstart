@@ -5,7 +5,7 @@ FEATURES:
   - Auth secret validation
   - OAuth provider credentials
   - Stripe integration keys
-USAGE: import { env } from '@acme/auth/env'
+USAGE: import { env } from '@agent-stack/auth/env'
 REQUIRED: AUTH_SECRET, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
 OPTIONAL: OAuth provider credentials (GitHub, Google, etc.)
 SEARCHABLE: auth env, environment variables, oauth config
@@ -13,7 +13,7 @@ agent-frontmatter:end */
 
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod/v4";
-import { env as emailEnv } from "@acme/email/env";
+import { env as emailEnv } from "@agent-stack/email/env";
 
 export const env = createEnv({
   extends: [emailEnv],

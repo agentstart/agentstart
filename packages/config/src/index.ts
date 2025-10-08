@@ -1,6 +1,6 @@
 /* agent-frontmatter:start
-AGENT: Main entry point for @acme/config package
-USAGE: import { defineConfig, siteConfig, pricingConfig, pricingPlans, i18nConfig } from '@acme/config'
+AGENT: Main entry point for @agent-stack/config package
+USAGE: import { defineConfig, siteConfig, pricingConfig, pricingPlans, i18nConfig } from '@agent-stack/config'
 agent-frontmatter:end */
 
 // Export defineConfig function for use in agent-stack.config.ts

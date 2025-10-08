@@ -4,20 +4,20 @@
     "": {
       "name": "agent-stack",
       "devDependencies": {
-        "@acme/prettier-config": "*",
+        "@agent-stack/prettier-config": "*",
         "prettier": "catalog:",
         "turbo": "^2.5.8",
         "typescript": "catalog:",
       },
     },
     "apps/nextjs": {
-      "name": "@acme/nextjs",
+      "name": "@agent-stack/nextjs",
       "version": "0.1.0",
       "dependencies": {
-        "@acme/api": "*",
-        "@acme/auth": "*",
-        "@acme/config": "*",
-        "@acme/db": "*",
+        "@agent-stack/api": "*",
+        "@agent-stack/auth": "*",
+        "@agent-stack/config": "*",
+        "@agent-stack/db": "*",
         "@ai-sdk/anthropic": "catalog:",
         "@ai-sdk/openai": "catalog:",
         "@ai-sdk/react": "catalog:",
@@ -97,9 +97,9 @@
         "zustand": "catalog:",
       },
       "devDependencies": {
-        "@acme/eslint-config": "*",
-        "@acme/prettier-config": "*",
-        "@acme/tsconfig": "*",
+        "@agent-stack/eslint-config": "*",
+        "@agent-stack/prettier-config": "*",
+        "@agent-stack/tsconfig": "*",
         "@tailwindcss/postcss": "catalog:",
         "@types/mdx": "catalog:",
         "@types/node": "catalog:",
@@ -117,11 +117,11 @@
       },
     },
     "packages/api": {
-      "name": "@acme/api",
+      "name": "@agent-stack/api",
       "version": "0.1.0",
       "dependencies": {
-        "@acme/auth": "*",
-        "@acme/db": "*",
+        "@agent-stack/auth": "*",
+        "@agent-stack/db": "*",
         "@openrouter/ai-sdk-provider": "catalog:",
         "@orpc/server": "catalog:",
         "@t3-oss/env-nextjs": "catalog:",
@@ -129,21 +129,21 @@
         "zod": "catalog:",
       },
       "devDependencies": {
-        "@acme/eslint-config": "*",
-        "@acme/prettier-config": "*",
-        "@acme/tsconfig": "*",
+        "@agent-stack/eslint-config": "*",
+        "@agent-stack/prettier-config": "*",
+        "@agent-stack/tsconfig": "*",
         "eslint": "catalog:",
         "prettier": "catalog:",
         "typescript": "catalog:",
       },
     },
     "packages/auth": {
-      "name": "@acme/auth",
+      "name": "@agent-stack/auth",
       "version": "0.1.0",
       "dependencies": {
-        "@acme/config": "*",
-        "@acme/db": "*",
-        "@acme/email": "*",
+        "@agent-stack/config": "*",
+        "@agent-stack/db": "*",
+        "@agent-stack/email": "*",
         "@better-auth/stripe": "catalog:",
         "@stripe/stripe-js": "catalog:",
         "@t3-oss/env-nextjs": "catalog:",
@@ -155,9 +155,9 @@
         "zod": "catalog:",
       },
       "devDependencies": {
-        "@acme/eslint-config": "*",
-        "@acme/prettier-config": "*",
-        "@acme/tsconfig": "*",
+        "@agent-stack/eslint-config": "*",
+        "@agent-stack/prettier-config": "*",
+        "@agent-stack/tsconfig": "*",
         "@better-auth/cli": "catalog:",
         "@types/react": "catalog:react19",
         "eslint": "catalog:",
@@ -166,20 +166,20 @@
       },
     },
     "packages/config": {
-      "name": "@acme/config",
+      "name": "@agent-stack/config",
       "version": "0.1.0",
       "dependencies": {
         "@better-auth/stripe": "catalog:",
       },
       "devDependencies": {
-        "@acme/eslint-config": "*",
-        "@acme/tsconfig": "*",
+        "@agent-stack/eslint-config": "*",
+        "@agent-stack/tsconfig": "*",
         "eslint": "catalog:",
         "typescript": "catalog:",
       },
     },
     "packages/db": {
-      "name": "@acme/db",
+      "name": "@agent-stack/db",
       "version": "0.1.0",
       "dependencies": {
         "@vercel/postgres": "catalog:",
@@ -188,9 +188,9 @@
         "zod": "catalog:",
       },
       "devDependencies": {
-        "@acme/eslint-config": "*",
-        "@acme/prettier-config": "*",
-        "@acme/tsconfig": "*",
+        "@agent-stack/eslint-config": "*",
+        "@agent-stack/prettier-config": "*",
+        "@agent-stack/tsconfig": "*",
         "dotenv-cli": "catalog:",
         "drizzle-kit": "catalog:",
         "eslint": "catalog:",
@@ -199,10 +199,10 @@
       },
     },
     "packages/email": {
-      "name": "@acme/email",
+      "name": "@agent-stack/email",
       "version": "0.0.0",
       "dependencies": {
-        "@acme/config": "*",
+        "@agent-stack/config": "*",
         "@react-email/components": "catalog:",
         "@t3-oss/env-nextjs": "catalog:",
         "consola": "catalog:",
@@ -212,28 +212,28 @@
         "zod": "catalog:",
       },
       "devDependencies": {
-        "@acme/eslint-config": "*",
-        "@acme/prettier-config": "*",
-        "@acme/tsconfig": "*",
+        "@agent-stack/eslint-config": "*",
+        "@agent-stack/prettier-config": "*",
+        "@agent-stack/tsconfig": "*",
         "@types/bun": "catalog:",
         "react-email": "catalog:",
         "typescript": "catalog:",
       },
     },
     "packages/errors": {
-      "name": "@acme/errors",
+      "name": "@agent-stack/errors",
       "version": "0.1.0",
       "devDependencies": {
-        "@acme/eslint-config": "*",
-        "@acme/prettier-config": "*",
-        "@acme/tsconfig": "*",
+        "@agent-stack/eslint-config": "*",
+        "@agent-stack/prettier-config": "*",
+        "@agent-stack/tsconfig": "*",
         "eslint": "catalog:",
         "prettier": "catalog:",
         "typescript": "catalog:",
       },
     },
     "tooling/eslint": {
-      "name": "@acme/eslint-config",
+      "name": "@agent-stack/eslint-config",
       "version": "0.3.0",
       "dependencies": {
         "@eslint/compat": "^1.4.0",
@@ -242,28 +242,28 @@
         "typescript-eslint": "^8.46.0",
       },
       "devDependencies": {
-        "@acme/prettier-config": "*",
-        "@acme/tsconfig": "*",
+        "@agent-stack/prettier-config": "*",
+        "@agent-stack/tsconfig": "*",
         "eslint": "catalog:",
         "prettier": "catalog:",
         "typescript": "catalog:",
       },
     },
     "tooling/prettier": {
-      "name": "@acme/prettier-config",
+      "name": "@agent-stack/prettier-config",
       "version": "0.1.0",
       "dependencies": {
         "prettier": "catalog:",
         "prettier-plugin-tailwindcss": "^0.6.14",
       },
       "devDependencies": {
-        "@acme/tsconfig": "*",
+        "@agent-stack/tsconfig": "*",
         "@types/node": "catalog:",
         "typescript": "catalog:",
       },
     },
     "tooling/typescript": {
-      "name": "@acme/tsconfig",
+      "name": "@agent-stack/tsconfig",
       "version": "0.1.0",
     },
   },
@@ -387,25 +387,25 @@
     },
   },
   "packages": {
-    "@acme/api": ["@acme/api@workspace:packages/api"],
+    "@agent-stack/api": ["@agent-stack/api@workspace:packages/api"],
 
-    "@acme/auth": ["@acme/auth@workspace:packages/auth"],
+    "@agent-stack/auth": ["@agent-stack/auth@workspace:packages/auth"],
 
-    "@acme/config": ["@acme/config@workspace:packages/config"],
+    "@agent-stack/config": ["@agent-stack/config@workspace:packages/config"],
 
-    "@acme/db": ["@acme/db@workspace:packages/db"],
+    "@agent-stack/db": ["@agent-stack/db@workspace:packages/db"],
 
-    "@acme/email": ["@acme/email@workspace:packages/email"],
+    "@agent-stack/email": ["@agent-stack/email@workspace:packages/email"],
 
-    "@acme/errors": ["@acme/errors@workspace:packages/errors"],
+    "@agent-stack/errors": ["@agent-stack/errors@workspace:packages/errors"],
 
-    "@acme/eslint-config": ["@acme/eslint-config@workspace:tooling/eslint"],
+    "@agent-stack/eslint-config": ["@agent-stack/eslint-config@workspace:tooling/eslint"],
 
-    "@acme/nextjs": ["@acme/nextjs@workspace:apps/nextjs"],
+    "@agent-stack/nextjs": ["@agent-stack/nextjs@workspace:apps/nextjs"],
 
-    "@acme/prettier-config": ["@acme/prettier-config@workspace:tooling/prettier"],
+    "@agent-stack/prettier-config": ["@agent-stack/prettier-config@workspace:tooling/prettier"],
 
-    "@acme/tsconfig": ["@acme/tsconfig@workspace:tooling/typescript"],
+    "@agent-stack/tsconfig": ["@agent-stack/tsconfig@workspace:tooling/typescript"],
 
     "@ai-sdk/anthropic": ["@ai-sdk/anthropic@2.0.23", "", { "dependencies": { "@ai-sdk/provider": "2.0.0", "@ai-sdk/provider-utils": "3.0.10" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-ZEBiiv1UhjGjBwUU63pFhLK5LCSlNDb1idY9K1oZHm5/Fda1cuTojf32tOp0opH0RPbPAN/F8fyyNjbU33n9Kw=="],
 

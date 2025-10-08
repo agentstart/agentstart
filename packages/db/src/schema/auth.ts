@@ -7,7 +7,7 @@ TABLES:
   - accounts: OAuth provider accounts
   - verifications: Email/phone verifications
   - subscriptions: Stripe subscriptions
-USAGE: import { users, sessions } from '@acme/db/schema'
+USAGE: import { users, sessions } from '@agent-stack/db/schema'
 SEARCHABLE: auth schema, user table, session table
 agent-frontmatter:end */
 

@@ -1,7 +1,7 @@
 /* agent-frontmatter:start
 AGENT: Config package environment variables
 PURPOSE: Type-safe Stripe price IDs configuration
-USAGE: import { env } from '@acme/config/env'
+USAGE: import { env } from '@agent-stack/config/env'
 VARIABLES:
   - NEXT_PUBLIC_PRO_PRICE_ID: Stripe Pro plan monthly price ID
   - NEXT_PUBLIC_PRO_ANNUAL_PRICE_ID: Stripe Pro plan annual price ID

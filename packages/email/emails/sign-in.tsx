@@ -10,7 +10,7 @@ PROPS:
 SEARCHABLE: sign in email, otp email, magic link email
 agent-frontmatter:end */
 
-import { siteConfig } from "@acme/config";
+import { siteConfig } from "@agent-stack/config";
 import {
   Body,
   Container,

@@ -1,7 +1,7 @@
 /* agent-frontmatter:start
 AGENT: Database client initialization
 PURPOSE: Initialize Drizzle ORM with Vercel Postgres
-USAGE: import { db } from '@acme/db/client'
+USAGE: import { db } from '@agent-stack/db/client'
 FEATURES:
   - Vercel Postgres integration
   - Snake case column naming

@@ -15,10 +15,10 @@ import { createEnv } from "@t3-oss/env-nextjs";
 import { vercel } from "@t3-oss/env-nextjs/presets-zod";
 import { z } from "zod/v4";
 
-import { env as dbEnv } from "@acme/db/env";
-import { env as authEnv } from "@acme/auth/env";
-import { env as emailEnv } from "@acme/email/env";
-import { env as apiEnv } from "@acme/api/env";
+import { env as dbEnv } from "@agent-stack/db/env";
+import { env as authEnv } from "@agent-stack/auth/env";
+import { env as emailEnv } from "@agent-stack/email/env";
+import { env as apiEnv } from "@agent-stack/api/env";
 
 export const env = createEnv({
   /* agent-frontmatter:start

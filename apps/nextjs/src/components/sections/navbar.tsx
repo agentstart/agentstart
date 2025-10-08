@@ -41,7 +41,7 @@ import { useScroll, useMotionValueEvent } from "motion/react";
 import { cn } from "@/lib/utils";
 import { useActiveSection } from "@/hooks/use-active-section";
 import { CornerBorders } from "./corner-borders";
-import { siteConfig } from "@acme/config";
+import { siteConfig } from "@agent-stack/config";
 import { Logo } from "../logo";
 import { FeedbackButton } from "@/components/feedback";
 import { useTranslations } from "next-intl";

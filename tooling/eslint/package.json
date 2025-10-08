@@ -1,5 +1,5 @@
 {
-  "name": "@acme/eslint-config",
+  "name": "@agent-stack/eslint-config",
   "private": true,
   "version": "0.3.0",
   "type": "module",
@@ -19,11 +19,11 @@
     "typescript-eslint": "^8.46.0"
   },
   "devDependencies": {
-    "@acme/prettier-config": "*",
-    "@acme/tsconfig": "*",
+    "@agent-stack/prettier-config": "*",
+    "@agent-stack/tsconfig": "*",
     "eslint": "catalog:",
     "prettier": "catalog:",
     "typescript": "catalog:"
   },
-  "prettier": "@acme/prettier-config"
+  "prettier": "@agent-stack/prettier-config"
 }

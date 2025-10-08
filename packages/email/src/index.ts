@@ -1,7 +1,7 @@
 /* agent-frontmatter:start
 AGENT: Email service initialization with Resend
 PURPOSE: Configure email sending service for transactional emails
-USAGE: import { resend } from '@acme/email'
+USAGE: import { resend } from '@agent-stack/email'
 FEATURES: Send emails via Resend API
 REQUIRES: RESEND_API_KEY in environment variables
 SEARCHABLE: email service, resend, email sender

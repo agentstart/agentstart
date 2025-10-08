@@ -6,7 +6,7 @@ agent-frontmatter:end */
 
 import { authClient } from "@/lib/auth/client";
 import { useQuery, queryOptions } from "@tanstack/react-query";
-import { pricingPlans } from "@acme/config";
+import { pricingPlans } from "@agent-stack/config";
 
 /**
  * React Query options for fetching user subscription information

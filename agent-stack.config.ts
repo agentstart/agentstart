@@ -4,7 +4,7 @@ USAGE: All application configuration should be defined here
 IMPORTANT: This file is imported by packages/config and used throughout the app
 agent-frontmatter:end */
 
-import { defineConfig } from "@acme/config";
+import { defineConfig } from "@agent-stack/config";
 
 export default defineConfig({
   site: {

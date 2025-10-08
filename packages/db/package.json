@@ -1,5 +1,5 @@
 {
-  "name": "@acme/db",
+  "name": "@agent-stack/db",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -26,14 +26,14 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@acme/eslint-config": "*",
-    "@acme/prettier-config": "*",
-    "@acme/tsconfig": "*",
+    "@agent-stack/eslint-config": "*",
+    "@agent-stack/prettier-config": "*",
+    "@agent-stack/tsconfig": "*",
     "dotenv-cli": "catalog:",
     "drizzle-kit": "catalog:",
     "eslint": "catalog:",
     "prettier": "catalog:",
     "typescript": "catalog:"
   },
-  "prettier": "@acme/prettier-config"
+  "prettier": "@agent-stack/prettier-config"
 }

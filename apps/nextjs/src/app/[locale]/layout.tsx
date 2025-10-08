@@ -17,7 +17,7 @@ import { notFound } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { Providers } from "@/components/layout/client-layout";
-import { siteConfig } from "@acme/config";
+import { siteConfig } from "@agent-stack/config";
 import { routing } from "@/i18n/routing";
 
 import "@/app/globals.css";

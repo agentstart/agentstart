@@ -25,12 +25,12 @@ const config = {
   These packages will be built by Next.js instead of requiring a separate build step
   agent-frontmatter:end */
   transpilePackages: [
-    "@acme/api",
-    "@acme/auth",
-    "@acme/config",
-    "@acme/db",
-    "@acme/email",
-    "@acme/errors",
+    "@agent-stack/api",
+    "@agent-stack/auth",
+    "@agent-stack/config",
+    "@agent-stack/db",
+    "@agent-stack/email",
+    "@agent-stack/errors",
   ],
 
   images: {

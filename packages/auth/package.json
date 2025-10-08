@@ -1,5 +1,5 @@
 {
-  "name": "@acme/auth",
+  "name": "@agent-stack/auth",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -18,9 +18,9 @@
     "generate": "dotenv -e ../../.env -- bunx @better-auth/cli generate --output ../db/src/auth-schema.ts"
   },
   "dependencies": {
-    "@acme/config": "*",
-    "@acme/db": "*",
-    "@acme/email": "*",
+    "@agent-stack/config": "*",
+    "@agent-stack/db": "*",
+    "@agent-stack/email": "*",
     "@better-auth/stripe": "catalog:",
     "@stripe/stripe-js": "catalog:",
     "@t3-oss/env-nextjs": "catalog:",
@@ -32,14 +32,14 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@acme/eslint-config": "*",
-    "@acme/prettier-config": "*",
-    "@acme/tsconfig": "*",
+    "@agent-stack/eslint-config": "*",
+    "@agent-stack/prettier-config": "*",
+    "@agent-stack/tsconfig": "*",
     "@better-auth/cli": "catalog:",
     "@types/react": "catalog:react19",
     "eslint": "catalog:",
     "prettier": "catalog:",
     "typescript": "catalog:"
   },
-  "prettier": "@acme/prettier-config"
+  "prettier": "@agent-stack/prettier-config"
 }

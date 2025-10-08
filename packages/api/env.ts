@@ -1,7 +1,7 @@
 /* agent-frontmatter:start
 AGENT: Config package environment variables
 PURPOSE: Type-safe environment variable configuration
-USAGE: import { env } from '@acme/api/env'
+USAGE: import { env } from '@agent-stack/api/env'
 VARIABLES:
   - OPENROUTER_API_KEY: OpenRouter API key
   - AI_GATEWAY_API_KEY: AI Gateway API key

@@ -1,4 +1,4 @@
-# @acme/config
+# @agent-stack/config
 
 Central configuration package for Agent Stack.
 
@@ -10,7 +10,7 @@ All configuration is defined in `agent-stack.config.ts` at the project root:
 
 ```typescript
 // agent-stack.config.ts
-import { defineConfig } from "@acme/config";
+import { defineConfig } from "@agent-stack/config";
 
 export default defineConfig({
   site: {
@@ -31,13 +31,18 @@ export default defineConfig({
 ### Use configuration in your app
 
 ```typescript
-import { siteConfig, pricingConfig, pricingPlans, features } from "@acme/config";
+import {
+  siteConfig,
+  pricingConfig,
+  pricingPlans,
+  features,
+} from "@agent-stack/config";
 
 // Use site config
 console.log(siteConfig.name); // "My App"
 
 // Use pricing plans
-pricingPlans.forEach(plan => {
+pricingPlans.forEach((plan) => {
   console.log(plan.title, plan.monthlyPrice);
 });
 
@@ -56,8 +61,8 @@ if (features.auth) {
 
 ## Types
 
-All configuration types are exported from `@acme/config`:
+All configuration types are exported from `@agent-stack/config`:
 
 ```typescript
-import type { AppConfig, PricingPlan, SiteConfig } from "@acme/config";
+import type { AppConfig, PricingPlan, SiteConfig } from "@agent-stack/config";
 ```

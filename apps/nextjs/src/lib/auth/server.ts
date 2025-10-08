@@ -13,9 +13,9 @@ import "server-only";
 
 import { cache } from "react";
 import { headers } from "next/headers";
-import { initAuth } from "@acme/auth";
+import { initAuth } from "@agent-stack/auth";
 import { env } from "@/env";
-import { siteConfig } from "@acme/config";
+import { siteConfig } from "@agent-stack/config";
 
 const baseUrl =
   env.NODE_ENV === "production"

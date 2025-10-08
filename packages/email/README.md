@@ -1,4 +1,4 @@
-# @acme/email
+# @agent-stack/email
 
 Email service package for AgentStack using Resend.
 
@@ -24,7 +24,7 @@ EMAIL_FROM=hello@yourdomain.com # Optional, defaults to noreply@agent-stack.dev
 The email client is automatically initialized in the auth package and will use environment variables directly:
 
 ```typescript
-import { createEmailClient } from "@acme/email";
+import { createEmailClient } from "@agent-stack/email";
 
 const emailClient = createEmailClient();
 
@@ -32,14 +32,14 @@ const emailClient = createEmailClient();
 await emailClient.sendPasswordResetEmail({
   to: "user@example.com",
   userName: "John Doe",
-  resetUrl: "https://yourapp.com/reset-password?token=xxx"
+  resetUrl: "https://yourapp.com/reset-password?token=xxx",
 });
 
-// Send verification email  
+// Send verification email
 await emailClient.sendVerificationEmail({
   to: "user@example.com",
   userName: "John Doe",
-  verificationUrl: "https://yourapp.com/verify-email?token=xxx"
+  verificationUrl: "https://yourapp.com/verify-email?token=xxx",
 });
 ```
 

@@ -14,7 +14,7 @@ agent-frontmatter:end */
 "use client";
 
 import Link from "next/link";
-import { siteConfig } from "@acme/config";
+import { siteConfig } from "@agent-stack/config";
 import { CssDotMatrixText } from "@/components/magicui/css-dot-matrix-text";
 import { FlickeringGrid } from "@/components/magicui/flickering-grid";
 import { useTheme } from "next-themes";

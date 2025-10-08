@@ -1,5 +1,5 @@
 {
-  "name": "@acme/errors",
+  "name": "@agent-stack/errors",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -13,12 +13,12 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@acme/eslint-config": "*",
-    "@acme/prettier-config": "*",
-    "@acme/tsconfig": "*",
+    "@agent-stack/eslint-config": "*",
+    "@agent-stack/prettier-config": "*",
+    "@agent-stack/tsconfig": "*",
     "eslint": "catalog:",
     "prettier": "catalog:",
     "typescript": "catalog:"
   },
-  "prettier": "@acme/prettier-config"
+  "prettier": "@agent-stack/prettier-config"
 }

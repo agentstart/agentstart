@@ -5,7 +5,7 @@
 The simplest way to use the auth package is to let it automatically detect OAuth providers from environment variables:
 
 ```typescript
-import { initAuth } from "@acme/auth";
+import { initAuth } from "@agent-stack/auth";
 
 const auth = initAuth({
   baseUrl: "http://localhost:3000",
@@ -101,7 +101,11 @@ AUTH_GOOGLE_CLIENT_SECRET='google-client-secret'
 The package exports TypeScript types for better IDE support:
 
 ```typescript
-import type { AuthOptions, OAuthProvider, OAuthProviders } from "@acme/auth";
+import type {
+  AuthOptions,
+  OAuthProvider,
+  OAuthProviders,
+} from "@agent-stack/auth";
 
 // Custom configuration
 const customConfig: AuthOptions = {

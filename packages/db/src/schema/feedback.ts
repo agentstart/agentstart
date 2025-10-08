@@ -3,7 +3,7 @@ AGENT: Feedback database schema definitions
 PURPOSE: Define tables for user feedback system
 TABLES:
   - feedback: User feedback entries
-USAGE: import { feedback } from '@acme/db/schema'
+USAGE: import { feedback } from '@agent-stack/db/schema'
 SEARCHABLE: feedback schema, feedback table, user feedback
 agent-frontmatter:end */
 

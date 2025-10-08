@@ -9,7 +9,7 @@ FEATURES:
   - Animated cards with MagicCard
   - BorderBeam effect on popular plan
   - i18n support using next-intl
-REQUIRES: Stripe configured, pricing plans in @acme/config
+REQUIRES: Stripe configured, pricing plans in @agent-stack/config
 SEARCHABLE: pricing section, subscription plans, stripe checkout
 agent-frontmatter:end */
 
@@ -23,8 +23,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth/client";
 import { useRouter } from "next/navigation";
-import type { PricingPlan } from "@acme/config";
-import { pricingConfig, pricingPlans } from "@acme/config";
+import type { PricingPlan } from "@agent-stack/config";
+import { pricingConfig, pricingPlans } from "@agent-stack/config";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { MagicCard } from "@/components/magicui/magic-card";

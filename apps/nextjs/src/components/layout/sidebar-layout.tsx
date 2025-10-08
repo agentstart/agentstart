@@ -23,7 +23,7 @@ import {
 import Link from "next/link";
 import { NavSecondary } from "./nav-secondary";
 import { UserDropmenu } from "@/components/controls/user-dropmenu";
-import { siteConfig } from "@acme/config";
+import { siteConfig } from "@agent-stack/config";
 import { Logo } from "@/components/logo";
 import { usePathname } from "next/navigation";
 

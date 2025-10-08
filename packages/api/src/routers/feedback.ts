@@ -12,8 +12,8 @@ agent-frontmatter:end */
 
 import { z } from "zod/v4";
 import { publicProcedure, protectedProcedure } from "../procedures";
-import { db } from "@acme/db/client";
-import { feedback } from "@acme/db/schema";
+import { db } from "@agent-stack/db/client";
+import { feedback } from "@agent-stack/db/schema";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 

@@ -11,6 +11,6 @@ RETURNS: Auth client with all client-side methods
 SEARCHABLE: client auth, auth hooks, useSession, signIn, signOut
 agent-frontmatter:end */
 
-import { initAuthClient } from "@acme/auth/client";
+import { initAuthClient } from "@agent-stack/auth/client";
 
 export const authClient = initAuthClient();

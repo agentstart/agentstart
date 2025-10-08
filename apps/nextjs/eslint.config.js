@@ -1,5 +1,5 @@
-import baseConfig, { restrictEnvAccess } from "@acme/eslint-config/base";
-import nextjsConfig from "@acme/eslint-config/nextjs";
+import baseConfig, { restrictEnvAccess } from "@agent-stack/eslint-config/base";
+import nextjsConfig from "@agent-stack/eslint-config/nextjs";
 
 /** @type {import('typescript-eslint').Config} */
 export default [

@@ -21,14 +21,14 @@ import { oAuthProxy, emailOTP } from "better-auth/plugins";
 import { stripe as betterAuthStripe } from "@better-auth/stripe";
 import Stripe from "stripe";
 
-import { resend } from "@acme/email";
-import { pricingPlans, siteConfig } from "@acme/config";
+import { resend } from "@agent-stack/email";
+import { pricingPlans, siteConfig } from "@agent-stack/config";
 import {
   SignInEmail,
   EmailVerificationEmail,
   ForgotPasswordEmail,
-} from "@acme/email/templates";
-import { db } from "@acme/db/client";
+} from "@agent-stack/email/templates";
+import { db } from "@agent-stack/db/client";
 import { env } from "../env";
 
 export interface AuthOptions {

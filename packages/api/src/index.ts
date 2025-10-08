@@ -2,7 +2,7 @@
 AGENT: API package main export (oRPC)
 PURPOSE: Export oRPC routers and utilities
 USAGE:
-  - oRPC: import { router as orpcRouter } from '@acme/api'
+  - oRPC: import { router as orpcRouter } from '@agent-stack/api'
 EXPORTS:
   - oRPC exports
 SEARCHABLE: api package, router exports, orpc

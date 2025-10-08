@@ -1,7 +1,7 @@
 /* agent-frontmatter:start
 AGENT: DB package environment variables
 PURPOSE: Type-safe environment variable configuration
-USAGE: import { env } from '@acme/db/env'
+USAGE: import { env } from '@agent-stack/db/env'
 VARIABLES:
   - POSTGRES_URL: PostgreSQL database connection URL
 SEARCHABLE: db env, database url, postgres url

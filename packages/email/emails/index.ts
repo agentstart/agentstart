@@ -5,7 +5,7 @@ TEMPLATES:
   - SignInEmail: Magic link sign-in email
   - EmailVerificationEmail: Email verification template
   - ForgotPasswordEmail: Password reset email
-USAGE: import { SignInEmail, EmailVerificationEmail } from '@acme/email/templates'
+USAGE: import { SignInEmail, EmailVerificationEmail } from '@agent-stack/email/templates'
 SEARCHABLE: email templates, email exports
 agent-frontmatter:end */
 

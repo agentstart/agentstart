@@ -10,8 +10,8 @@ FEATURES:
 SEARCHABLE: orpc context, api context, auth context
 agent-frontmatter:end */
 
-import type { Auth, Session } from "@acme/auth";
-import type { db as dbInstance } from "@acme/db/client";
+import type { Auth, Session } from "@agent-stack/auth";
+import type { db as dbInstance } from "@agent-stack/db/client";
 
 export interface Context {
   db: typeof dbInstance;
