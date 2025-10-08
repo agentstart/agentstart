@@ -264,3 +264,13 @@ export const errors = {
       500,
     ),
 } as const;
+
+export class AgentStackError extends Error {
+  constructor(
+    public code: string,
+    message: string,
+  ) {
+    super(message);
+    this.name = "AgentStackError";
+  }
+}

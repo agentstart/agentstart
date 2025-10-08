@@ -29,6 +29,7 @@
   "workspaces": {
     "packages": ["apps/*", "packages/*", "tooling/*", "playground/*"],
     "catalog": {
+      "nanoid": "^5.1.6",
       "turbo": "^2.5.8",
       "@biomejs/biome": "^2.2.5",
       "@ai-sdk/react": "^2.0.60",
