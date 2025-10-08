@@ -1,14 +1,16 @@
 "use client";
 
-// AGENT: Feedback form component
-// PURPOSE: Render feedback submission form inside popover
-// FEATURES:
-//   - Topic selection dropdown
-//   - Feedback content textarea
-//   - Mood selector with emoji icons
-//   - Markdown support indicator
-// USAGE: Used inside FeedbackPopover component
-// SEARCHABLE: feedback form, user feedback, feedback ui
+/* agent-frontmatter:start
+AGENT: Feedback form component
+PURPOSE: Render feedback submission form inside popover
+FEATURES:
+  - Topic selection dropdown
+  - Feedback content textarea
+  - Mood selector with emoji icons
+  - Markdown support indicator
+USAGE: Used inside FeedbackPopover component
+SEARCHABLE: feedback form, user feedback, feedback ui
+agent-frontmatter:end */
 
 import * as React from "react";
 import { Smile, Meh, Frown, Heart } from "lucide-react";

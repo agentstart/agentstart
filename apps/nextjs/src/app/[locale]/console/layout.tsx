@@ -1,8 +1,10 @@
-// AGENT: Console route group layout
-// PURPOSE: Wrap all console pages with sidebar navigation
-// FEATURES: Consistent console layout with sidebar
-// ROUTES: /console/feedbacks, /console/users, etc.
-// SEARCHABLE: console layout, console wrapper
+/* agent-frontmatter:start
+AGENT: Console route group layout
+PURPOSE: Wrap all console pages with sidebar navigation
+FEATURES: Consistent console layout with sidebar
+ROUTES: /console/feedbacks, /console/users, etc.
+SEARCHABLE: console layout, console wrapper
+agent-frontmatter:end */
 
 "use client";
 

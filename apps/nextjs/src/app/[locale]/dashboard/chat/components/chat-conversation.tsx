@@ -1,11 +1,13 @@
-// AGENT: Chat conversation component
-// PURPOSE: Displays the conversation history with messages
-// USAGE: <ChatConversation messages={messages} status={status} />
-// FEATURES:
-//   - Scrollable conversation area
-//   - Auto-scroll to bottom on new messages
-//   - Loading indicator for pending responses
-// SEARCHABLE: conversation display, message list, chat history
+/* agent-frontmatter:start
+AGENT: Chat conversation component
+PURPOSE: Displays the conversation history with messages
+USAGE: <ChatConversation messages={messages} status={status} />
+FEATURES:
+  - Scrollable conversation area
+  - Auto-scroll to bottom on new messages
+  - Loading indicator for pending responses
+SEARCHABLE: conversation display, message list, chat history
+agent-frontmatter:end */
 
 import {
   Conversation,

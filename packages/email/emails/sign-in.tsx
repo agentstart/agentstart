@@ -1,12 +1,14 @@
-// AGENT: Sign-in email template with OTP code
-// PURPOSE: Email template for magic link/OTP authentication
-// USAGE: Used by Better Auth for email sign-in
-// PROPS:
-//   - validationCode: OTP code for verification
-//   - name: User's name (optional)
-//   - url: Sign-in link (optional)
-//   - expiresIn: Expiration time in seconds
-// SEARCHABLE: sign in email, otp email, magic link email
+/* agent-frontmatter:start
+AGENT: Sign-in email template with OTP code
+PURPOSE: Email template for magic link/OTP authentication
+USAGE: Used by Better Auth for email sign-in
+PROPS:
+  - validationCode: OTP code for verification
+  - name: User's name (optional)
+  - url: Sign-in link (optional)
+  - expiresIn: Expiration time in seconds
+SEARCHABLE: sign in email, otp email, magic link email
+agent-frontmatter:end */
 
 import { siteConfig } from "@acme/config";
 import {

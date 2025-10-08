@@ -1,12 +1,14 @@
-// AGENT: AI Chat interface with streaming responses
-// PURPOSE: Provides out-of-the-box chat functionality with AI
-// USAGE: Visit /dashboard/chat to interact with AI assistant
-// FEATURES:
-//   - Streaming responses with real-time updates
-//   - Markdown rendering with syntax highlighting
-//   - Message history with user/assistant roles
-//   - Loading states and error handling
-// SEARCHABLE: ai chat, streaming, markdown, chatbot
+/* agent-frontmatter:start
+AGENT: AI Chat interface with streaming responses
+PURPOSE: Provides out-of-the-box chat functionality with AI
+USAGE: Visit /dashboard/chat to interact with AI assistant
+FEATURES:
+  - Streaming responses with real-time updates
+  - Markdown rendering with syntax highlighting
+  - Message history with user/assistant roles
+  - Loading states and error handling
+SEARCHABLE: ai chat, streaming, markdown, chatbot
+agent-frontmatter:end */
 
 "use client";
 

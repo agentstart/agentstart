@@ -1,13 +1,15 @@
-// AGENT: User account dropdown menu component
-// PURPOSE: Display user avatar with dropdown for account actions
-// USAGE: <UserDropmenu size="default" />
-// FEATURES:
-//   - User avatar with fallback
-//   - Dashboard link
-//   - Theme switcher
-//   - Sign out action
-//   - Loading skeleton state
-// SEARCHABLE: user menu, account dropdown, avatar menu, logout
+/* agent-frontmatter:start
+AGENT: User account dropdown menu component
+PURPOSE: Display user avatar with dropdown for account actions
+USAGE: <UserDropmenu size="default" />
+FEATURES:
+  - User avatar with fallback
+  - Dashboard link
+  - Theme switcher
+  - Sign out action
+  - Loading skeleton state
+SEARCHABLE: user menu, account dropdown, avatar menu, logout
+agent-frontmatter:end */
 
 "use client";
 

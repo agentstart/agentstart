@@ -1,15 +1,17 @@
-// AGENT: Landing page component
-// PURPOSE: Main marketing landing page with all sections
-// SECTIONS:
-//   - Navbar - Navigation menu
-//   - HeroSection - Main hero with CTA
-//   - FeaturesSection - Product features grid
-//   - ShowcaseSection - Product showcase
-//   - PricingSection - Pricing plans
-//   - FAQSection - Frequently asked questions
-//   - CTASection - Call to action
-//   - FooterSection - Footer with links
-// SEARCHABLE: landing page, homepage, marketing page
+/* agent-frontmatter:start
+AGENT: Landing page component
+PURPOSE: Main marketing landing page with all sections
+SECTIONS:
+  - Navbar - Navigation menu
+  - HeroSection - Main hero with CTA
+  - FeaturesSection - Product features grid
+  - ShowcaseSection - Product showcase
+  - PricingSection - Pricing plans
+  - FAQSection - Frequently asked questions
+  - CTASection - Call to action
+  - FooterSection - Footer with links
+SEARCHABLE: landing page, homepage, marketing page
+agent-frontmatter:end */
 
 import { Navbar } from "@/components/sections/navbar";
 import { HeroSection } from "@/components/sections/hero";

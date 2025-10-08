@@ -1,12 +1,14 @@
-// AGENT: Password reset email template
-// PURPOSE: Send password reset link/code to users
-// USAGE: Used by Better Auth for password recovery
-// PROPS:
-//   - validationCode: Password reset code
-//   - name: User's name (optional)
-//   - url: Reset password link (optional)
-//   - expiresIn: Code expiration time in seconds
-// SEARCHABLE: forgot password email, password reset email, recovery email
+/* agent-frontmatter:start
+AGENT: Password reset email template
+PURPOSE: Send password reset link/code to users
+USAGE: Used by Better Auth for password recovery
+PROPS:
+  - validationCode: Password reset code
+  - name: User's name (optional)
+  - url: Reset password link (optional)
+  - expiresIn: Code expiration time in seconds
+SEARCHABLE: forgot password email, password reset email, recovery email
+agent-frontmatter:end */
 
 import { siteConfig } from "@acme/config";
 import {

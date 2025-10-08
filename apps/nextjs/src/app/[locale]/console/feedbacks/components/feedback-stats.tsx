@@ -1,11 +1,13 @@
-// AGENT: Feedback statistics component
-// PURPOSE: Display feedback statistics in card format
-// FEATURES:
-//   - Total feedback count
-//   - Status breakdown (pending, reviewed, resolved)
-//   - Real-time updates
-// USAGE: <FeedbackStats stats={statsData} />
-// SEARCHABLE: feedback stats, statistics component
+/* agent-frontmatter:start
+AGENT: Feedback statistics component
+PURPOSE: Display feedback statistics in card format
+FEATURES:
+  - Total feedback count
+  - Status breakdown (pending, reviewed, resolved)
+  - Real-time updates
+USAGE: <FeedbackStats stats={statsData} />
+SEARCHABLE: feedback stats, statistics component
+agent-frontmatter:end */
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MessageSquare, Clock, CheckCircle, AlertCircle } from "lucide-react";

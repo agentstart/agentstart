@@ -1,11 +1,13 @@
-// AGENT: Zustand store for chat state management
-// PURPOSE: Centralized state management for chat settings
-// USAGE: Import useChatStore hook in components
-// FEATURES:
-//   - Model selection state
-//   - Web search toggle state
-//   - Persistent state with localStorage
-// SEARCHABLE: zustand, chat store, state management
+/* agent-frontmatter:start
+AGENT: Zustand store for chat state management
+PURPOSE: Centralized state management for chat settings
+USAGE: Import useChatStore hook in components
+FEATURES:
+  - Model selection state
+  - Web search toggle state
+  - Persistent state with localStorage
+SEARCHABLE: zustand, chat store, state management
+agent-frontmatter:end */
 
 import { create } from "zustand";
 

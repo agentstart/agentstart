@@ -1,13 +1,15 @@
-// AGENT: Showcase section component with i18n support
-// PURPOSE: Display featured demos, tutorials, or case studies
-// USAGE: <ShowcaseSection /> - typically on landing page
-// FEATURES:
-//   - Card-based showcase items
-//   - Tags and stats display
-//   - Corner border decorations
-//   - i18n support using next-intl
-// CUSTOMIZATION: Modify showcaseItems array for content
-// SEARCHABLE: showcase section, demo section, case studies
+/* agent-frontmatter:start
+AGENT: Showcase section component with i18n support
+PURPOSE: Display featured demos, tutorials, or case studies
+USAGE: <ShowcaseSection /> - typically on landing page
+FEATURES:
+  - Card-based showcase items
+  - Tags and stats display
+  - Corner border decorations
+  - i18n support using next-intl
+CUSTOMIZATION: Modify showcaseItems array for content
+SEARCHABLE: showcase section, demo section, case studies
+agent-frontmatter:end */
 
 "use client";
 

@@ -1,12 +1,14 @@
-// AGENT: oRPC route handler for Next.js App Router
-// PURPOSE: Handle all oRPC API requests with automatic REST support
-// USAGE: All /api/* requests are handled by this route
-// FEATURES:
-//   - Handles both RPC and REST requests
-//   - Automatic OpenAPI support
-//   - Context creation with auth and database
-//   - Support for all HTTP methods
-// SEARCHABLE: orpc route, api handler, next.js route
+/* agent-frontmatter:start
+AGENT: oRPC route handler for Next.js App Router
+PURPOSE: Handle all oRPC API requests with automatic REST support
+USAGE: All /api/* requests are handled by this route
+FEATURES:
+  - Handles both RPC and REST requests
+  - Automatic OpenAPI support
+  - Context creation with auth and database
+  - Support for all HTTP methods
+SEARCHABLE: orpc route, api handler, next.js route
+agent-frontmatter:end */
 
 import { RPCHandler } from "@orpc/server/fetch";
 import { appRouter, createContext } from "@acme/api";

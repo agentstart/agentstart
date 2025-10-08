@@ -1,13 +1,15 @@
-// AGENT: Footer section component with i18n support
-// PURPOSE: Site footer with links, resources, and branding
-// USAGE: <FooterSection /> - typically at page bottom
-// FEATURES:
-//   - Multi-column link layout
-//   - Animated background effects
-//   - Social links
-//   - Copyright notice
-//   - i18n support using next-intl
-// SEARCHABLE: footer section, site footer, footer links
+/* agent-frontmatter:start
+AGENT: Footer section component with i18n support
+PURPOSE: Site footer with links, resources, and branding
+USAGE: <FooterSection /> - typically at page bottom
+FEATURES:
+  - Multi-column link layout
+  - Animated background effects
+  - Social links
+  - Copyright notice
+  - i18n support using next-intl
+SEARCHABLE: footer section, site footer, footer links
+agent-frontmatter:end */
 
 "use client";
 

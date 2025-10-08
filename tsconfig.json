@@ -1,9 +1,11 @@
-// AGENT: Root TypeScript configuration
-// PURPOSE: Base TypeScript config for monorepo root
-// USAGE: Extended by packages and apps
-// FEATURES:
-//   - Path aliases for @acme/* packages
-// SEARCHABLE: typescript config, tsconfig, type configuration
+/* agent-frontmatter:start
+AGENT: Root TypeScript configuration
+PURPOSE: Base TypeScript config for monorepo root
+USAGE: Extended by packages and apps
+FEATURES:
+  - Path aliases for @acme/* packages
+SEARCHABLE: typescript config, tsconfig, type configuration
+agent-frontmatter:end */
 
 {
   "extends": "@acme/tsconfig/internal-package.json",

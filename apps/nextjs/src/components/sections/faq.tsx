@@ -1,13 +1,15 @@
-// AGENT: FAQ section component with i18n support
-// PURPOSE: Display frequently asked questions with expandable answers
-// USAGE: <FAQSection /> - typically on landing or support pages
-// FEATURES:
-//   - Accordion-style Q&A layout
-//   - Corner border decorations
-//   - Customizable FAQ list
-//   - i18n support using next-intl
-// CUSTOMIZATION: Modify FAQList array to update questions
-// SEARCHABLE: faq section, questions, frequently asked questions
+/* agent-frontmatter:start
+AGENT: FAQ section component with i18n support
+PURPOSE: Display frequently asked questions with expandable answers
+USAGE: <FAQSection /> - typically on landing or support pages
+FEATURES:
+  - Accordion-style Q&A layout
+  - Corner border decorations
+  - Customizable FAQ list
+  - i18n support using next-intl
+CUSTOMIZATION: Modify FAQList array to update questions
+SEARCHABLE: faq section, questions, frequently asked questions
+agent-frontmatter:end */
 
 "use client";
 

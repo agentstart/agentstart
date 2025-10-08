@@ -1,10 +1,12 @@
-// AGENT: Theme switcher components
-// PURPOSE: Toggle between light/dark/system themes
-// EXPORTS:
-//   - SimpleThemeSwitch: Icon button for quick theme toggle
-//   - ThemeSwitch: Tab-based theme selector
-// USAGE: <SimpleThemeSwitch /> or <ThemeSwitch />
-// SEARCHABLE: theme toggle, dark mode, light mode, theme switcher
+/* agent-frontmatter:start
+AGENT: Theme switcher components
+PURPOSE: Toggle between light/dark/system themes
+EXPORTS:
+  - SimpleThemeSwitch: Icon button for quick theme toggle
+  - ThemeSwitch: Tab-based theme selector
+USAGE: <SimpleThemeSwitch /> or <ThemeSwitch />
+SEARCHABLE: theme toggle, dark mode, light mode, theme switcher
+agent-frontmatter:end */
 
 "use client";
 

@@ -1,12 +1,14 @@
-// AGENT: Call-to-action section component
-// PURPOSE: Conversion-focused section with prominent action buttons
-// USAGE: <CTASection /> - typically near page bottom
-// FEATURES:
-//   - Auth-aware CTAs (different for logged in users)
-//   - Corner border decorations
-//   - Responsive design
-//   - i18n support
-// SEARCHABLE: cta section, call to action, conversion section
+/* agent-frontmatter:start
+AGENT: Call-to-action section component
+PURPOSE: Conversion-focused section with prominent action buttons
+USAGE: <CTASection /> - typically near page bottom
+FEATURES:
+  - Auth-aware CTAs (different for logged in users)
+  - Corner border decorations
+  - Responsive design
+  - i18n support
+SEARCHABLE: cta section, call to action, conversion section
+agent-frontmatter:end */
 
 "use client";
 

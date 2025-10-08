@@ -1,12 +1,14 @@
-// AGENT: Development router using oRPC
-// PURPOSE: CRUD operations for dev dashboard demonstrating DB usage
-// USAGE: Used by /dev page for user management and testing
-// FEATURES:
-//   - User CRUD with pagination and filtering
-//   - Batch operations
-//   - Statistics and aggregations
-//   - Demo data seeding
-// SEARCHABLE: dev router, crud api, user management, demo data
+/* agent-frontmatter:start
+AGENT: Development router using oRPC
+PURPOSE: CRUD operations for dev dashboard demonstrating DB usage
+USAGE: Used by /dev page for user management and testing
+FEATURES:
+  - User CRUD with pagination and filtering
+  - Batch operations
+  - Statistics and aggregations
+  - Demo data seeding
+SEARCHABLE: dev router, crud api, user management, demo data
+agent-frontmatter:end */
 
 import { z } from "zod/v4";
 import { publicProcedure, protectedProcedure } from "../procedures";

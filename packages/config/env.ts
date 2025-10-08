@@ -1,12 +1,14 @@
-// AGENT: Config package environment variables
-// PURPOSE: Type-safe Stripe price IDs configuration
-// USAGE: import { env } from '@acme/config/env'
-// VARIABLES:
-//   - NEXT_PUBLIC_PRO_PRICE_ID: Stripe Pro plan monthly price ID
-//   - NEXT_PUBLIC_PRO_ANNUAL_PRICE_ID: Stripe Pro plan annual price ID
-//   - NEXT_PUBLIC_ULTRA_PRICE_ID: Stripe Ultra plan monthly price ID
-//   - NEXT_PUBLIC_ULTRA_ANNUAL_PRICE_ID: Stripe Ultra plan annual price ID
-// SEARCHABLE: config env, stripe price ids, pricing configuration
+/* agent-frontmatter:start
+AGENT: Config package environment variables
+PURPOSE: Type-safe Stripe price IDs configuration
+USAGE: import { env } from '@acme/config/env'
+VARIABLES:
+  - NEXT_PUBLIC_PRO_PRICE_ID: Stripe Pro plan monthly price ID
+  - NEXT_PUBLIC_PRO_ANNUAL_PRICE_ID: Stripe Pro plan annual price ID
+  - NEXT_PUBLIC_ULTRA_PRICE_ID: Stripe Ultra plan monthly price ID
+  - NEXT_PUBLIC_ULTRA_ANNUAL_PRICE_ID: Stripe Ultra plan annual price ID
+SEARCHABLE: config env, stripe price ids, pricing configuration
+agent-frontmatter:end */
 
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod/v4";

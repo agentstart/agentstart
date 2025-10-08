@@ -1,12 +1,14 @@
-// AGENT: oRPC client configuration
-// PURPOSE: Configure oRPC client for browser usage
-// USAGE: Import orpc client for API calls in components
-// FEATURES:
-//   - Automatic type inference from server router
-//   - Support for client components
-//   - Authentication headers handling
-//   - Base URL configuration
-// SEARCHABLE: orpc client, api client, rpc client
+/* agent-frontmatter:start
+AGENT: oRPC client configuration
+PURPOSE: Configure oRPC client for browser usage
+USAGE: Import orpc client for API calls in components
+FEATURES:
+  - Automatic type inference from server router
+  - Support for client components
+  - Authentication headers handling
+  - Base URL configuration
+SEARCHABLE: orpc client, api client, rpc client
+agent-frontmatter:end */
 
 "use client";
 

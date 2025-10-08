@@ -1,12 +1,14 @@
-// AGENT: Individual feedback item component
-// PURPOSE: Display and manage a single feedback entry
-// FEATURES:
-//   - Display feedback content and metadata
-//   - Update status
-//   - Add/edit admin response
-//   - Show mood indicator
-// USAGE: <FeedbackItem feedback={} onStatusUpdate={} onResponseUpdate={} />
-// SEARCHABLE: feedback item, feedback card
+/* agent-frontmatter:start
+AGENT: Individual feedback item component
+PURPOSE: Display and manage a single feedback entry
+FEATURES:
+  - Display feedback content and metadata
+  - Update status
+  - Add/edit admin response
+  - Show mood indicator
+USAGE: <FeedbackItem feedback={} onStatusUpdate={} onResponseUpdate={} />
+SEARCHABLE: feedback item, feedback card
+agent-frontmatter:end */
 
 "use client";
 

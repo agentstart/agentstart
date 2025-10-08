@@ -1,11 +1,13 @@
-// AGENT: Next.js configuration file
-// PURPOSE: Configure Next.js build and runtime behavior
-// FEATURES:
-//   - Environment validation at build time
-//   - Monorepo package transpilation
-//   - Image optimization configuration
-//   - MDX support for Fumadocs
-// SEARCHABLE: next config, build configuration, image domains, mdx, fumadocs
+/* agent-frontmatter:start
+AGENT: Next.js configuration file
+PURPOSE: Configure Next.js build and runtime behavior
+FEATURES:
+  - Environment validation at build time
+  - Monorepo package transpilation
+  - Image optimization configuration
+  - MDX support for Fumadocs
+SEARCHABLE: next config, build configuration, image domains, mdx, fumadocs
+agent-frontmatter:end */
 
 import { createJiti } from "jiti";
 import { createMDX } from "fumadocs-mdx/next";
@@ -18,10 +20,10 @@ await jiti.import("./src/env");
 
 /** @type {import("next").NextConfig} */
 const config = {
-  /**
-   * AGENT: Transpile monorepo packages for hot reloading
-   * These packages will be built by Next.js instead of requiring a separate build step
-   */
+  /* agent-frontmatter:start
+  AGENT: Transpile monorepo packages for hot reloading
+  These packages will be built by Next.js instead of requiring a separate build step
+  agent-frontmatter:end */
   transpilePackages: [
     "@acme/api",
     "@acme/auth",

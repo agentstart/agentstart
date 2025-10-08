@@ -1,13 +1,15 @@
-// AGENT: Feedback management dashboard page
-// PURPOSE: View and manage user feedback submissions
-// FEATURES:
-//   - List all feedback entries
-//   - Filter by status and topic
-//   - Update feedback status
-//   - Add admin responses
-//   - View statistics
-// USAGE: Navigate to /dashboard/feedback
-// SEARCHABLE: feedback dashboard, feedback management, admin feedback
+/* agent-frontmatter:start
+AGENT: Feedback management dashboard page
+PURPOSE: View and manage user feedback submissions
+FEATURES:
+  - List all feedback entries
+  - Filter by status and topic
+  - Update feedback status
+  - Add admin responses
+  - View statistics
+USAGE: Navigate to /dashboard/feedback
+SEARCHABLE: feedback dashboard, feedback management, admin feedback
+agent-frontmatter:end */
 
 "use client";
 

@@ -1,12 +1,14 @@
-// AGENT: Feedback router using oRPC
-// PURPOSE: Handle user feedback submission and retrieval
-// USAGE: Submit and query user feedback entries
-// FEATURES:
-//   - Submit feedback with mood and topic
-//   - Query feedback with filters
-//   - Update feedback status (admin)
-//   - Add response to feedback (admin)
-// SEARCHABLE: feedback router, user feedback, feedback api
+/* agent-frontmatter:start
+AGENT: Feedback router using oRPC
+PURPOSE: Handle user feedback submission and retrieval
+USAGE: Submit and query user feedback entries
+FEATURES:
+  - Submit feedback with mood and topic
+  - Query feedback with filters
+  - Update feedback status (admin)
+  - Add response to feedback (admin)
+SEARCHABLE: feedback router, user feedback, feedback api
+agent-frontmatter:end */
 
 import { z } from "zod/v4";
 import { publicProcedure, protectedProcedure } from "../procedures";
@@ -15,7 +17,9 @@ import { feedback } from "@acme/db/schema";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
-// AGENT: Input validation schemas
+/* agent-frontmatter:start
+AGENT: Input validation schemas
+agent-frontmatter:end */
 const submitFeedbackSchema = z.object({
   topic: z.enum(["bug", "feature", "improvement", "general"]),
   content: z.string().min(1).max(5000),
@@ -36,7 +40,9 @@ const updateFeedbackSchema = z.object({
 });
 
 export const feedbackRouter = {
-  // AGENT: Submit feedback (public endpoint - allows anonymous feedback)
+  /* agent-frontmatter:start
+  AGENT: Submit feedback (public endpoint - allows anonymous feedback)
+  agent-frontmatter:end */
   submit: publicProcedure
     .input(submitFeedbackSchema)
     .handler(async ({ input, context }) => {
@@ -60,7 +66,9 @@ export const feedbackRouter = {
       };
     }),
 
-  // AGENT: List feedback entries
+  /* agent-frontmatter:start
+  AGENT: List feedback entries
+  agent-frontmatter:end */
   list: protectedProcedure
     .input(listFeedbackSchema)
     .handler(async ({ input }) => {
@@ -98,7 +106,9 @@ export const feedbackRouter = {
       };
     }),
 
-  // AGENT: Get single feedback by ID
+  /* agent-frontmatter:start
+  AGENT: Get single feedback by ID
+  agent-frontmatter:end */
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .handler(async ({ input }) => {
@@ -115,7 +125,9 @@ export const feedbackRouter = {
       return result[0];
     }),
 
-  // AGENT: Update feedback (admin only - for status and response)
+  /* agent-frontmatter:start
+  AGENT: Update feedback (admin only - for status and response)
+  agent-frontmatter:end */
   update: protectedProcedure
     .input(updateFeedbackSchema)
     .handler(async ({ input }) => {
@@ -147,7 +159,9 @@ export const feedbackRouter = {
       };
     }),
 
-  // AGENT: Get feedback statistics
+  /* agent-frontmatter:start
+  AGENT: Get feedback statistics
+  agent-frontmatter:end */
   stats: protectedProcedure.handler(async () => {
     const [
       totalCount,

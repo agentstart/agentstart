@@ -1,13 +1,15 @@
-// AGENT: Environment variable configuration with type safety
-// PURPOSE: Validate and type environment variables at build/runtime
-// USAGE: import { env } from '@/env'
-// FEATURES:
-//   - Type-safe env access (env.DATABASE_URL)
-//   - Build-time validation
-//   - Extends auth and email env configs
-//   - Vercel env preset included
-// ERRORS: Will fail at build if required env vars missing
-// SEARCHABLE: environment variables, env config, env validation
+/* agent-frontmatter:start
+AGENT: Environment variable configuration with type safety
+PURPOSE: Validate and type environment variables at build/runtime
+USAGE: import { env } from '@/env'
+FEATURES:
+  - Type-safe env access (env.DATABASE_URL)
+  - Build-time validation
+  - Extends auth and email env configs
+  - Vercel env preset included
+ERRORS: Will fail at build if required env vars missing
+SEARCHABLE: environment variables, env config, env validation
+agent-frontmatter:end */
 
 import { createEnv } from "@t3-oss/env-nextjs";
 import { vercel } from "@t3-oss/env-nextjs/presets-zod";
@@ -19,7 +21,9 @@ import { env as emailEnv } from "@acme/email/env";
 import { env as apiEnv } from "@acme/api/env";
 
 export const env = createEnv({
-  // AGENT: Inherit environment configs from auth, email, api packages and Vercel
+  /* agent-frontmatter:start
+  AGENT: Inherit environment configs from auth, email, api packages and Vercel
+  agent-frontmatter:end */
   extends: [dbEnv, authEnv, emailEnv, apiEnv, vercel()],
   shared: {
     NODE_ENV: z

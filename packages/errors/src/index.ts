@@ -1,7 +1,7 @@
-/**
- * AGENT: Smart error handling system with auto-fix suggestions
- * Automatically identifies errors and provides fix commands
- */
+/* agent-frontmatter:start
+AGENT: Smart error handling system with auto-fix suggestions
+Automatically identifies errors and provides fix commands
+agent-frontmatter:end */
 
 // Standard error class with fix suggestions
 export class AppError extends Error {

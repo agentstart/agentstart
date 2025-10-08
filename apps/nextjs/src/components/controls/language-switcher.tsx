@@ -1,11 +1,13 @@
-// AGENT: Language switcher component for i18n
-// PURPOSE: Allow users to switch between different languages
-// USAGE: <LanguageSwitcher /> - place in navbar or header
-// FEATURES:
-//   - Dropdown select with language options from config
-//   - Preserves current route when switching languages
-//   - Shows language names in their native form
-// SEARCHABLE: language switcher, locale switcher, i18n switcher
+/* agent-frontmatter:start
+AGENT: Language switcher component for i18n
+PURPOSE: Allow users to switch between different languages
+USAGE: <LanguageSwitcher /> - place in navbar or header
+FEATURES:
+  - Dropdown select with language options from config
+  - Preserves current route when switching languages
+  - Shows language names in their native form
+SEARCHABLE: language switcher, locale switcher, i18n switcher
+agent-frontmatter:end */
 
 "use client";
 

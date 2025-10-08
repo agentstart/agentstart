@@ -1,12 +1,14 @@
-// AGENT: oRPC context creation
-// PURPOSE: Create request context with auth, database, and session
-// USAGE: Used by oRPC router for all procedures
-// FEATURES:
-//   - Authentication context from Better Auth
-//   - Database connection
-//   - User session handling
-//   - Request headers access
-// SEARCHABLE: orpc context, api context, auth context
+/* agent-frontmatter:start
+AGENT: oRPC context creation
+PURPOSE: Create request context with auth, database, and session
+USAGE: Used by oRPC router for all procedures
+FEATURES:
+  - Authentication context from Better Auth
+  - Database connection
+  - User session handling
+  - Request headers access
+SEARCHABLE: orpc context, api context, auth context
+agent-frontmatter:end */
 
 import type { Auth, Session } from "@acme/auth";
 import type { db as dbInstance } from "@acme/db/client";

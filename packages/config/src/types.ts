@@ -1,5 +1,7 @@
-// AGENT: Configuration type definitions for agent-stack
-// USAGE: Used by defineConfig function and throughout the application
+/* agent-frontmatter:start
+AGENT: Configuration type definitions for agent-stack
+USAGE: Used by defineConfig function and throughout the application
+agent-frontmatter:end */
 
 import type { StripePlan } from "@better-auth/stripe";
 

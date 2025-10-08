@@ -1,10 +1,12 @@
-// AGENT: Feedback filters component
-// PURPOSE: Filter feedback by status and topic
-// FEATURES:
-//   - Status filter dropdown
-//   - Topic filter dropdown
-// USAGE: <FeedbackFilters onStatusChange={} onTopicChange={} />
-// SEARCHABLE: feedback filters, filter component
+/* agent-frontmatter:start
+AGENT: Feedback filters component
+PURPOSE: Filter feedback by status and topic
+FEATURES:
+  - Status filter dropdown
+  - Topic filter dropdown
+USAGE: <FeedbackFilters onStatusChange={} onTopicChange={} />
+SEARCHABLE: feedback filters, filter component
+agent-frontmatter:end */
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {

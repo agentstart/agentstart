@@ -1,11 +1,13 @@
-// AGENT: Root layout component for the entire application
-// PURPOSE: Sets up global providers, fonts, metadata for all pages
-// FEATURES:
-//   - Global metadata configuration
-//   - Font setup (Geist and Geist Mono)
-//   - All client-side providers (theme, auth, tanstack query, etc.)
-//   - Global CSS import
-// SEARCHABLE: root layout, app layout, metadata, providers
+/* agent-frontmatter:start
+AGENT: Root layout component for the entire application
+PURPOSE: Sets up global providers, fonts, metadata for all pages
+FEATURES:
+  - Global metadata configuration
+  - Font setup (Geist and Geist Mono)
+  - All client-side providers (theme, auth, tanstack query, etc.)
+  - Global CSS import
+SEARCHABLE: root layout, app layout, metadata, providers
+agent-frontmatter:end */
 
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";

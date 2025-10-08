@@ -1,12 +1,14 @@
-// AGENT: Chat message component
-// PURPOSE: Renders individual chat messages with sources and reasoning
-// USAGE: <ChatMessage message={message} status={status} />
-// FEATURES:
-//   - Displays message content with proper formatting
-//   - Shows sources for assistant messages
-//   - Renders reasoning sections
-//   - Action buttons (copy, regenerate, edit)
-// SEARCHABLE: chat message, message component, ai response, actions
+/* agent-frontmatter:start
+AGENT: Chat message component
+PURPOSE: Renders individual chat messages with sources and reasoning
+USAGE: <ChatMessage message={message} status={status} />
+FEATURES:
+  - Displays message content with proper formatting
+  - Shows sources for assistant messages
+  - Renders reasoning sections
+  - Action buttons (copy, regenerate, edit)
+SEARCHABLE: chat message, message component, ai response, actions
+agent-frontmatter:end */
 
 import { Message, MessageContent } from "@/components/ai-elements/message";
 import { Response } from "@/components/ai-elements/response";

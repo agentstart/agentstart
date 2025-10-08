@@ -1,13 +1,15 @@
-// AGENT: Hero section component for landing page
-// PURPOSE: Eye-catching hero section with animated background and CTA buttons
-// USAGE: <HeroSection /> - place at top of landing page
-// FEATURES:
-//   - Animated grid pattern background
-//   - Responsive typography
-//   - Auth-aware CTAs (different for logged in users)
-//   - Corner border decorations
-//   - i18n support
-// SEARCHABLE: hero section, landing hero, homepage hero
+/* agent-frontmatter:start
+AGENT: Hero section component for landing page
+PURPOSE: Eye-catching hero section with animated background and CTA buttons
+USAGE: <HeroSection /> - place at top of landing page
+FEATURES:
+  - Animated grid pattern background
+  - Responsive typography
+  - Auth-aware CTAs (different for logged in users)
+  - Corner border decorations
+  - i18n support
+SEARCHABLE: hero section, landing hero, homepage hero
+agent-frontmatter:end */
 
 "use client";
 
@@ -19,8 +21,10 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { CornerBorders } from "./corner-borders";
 
-// AGENT: Main hero section export
-// CUSTOMIZATION: Modify text, badges, or CTAs as needed
+/* agent-frontmatter:start
+AGENT: Main hero section export
+CUSTOMIZATION: Modify text, badges, or CTAs as needed
+agent-frontmatter:end */
 export const HeroSection = () => {
   const { user } = useAuth();
   const t = useTranslations("sections.hero");

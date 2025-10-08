@@ -1,9 +1,11 @@
-// AGENT: DB package environment variables
-// PURPOSE: Type-safe environment variable configuration
-// USAGE: import { env } from '@acme/db/env'
-// VARIABLES:
-//   - POSTGRES_URL: PostgreSQL database connection URL
-// SEARCHABLE: db env, database url, postgres url
+/* agent-frontmatter:start
+AGENT: DB package environment variables
+PURPOSE: Type-safe environment variable configuration
+USAGE: import { env } from '@acme/db/env'
+VARIABLES:
+  - POSTGRES_URL: PostgreSQL database connection URL
+SEARCHABLE: db env, database url, postgres url
+agent-frontmatter:end */
 
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod/v4";

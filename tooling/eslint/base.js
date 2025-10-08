@@ -1,12 +1,14 @@
-// AGENT: Base ESLint configuration for monorepo
-// PURPOSE: Shared ESLint rules and configurations
-// FEATURES:
-//   - TypeScript ESLint integration
-//   - Unused imports detection
-//   - Environment variable access restrictions
-//   - Gitignore-based file ignoring
-// USAGE: Extended by packages and apps
-// SEARCHABLE: eslint config, linting rules, code quality
+/* agent-frontmatter:start
+AGENT: Base ESLint configuration for monorepo
+PURPOSE: Shared ESLint rules and configurations
+FEATURES:
+  - TypeScript ESLint integration
+  - Unused imports detection
+  - Environment variable access restrictions
+  - Gitignore-based file ignoring
+USAGE: Extended by packages and apps
+SEARCHABLE: eslint config, linting rules, code quality
+agent-frontmatter:end */
 
 /// <reference types="./types.d.ts" />
 
@@ -17,10 +19,10 @@ import { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
 import unusedImports from "eslint-plugin-unused-imports";
 
-/**
- * AGENT: Restrict direct process.env access
- * All packages that leverage t3-env should use this rule
- */
+/* agent-frontmatter:start
+AGENT: Restrict direct process.env access
+All packages that leverage t3-env should use this rule
+agent-frontmatter:end */
 export const restrictEnvAccess = defineConfig(
   { ignores: ["**/env.ts"] },
   {

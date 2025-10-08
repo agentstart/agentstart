@@ -1,5 +1,7 @@
-// AGENT: Convenient exports for specific config sections
-// USAGE: import { siteConfig, pricingConfig, pricingPlans, i18nConfig } from '@acme/config'
+/* agent-frontmatter:start
+AGENT: Convenient exports for specific config sections
+USAGE: import { siteConfig, pricingConfig, pricingPlans, i18nConfig } from '@acme/config'
+agent-frontmatter:end */
 
 import { config } from "./loader";
 import type { PricingPlan, PricingConfig, SiteConfig, I18nConfig } from "./types";

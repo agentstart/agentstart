@@ -1,14 +1,16 @@
-// AGENT: Features grid section using Bento layout with i18n support
-// PURPOSE: Showcase product features in a visually appealing grid
-// USAGE: <FeaturesSection /> - typically after hero section
-// FEATURES:
-//   - Responsive bento grid layout
-//   - Interactive hover effects
-//   - Icon integration with lucide-react
-//   - Corner border decorations
-//   - i18n support using next-intl
-// CUSTOMIZATION: Modify features array to change content
-// SEARCHABLE: features section, bento grid, product features
+/* agent-frontmatter:start
+AGENT: Features grid section using Bento layout with i18n support
+PURPOSE: Showcase product features in a visually appealing grid
+USAGE: <FeaturesSection /> - typically after hero section
+FEATURES:
+  - Responsive bento grid layout
+  - Interactive hover effects
+  - Icon integration with lucide-react
+  - Corner border decorations
+  - i18n support using next-intl
+CUSTOMIZATION: Modify features array to change content
+SEARCHABLE: features section, bento grid, product features
+agent-frontmatter:end */
 
 "use client";
 

@@ -1,15 +1,17 @@
-// AGENT: Pricing section with monthly/annual toggle and i18n support
-// PURPOSE: Display pricing plans with Stripe checkout integration
-// USAGE: <PricingSection /> - typically on pricing page or landing
-// FEATURES:
-//   - Monthly/annual billing toggle
-//   - Stripe checkout integration
-//   - Auth-aware (shows current plan)
-//   - Animated cards with MagicCard
-//   - BorderBeam effect on popular plan
-//   - i18n support using next-intl
-// REQUIRES: Stripe configured, pricing plans in @acme/config
-// SEARCHABLE: pricing section, subscription plans, stripe checkout
+/* agent-frontmatter:start
+AGENT: Pricing section with monthly/annual toggle and i18n support
+PURPOSE: Display pricing plans with Stripe checkout integration
+USAGE: <PricingSection /> - typically on pricing page or landing
+FEATURES:
+  - Monthly/annual billing toggle
+  - Stripe checkout integration
+  - Auth-aware (shows current plan)
+  - Animated cards with MagicCard
+  - BorderBeam effect on popular plan
+  - i18n support using next-intl
+REQUIRES: Stripe configured, pricing plans in @acme/config
+SEARCHABLE: pricing section, subscription plans, stripe checkout
+agent-frontmatter:end */
 
 "use client";
 

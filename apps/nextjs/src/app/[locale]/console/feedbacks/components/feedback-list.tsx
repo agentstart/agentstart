@@ -1,12 +1,14 @@
-// AGENT: Feedback list component
-// PURPOSE: Display list of feedback items with pagination
-// FEATURES:
-//   - Display feedback items
-//   - Loading state
-//   - Empty state
-//   - Pagination controls
-// USAGE: <FeedbackList data={} isLoading={} onPageChange={} />
-// SEARCHABLE: feedback list, pagination component
+/* agent-frontmatter:start
+AGENT: Feedback list component
+PURPOSE: Display list of feedback items with pagination
+FEATURES:
+  - Display feedback items
+  - Loading state
+  - Empty state
+  - Pagination controls
+USAGE: <FeedbackList data={} isLoading={} onPageChange={} />
+SEARCHABLE: feedback list, pagination component
+agent-frontmatter:end */
 
 import { Button } from "@/components/ui/button";
 import {

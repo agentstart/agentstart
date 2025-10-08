@@ -1,13 +1,15 @@
-// AGENT: Client-side providers wrapper component
-// PURPOSE: Wrap application with all necessary client providers
-// USAGE: <Providers>{children}</Providers> in root layout
-// PROVIDERS:
-//   - RootProvider: Fumadocs root provider
-//   - ThemeProvider: Dark/light mode support
-//   - QueryClientProvider: TanStack Query provider
-//   - AuthUIProvider: Authentication UI components
-//   - Toaster: Toast notifications
-// SEARCHABLE: providers, client providers, app providers
+/* agent-frontmatter:start
+AGENT: Client-side providers wrapper component
+PURPOSE: Wrap application with all necessary client providers
+USAGE: <Providers>{children}</Providers> in root layout
+PROVIDERS:
+  - RootProvider: Fumadocs root provider
+  - ThemeProvider: Dark/light mode support
+  - QueryClientProvider: TanStack Query provider
+  - AuthUIProvider: Authentication UI components
+  - Toaster: Toast notifications
+SEARCHABLE: providers, client providers, app providers
+agent-frontmatter:end */
 
 "use client";
 
@@ -23,8 +25,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 
-// AGENT: Main providers wrapper
-// CUSTOMIZATION: Add new providers here as needed
+/* agent-frontmatter:start
+AGENT: Main providers wrapper
+CUSTOMIZATION: Add new providers here as needed
+agent-frontmatter:end */
 export function Providers({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [queryClient] = useState(() => new QueryClient());

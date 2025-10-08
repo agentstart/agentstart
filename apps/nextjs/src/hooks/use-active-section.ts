@@ -1,19 +1,23 @@
-// AGENT: Active section detection hook
-// PURPOSE: Track which section is currently visible in viewport
-// USAGE: const activeSection = useActiveSection(['hero', 'features', 'pricing'])
-// FEATURES:
-//   - Uses Intersection Observer API
-//   - Customizable viewport trigger zone
-//   - Automatic cleanup on unmount
-// RETURNS: ID of currently visible section
-// SEARCHABLE: active section, scroll spy, viewport tracking
+/* agent-frontmatter:start
+AGENT: Active section detection hook
+PURPOSE: Track which section is currently visible in viewport
+USAGE: const activeSection = useActiveSection(['hero', 'features', 'pricing'])
+FEATURES:
+  - Uses Intersection Observer API
+  - Customizable viewport trigger zone
+  - Automatic cleanup on unmount
+RETURNS: ID of currently visible section
+SEARCHABLE: active section, scroll spy, viewport tracking
+agent-frontmatter:end */
 
 "use client";
 
 import { useEffect, useState } from "react";
 
-// AGENT: Hook to detect active section based on scroll position
-// CUSTOMIZATION: Adjust rootMargin to change trigger zone
+/* agent-frontmatter:start
+AGENT: Hook to detect active section based on scroll position
+CUSTOMIZATION: Adjust rootMargin to change trigger zone
+agent-frontmatter:end */
 export function useActiveSection(sectionIds: string[]) {
   const [activeSection, setActiveSection] = useState<string>("");
 

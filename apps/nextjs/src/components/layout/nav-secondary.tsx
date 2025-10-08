@@ -1,10 +1,12 @@
-// AGENT: Secondary navigation component for sidebar
-// PURPOSE: Display secondary navigation items in sidebar
-// USAGE: <NavSecondary items={[{title, url, icon}]} />
-// PROPS:
-//   - items: Array of navigation items with title, url, and icon
-// FEATURES: Icon support, small button style
-// SEARCHABLE: secondary nav, sidebar navigation, menu items
+/* agent-frontmatter:start
+AGENT: Secondary navigation component for sidebar
+PURPOSE: Display secondary navigation items in sidebar
+USAGE: <NavSecondary items={[{title, url, icon}]} />
+PROPS:
+  - items: Array of navigation items with title, url, and icon
+FEATURES: Icon support, small button style
+SEARCHABLE: secondary nav, sidebar navigation, menu items
+agent-frontmatter:end */
 
 import * as React from "react";
 
@@ -17,8 +19,10 @@ import {
 } from "@/components/ui/sidebar";
 import type { NavItem } from "./sidebar-layout";
 
-// AGENT: Secondary navigation menu component
-// CUSTOMIZATION: Pass different items array for different sections
+/* agent-frontmatter:start
+AGENT: Secondary navigation menu component
+CUSTOMIZATION: Pass different items array for different sections
+agent-frontmatter:end */
 export function NavSecondary({
   items,
   ...props

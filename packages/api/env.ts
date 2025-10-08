@@ -1,10 +1,12 @@
-// AGENT: Config package environment variables
-// PURPOSE: Type-safe environment variable configuration
-// USAGE: import { env } from '@acme/api/env'
-// VARIABLES:
-//   - OPENROUTER_API_KEY: OpenRouter API key
-//   - AI_GATEWAY_API_KEY: AI Gateway API key
-// SEARCHABLE: config env, stripe price ids, pricing configuration
+/* agent-frontmatter:start
+AGENT: Config package environment variables
+PURPOSE: Type-safe environment variable configuration
+USAGE: import { env } from '@acme/api/env'
+VARIABLES:
+  - OPENROUTER_API_KEY: OpenRouter API key
+  - AI_GATEWAY_API_KEY: AI Gateway API key
+SEARCHABLE: config env, stripe price ids, pricing configuration
+agent-frontmatter:end */
 
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod/v4";

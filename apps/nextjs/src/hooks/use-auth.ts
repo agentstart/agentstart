@@ -1,6 +1,8 @@
-// AGENT: Universal authentication and subscription state management hook
-// USAGE: import { useAuth } from '@/hooks/use-auth'
-// PROVIDES: User info, subscription status, plan details, permission checks
+/* agent-frontmatter:start
+AGENT: Universal authentication and subscription state management hook
+USAGE: import { useAuth } from '@/hooks/use-auth'
+PROVIDES: User info, subscription status, plan details, permission checks
+agent-frontmatter:end */
 
 import { authClient } from "@/lib/auth/client";
 import { useQuery, queryOptions } from "@tanstack/react-query";

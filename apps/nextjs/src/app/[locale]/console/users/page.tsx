@@ -1,11 +1,13 @@
-// AGENT: Development tools page demonstrating DB and TanStack Query usage
-// PURPOSE: Interactive demo of CRUD operations with optimistic updates
-// FEATURES:
-//   - User list with pagination, search, and filtering
-//   - Create, edit, delete operations with optimistic UI
-//   - Real-time statistics and aggregations
-//   - Demo data seeding
-// SEARCHABLE: dev page, crud demo, tanstack query example, database demo
+/* agent-frontmatter:start
+AGENT: Development tools page demonstrating DB and TanStack Query usage
+PURPOSE: Interactive demo of CRUD operations with optimistic updates
+FEATURES:
+  - User list with pagination, search, and filtering
+  - Create, edit, delete operations with optimistic UI
+  - Real-time statistics and aggregations
+  - Demo data seeding
+SEARCHABLE: dev page, crud demo, tanstack query example, database demo
+agent-frontmatter:end */
 
 "use client";
 

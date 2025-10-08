@@ -1,11 +1,13 @@
-// AGENT: Custom hook for chat streaming functionality
-// PURPOSE: Encapsulates chat streaming logic with oRPC
-// USAGE: const { messages, sendMessage, status } = useChatStream();
-// FEATURES:
-//   - Handles streaming responses from AI
-//   - Manages chat state with AI SDK
-//   - Integrates with oRPC client
-// SEARCHABLE: chat hook, streaming hook, ai chat logic
+/* agent-frontmatter:start
+AGENT: Custom hook for chat streaming functionality
+PURPOSE: Encapsulates chat streaming logic with oRPC
+USAGE: const { messages, sendMessage, status } = useChatStream();
+FEATURES:
+  - Handles streaming responses from AI
+  - Manages chat state with AI SDK
+  - Integrates with oRPC client
+SEARCHABLE: chat hook, streaming hook, ai chat logic
+agent-frontmatter:end */
 
 import { useChat } from "@ai-sdk/react";
 import { eventIteratorToStream } from "@orpc/client";

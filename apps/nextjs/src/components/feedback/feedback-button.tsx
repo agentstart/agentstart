@@ -1,13 +1,15 @@
 "use client";
 
-// AGENT: Feedback button with popover component
-// PURPOSE: Trigger button that opens feedback form in popover
-// FEATURES:
-//   - Floating action button or inline button
-//   - Popover with feedback form
-//   - Customizable position and style
-// USAGE: Place in layout or any page for feedback collection
-// SEARCHABLE: feedback button, feedback popover, user feedback ui
+/* agent-frontmatter:start
+AGENT: Feedback button with popover component
+PURPOSE: Trigger button that opens feedback form in popover
+FEATURES:
+  - Floating action button or inline button
+  - Popover with feedback form
+  - Customizable position and style
+USAGE: Place in layout or any page for feedback collection
+SEARCHABLE: feedback button, feedback popover, user feedback ui
+agent-frontmatter:end */
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";

@@ -1,16 +1,18 @@
-// AGENT: Navigation bar with responsive design and i18n support
-// PURPOSE: Main navigation with auth state, theme toggle, and mobile menu
-// USAGE: <NavBar /> - typically in root layout
-// FEATURES:
-//   - Responsive (desktop menu + mobile sheet)
-//   - Auth-aware (shows user menu or sign in)
-//   - Theme switcher integration
-//   - Scroll-based active section highlighting
-//   - Hide on scroll behavior
-//   - Corner border decorations
-//   - i18n support using next-intl
-// CUSTOMIZATION: Modify routeList for navigation items
-// SEARCHABLE: navbar, navigation, header, menu
+/* agent-frontmatter:start
+AGENT: Navigation bar with responsive design and i18n support
+PURPOSE: Main navigation with auth state, theme toggle, and mobile menu
+USAGE: <NavBar /> - typically in root layout
+FEATURES:
+  - Responsive (desktop menu + mobile sheet)
+  - Auth-aware (shows user menu or sign in)
+  - Theme switcher integration
+  - Scroll-based active section highlighting
+  - Hide on scroll behavior
+  - Corner border decorations
+  - i18n support using next-intl
+CUSTOMIZATION: Modify routeList for navigation items
+SEARCHABLE: navbar, navigation, header, menu
+agent-frontmatter:end */
 
 "use client";
 

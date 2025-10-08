@@ -1,5 +1,7 @@
-// AGENT: Configuration loader that imports agent-stack.config.ts from project root
-// USAGE: Import config directly from this module
+/* agent-frontmatter:start
+AGENT: Configuration loader that imports agent-stack.config.ts from project root
+USAGE: Import config directly from this module
+agent-frontmatter:end */
 
 import type { AppConfig } from "./types";
 

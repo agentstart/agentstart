@@ -1,7 +1,9 @@
 "use client";
 
-// AGENT: Generic sidebar layout component
-// USAGE: Pass navigation data through props for flexible sidebar layouts
+/* agent-frontmatter:start
+AGENT: Generic sidebar layout component
+USAGE: Pass navigation data through props for flexible sidebar layouts
+agent-frontmatter:end */
 
 import * as React from "react";
 import type { LucideIcon } from "lucide-react";

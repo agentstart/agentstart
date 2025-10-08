@@ -1,19 +1,23 @@
-// AGENT: Authentication database schema definitions
-// PURPOSE: Define tables for Better Auth authentication system
-// TABLES:
-//   - users: User accounts
-//   - sessions: Active user sessions
-//   - accounts: OAuth provider accounts
-//   - verifications: Email/phone verifications
-//   - subscriptions: Stripe subscriptions
-// USAGE: import { users, sessions } from '@acme/db/schema'
-// SEARCHABLE: auth schema, user table, session table
+/* agent-frontmatter:start
+AGENT: Authentication database schema definitions
+PURPOSE: Define tables for Better Auth authentication system
+TABLES:
+  - users: User accounts
+  - sessions: Active user sessions
+  - accounts: OAuth provider accounts
+  - verifications: Email/phone verifications
+  - subscriptions: Stripe subscriptions
+USAGE: import { users, sessions } from '@acme/db/schema'
+SEARCHABLE: auth schema, user table, session table
+agent-frontmatter:end */
 
 import { pgTable } from "drizzle-orm/pg-core";
 
-// AGENT: Users table schema
-// FIELDS: id, name, email, emailVerified, image, stripeCustomerId
-// RELATIONS: sessions, accounts, subscriptions
+/* agent-frontmatter:start
+AGENT: Users table schema
+FIELDS: id, name, email, emailVerified, image, stripeCustomerId
+RELATIONS: sessions, accounts, subscriptions
+agent-frontmatter:end */
 export const users = pgTable("users", (t) => ({
   id: t.text().primaryKey(),
   name: t.text().notNull(),

@@ -1,7 +1,9 @@
-// AGENT: Chat constants and configuration
-// PURPOSE: Centralized configuration for chat models
-// USAGE: Import models array in chat components
-// SEARCHABLE: chat models, ai models configuration
+/* agent-frontmatter:start
+AGENT: Chat constants and configuration
+PURPOSE: Centralized configuration for chat models
+USAGE: Import models array in chat components
+SEARCHABLE: chat models, ai models configuration
+agent-frontmatter:end */
 
 export const CHAT_MODELS = [
   {

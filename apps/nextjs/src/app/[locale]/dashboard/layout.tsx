@@ -1,8 +1,10 @@
-// AGENT: Dashboard route group layout
-// PURPOSE: Wrap all dashboard pages with sidebar navigation
-// FEATURES: Consistent dashboard layout with sidebar
-// ROUTES: /dashboard, /dashboard/settings, etc.
-// SEARCHABLE: dashboard layout, dashboard wrapper
+/* agent-frontmatter:start
+AGENT: Dashboard route group layout
+PURPOSE: Wrap all dashboard pages with sidebar navigation
+FEATURES: Consistent dashboard layout with sidebar
+ROUTES: /dashboard, /dashboard/settings, etc.
+SEARCHABLE: dashboard layout, dashboard wrapper
+agent-frontmatter:end */
 
 "use client";
 

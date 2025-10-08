@@ -1,12 +1,14 @@
-// AGENT: Chat input component
-// PURPOSE: Handles message input and chat settings
-// USAGE: <ChatInput onSubmit={handleSubmit} status={status} />
-// FEATURES:
-//   - Text input with auto-resize
-//   - Model selection dropdown
-//   - Web search toggle
-//   - Submit button with loading state
-// SEARCHABLE: chat input, prompt input, message composer
+/* agent-frontmatter:start
+AGENT: Chat input component
+PURPOSE: Handles message input and chat settings
+USAGE: <ChatInput onSubmit={handleSubmit} status={status} />
+FEATURES:
+  - Text input with auto-resize
+  - Model selection dropdown
+  - Web search toggle
+  - Submit button with loading state
+SEARCHABLE: chat input, prompt input, message composer
+agent-frontmatter:end */
 
 import {
   PromptInput,

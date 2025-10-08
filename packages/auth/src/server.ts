@@ -1,14 +1,16 @@
-// AGENT: Server-side authentication initialization with Better Auth
-// PURPOSE: Configure and initialize authentication system with database, email, and Stripe
-// USAGE: const auth = initAuth({ baseUrl, productionUrl, secret, socialProviders })
-// FEATURES:
-//   - Email/password authentication
-//   - OAuth social providers (GitHub, Google)
-//   - Email OTP verification
-//   - Stripe subscription integration
-//   - Password reset flow
-// REQUIRES: Database connection, email service (Resend), optional Stripe
-// SEARCHABLE: auth server, better auth, authentication setup
+/* agent-frontmatter:start
+AGENT: Server-side authentication initialization with Better Auth
+PURPOSE: Configure and initialize authentication system with database, email, and Stripe
+USAGE: const auth = initAuth({ baseUrl, productionUrl, secret, socialProviders })
+FEATURES:
+  - Email/password authentication
+  - OAuth social providers (GitHub, Google)
+  - Email OTP verification
+  - Stripe subscription integration
+  - Password reset flow
+REQUIRES: Database connection, email service (Resend), optional Stripe
+SEARCHABLE: auth server, better auth, authentication setup
+agent-frontmatter:end */
 
 import "server-only";
 
