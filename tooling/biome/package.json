@@ -1,0 +1,12 @@
+{
+  "name": "@agent-stack/biome-config",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "*.json"
+  ],
+  "exports": {
+    "./biome": "./biome.json"
+  }
+}

@@ -7,7 +7,7 @@ USAGE: import { feedback } from '@agent-stack/db/schema'
 SEARCHABLE: feedback schema, feedback table, user feedback
 agent-frontmatter:end */
 
-import { pgTable, pgEnum } from "drizzle-orm/pg-core";
+import { pgEnum, pgTable } from "drizzle-orm/pg-core";
 import { users } from "./auth";
 
 /* agent-frontmatter:start

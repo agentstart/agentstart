@@ -10,10 +10,10 @@ FEATURES:
 SEARCHABLE: orpc route, api handler, next.js route
 agent-frontmatter:end */
 
-import { RPCHandler } from "@orpc/server/fetch";
 import { appRouter, createContext } from "@agent-stack/api";
-import { auth } from "@/lib/auth/server";
 import { db } from "@agent-stack/db/client";
+import { RPCHandler } from "@orpc/server/fetch";
+import { auth } from "@/lib/auth/server";
 
 // Create the RPC handler
 const handler = new RPCHandler(appRouter);

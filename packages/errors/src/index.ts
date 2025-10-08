@@ -204,9 +204,9 @@ export function formatError(error: AppError): string {
 
   if (error.prompt) {
     output += `\n💡 Solution:\n`;
-    output += "─".repeat(40) + "\n";
-    output += error.prompt + "\n";
-    output += "─".repeat(40) + "\n";
+    output += `${"─".repeat(40)}\n`;
+    output += `${error.prompt}\n`;
+    output += `${"─".repeat(40)}\n`;
   }
 
   return output;

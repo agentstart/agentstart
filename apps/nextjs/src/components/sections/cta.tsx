@@ -12,11 +12,11 @@ agent-frontmatter:end */
 
 "use client";
 
+import { ArrowRight, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { ArrowRight, Sparkles } from "lucide-react";
-import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { CornerBorders } from "./corner-borders";
 
 export const CTASection = () => {
@@ -29,18 +29,18 @@ export const CTASection = () => {
 
       <div className="container px-4">
         <div className="mx-auto max-w-3xl">
-          <div className="border-border/40 bg-card border p-8 text-center sm:p-12">
+          <div className="border border-border/40 bg-card p-8 text-center sm:p-12">
             {/* Sparkle decoration */}
-            <div className="bg-primary/10 mb-6 inline-flex h-12 w-12 items-center justify-center rounded-full">
-              <Sparkles className="text-primary h-6 w-6" />
+            <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <Sparkles className="h-6 w-6 text-primary" />
             </div>
 
-            <h2 className="mb-4 text-3xl font-bold sm:text-4xl">
+            <h2 className="mb-4 font-bold text-3xl sm:text-4xl">
               {t("title")}{" "}
               <span className="text-primary">{t("titleHighlight")}</span>
             </h2>
 
-            <p className="text-muted-foreground mx-auto mb-8 max-w-2xl text-lg">
+            <p className="mx-auto mb-8 max-w-2xl text-lg text-muted-foreground">
               {t("description")}
             </p>
 
@@ -48,7 +48,7 @@ export const CTASection = () => {
               <Button
                 asChild
                 size="lg"
-                className="shadow-primary/25 hover:shadow-primary/30 group h-12 rounded-none px-8 font-semibold transition-all"
+                className="group h-12 rounded-none px-8 font-semibold shadow-primary/25 transition-all hover:shadow-primary/30"
               >
                 <Link href={user?.id ? "/dashboard" : "/auth/sign-in"}>
                   {t("getStarted")}

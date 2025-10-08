@@ -8,7 +8,7 @@ EXPORTS:
 SEARCHABLE: api package, router exports, orpc
 agent-frontmatter:end */
 
-// oRPC exports (new API)
-export * from "./router";
 export * from "./context";
 export * from "./procedures";
+// oRPC exports (new API)
+export * from "./router";

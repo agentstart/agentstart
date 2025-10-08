@@ -10,11 +10,11 @@ FEATURES:
 SEARCHABLE: dev router, crud api, user management, demo data
 agent-frontmatter:end */
 
-import { z } from "zod/v4";
-import { publicProcedure, protectedProcedure } from "../procedures";
-import { users, sessions, accounts } from "@agent-stack/db/schema";
-import { eq, desc, asc, like, and, sql } from "drizzle-orm";
+import { accounts, sessions, users } from "@agent-stack/db/schema";
 import { ORPCError } from "@orpc/server";
+import { and, asc, desc, eq, like, sql } from "drizzle-orm";
+import { z } from "zod/v4";
+import { protectedProcedure, publicProcedure } from "../procedures";
 
 // User schemas
 const createUserSchema = z.object({

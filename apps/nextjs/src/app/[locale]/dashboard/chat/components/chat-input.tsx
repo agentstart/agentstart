@@ -10,6 +10,9 @@ FEATURES:
 SEARCHABLE: chat input, prompt input, message composer
 agent-frontmatter:end */
 
+import type { ChatStatus, FileUIPart } from "ai";
+import { GlobeIcon, PaperclipIcon, X } from "lucide-react";
+import { useRef, useState } from "react";
 import {
   PromptInput,
   PromptInputButton,
@@ -23,17 +26,14 @@ import {
   PromptInputToolbar,
   PromptInputTools,
 } from "@/components/ai-elements/prompt-input";
-import { GlobeIcon, PaperclipIcon, X } from "lucide-react";
-import { useChatStore } from "@/stores/chat";
-import { CHAT_MODELS } from "../constants";
-import { useRef, useState } from "react";
-import type { ChatStatus, FileUIPart } from "ai";
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
+import { useChatStore } from "@/stores/chat";
+import { CHAT_MODELS } from "../constants";
 
 interface ChatInputProps {
   onSubmit: ({
@@ -100,24 +100,27 @@ export function ChatInput({ onSubmit, onStop, status }: ChatInputProps) {
     <PromptInput onSubmit={handleSubmit} className="mt-4">
       {files.length > 0 && (
         <div className="flex flex-wrap gap-2 pt-2 pl-3">
-          {files.map((file, index) => (
-            <div
-              key={index}
-              className="bg-muted flex items-center gap-2 rounded-lg px-2 py-1 text-sm"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <PaperclipIcon className="size-4" />
-              <span className="max-w-[120px] truncate">{file.name}</span>
-              <Button
-                onClick={() => handleRemoveFile(index)}
-                className="size-5 rounded-full"
-                size="icon"
-                variant="ghost"
+          {files.map((file, index) => {
+            const fileKey = `${file.name}-${file.lastModified}`;
+            return (
+              <div
+                key={fileKey}
+                className="flex items-center gap-2 rounded-lg bg-muted px-2 py-1 text-sm"
+                onClick={(e) => e.stopPropagation()}
               >
-                <X className="size-3" />
-              </Button>
-            </div>
-          ))}
+                <PaperclipIcon className="size-4" />
+                <span className="max-w-[120px] truncate">{file.name}</span>
+                <Button
+                  onClick={() => handleRemoveFile(index)}
+                  className="size-5 rounded-full"
+                  size="icon"
+                  variant="ghost"
+                >
+                  <X className="size-3" />
+                </Button>
+              </div>
+            );
+          })}
         </div>
       )}
 

@@ -8,13 +8,13 @@ agent-frontmatter:end */
 
 "use client";
 
-import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import {
+  HelpingHand,
+  MessageCircle,
   MessageSquare,
   Settings,
-  MessageCircle,
-  HelpingHand,
 } from "lucide-react";
+import { SidebarLayout } from "@/components/layout/sidebar-layout";
 
 const navMain = [
   {

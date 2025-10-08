@@ -1,10 +1,10 @@
 "use client";
 
 import { motion, useMotionTemplate, useMotionValue } from "motion/react";
-import React, { useCallback, useEffect, useRef } from "react";
-
-import { cn } from "@/lib/utils";
+import type React from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useMount } from "@/hooks/use-mount";
+import { cn } from "@/lib/utils";
 
 interface MagicCardProps {
   children?: React.ReactNode;
@@ -98,8 +98,8 @@ export function MagicCard({
         ref={cardRef}
         className={cn("group relative rounded-[inherit]", className)}
       >
-        <div className="bg-border pointer-events-none absolute inset-0 rounded-[inherit] duration-300" />
-        <div className="bg-background absolute inset-px rounded-[inherit]" />
+        <div className="pointer-events-none absolute inset-0 rounded-[inherit] bg-border duration-300" />
+        <div className="absolute inset-px rounded-[inherit] bg-background" />
         <div className="pointer-events-none absolute inset-px rounded-[inherit]" />
         <div className={cn("relative", containerClassName)}>{children}</div>
       </div>
@@ -112,12 +112,12 @@ export function MagicCard({
       className={cn("group relative rounded-[inherit]", className)}
     >
       <motion.div
-        className="bg-border pointer-events-none absolute inset-0 rounded-[inherit] duration-300 group-hover:opacity-100"
+        className="pointer-events-none absolute inset-0 rounded-[inherit] bg-border duration-300 group-hover:opacity-100"
         style={{
           background: borderBackground,
         }}
       />
-      <div className="bg-background absolute inset-px rounded-[inherit]" />
+      <div className="absolute inset-px rounded-[inherit] bg-background" />
       <motion.div
         className="pointer-events-none absolute inset-px rounded-[inherit] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{

@@ -10,7 +10,23 @@ FEATURES:
 SEARCHABLE: chat message, message component, ai response, actions
 agent-frontmatter:end */
 
+import {
+  type AbstractChat,
+  type ChatStatus,
+  isToolUIPart,
+  type UIMessage,
+} from "ai";
+import { CopyIcon, PencilIcon, RefreshCcwIcon } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Action, Actions } from "@/components/ai-elements/actions";
+import { Image } from "@/components/ai-elements/image";
 import { Message, MessageContent } from "@/components/ai-elements/message";
+import {
+  Reasoning,
+  ReasoningContent,
+  ReasoningTrigger,
+} from "@/components/ai-elements/reasoning";
 import { Response } from "@/components/ai-elements/response";
 import {
   Source,
@@ -19,31 +35,15 @@ import {
   SourcesTrigger,
 } from "@/components/ai-elements/sources";
 import {
-  Reasoning,
-  ReasoningContent,
-  ReasoningTrigger,
-} from "@/components/ai-elements/reasoning";
-import { Actions, Action } from "@/components/ai-elements/actions";
-import { Image } from "@/components/ai-elements/image";
-import {
   Tool,
   ToolContent,
   ToolHeader,
   ToolInput,
   ToolOutput,
 } from "@/components/ai-elements/tool";
-import { CopyIcon, RefreshCcwIcon, PencilIcon } from "lucide-react";
-import {
-  type UIMessage,
-  type ChatStatus,
-  type AbstractChat,
-  isToolUIPart,
-} from "ai";
-import { useState } from "react";
-import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import { Textarea } from "@/components/ui/textarea";
 import { Logo } from "@/components/logo";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 interface ChatMessageProps {
   message: UIMessage;
@@ -164,13 +164,13 @@ export function ChatMessage({
               <div className="flex gap-2">
                 <button
                   onClick={handleSaveEdit}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1 text-sm"
+                  className="rounded-md bg-primary px-3 py-1 text-primary-foreground text-sm hover:bg-primary/90"
                 >
                   Save
                 </button>
                 <button
                   onClick={handleCancelEdit}
-                  className="hover:bg-accent rounded-md border px-3 py-1 text-sm"
+                  className="rounded-md border px-3 py-1 text-sm hover:bg-accent"
                 >
                   Cancel
                 </button>
@@ -197,7 +197,7 @@ export function ChatMessage({
                 );
               } else if (isToolUIPart(part)) {
                 return (
-                  <Tool defaultOpen={true}>
+                  <Tool key={`${message.id}-tool-${i}`} defaultOpen={true}>
                     <ToolHeader type={part.type} state={part.state} />
                     <ToolContent>
                       <ToolInput input={part.input} />
@@ -212,7 +212,6 @@ export function ChatMessage({
                     </ToolContent>
                   </Tool>
                 );
-                return;
               } else {
                 return null;
               }

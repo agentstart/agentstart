@@ -74,7 +74,7 @@ export const CornerBorders = ({
         <div
           key={pos}
           className={cn(
-            "text-foreground/20 pointer-events-none absolute z-10",
+            "pointer-events-none absolute z-10 text-foreground/20",
             positionClasses[pos],
             className,
           )}

@@ -11,25 +11,38 @@ agent-frontmatter:end */
 
 "use client";
 
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import type { User } from "better-auth";
+import {
+  CheckCircle,
+  Clock,
+  Database,
+  Loader2,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Search,
+  Trash,
+  Users,
+} from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -39,42 +52,34 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
 import {
-  Search,
-  Plus,
-  Pencil,
-  Trash,
-  Users,
-  CheckCircle,
-  Clock,
-  RefreshCw,
-  Database,
-  Loader2,
-} from "lucide-react";
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  keepPreviousData,
-} from "@tanstack/react-query";
-import { Checkbox } from "@/components/ui/checkbox";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { orpc } from "@/lib/orpc";
-import type { User } from "better-auth";
 
 // Type definitions
 type ListUsersOutput = Awaited<ReturnType<(typeof orpc.dev.listUsers)["call"]>>; // Will be inferred from oRPC response
+
+const loadingRowKeys = Array.from(
+  { length: 5 },
+  (_, index) => `user-loading-row-${index}`,
+);
 
 export default function DevPage() {
   const queryClient = useQueryClient();
@@ -176,7 +181,7 @@ export default function DevPage() {
 
         return { previousUsers };
       },
-      onError: (err, newUser, context) => {
+      onError: (err, _newUser, context) => {
         // Rollback on error
         queryClient.setQueryData(listUsersQueryKey, context?.previousUsers);
         toast.error(err.message);
@@ -221,7 +226,7 @@ export default function DevPage() {
 
         return { previousUsers };
       },
-      onError: (err, updatedUser, context) => {
+      onError: (err, _updatedUser, context) => {
         queryClient.setQueryData(listUsersQueryKey, context?.previousUsers);
         toast.error(err.message);
       },
@@ -259,7 +264,7 @@ export default function DevPage() {
 
         return { previousUsers };
       },
-      onError: (err, deletedUser, context) => {
+      onError: (err, _deletedUser, context) => {
         queryClient.setQueryData(listUsersQueryKey, context?.previousUsers);
         toast.error(err.message);
       },
@@ -300,7 +305,7 @@ export default function DevPage() {
 
         return { previousUsers };
       },
-      onError: (err, payload, context) => {
+      onError: (err, _payload, context) => {
         queryClient.setQueryData(listUsersQueryKey, context?.previousUsers);
         toast.error(err.message);
       },
@@ -402,7 +407,7 @@ export default function DevPage() {
     <div className="container mx-auto space-y-6 px-6 py-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">Development Dashboard</h1>
+        <h1 className="font-bold text-3xl">Development Dashboard</h1>
         <p className="text-muted-foreground">
           Demonstrating DB operations with TanStack Query
         </p>
@@ -412,11 +417,11 @@ export default function DevPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="text-muted-foreground h-4 w-4" />
+            <CardTitle className="font-medium text-sm">Total Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="font-bold text-2xl">
               {isLoadingStats ? (
                 <Skeleton className="h-8 w-16" />
               ) : (
@@ -431,11 +436,11 @@ export default function DevPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Verified</CardTitle>
-            <CheckCircle className="text-muted-foreground h-4 w-4" />
+            <CardTitle className="font-medium text-sm">Verified</CardTitle>
+            <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="font-bold text-2xl">
               {isLoadingStats ? (
                 <Skeleton className="h-8 w-16" />
               ) : (
@@ -450,11 +455,11 @@ export default function DevPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Query Status</CardTitle>
-            <Clock className="text-muted-foreground h-4 w-4" />
+            <CardTitle className="font-medium text-sm">Query Status</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="font-bold text-2xl">
               {queryClient.isFetching() > 0 ? (
                 <div className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -485,7 +490,7 @@ export default function DevPage() {
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex flex-1 gap-2">
               <div className="relative max-w-sm flex-1">
-                <Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
+                <Search className="absolute top-2.5 left-2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search users..."
                   value={search}
@@ -639,8 +644,8 @@ export default function DevPage() {
                 </TableHeader>
                 <TableBody>
                   {isLoadingUsers ? (
-                    Array.from({ length: 5 }).map((_, i) => (
-                      <TableRow key={i}>
+                    loadingRowKeys.map((loadingKey) => (
+                      <TableRow key={loadingKey}>
                         <TableCell colSpan={7}>
                           <Skeleton className="h-12 w-full" />
                         </TableCell>
@@ -761,40 +766,40 @@ export default function DevPage() {
             <CardContent className="space-y-4">
               <div>
                 <h3 className="mb-2 font-semibold">🔄 Optimistic Updates</h3>
-                <p className="text-muted-foreground mb-2 text-sm">
+                <p className="mb-2 text-muted-foreground text-sm">
                   UI updates immediately before server confirmation
                 </p>
-                <code className="bg-muted block rounded p-2 text-xs">
+                <code className="block rounded bg-muted p-2 text-xs">
                   {`// See create/update/delete mutations above`}
                 </code>
               </div>
 
               <div>
                 <h3 className="mb-2 font-semibold">⏱️ Auto Refetch</h3>
-                <p className="text-muted-foreground mb-2 text-sm">
+                <p className="mb-2 text-muted-foreground text-sm">
                   Data refreshes automatically at intervals
                 </p>
-                <code className="bg-muted block rounded p-2 text-xs">
+                <code className="block rounded bg-muted p-2 text-xs">
                   {`refetchInterval: 30000 // Refetch every 30 seconds`}
                 </code>
               </div>
 
               <div>
                 <h3 className="mb-2 font-semibold">📄 Pagination</h3>
-                <p className="text-muted-foreground mb-2 text-sm">
+                <p className="mb-2 text-muted-foreground text-sm">
                   Keep previous data while loading next page
                 </p>
-                <code className="bg-muted block rounded p-2 text-xs">
+                <code className="block rounded bg-muted p-2 text-xs">
                   {`placeholderData: keepPreviousData // Smooth pagination`}
                 </code>
               </div>
 
               <div>
                 <h3 className="mb-2 font-semibold">🎯 Query Invalidation</h3>
-                <p className="text-muted-foreground mb-2 text-sm">
+                <p className="mb-2 text-muted-foreground text-sm">
                   Selective cache invalidation after mutations
                 </p>
-                <code className="bg-muted block rounded p-2 text-xs">
+                <code className="block rounded bg-muted p-2 text-xs">
                   {`queryClient.invalidateQueries({ queryKey: orpc.dev.listUsers.queryKey() })`}
                 </code>
               </div>
@@ -877,8 +882,8 @@ export default function DevPage() {
               </div>
 
               <div className="space-y-2">
-                <h4 className="text-sm font-semibold">Query Cache Info</h4>
-                <pre className="bg-muted overflow-auto rounded p-3 text-xs">
+                <h4 className="font-semibold text-sm">Query Cache Info</h4>
+                <pre className="overflow-auto rounded bg-muted p-3 text-xs">
                   {JSON.stringify(
                     {
                       activeQueries: queryClient.isFetching(),

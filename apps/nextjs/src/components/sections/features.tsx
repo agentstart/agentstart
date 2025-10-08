@@ -14,13 +14,12 @@ agent-frontmatter:end */
 
 "use client";
 
-import React from "react";
-import { Brain, Sparkles, Shield, GitBranch } from "lucide-react";
+import { Brain, GitBranch, Shield, Sparkles } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { BentoCard, BentoGrid } from "@/components/magicui/bento-grid";
+import { GridPattern } from "@/components/magicui/grid-pattern";
 import { cn } from "@/lib/utils";
 import { CornerBorders } from "./corner-borders";
-import { GridPattern } from "@/components/magicui/grid-pattern";
-import { useTranslations } from "next-intl";
 
 export const FeaturesSection = () => {
   const t = useTranslations("sections.features");
@@ -64,11 +63,11 @@ export const FeaturesSection = () => {
       background: (
         <div>
           <div className="absolute right-4 bottom-4 flex flex-col gap-2 text-sm">
-            <div className="bg-accent flex items-center gap-2 rounded px-3 py-1.5 backdrop-blur-sm">
-              <code className="text-muted-foreground">// AGENT: Purpose</code>
+            <div className="flex items-center gap-2 rounded bg-accent px-3 py-1.5 backdrop-blur-sm">
+              <code className="text-muted-foreground">{`// AGENT: Purpose`}</code>
             </div>
-            <div className="bg-accent flex items-center gap-2 rounded px-3 py-1.5 backdrop-blur-sm">
-              <code className="text-muted-foreground">// USAGE: Examples</code>
+            <div className="flex items-center gap-2 rounded bg-accent px-3 py-1.5 backdrop-blur-sm">
+              <code className="text-muted-foreground">{`// USAGE: Examples`}</code>
             </div>
           </div>
         </div>
@@ -78,7 +77,7 @@ export const FeaturesSection = () => {
   ];
   return (
     <section id="features" className="relative border-b py-24 sm:pt-32">
-      <div className="relative container mx-auto max-w-7xl">
+      <div className="container relative mx-auto max-w-7xl">
         <CornerBorders position="all" />
 
         <div className="relative border-t py-16 text-center 2xl:border-x">
@@ -91,10 +90,10 @@ export const FeaturesSection = () => {
             strokeDasharray={"4 2"}
           />
 
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+          <h2 className="font-bold text-3xl tracking-tight sm:text-4xl md:text-5xl">
             {t("title")}
           </h2>
-          <p className="text-muted-foreground mt-4 text-lg">{t("subtitle")}</p>
+          <p className="mt-4 text-lg text-muted-foreground">{t("subtitle")}</p>
         </div>
 
         {/* Bento Grid */}
@@ -104,7 +103,7 @@ export const FeaturesSection = () => {
               key={feature.name}
               {...feature}
               className={cn(
-                "rounded-none border-0 border-b !shadow-none",
+                "!shadow-none rounded-none border-0 border-b",
                 feature.className,
               )}
             />

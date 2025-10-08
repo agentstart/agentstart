@@ -9,12 +9,11 @@ FEATURES:
 SEARCHABLE: bento grid, feature grid, card layout
 agent-frontmatter:end */
 
-import type { ComponentPropsWithoutRef, ReactNode } from "react";
-
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface BentoGridProps extends ComponentPropsWithoutRef<"div"> {
   children: ReactNode;
@@ -62,16 +61,16 @@ const BentoCard = ({
       // light styles
       "bg-background [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]",
       // dark styles
-      "dark:bg-background transform-gpu dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset] dark:[border:1px_solid_rgba(255,255,255,.1)]",
+      "transform-gpu dark:bg-background dark:[border:1px_solid_rgba(255,255,255,.1)] dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset]",
       className,
     )}
     {...props}
   >
     <div>{background}</div>
     <div className="p-4">
-      <div className="pointer-events-none z-10 flex transform-gpu flex-col gap-1 transition-all duration-300 lg:group-hover:-translate-y-10">
+      <div className="lg:group-hover:-translate-y-10 pointer-events-none z-10 flex transform-gpu flex-col gap-1 transition-all duration-300">
         <Icon className="h-12 w-12 origin-left transform-gpu text-neutral-700 transition-all duration-300 ease-in-out group-hover:scale-75" />
-        <h3 className="text-xl font-semibold text-neutral-700 dark:text-neutral-300">
+        <h3 className="font-semibold text-neutral-700 text-xl dark:text-neutral-300">
           {name}
         </h3>
         <p className="max-w-lg text-neutral-400">{description}</p>
@@ -86,7 +85,7 @@ const BentoCard = ({
           variant="link"
           asChild
           size="sm"
-          className="pointer-events-auto !p-0"
+          className="!p-0 pointer-events-auto"
         >
           <Link href={href}>
             {cta}
@@ -105,7 +104,7 @@ const BentoCard = ({
         variant="link"
         asChild
         size="sm"
-        className="pointer-events-auto !p-0"
+        className="!p-0 pointer-events-auto"
       >
         <Link href={href}>
           {cta}

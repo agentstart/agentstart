@@ -15,24 +15,24 @@ agent-frontmatter:end */
 
 "use client";
 
-import { Check } from "lucide-react";
-import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { toast } from "sonner";
-import { authClient } from "@/lib/auth/client";
-import { useRouter } from "next/navigation";
 import type { PricingPlan } from "@agent-stack/config";
 import { pricingConfig, pricingPlans } from "@agent-stack/config";
-import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
-import { MagicCard } from "@/components/magicui/magic-card";
-import { BorderBeam } from "@/components/magicui/border-beam";
-import { useTheme } from "next-themes";
-import { useAuth } from "@/hooks/use-auth";
-import { CornerBorders } from "./corner-borders";
+import { Check } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useTheme } from "next-themes";
+import { useState } from "react";
+import { toast } from "sonner";
+import { BorderBeam } from "@/components/magicui/border-beam";
+import { MagicCard } from "@/components/magicui/magic-card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/hooks/use-auth";
+import { authClient } from "@/lib/auth/client";
+import { cn } from "@/lib/utils";
+import { CornerBorders } from "./corner-borders";
 
 interface PricingCardProps {
   plan: PricingPlan;
@@ -75,13 +75,13 @@ function PricingCard({
         {/* Price */}
         <div className="mb-2">
           {isEnterprise ? (
-            <div className="text-4xl font-bold">
+            <div className="font-bold text-4xl">
               {t("plans.enterprise.price")}
             </div>
           ) : (
             <div className="flex items-baseline">
-              <span className="text-4xl font-bold">${price}</span>
-              <span className="text-muted-foreground ml-2 text-base">/mo</span>
+              <span className="font-bold text-4xl">${price}</span>
+              <span className="ml-2 text-base text-muted-foreground">/mo</span>
             </div>
           )}
         </div>
@@ -89,14 +89,17 @@ function PricingCard({
         <Separator className="my-6" />
 
         {/* Tagline */}
-        <div className={cn("text-muted-foreground mb-4 text-sm font-semibold")}>
+        <div className={cn("mb-4 font-semibold text-muted-foreground text-sm")}>
           {plan.tagline}
         </div>
 
         {/* Features */}
         <ul className="mb-8 flex-1 space-y-3">
-          {plan.features.map((feature, idx) => (
-            <li key={idx} className="flex items-start gap-2">
+          {plan.features.map((feature) => (
+            <li
+              key={`${plan.name}-${feature}`}
+              className="flex items-start gap-2"
+            >
               <Check
                 className={cn(
                   "mt-1 size-4 flex-shrink-0",
@@ -197,8 +200,8 @@ export function PricingSection() {
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-12 text-center">
-          <h2 className="mb-4 text-5xl font-bold">{t("title")}</h2>
-          <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
+          <h2 className="mb-4 font-bold text-5xl">{t("title")}</h2>
+          <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
             {t("subtitle")}
           </p>
         </div>

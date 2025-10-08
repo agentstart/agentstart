@@ -1,25 +1,23 @@
 {
-  "name": "@agent-stack/config",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "exports": {
-    ".": "./src/index.ts",
-    "./env": "./env.ts"
-  },
-  "license": "MIT",
-  "scripts": {
-    "clean": "rm -rf .turbo node_modules",
-    "lint": "eslint",
-    "type-check": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@better-auth/stripe": "catalog:"
-  },
-  "devDependencies": {
-    "@agent-stack/eslint-config": "*",
-    "@agent-stack/tsconfig": "*",
-    "eslint": "catalog:",
-    "typescript": "catalog:"
-  }
+	"name": "@agent-stack/config",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./env": "./env.ts"
+	},
+	"license": "MIT",
+	"scripts": {
+		"clean": "rm -rf .turbo node_modules",
+		"lint": "bunx biome check --write ./src",
+		"type-check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@better-auth/stripe": "catalog:"
+	},
+	"devDependencies": {
+		"@agent-stack/tsconfig": "*",
+		"typescript": "catalog:"
+	}
 }

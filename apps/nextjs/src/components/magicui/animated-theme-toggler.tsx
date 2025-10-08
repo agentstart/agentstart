@@ -1,11 +1,11 @@
 "use client";
 
 import { Moon, SunDim } from "lucide-react";
+import { useTheme } from "next-themes";
 import { useRef } from "react";
 import { flushSync } from "react-dom";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useTheme } from "next-themes";
+import { cn } from "@/lib/utils";
 
 interface props {
   className?: string;

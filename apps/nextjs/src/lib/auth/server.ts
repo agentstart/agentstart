@@ -11,11 +11,11 @@ agent-frontmatter:end */
 
 import "server-only";
 
-import { cache } from "react";
-import { headers } from "next/headers";
 import { initAuth } from "@agent-stack/auth";
-import { env } from "@/env";
 import { siteConfig } from "@agent-stack/config";
+import { headers } from "next/headers";
+import { cache } from "react";
+import { env } from "@/env";
 
 const baseUrl =
   env.NODE_ENV === "production"

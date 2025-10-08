@@ -9,13 +9,13 @@ FEATURES:
 SEARCHABLE: conversation display, message list, chat history
 agent-frontmatter:end */
 
+import type { AbstractChat, ChatStatus, UIMessage } from "ai";
 import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
 import { Loader } from "@/components/ai-elements/loader";
-import type { UIMessage, ChatStatus, AbstractChat } from "ai";
 import { ChatMessage } from "./chat-message";
 
 interface ChatConversationProps {

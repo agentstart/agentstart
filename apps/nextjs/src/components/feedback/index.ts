@@ -5,5 +5,5 @@ USAGE: import { FeedbackButton } from "@/components/feedback"
 SEARCHABLE: feedback exports, feedback components
 agent-frontmatter:end */
 
-export * from "./feedback-form";
 export * from "./feedback-button";
+export * from "./feedback-form";

@@ -8,7 +8,7 @@ FEATURES: Icon support, small button style
 SEARCHABLE: secondary nav, sidebar navigation, menu items
 agent-frontmatter:end */
 
-import * as React from "react";
+import type * as React from "react";
 
 import {
   SidebarGroup,

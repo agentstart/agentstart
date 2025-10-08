@@ -12,7 +12,16 @@ agent-frontmatter:end */
 
 "use client";
 
-import { useState } from "react";
+import {
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  Frown,
+  Heart,
+  Meh,
+  Smile,
+} from "lucide-react";
+import { type ComponentProps, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -33,15 +42,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  Smile,
-  Frown,
-  Meh,
-  Heart,
-} from "lucide-react";
 import type { FeedbackStatus, FeedbackTopic } from "./feedback-filters";
 
 export type FeedbackMood = "happy" | "satisfied" | "unsatisfied" | "sad";
@@ -52,7 +52,13 @@ const statusConfig = {
   resolved: { label: "Resolved", color: "bg-green-500", icon: CheckCircle },
 };
 
-const topicConfig = {
+const topicConfig: Record<
+  FeedbackTopic,
+  {
+    label: string;
+    color: NonNullable<ComponentProps<typeof Badge>["variant"]>;
+  }
+> = {
   bug: { label: "Bug", color: "destructive" },
   feature: { label: "Feature", color: "default" },
   improvement: { label: "Improvement", color: "secondary" },
@@ -82,6 +88,8 @@ interface FeedbackItemProps {
   onResponseUpdate: (id: string, response: string) => void;
 }
 
+export type FeedbackItemData = FeedbackItemProps["feedback"];
+
 export function FeedbackItem({
   feedback,
   onStatusUpdate,
@@ -99,7 +107,7 @@ export function FeedbackItem({
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <Badge variant={topicConfig[feedback.topic].color as any}>
+              <Badge variant={topicConfig[feedback.topic].color}>
                 {topicConfig[feedback.topic].label}
               </Badge>
               <Badge variant="outline" className="flex items-center gap-1">
@@ -107,7 +115,7 @@ export function FeedbackItem({
                 {statusConfig[feedback.status].label}
               </Badge>
               {MoodIcon && (
-                <MoodIcon className="text-muted-foreground h-4 w-4" />
+                <MoodIcon className="h-4 w-4 text-muted-foreground" />
               )}
             </div>
             <div className="text-muted-foreground text-xs">
@@ -140,8 +148,8 @@ export function FeedbackItem({
         <p className="text-sm">{feedback.content}</p>
 
         {feedback.response && (
-          <div className="bg-muted rounded-md p-3">
-            <p className="mb-1 text-xs font-medium">Admin Response:</p>
+          <div className="rounded-md bg-muted p-3">
+            <p className="mb-1 font-medium text-xs">Admin Response:</p>
             <p className="text-sm">{feedback.response}</p>
           </div>
         )}

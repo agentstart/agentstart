@@ -14,21 +14,21 @@ agent-frontmatter:end */
 
 import "server-only";
 
-import consola from "consola";
-import { betterAuth, type BetterAuthOptions } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { oAuthProxy, emailOTP } from "better-auth/plugins";
-import { stripe as betterAuthStripe } from "@better-auth/stripe";
-import Stripe from "stripe";
-
-import { resend } from "@agent-stack/email";
 import { pricingPlans, siteConfig } from "@agent-stack/config";
+import { db } from "@agent-stack/db/client";
+import { resend } from "@agent-stack/email";
 import {
-  SignInEmail,
   EmailVerificationEmail,
   ForgotPasswordEmail,
+  SignInEmail,
 } from "@agent-stack/email/templates";
-import { db } from "@agent-stack/db/client";
+import { stripe as betterAuthStripe } from "@better-auth/stripe";
+import { type BetterAuthOptions, betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { emailOTP, oAuthProxy } from "better-auth/plugins";
+import consola from "consola";
+import type { ReactElement } from "react";
+import Stripe from "stripe";
 import { env } from "../env";
 
 export interface AuthOptions {
@@ -76,7 +76,7 @@ export function initAuth(options: AuthOptions) {
         sendVerificationOnSignUp: true,
         sendVerificationOTP: async ({ email, otp, type }) => {
           const name = siteConfig.name;
-          let emailTemplate;
+          let emailTemplate: ReactElement;
           let subject = `[${name}] `;
 
           if (type === "sign-in") {
@@ -146,7 +146,7 @@ export function initAuth(options: AuthOptions) {
 }
 
 export const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-  apiVersion: "2025-08-27.basil",
+  apiVersion: "2025-09-30.clover",
   typescript: true,
 });
 

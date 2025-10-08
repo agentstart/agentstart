@@ -16,8 +16,23 @@ agent-frontmatter:end */
 
 "use client";
 
+import { siteConfig } from "@agent-stack/config";
 import { Menu } from "lucide-react";
+import { useMotionValueEvent, useScroll } from "motion/react";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
 import React from "react";
+import { LanguageSwitcher } from "@/components/controls/language-switcher";
+import { ThemeSwitch } from "@/components/controls/theme-switch";
+import { UserDropmenu } from "@/components/controls/user-dropmenu";
+import { FeedbackButton } from "@/components/feedback";
+import { Button } from "@/components/ui/button";
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+} from "@/components/ui/navigation-menu";
 import {
   Sheet,
   SheetContent,
@@ -26,26 +41,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from "@/components/ui/navigation-menu";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { UserDropmenu } from "@/components/controls/user-dropmenu";
-import { ThemeSwitch } from "@/components/controls/theme-switch";
-import { useAuth } from "@/hooks/use-auth";
-import { useScroll, useMotionValueEvent } from "motion/react";
-import { cn } from "@/lib/utils";
 import { useActiveSection } from "@/hooks/use-active-section";
-import { CornerBorders } from "./corner-borders";
-import { siteConfig } from "@agent-stack/config";
+import { useAuth } from "@/hooks/use-auth";
+import { cn } from "@/lib/utils";
 import { Logo } from "../logo";
-import { FeedbackButton } from "@/components/feedback";
-import { useTranslations } from "next-intl";
-import { LanguageSwitcher } from "@/components/controls/language-switcher";
+import { CornerBorders } from "./corner-borders";
 
 interface RouteProps {
   href: string;
@@ -106,7 +106,7 @@ export const Navbar = () => {
           // Default state (not scrolled)
           "top-0 border-transparent": !isScrolled,
           // Scrolled state
-          "border-border bg-background/75 top-4 backdrop-blur-xl": isScrolled,
+          "top-4 border-border bg-background/75 backdrop-blur-xl": isScrolled,
         },
       )}
     >
@@ -127,7 +127,7 @@ export const Navbar = () => {
       >
         <Link
           href="/"
-          className="flex items-center gap-2 text-lg font-semibold"
+          className="flex items-center gap-2 font-semibold text-lg"
         >
           <Logo />
           {siteConfig.name}
@@ -145,7 +145,7 @@ export const Navbar = () => {
 
             <SheetContent
               side="left"
-              className="bg-card border-secondary flex flex-col justify-between"
+              className="flex flex-col justify-between border-secondary bg-card"
             >
               <div>
                 <SheetHeader className="mb-4">
@@ -164,7 +164,7 @@ export const Navbar = () => {
                   {sectionList.map(({ href, label, sectionId }) => (
                     <Link
                       key={sectionId}
-                      className="text-muted-foreground hover:text-foreground px-4 text-xl transition-all duration-300 hover:text-2xl"
+                      className="px-4 text-muted-foreground text-xl transition-all duration-300 hover:text-2xl hover:text-foreground"
                       href={href}
                     >
                       {label}

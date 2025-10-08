@@ -13,22 +13,22 @@ agent-frontmatter:end */
 
 "use client";
 
-import { useState } from "react";
 import {
-  useQuery,
-  useMutation,
-  useQueryClient,
   keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
 } from "@tanstack/react-query";
-import { orpc } from "@/lib/orpc";
+import { useState } from "react";
 import { toast } from "sonner";
-import { FeedbackStats } from "./components/feedback-stats";
-import { FeedbackFilters } from "./components/feedback-filters";
-import { FeedbackList } from "./components/feedback-list";
+import { orpc } from "@/lib/orpc";
 import type {
   FeedbackStatus,
   FeedbackTopic,
 } from "./components/feedback-filters";
+import { FeedbackFilters } from "./components/feedback-filters";
+import { FeedbackList } from "./components/feedback-list";
+import { FeedbackStats } from "./components/feedback-stats";
 
 export default function FeedbackDashboard() {
   const [statusFilter, setStatusFilter] = useState<FeedbackStatus | "all">(
@@ -98,7 +98,7 @@ export default function FeedbackDashboard() {
     <div className="container mx-auto space-y-6 px-6 py-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Feedback Management</h1>
+          <h1 className="font-bold text-3xl">Feedback Management</h1>
           <p className="text-muted-foreground">View and manage user feedback</p>
         </div>
       </div>

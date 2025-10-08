@@ -10,8 +10,8 @@ SEARCHABLE: auth client, client auth, authentication client
 agent-frontmatter:end */
 
 import { stripeClient } from "@better-auth/stripe/client";
-import { createAuthClient } from "better-auth/react";
 import { emailOTPClient } from "better-auth/client/plugins";
+import { createAuthClient } from "better-auth/react";
 
 /* agent-frontmatter:start
 AGENT: Initialize auth client with plugins

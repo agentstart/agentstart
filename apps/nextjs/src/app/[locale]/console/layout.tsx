@@ -8,14 +8,14 @@ agent-frontmatter:end */
 
 "use client";
 
-import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import {
-  SquareTerminal,
-  Settings,
   HelpingHand,
-  MessageSquareHeart,
   LayoutDashboard,
+  MessageSquareHeart,
+  Settings,
+  SquareTerminal,
 } from "lucide-react";
+import { SidebarLayout } from "@/components/layout/sidebar-layout";
 
 const navMain = [
   {

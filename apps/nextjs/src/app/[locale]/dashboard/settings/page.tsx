@@ -13,13 +13,13 @@ SEARCHABLE: settings page, account settings, user profile
 agent-frontmatter:end */
 
 import {
-  UpdateAvatarCard,
-  UpdateNameCard,
   ChangeEmailCard,
   ChangePasswordCard,
+  DeleteAccountCard,
   ProvidersCard,
   SessionsCard,
-  DeleteAccountCard,
+  UpdateAvatarCard,
+  UpdateNameCard,
 } from "@daveyplate/better-auth-ui";
 
 /* agent-frontmatter:start

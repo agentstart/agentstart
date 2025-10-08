@@ -9,13 +9,13 @@ SECTIONS:
 SEARCHABLE: pricing page, subscription plans page
 agent-frontmatter:end */
 
+import { FooterSection } from "@/components/sections/footer";
 import { Navbar } from "@/components/sections/navbar";
 import { PricingSection } from "@/components/sections/pricing";
-import { FooterSection } from "@/components/sections/footer";
 
 export default function Pricing() {
   return (
-    <div className="bg-background relative min-h-screen">
+    <div className="relative min-h-screen bg-background">
       <Navbar />
 
       <PricingSection />

@@ -13,12 +13,12 @@ agent-frontmatter:end */
 
 "use client";
 
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { ArrowUpRight, Clock, Cpu } from "lucide-react";
 import Link from "next/link";
-import { CornerBorders } from "./corner-borders";
 import { useTranslations } from "next-intl";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { CornerBorders } from "./corner-borders";
 
 export const ShowcaseSection = () => {
   const t = useTranslations("sections.showcase");
@@ -70,24 +70,24 @@ export const ShowcaseSection = () => {
           <Badge className="mb-4" variant="outline">
             {t("badge")}
           </Badge>
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+          <h2 className="font-bold text-3xl tracking-tight sm:text-4xl md:text-5xl">
             {t("title")}
           </h2>
-          <p className="text-muted-foreground mt-4 text-lg">{t("subtitle")}</p>
+          <p className="mt-4 text-lg text-muted-foreground">{t("subtitle")}</p>
         </div>
 
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {showcaseItems.map((item, index) => (
-              <Link key={index} href="#" className="group">
+            {showcaseItems.map((item) => (
+              <Link key={item.title} href="#" className="group">
                 <Card className="rounded-none py-0 shadow-none">
                   {/* Image placeholder */}
-                  <div className="bg-muted relative aspect-video overflow-hidden">
+                  <div className="relative aspect-video overflow-hidden bg-muted">
                     <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]" />
 
                     {/* Play button overlay */}
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-                      <div className="bg-background/90 rounded-full p-4 shadow-lg backdrop-blur-sm">
+                      <div className="rounded-full bg-background/90 p-4 shadow-lg backdrop-blur-sm">
                         <ArrowUpRight className="h-6 w-6" />
                       </div>
                     </div>
@@ -108,15 +108,15 @@ export const ShowcaseSection = () => {
                     </div>
 
                     {/* Title & Description */}
-                    <h3 className="group-hover:text-primary mb-2 text-lg font-semibold transition-colors">
+                    <h3 className="mb-2 font-semibold text-lg transition-colors group-hover:text-primary">
                       {item.title}
                     </h3>
-                    <p className="text-muted-foreground line-clamp-2 text-sm">
+                    <p className="line-clamp-2 text-muted-foreground text-sm">
                       {item.description}
                     </p>
 
                     {/* Stats */}
-                    <div className="text-muted-foreground mt-4 flex items-center gap-4 text-xs">
+                    <div className="mt-4 flex items-center gap-4 text-muted-foreground text-xs">
                       <div className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
                         <span>{item.stats.time}</span>
@@ -136,7 +136,7 @@ export const ShowcaseSection = () => {
           <div className="mt-12 text-center">
             <Link
               href="#"
-              className="text-primary inline-flex items-center gap-2 text-sm font-medium hover:underline"
+              className="inline-flex items-center gap-2 font-medium text-primary text-sm hover:underline"
             >
               {t("viewAll")}
               <ArrowUpRight className="h-4 w-4" />

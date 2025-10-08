@@ -14,16 +14,14 @@ agent-frontmatter:end */
 "use client";
 
 import { AuthUIProvider } from "@daveyplate/better-auth-ui";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { ReactNode } from "react";
-import { Suspense } from "react";
 import { ThemeProvider } from "next-themes";
-
-import { authClient } from "@/lib/auth/client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
+import type { ReactNode } from "react";
+import { Suspense, useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
+import { authClient } from "@/lib/auth/client";
 
 /* agent-frontmatter:start
 AGENT: Main providers wrapper

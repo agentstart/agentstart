@@ -4,7 +4,12 @@ USAGE: import { siteConfig, pricingConfig, pricingPlans, i18nConfig } from '@age
 agent-frontmatter:end */
 
 import { config } from "./loader";
-import type { PricingPlan, PricingConfig, SiteConfig, I18nConfig } from "./types";
+import type {
+  I18nConfig,
+  PricingConfig,
+  PricingPlan,
+  SiteConfig,
+} from "./types";
 
 // Site configuration
 export const siteConfig: SiteConfig = config.site || {
@@ -29,9 +34,7 @@ export const pricingPlans: PricingPlan[] = pricingConfig.plans || [];
 // i18n configuration
 export const i18nConfig: I18nConfig = config.i18n || {
   defaultLocale: "en",
-  locales: [
-    { code: "en", name: "English", nativeName: "English" },
-  ],
+  locales: [{ code: "en", name: "English", nativeName: "English" }],
 };
 
 // Full config export

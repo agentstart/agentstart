@@ -10,12 +10,13 @@ agent-frontmatter:end */
 
 "use client";
 
+import { MonitorCog, Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
+import type React from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMount } from "@/hooks/use-mount";
-import { MonitorCog, Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
-import React, { useEffect, useState } from "react";
 
 export function SimpleThemeSwitch() {
   const { theme, setTheme } = useTheme();
@@ -31,7 +32,7 @@ export function SimpleThemeSwitch() {
       <Button
         variant="ghost"
         size="icon"
-        className="text-foreground size-8 rounded-full transition-colors"
+        className="size-8 rounded-full text-foreground transition-colors"
       >
         <Sun className="size-4" />
       </Button>
@@ -54,7 +55,7 @@ export function SimpleThemeSwitch() {
     <Button
       variant="ghost"
       size="icon"
-      className="text-foreground size-8 rounded-full transition-colors"
+      className="size-8 rounded-full text-foreground transition-colors"
       onClick={() => {
         setTheme(nextTheme);
       }}
@@ -94,7 +95,7 @@ function ThemeSwitchTrigger({
 }: React.PropsWithChildren<{ value: string }>) {
   return (
     <TabsTrigger
-      className="dark:data-[state=active]:bg-input flex size-[26px] items-center justify-center rounded-full p-0 transition-colors data-[state=active]:border-none data-[state=active]:bg-white data-[state=inactive]:border-none"
+      className="flex size-[26px] items-center justify-center rounded-full p-0 transition-colors data-[state=active]:border-none data-[state=inactive]:border-none data-[state=active]:bg-white dark:data-[state=active]:bg-input"
       value={value}
     >
       {children}

@@ -11,11 +11,11 @@ agent-frontmatter:end */
 
 import { useChat } from "@ai-sdk/react";
 import { eventIteratorToStream } from "@orpc/client";
+import type { FileUIPart } from "ai";
+import { toast } from "sonner";
 import { client } from "@/lib/orpc";
 import { useChatStore } from "@/stores/chat";
 import type { ChatModel } from "../constants";
-import { toast } from "sonner";
-import type { FileUIPart } from "ai";
 
 export function useChatStream() {
   const { model, webSearch } = useChatStore();

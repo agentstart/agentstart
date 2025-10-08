@@ -9,16 +9,15 @@ FEATURES:
 SEARCHABLE: root layout, app layout, metadata, providers
 agent-frontmatter:end */
 
+import { siteConfig } from "@agent-stack/config";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
-import { notFound } from "next/navigation";
-
-import { cn } from "@/lib/utils";
 import { Providers } from "@/components/layout/client-layout";
-import { siteConfig } from "@agent-stack/config";
 import { routing } from "@/i18n/routing";
+import { cn } from "@/lib/utils";
 
 import "@/app/globals.css";
 
@@ -87,7 +86,7 @@ export default async function RootLayout({
     <html lang={locale} suppressHydrationWarning data-scroll-behavior="smooth">
       <body
         className={cn(
-          "bg-background text-foreground min-h-screen font-sans antialiased",
+          "min-h-screen bg-background font-sans text-foreground antialiased",
           geistSans.variable,
           geistMono.variable,
         )}

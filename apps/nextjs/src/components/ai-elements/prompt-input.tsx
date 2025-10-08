@@ -1,5 +1,13 @@
 "use client";
 
+import type { ChatStatus } from "ai";
+import { ArrowUpIcon, SquareIcon, XIcon } from "lucide-react";
+import type {
+  ComponentProps,
+  HTMLAttributes,
+  KeyboardEventHandler,
+} from "react";
+import { Children } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -10,14 +18,6 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import type { ChatStatus } from "ai";
-import { ArrowUpIcon, SquareIcon, XIcon } from "lucide-react";
-import type {
-  ComponentProps,
-  HTMLAttributes,
-  KeyboardEventHandler,
-} from "react";
-import { Children } from "react";
 import { Loader } from "./loader";
 
 export type PromptInputProps = HTMLAttributes<HTMLFormElement>;
@@ -25,7 +25,7 @@ export type PromptInputProps = HTMLAttributes<HTMLFormElement>;
 export const PromptInput = ({ className, ...props }: PromptInputProps) => (
   <form
     className={cn(
-      "bg-background w-full overflow-hidden rounded-3xl border transition-colors focus-within:border-black/20 dark:focus-within:border-white/20",
+      "w-full overflow-hidden rounded-3xl border bg-background transition-colors focus-within:border-black/20 dark:focus-within:border-white/20",
       className,
     )}
     {...props}
@@ -69,7 +69,7 @@ export const PromptInputTextarea = ({
   return (
     <Textarea
       className={cn(
-        "w-full resize-none rounded-none border-none p-3 pl-4 shadow-none ring-0 outline-none md:text-base",
+        "w-full resize-none rounded-none border-none p-3 pl-4 shadow-none outline-none ring-0 md:text-base",
         "field-sizing-content max-h-[6lh] bg-transparent dark:bg-transparent",
         "focus-visible:ring-0",
         className,
@@ -195,7 +195,7 @@ export const PromptInputModelSelectTrigger = ({
 }: PromptInputModelSelectTriggerProps) => (
   <SelectTrigger
     className={cn(
-      "text-muted-foreground border-none bg-transparent font-medium shadow-none transition-colors",
+      "border-none bg-transparent font-medium text-muted-foreground shadow-none transition-colors",
       'hover:bg-accent hover:text-foreground [&[aria-expanded="true"]]:bg-accent [&[aria-expanded="true"]]:text-foreground',
       className,
     )}

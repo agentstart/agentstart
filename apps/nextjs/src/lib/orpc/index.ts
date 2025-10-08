@@ -12,9 +12,9 @@ agent-frontmatter:end */
 
 "use client";
 
+import type { AppRouter } from "@agent-stack/api";
 import { createORPCClient } from "@orpc/client";
 import { RPCLink } from "@orpc/client/fetch";
-import type { AppRouter } from "@agent-stack/api";
 import type { RouterClient } from "@orpc/server";
 import { createTanstackQueryUtils } from "@orpc/tanstack-query";
 

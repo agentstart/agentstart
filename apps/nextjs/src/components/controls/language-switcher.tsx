@@ -11,6 +11,9 @@ agent-frontmatter:end */
 
 "use client";
 
+import { i18nConfig } from "@agent-stack/config";
+import type { Locale } from "next-intl";
+import { useLocale } from "next-intl";
 import {
   Select,
   SelectContent,
@@ -18,9 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { i18nConfig } from "@agent-stack/config";
-import type { Locale } from "next-intl";
-import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
 
 export function LanguageSwitcher() {
@@ -51,7 +51,7 @@ export function LanguageSwitcher() {
             <div className="flex w-full items-center justify-between">
               <span>{lang.nativeName}</span>
               {lang.code === locale && (
-                <span className="text-muted-foreground ml-2 text-xs">✓</span>
+                <span className="ml-2 text-muted-foreground text-xs">✓</span>
               )}
             </div>
           </SelectItem>

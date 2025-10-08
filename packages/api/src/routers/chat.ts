@@ -9,13 +9,13 @@ FEATURES:
 SEARCHABLE: chat router, ai api, openrouter, streaming chat
 agent-frontmatter:end */
 
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { streamToEventIterator, type } from "@orpc/server";
 import type { UIMessage } from "ai";
 import { convertToModelMessages, streamText, tool } from "ai";
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { protectedProcedure } from "../procedures";
-import { streamToEventIterator, type } from "@orpc/server";
-import { env } from "../../env";
 import { z } from "zod/v4";
+import { env } from "../../env";
+import { protectedProcedure } from "../procedures";
 
 const tools = {
   time: tool({

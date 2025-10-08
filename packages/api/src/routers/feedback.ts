@@ -10,12 +10,12 @@ FEATURES:
 SEARCHABLE: feedback router, user feedback, feedback api
 agent-frontmatter:end */
 
-import { z } from "zod/v4";
-import { publicProcedure, protectedProcedure } from "../procedures";
 import { db } from "@agent-stack/db/client";
 import { feedback } from "@agent-stack/db/schema";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { z } from "zod/v4";
+import { protectedProcedure, publicProcedure } from "../procedures";
 
 /* agent-frontmatter:start
 AGENT: Input validation schemas
@@ -131,7 +131,7 @@ export const feedbackRouter = {
   update: protectedProcedure
     .input(updateFeedbackSchema)
     .handler(async ({ input }) => {
-      const updateData: any = {
+      const updateData: Partial<typeof feedback.$inferInsert> = {
         updatedAt: new Date(),
       };
 
@@ -217,6 +217,16 @@ export const feedbackRouter = {
         .groupBy(feedback.topic),
     ]);
 
+    const moodCounts: Record<string, number> = {};
+    for (const stat of moodStats) {
+      moodCounts[stat.mood] = stat.count;
+    }
+
+    const topicCounts: Record<string, number> = {};
+    for (const stat of topicStats) {
+      topicCounts[stat.topic] = stat.count;
+    }
+
     return {
       total: totalCount,
       byStatus: {
@@ -224,20 +234,8 @@ export const feedbackRouter = {
         reviewed: reviewedCount,
         resolved: resolvedCount,
       },
-      byMood: moodStats.reduce(
-        (acc, stat) => ({
-          ...acc,
-          [stat.mood]: stat.count,
-        }),
-        {},
-      ),
-      byTopic: topicStats.reduce(
-        (acc, stat) => ({
-          ...acc,
-          [stat.topic]: stat.count,
-        }),
-        {},
-      ),
+      byMood: moodCounts,
+      byTopic: topicCounts,
     };
   }),
 };

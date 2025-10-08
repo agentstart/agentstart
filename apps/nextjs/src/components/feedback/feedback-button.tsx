@@ -18,8 +18,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { FeedbackForm } from "./feedback-form";
 import { cn } from "@/lib/utils";
+import { FeedbackForm } from "./feedback-form";
 
 interface FeedbackButtonProps {
   className?: string;
@@ -68,7 +68,7 @@ export function FeedbackButton({
       >
         <div className="space-y-4 p-4">
           <div className="space-y-2">
-            <h4 className="leading-none font-medium">Send Feedback</h4>
+            <h4 className="font-medium leading-none">Send Feedback</h4>
             <p className="text-muted-foreground text-sm">
               We'd love to hear your thoughts!
             </p>

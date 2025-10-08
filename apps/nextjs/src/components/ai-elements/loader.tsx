@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import React from "react";
 
 export interface LoaderProps {
   variant?:
@@ -22,6 +21,10 @@ export interface LoaderProps {
   className?: string;
 }
 
+const spinnerSegmentIndices = Array.from({ length: 12 }, (_, index) => index);
+const bouncingDotIndices = [0, 1, 2] as const;
+const waveSegmentIndices = [0, 1, 2, 3, 4] as const;
+
 export function CircularLoader({
   className,
   size = "md",
@@ -38,7 +41,7 @@ export function CircularLoader({
   return (
     <div
       className={cn(
-        "border-primary animate-spin rounded-full border-2 border-t-transparent",
+        "animate-spin rounded-full border-2 border-primary border-t-transparent",
         sizeClasses[size],
         className,
       )}
@@ -70,19 +73,19 @@ export function ClassicLoader({
   return (
     <div className={cn("relative", sizeClasses[size], className)}>
       <div className="absolute h-full w-full">
-        {[...Array(12)].map((_, i) => (
+        {spinnerSegmentIndices.map((segmentIndex) => (
           <div
-            key={i}
-            className="bg-primary absolute animate-[spinner-fade_1.2s_linear_infinite] rounded-full"
+            key={`spinner-segment-${segmentIndex}`}
+            className="absolute animate-[spinner-fade_1.2s_linear_infinite] rounded-full bg-primary"
             style={{
               top: "0",
               left: "50%",
               marginLeft:
                 size === "sm" ? "-0.75px" : size === "lg" ? "-1.25px" : "-1px",
               transformOrigin: `${size === "sm" ? "0.75px" : size === "lg" ? "1.25px" : "1px"} ${size === "sm" ? "10px" : size === "lg" ? "14px" : "12px"}`,
-              transform: `rotate(${i * 30}deg)`,
+              transform: `rotate(${segmentIndex * 30}deg)`,
               opacity: 0,
-              animationDelay: `${i * 0.1}s`,
+              animationDelay: `${segmentIndex * 0.1}s`,
               height: barSizes[size].height,
               width: barSizes[size].width,
             }}
@@ -109,7 +112,7 @@ export function PulseLoader({
 
   return (
     <div className={cn("relative", sizeClasses[size], className)}>
-      <div className="border-primary absolute inset-0 animate-[thin-pulse_1.5s_ease-in-out_infinite] rounded-full border-2" />
+      <div className="absolute inset-0 animate-[thin-pulse_1.5s_ease-in-out_infinite] rounded-full border-2 border-primary" />
       <span className="sr-only">Loading</span>
     </div>
   );
@@ -131,7 +134,7 @@ export function PulseDotLoader({
   return (
     <div
       className={cn(
-        "bg-primary animate-[pulse-dot_1.2s_ease-in-out_infinite] rounded-full",
+        "animate-[pulse-dot_1.2s_ease-in-out_infinite] rounded-full bg-primary",
         sizeClasses[size],
         className,
       )}
@@ -168,15 +171,15 @@ export function DotsLoader({
         className,
       )}
     >
-      {[...Array(3)].map((_, i) => (
+      {bouncingDotIndices.map((dotIndex) => (
         <div
-          key={i}
+          key={`bounce-dot-${dotIndex}`}
           className={cn(
-            "bg-primary animate-[bounce-dots_1.4s_ease-in-out_infinite] rounded-full",
+            "animate-[bounce-dots_1.4s_ease-in-out_infinite] rounded-full bg-primary",
             dotSizes[size],
           )}
           style={{
-            animationDelay: `${i * 160}ms`,
+            animationDelay: `${dotIndex * 160}ms`,
           }}
         />
       ))}
@@ -212,15 +215,15 @@ export function TypingLoader({
         className,
       )}
     >
-      {[...Array(3)].map((_, i) => (
+      {bouncingDotIndices.map((dotIndex) => (
         <div
-          key={i}
+          key={`typing-dot-${dotIndex}`}
           className={cn(
-            "bg-primary animate-[typing_1s_infinite] rounded-full",
+            "animate-[typing_1s_infinite] rounded-full bg-primary",
             dotSizes[size],
           )}
           style={{
-            animationDelay: `${i * 250}ms`,
+            animationDelay: `${dotIndex * 250}ms`,
           }}
         />
       ))}
@@ -262,16 +265,16 @@ export function WaveLoader({
         className,
       )}
     >
-      {[...Array(5)].map((_, i) => (
+      {waveSegmentIndices.map((segmentIndex) => (
         <div
-          key={i}
+          key={`wave-segment-${segmentIndex}`}
           className={cn(
-            "bg-primary animate-[wave_1s_ease-in-out_infinite] rounded-full",
+            "animate-[wave_1s_ease-in-out_infinite] rounded-full bg-primary",
             barWidths[size],
           )}
           style={{
-            animationDelay: `${i * 100}ms`,
-            height: heights[size][i],
+            animationDelay: `${segmentIndex * 100}ms`,
+            height: heights[size][segmentIndex],
           }}
         />
       ))}
@@ -301,15 +304,15 @@ export function BarsLoader({
 
   return (
     <div className={cn("flex", containerSizes[size], className)}>
-      {[...Array(3)].map((_, i) => (
+      {bouncingDotIndices.map((barIndex) => (
         <div
-          key={i}
+          key={`wave-bar-${barIndex}`}
           className={cn(
-            "bg-primary h-full animate-[wave-bars_1.2s_ease-in-out_infinite]",
+            "h-full animate-[wave-bars_1.2s_ease-in-out_infinite] bg-primary",
             barWidths[size],
           )}
           style={{
-            animationDelay: `${i * 0.2}s`,
+            animationDelay: `${barIndex * 0.2}s`,
           }}
         />
       ))}
@@ -351,12 +354,12 @@ export function TerminalLoader({
         className,
       )}
     >
-      <span className={cn("text-primary font-mono", textSizes[size])}>
+      <span className={cn("font-mono text-primary", textSizes[size])}>
         {">"}
       </span>
       <div
         className={cn(
-          "bg-primary animate-[blink_1s_step-end_infinite]",
+          "animate-[blink_1s_step-end_infinite] bg-primary",
           cursorSizes[size],
         )}
       />
@@ -440,17 +443,17 @@ export function TextDotsLoader({
 
   return (
     <div className={cn("inline-flex items-center", className)}>
-      <span className={cn("text-primary font-medium", textSizes[size])}>
+      <span className={cn("font-medium text-primary", textSizes[size])}>
         {text}
       </span>
       <span className="inline-flex">
-        <span className="text-primary animate-[loading-dots_1.4s_infinite_0.2s]">
+        <span className="animate-[loading-dots_1.4s_infinite_0.2s] text-primary">
           .
         </span>
-        <span className="text-primary animate-[loading-dots_1.4s_infinite_0.4s]">
+        <span className="animate-[loading-dots_1.4s_infinite_0.4s] text-primary">
           .
         </span>
-        <span className="text-primary animate-[loading-dots_1.4s_infinite_0.6s]">
+        <span className="animate-[loading-dots_1.4s_infinite_0.6s] text-primary">
           .
         </span>
       </span>

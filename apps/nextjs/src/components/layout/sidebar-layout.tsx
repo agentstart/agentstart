@@ -5,9 +5,13 @@ AGENT: Generic sidebar layout component
 USAGE: Pass navigation data through props for flexible sidebar layouts
 agent-frontmatter:end */
 
-import * as React from "react";
+import { siteConfig } from "@agent-stack/config";
 import type { LucideIcon } from "lucide-react";
-
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import type * as React from "react";
+import { UserDropmenu } from "@/components/controls/user-dropmenu";
+import { Logo } from "@/components/logo";
 import {
   Sidebar,
   SidebarContent,
@@ -20,12 +24,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import Link from "next/link";
 import { NavSecondary } from "./nav-secondary";
-import { UserDropmenu } from "@/components/controls/user-dropmenu";
-import { siteConfig } from "@agent-stack/config";
-import { Logo } from "@/components/logo";
-import { usePathname } from "next/navigation";
 
 export interface NavItem {
   title: string;
@@ -68,7 +67,7 @@ export function SidebarLayout({
               <SidebarMenuButton size="lg" asChild>
                 <Link href={logoHref}>
                   <Logo background />
-                  <span className="text-base font-semibold">
+                  <span className="font-semibold text-base">
                     {siteConfig.name}
                   </span>
                 </Link>

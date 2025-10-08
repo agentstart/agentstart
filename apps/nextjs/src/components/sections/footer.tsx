@@ -13,14 +13,14 @@ agent-frontmatter:end */
 
 "use client";
 
-import Link from "next/link";
 import { siteConfig } from "@agent-stack/config";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { useTheme } from "next-themes";
+import { ThemeSwitch } from "@/components/controls/theme-switch";
+import { Logo } from "@/components/logo";
 import { CssDotMatrixText } from "@/components/magicui/css-dot-matrix-text";
 import { FlickeringGrid } from "@/components/magicui/flickering-grid";
-import { useTheme } from "next-themes";
-import { Logo } from "@/components/logo";
-import { ThemeSwitch } from "@/components/controls/theme-switch";
-import { useTranslations } from "next-intl";
 
 export const FooterSection = () => {
   const { resolvedTheme } = useTheme();
@@ -36,7 +36,7 @@ export const FooterSection = () => {
             <div>
               <div className="mb-4 flex items-center gap-2">
                 <Logo />
-                <span className="text-lg font-semibold">{siteConfig.name}</span>
+                <span className="font-semibold text-lg">{siteConfig.name}</span>
               </div>
               <p className="text-muted-foreground text-sm">{t("tagline")}</p>
             </div>
@@ -53,7 +53,7 @@ export const FooterSection = () => {
               <li>
                 <Link
                   href="#features"
-                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                  className="text-muted-foreground text-sm transition-colors hover:text-foreground"
                 >
                   {t("product.features")}
                 </Link>
@@ -61,7 +61,7 @@ export const FooterSection = () => {
               <li>
                 <Link
                   href="#pricing"
-                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                  className="text-muted-foreground text-sm transition-colors hover:text-foreground"
                 >
                   {t("product.pricing")}
                 </Link>
@@ -69,7 +69,7 @@ export const FooterSection = () => {
               <li>
                 <Link
                   href="#showcase"
-                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                  className="text-muted-foreground text-sm transition-colors hover:text-foreground"
                 >
                   {t("product.showcase")}
                 </Link>
@@ -77,7 +77,7 @@ export const FooterSection = () => {
               <li>
                 <Link
                   href="/changelog"
-                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                  className="text-muted-foreground text-sm transition-colors hover:text-foreground"
                 >
                   {t("product.changelog")}
                 </Link>
@@ -92,7 +92,7 @@ export const FooterSection = () => {
               <li>
                 <Link
                   href="/docs"
-                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                  className="text-muted-foreground text-sm transition-colors hover:text-foreground"
                 >
                   {t("resources.docs")}
                 </Link>
@@ -100,7 +100,7 @@ export const FooterSection = () => {
               <li>
                 <Link
                   href="/blog"
-                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                  className="text-muted-foreground text-sm transition-colors hover:text-foreground"
                 >
                   {t("resources.blog")}
                 </Link>
@@ -108,7 +108,7 @@ export const FooterSection = () => {
               <li>
                 <Link
                   href="/guides"
-                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                  className="text-muted-foreground text-sm transition-colors hover:text-foreground"
                 >
                   {t("resources.guides")}
                 </Link>
@@ -116,7 +116,7 @@ export const FooterSection = () => {
               <li>
                 <Link
                   href="/support"
-                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                  className="text-muted-foreground text-sm transition-colors hover:text-foreground"
                 >
                   {t("resources.support")}
                 </Link>
@@ -131,7 +131,7 @@ export const FooterSection = () => {
               <li>
                 <Link
                   href="/about"
-                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                  className="text-muted-foreground text-sm transition-colors hover:text-foreground"
                 >
                   {t("company.about")}
                 </Link>
@@ -139,7 +139,7 @@ export const FooterSection = () => {
               <li>
                 <Link
                   href="/privacy"
-                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                  className="text-muted-foreground text-sm transition-colors hover:text-foreground"
                 >
                   {t("company.privacy")}
                 </Link>
@@ -147,7 +147,7 @@ export const FooterSection = () => {
               <li>
                 <Link
                   href="/terms"
-                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                  className="text-muted-foreground text-sm transition-colors hover:text-foreground"
                 >
                   {t("company.terms")}
                 </Link>
@@ -155,7 +155,7 @@ export const FooterSection = () => {
               <li>
                 <Link
                   href="https://github.com"
-                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                  className="text-muted-foreground text-sm transition-colors hover:text-foreground"
                 >
                   GitHub
                 </Link>
@@ -166,7 +166,7 @@ export const FooterSection = () => {
 
         <div className="relative z-0 mt-8 flex h-48 w-full items-center justify-center text-center md:h-64">
           <FlickeringGrid
-            className="absolute inset-0 z-0 size-full mask-t-from-50% mask-radial-[50%_90%] mask-radial-from-80%"
+            className="mask-t-from-50% mask-radial-[50%_90%] mask-radial-from-80% absolute inset-0 z-0 size-full"
             squareSize={2}
             gridGap={4}
             maxOpacity={0.1}
@@ -175,7 +175,7 @@ export const FooterSection = () => {
               resolvedTheme === "dark" ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)"
             }
           />
-          <CssDotMatrixText className="text-6xl font-bold tracking-tighter md:text-8xl">
+          <CssDotMatrixText className="font-bold text-6xl tracking-tighter md:text-8xl">
             {siteConfig.name}
           </CssDotMatrixText>
         </div>

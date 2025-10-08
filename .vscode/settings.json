@@ -1,35 +1,13 @@
-// AGENT: VS Code workspace settings
-// PURPOSE: Configure VS Code for optimal development experience
-// FEATURES:
-//   - Auto-fix ESLint on save
-//   - Format with Prettier on save
-//   - TypeScript workspace version
-//   - Tailwind CSS class sorting
-// SEARCHABLE: vscode settings, editor config, workspace settings
-
 {
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
-  },
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "[typescript,typescriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "editor.formatOnSave": true,
-  "eslint.rules.customizations": [{ "rule": "*", "severity": "warn" }],
-  "eslint.runtime": "node",
-  "eslint.workingDirectories": [
-    { "pattern": "apps/*/" },
-    { "pattern": "packages/*/" },
-    { "pattern": "tooling/*/" }
-  ],
-  "prettier.ignorePath": ".gitignore",
-  "tailwindCSS.classFunctions": ["cva", "cx", "cn"],
-  "typescript.enablePromptUseWorkspaceTsdk": true,
-  "typescript.preferences.autoImportFileExcludePatterns": [
-    "zod/dist/types/index.d.ts", // Force auto-imports to v4
-    "next/router.d.ts",
-    "next/dist/client/router.d.ts"
-  ],
-  "typescript.tsdk": "node_modules/typescript/lib"
+	"editor.formatOnSave": true,
+	"editor.defaultFormatter": "biomejs.biome",
+	"editor.codeActionsOnSave": {
+		"source.fixAll.biome": "explicit",
+		"source.organizeImports.biome": "explicit"
+	},
+	"tailwindCSS.classFunctions": ["cva", "cx", "cn"],
+	"typescript.preferences.autoImportFileExcludePatterns": [
+		"zod/dist/types/index.d.ts"
+	],
+	"typescript.tsdk": "node_modules/typescript/lib"
 }

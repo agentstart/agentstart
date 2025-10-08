@@ -20,13 +20,22 @@ import {
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FeedbackItem } from "./feedback-item";
 import type { FeedbackStatus } from "./feedback-filters";
+import type { FeedbackItemData } from "./feedback-item";
+import { FeedbackItem } from "./feedback-item";
+
+const feedbackSkeletonKeys = [
+  "feedback-skeleton-0",
+  "feedback-skeleton-1",
+  "feedback-skeleton-2",
+  "feedback-skeleton-3",
+  "feedback-skeleton-4",
+] as const;
 
 interface FeedbackListProps {
   data:
     | {
-        items: any[];
+        items: FeedbackItemData[];
         totalCount: number;
         hasMore: boolean;
       }
@@ -62,12 +71,12 @@ export function FeedbackList({
         <ScrollArea className="h-[600px] pr-4">
           {isLoading ? (
             <div className="space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-32" />
+              {feedbackSkeletonKeys.map((key) => (
+                <Skeleton key={key} className="h-32" />
               ))}
             </div>
           ) : data?.items.length === 0 ? (
-            <div className="text-muted-foreground py-8 text-center">
+            <div className="py-8 text-center text-muted-foreground">
               No feedback found
             </div>
           ) : (

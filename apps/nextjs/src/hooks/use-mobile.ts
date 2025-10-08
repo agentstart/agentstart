@@ -1,20 +1,7 @@
-/* agent-frontmatter:start
-AGENT: Mobile detection hook
-PURPOSE: Detect if current viewport is mobile size
-USAGE: const isMobile = useIsMobile()
-RETURNS: true if viewport width < 768px, false otherwise
-FEATURES: Responsive to window resize events
-SEARCHABLE: mobile detection, responsive hook, viewport size
-agent-frontmatter:end */
-
 import * as React from "react";
 
 const MOBILE_BREAKPOINT = 768;
 
-/* agent-frontmatter:start
-AGENT: Hook to detect mobile viewport
-CUSTOMIZATION: Change MOBILE_BREAKPOINT to adjust threshold
-agent-frontmatter:end */
 export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean | undefined>(
     undefined,

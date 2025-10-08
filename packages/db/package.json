@@ -1,39 +1,35 @@
 {
-  "name": "@agent-stack/db",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "exports": {
-    ".": "./src/index.ts",
-    "./client": "./src/client.ts",
-    "./schema": "./src/schema/index.ts",
-    "./env": "./env.ts"
-  },
-  "license": "MIT",
-  "scripts": {
-    "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "format": "prettier --check . --ignore-path ../../.gitignore",
-    "lint": "eslint",
-    "push": "bun with-env drizzle-kit push",
-    "studio": "bun with-env drizzle-kit studio",
-    "typecheck": "tsc --noEmit",
-    "with-env": "dotenv -e ../../.env --"
-  },
-  "dependencies": {
-    "@vercel/postgres": "catalog:",
-    "drizzle-orm": "catalog:",
-    "drizzle-zod": "catalog:",
-    "zod": "catalog:"
-  },
-  "devDependencies": {
-    "@agent-stack/eslint-config": "*",
-    "@agent-stack/prettier-config": "*",
-    "@agent-stack/tsconfig": "*",
-    "dotenv-cli": "catalog:",
-    "drizzle-kit": "catalog:",
-    "eslint": "catalog:",
-    "prettier": "catalog:",
-    "typescript": "catalog:"
-  },
-  "prettier": "@agent-stack/prettier-config"
+	"name": "@agent-stack/db",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./client": "./src/client.ts",
+		"./schema": "./src/schema/index.ts",
+		"./env": "./env.ts"
+	},
+	"license": "MIT",
+	"scripts": {
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"lint": "bunx biome check --write ./src",
+		"push": "bun with-env drizzle-kit push",
+		"studio": "bun with-env drizzle-kit studio",
+		"typecheck": "tsc --noEmit",
+		"with-env": "dotenv -e ../../.env --"
+	},
+	"dependencies": {
+		"@vercel/postgres": "catalog:",
+		"drizzle-orm": "catalog:",
+		"drizzle-zod": "catalog:",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@agent-stack/biome-config": "*",
+		"@agent-stack/tsconfig": "*",
+		"@biomejs/biome": "catalog:",
+		"dotenv-cli": "catalog:",
+		"drizzle-kit": "catalog:",
+		"typescript": "catalog:"
+	}
 }

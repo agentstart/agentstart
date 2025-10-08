@@ -13,6 +13,7 @@ agent-frontmatter:end */
 
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   Accordion,
   AccordionContent,
@@ -20,7 +21,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { CornerBorders } from "./corner-borders";
-import { useTranslations } from "next-intl";
 
 export const FAQSection = () => {
   const t = useTranslations("sections.faq");
@@ -58,10 +58,10 @@ export const FAQSection = () => {
 
       <div className="container px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+          <h2 className="font-bold text-3xl tracking-tight sm:text-4xl md:text-5xl">
             {t("title")}
           </h2>
-          <p className="text-muted-foreground mt-4 text-lg">{t("subtitle")}</p>
+          <p className="mt-4 text-lg text-muted-foreground">{t("subtitle")}</p>
         </div>
 
         <div className="mx-auto mt-16 max-w-3xl">
@@ -70,15 +70,15 @@ export const FAQSection = () => {
               <AccordionItem
                 key={value}
                 value={value}
-                className="border-muted/50 bg-card/50 hover:border-muted data-[state=open]:border-primary/50 border px-6 backdrop-blur transition-all"
+                className="border border-muted/50 bg-card/50 px-6 backdrop-blur transition-all hover:border-muted data-[state=open]:border-primary/50"
               >
                 <AccordionTrigger className="text-left hover:no-underline">
-                  <span className="text-sm font-medium sm:text-base">
+                  <span className="font-medium text-sm sm:text-base">
                     {question}
                   </span>
                 </AccordionTrigger>
 
-                <AccordionContent className="text-muted-foreground pt-2 text-sm">
+                <AccordionContent className="pt-2 text-muted-foreground text-sm">
                   {answer}
                 </AccordionContent>
               </AccordionItem>

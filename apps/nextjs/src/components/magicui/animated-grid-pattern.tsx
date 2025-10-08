@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import type { ComponentPropsWithoutRef } from "react";
+import type { ComponentPropsWithoutRef, SVGProps } from "react";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -12,7 +12,7 @@ export interface AnimatedGridPatternProps
   height?: number;
   x?: number;
   y?: number;
-  strokeDasharray?: any;
+  strokeDasharray?: SVGProps<SVGPathElement>["strokeDasharray"];
   numSquares?: number;
   maxOpacity?: number;
   duration?: number;
@@ -121,18 +121,18 @@ export function AnimatedGridPattern({
       </defs>
       <rect width="100%" height="100%" fill={`url(#${id})`} />
       <svg x={x} y={y} className="overflow-visible">
-        {squares.map(({ pos: [x, y], id }, index) => (
+        {squares.map(({ pos: [x, y], id }) => (
           <motion.rect
             initial={{ opacity: 0 }}
             animate={{ opacity: maxOpacity }}
             transition={{
               duration,
               repeat: 1,
-              delay: index * 0.1,
+              delay: id * 0.1,
               repeatType: "reverse",
             }}
             onAnimationComplete={() => updateSquarePosition(id)}
-            key={`${x}-${y}-${index}`}
+            key={id}
             width={width - 1}
             height={height - 1}
             x={(x ?? 0) * width + 1}

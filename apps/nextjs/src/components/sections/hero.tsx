@@ -13,12 +13,12 @@ agent-frontmatter:end */
 
 "use client";
 
+import { ArrowRight, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { AnimatedGridPattern } from "@/components/magicui/animated-grid-pattern";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { ArrowRight, Sparkles } from "lucide-react";
-import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { CornerBorders } from "./corner-borders";
 
 /* agent-frontmatter:start
@@ -44,30 +44,30 @@ export const HeroSection = () => {
       <CornerBorders position="bl" />
       <CornerBorders position="br" />
 
-      <div className="relative z-10 container">
+      <div className="container relative z-10">
         <div className="mx-auto max-w-5xl">
           <div className="flex flex-col items-center space-y-8 text-center">
             {/* Announcement Badge */}
             <Link
               href="#features"
-              className="border-border/40 bg-background/60 hover:border-primary/40 group inline-flex items-center gap-2 border px-4 py-1.5 text-sm backdrop-blur-sm transition-all"
+              className="group inline-flex items-center gap-2 border border-border/40 bg-background/60 px-4 py-1.5 text-sm backdrop-blur-sm transition-all hover:border-primary/40"
             >
-              <Sparkles className="text-primary h-3.5 w-3.5" />
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
               <span className="text-muted-foreground">{t("badge")}</span>
-              <ArrowRight className="text-muted-foreground h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight className="h-3.5 w-3.5 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
             </Link>
 
             {/* Main Heading */}
             <div className="space-y-4">
-              <h1 className="text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
+              <h1 className="font-bold text-5xl tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
                 <span className="inline-block">{t("title")}</span>
                 <br />
-                <span className="text-primary inline-block">
+                <span className="inline-block text-primary">
                   {t("titleHighlight")}
                 </span>
               </h1>
 
-              <p className="text-muted-foreground mx-auto max-w-2xl text-lg sm:text-xl">
+              <p className="mx-auto max-w-2xl text-lg text-muted-foreground sm:text-xl">
                 {t("description")}
               </p>
             </div>
@@ -77,7 +77,7 @@ export const HeroSection = () => {
               <Button
                 asChild
                 size="lg"
-                className="shadow-primary/25 hover:shadow-primary/30 group h-12 rounded-none px-8 font-semibold transition-all"
+                className="group h-12 rounded-none px-8 font-semibold shadow-primary/25 transition-all hover:shadow-primary/30"
               >
                 <Link href={user?.id ? "/dashboard" : "/auth/sign-in"}>
                   {t("getStarted")}
@@ -96,19 +96,19 @@ export const HeroSection = () => {
             </div>
 
             {/* Stats */}
-            <div className="text-muted-foreground flex items-center gap-8 pt-8 text-sm">
+            <div className="flex items-center gap-8 pt-8 text-muted-foreground text-sm">
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
                 <span>{t("stats.active")}</span>
               </div>
               <div className="hidden items-center gap-2 sm:flex">
-                <span className="text-foreground font-semibold">
+                <span className="font-semibold text-foreground">
                   {t("stats.developersCount")}
                 </span>
                 <span>{t("stats.developers")}</span>
               </div>
               <div className="hidden items-center gap-2 sm:flex">
-                <span className="text-foreground font-semibold">
+                <span className="font-semibold text-foreground">
                   {t("stats.tokensPercent")}
                 </span>
                 <span>{t("stats.lessTokens")}</span>

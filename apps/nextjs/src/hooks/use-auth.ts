@@ -4,9 +4,9 @@ USAGE: import { useAuth } from '@/hooks/use-auth'
 PROVIDES: User info, subscription status, plan details, permission checks
 agent-frontmatter:end */
 
-import { authClient } from "@/lib/auth/client";
-import { useQuery, queryOptions } from "@tanstack/react-query";
 import { pricingPlans } from "@agent-stack/config";
+import { queryOptions, useQuery } from "@tanstack/react-query";
+import { authClient } from "@/lib/auth/client";
 
 /**
  * React Query options for fetching user subscription information

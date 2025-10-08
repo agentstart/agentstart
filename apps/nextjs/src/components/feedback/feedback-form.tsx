@@ -12,10 +12,11 @@ USAGE: Used inside FeedbackPopover component
 SEARCHABLE: feedback form, user feedback, feedback ui
 agent-frontmatter:end */
 
+import { useMutation } from "@tanstack/react-query";
+import { Frown, Heart, Meh, Smile } from "lucide-react";
 import * as React from "react";
-import { Smile, Meh, Frown, Heart } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -23,10 +24,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
 import { orpc } from "@/lib/orpc";
-import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
 
 type FeedbackMood = "happy" | "satisfied" | "unsatisfied" | "sad";
 type FeedbackTopic = "bug" | "feature" | "improvement" | "general";
@@ -118,7 +118,7 @@ export function FeedbackForm({ onSuccess, className }: FeedbackFormProps) {
           className="min-h-[120px] resize-none"
           maxLength={5000}
         />
-        <div className="text-muted-foreground flex items-center justify-between text-xs">
+        <div className="flex items-center justify-between text-muted-foreground text-xs">
           <span>Markdown supported</span>
           <span>{content.length}/5000</span>
         </div>
@@ -133,7 +133,7 @@ export function FeedbackForm({ onSuccess, className }: FeedbackFormProps) {
               type="button"
               onClick={() => setMood(value)}
               className={cn(
-                "hover:bg-muted rounded-full p-2 transition-all",
+                "rounded-full p-2 transition-all hover:bg-muted",
                 mood === value && "bg-primary/10 text-primary",
               )}
               aria-label={label}

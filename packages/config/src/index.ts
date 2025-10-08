@@ -5,9 +5,13 @@ agent-frontmatter:end */
 
 // Export defineConfig function for use in agent-stack.config.ts
 export { defineConfig } from "./define-config";
-
+// Export convenient config sections
+export {
+  appConfig,
+  i18nConfig,
+  pricingConfig,
+  pricingPlans,
+  siteConfig,
+} from "./exports";
 // Export types
 export * from "./types";
-
-// Export convenient config sections
-export { siteConfig, pricingConfig, pricingPlans, i18nConfig, appConfig } from "./exports";

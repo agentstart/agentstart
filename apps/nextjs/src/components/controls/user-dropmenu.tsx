@@ -17,8 +17,6 @@ import { Home, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { match } from "ts-pattern";
-
-import { authClient } from "@/lib/auth/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +30,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
+import { authClient } from "@/lib/auth/client";
 import { ThemeSwitch } from "./theme-switch";
 
 interface UserDropmenuProps {
@@ -117,7 +116,7 @@ export function UserDropmenu({ size = "default" }: UserDropmenuProps) {
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col space-y-1">
-                <p className="text-sm leading-none font-medium">
+                <p className="font-medium text-sm leading-none">
                   {user.name ?? "User"}
                 </p>
                 <p className="text-muted-foreground text-xs leading-none">
@@ -134,7 +133,7 @@ export function UserDropmenu({ size = "default" }: UserDropmenuProps) {
       >
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-2">
-            <p className="text-base leading-none font-medium">
+            <p className="font-medium text-base leading-none">
               {user.name ?? "User"}
             </p>
             <p className="text-muted-foreground text-xs leading-none">

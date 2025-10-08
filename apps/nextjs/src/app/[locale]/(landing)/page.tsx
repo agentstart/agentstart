@@ -13,22 +13,22 @@ SECTIONS:
 SEARCHABLE: landing page, homepage, marketing page
 agent-frontmatter:end */
 
-import { Navbar } from "@/components/sections/navbar";
-import { HeroSection } from "@/components/sections/hero";
-import { FeaturesSection } from "@/components/sections/features";
-import { ShowcaseSection } from "@/components/sections/showcase";
-import { PricingSection } from "@/components/sections/pricing";
 import { CTASection } from "@/components/sections/cta";
 import { FAQSection } from "@/components/sections/faq";
+import { FeaturesSection } from "@/components/sections/features";
 import { FooterSection } from "@/components/sections/footer";
+import { HeroSection } from "@/components/sections/hero";
+import { Navbar } from "@/components/sections/navbar";
+import { PricingSection } from "@/components/sections/pricing";
+import { ShowcaseSection } from "@/components/sections/showcase";
 
 export default function Home() {
   return (
     <div className="relative">
       {/* bg */}
-      <div className="text-border/20 absolute inset-0 bg-neutral-100 [background-image:repeating-linear-gradient(45deg,currentColor_0_1px,#0000_50%)] bg-[size:10px_10px] dark:bg-transparent"></div>
+      <div className="absolute inset-0 bg-[size:10px_10px] bg-neutral-100 text-border/20 [background-image:repeating-linear-gradient(45deg,currentColor_0_1px,#0000_50%)] dark:bg-transparent"></div>
 
-      <div className="bg-background border-border relative container min-h-screen w-[calc(100%-2rem)] border-x sm:w-full">
+      <div className="container relative min-h-screen w-[calc(100%-2rem)] border-border border-x bg-background sm:w-full">
         <Navbar />
         <HeroSection />
         <FeaturesSection />
