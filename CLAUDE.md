@@ -106,6 +106,8 @@ export default defineAgentStackConfig({
 
 ## Metadata Comment Standard
 
+**IMPORTANT: Every new TypeScript or JavaScript file MUST start with an `agent-frontmatter` block.** This is a mandatory requirement for all code files in the project.
+
 All TypeScript and JavaScript entry points should start with the sentinel-wrapped metadata block so agents and scripts can identify file purpose:
 
 ```ts
@@ -124,6 +126,16 @@ agent-frontmatter:end */
 
 Keep field names and ordering consistent across files. Expand `FEATURES` or `EXPORTS` only when relevant.
 
+### Code Navigation & Discovery
+
+Almost every file includes an `agent-frontmatter` block with functional descriptions and searchable keywords. When you need to find relevant code:
+
+1. Use the Grep tool to search for keywords in the `SEARCHABLE` field (e.g., `grep "agent handler" --output_mode=files_with_matches`)
+2. Once you locate candidate files, read the `agent-frontmatter` block at the top to understand the file's purpose, exports, and features
+3. This approach helps you navigate the codebase efficiently without reading every file
+
+The `SEARCHABLE` field should contain comma-separated keywords that describe the file's domain, functionality, and common use cases.
+
 ## Environment & Secrets
 
 - `E2B_API_KEY`: access to sandboxed code execution.
@@ -137,10 +149,13 @@ Keep field names and ordering consistent across files. Expand `FEATURES` or `EXP
 2. Run `npx agent-stack/cli generate` after schema changes to keep memory tables aligned.
 3. Use the template-specific dev server (`npm run dev:express`, `npm run dev:next`) to test interactions.
 4. Verify memory adapters with integration tests (see `/tooling/testing`).
+5. **Always run `bun run lint` and `bun run typecheck` after completing changes** to ensure code quality and type safety before committing.
+6. Unit tests are optional overall, but add or update them when you touch stability-critical paths (adapters, persistence flows, core runtime hooks) so regressions surface early.
 
 ## Code Style Guardrails
 
 - Prefer precise TypeScript types and `unknown` over `any`. Unless a spec explicitly allows it, `any` is off limits.
+- When a function needs more than two parameters, wrap them in a single options object so call sites remain readable and extensible.
 
 ## Roadmap Snapshot
 

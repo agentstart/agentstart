@@ -21,6 +21,7 @@ import {
   type AdapterFindOneArgs,
   type AdapterUpdateArgs,
   type AdapterUpdateManyArgs,
+  type AdapterUpsertArgs,
   createAdapterFactory,
   type DatabaseAdapterMethods,
 } from "./create-database-adapter";
@@ -86,6 +87,13 @@ interface PrismaUpdateManyArgs {
   data: Record<string, unknown>;
 }
 
+interface PrismaUpsertArgs {
+  where: Record<string, unknown>;
+  create: Record<string, unknown>;
+  update: Record<string, unknown>;
+  select?: Record<string, boolean>;
+}
+
 interface PrismaDeleteArgs {
   where: Record<string, unknown>;
   select?: Record<string, boolean>;
@@ -106,6 +114,7 @@ interface PrismaModelDelegate {
   count(args: PrismaCountArgs): Promise<number>;
   update(args: PrismaUpdateArgs): Promise<Record<string, unknown>>;
   updateMany(args: PrismaUpdateManyArgs): Promise<PrismaBulkResult>;
+  upsert(args: PrismaUpsertArgs): Promise<Record<string, unknown>>;
   delete(args: PrismaDeleteArgs): Promise<Record<string, unknown> | null>;
   deleteMany(args: PrismaDeleteManyArgs): Promise<PrismaBulkResult>;
 }
@@ -237,6 +246,39 @@ function buildPrismaWhere(
   return prismaWhere;
 }
 
+function isEqualityCondition(condition: AdapterWhereCondition): boolean {
+  const operator = condition.operator ?? "eq";
+  if (operator !== "eq") {
+    return false;
+  }
+  return condition.connector !== "OR";
+}
+
+function buildPrismaUniqueWhere(
+  conditions: AdapterWhereCondition[],
+  fieldNormalizer: (field: string) => string,
+): Record<string, unknown> {
+  if (conditions.length === 0) {
+    throw new AgentStackError(
+      "DB_ADAPTER_UPSERT_WHERE_REQUIRED",
+      "Upsert operations require a where clause with equality conditions.",
+    );
+  }
+
+  if (!conditions.every(isEqualityCondition)) {
+    throw new AgentStackError(
+      "DB_ADAPTER_INVALID_WHERE",
+      "Upsert where clauses may only include equality comparisons joined with AND.",
+    );
+  }
+
+  return conditions.reduce<Record<string, unknown>>((acc, condition) => {
+    const fieldName = fieldNormalizer(condition.field);
+    acc[fieldName] = condition.value;
+    return acc;
+  }, {});
+}
+
 // Prisma expects boolean selects (field -> true). We reuse the normalization hook
 // so adapters expose consistent field naming behaviour.
 function convertSelect(
@@ -253,10 +295,7 @@ function convertSelect(
   return Object.fromEntries(mappedEntries);
 }
 
-const basePrismaAdapter = createAdapterFactory<
-  PrismaAdapterResolvedOptions,
-  DatabaseAdapterMethods
->({
+const basePrismaAdapter = createAdapterFactory<PrismaAdapterResolvedOptions>({
   hooks: {
     logger: createDebugLoggerHook<PrismaAdapterResolvedOptions>("prisma"),
     normalizeModelName: ({ options, model }) => {
@@ -360,6 +399,23 @@ const basePrismaAdapter = createAdapterFactory<
           );
           return delegate.count({
             where: prismaWhere,
+          });
+        },
+      ),
+      upsert: wrapOperation<AdapterUpsertArgs, unknown>(
+        "upsert",
+        async ({ model, where, create, update, select }) => {
+          const modelName = normalizeModelName(model);
+          const delegate = getModelDelegate(client, modelName);
+          const normalizedWhere = normalizeWhereInput(where);
+          const uniqueWhere = buildPrismaUniqueWhere(normalizedWhere, (field) =>
+            normalizeFieldName(modelName, field),
+          );
+          return delegate.upsert({
+            where: uniqueWhere,
+            create,
+            update,
+            select: convertSelect(select, modelName, normalizeFieldName),
           });
         },
       ),

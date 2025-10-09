@@ -21,6 +21,7 @@ import {
   type AdapterFindOneArgs,
   type AdapterUpdateArgs,
   type AdapterUpdateManyArgs,
+  type AdapterUpsertArgs,
   createAdapterFactory,
   type DatabaseAdapterMethods,
 } from "./create-database-adapter";
@@ -172,10 +173,43 @@ function buildWhereExpression(
   return andExpression ?? orExpression ?? undefined;
 }
 
-const baseKyselyAdapter = createAdapterFactory<
-  KyselyAdapterResolvedOptions,
-  DatabaseAdapterMethods
->({
+function isEqualityCondition(condition: AdapterWhereCondition): boolean {
+  const operator = condition.operator ?? "eq";
+  if (operator !== "eq") {
+    return false;
+  }
+  return condition.connector !== "OR";
+}
+
+function resolveConflictFields(
+  conditions: AdapterWhereCondition[],
+  fieldNormalizer: (field: string) => string,
+): string[] | null {
+  if (conditions.length === 0) {
+    return null;
+  }
+  if (!conditions.every(isEqualityCondition)) {
+    return null;
+  }
+  const fields = conditions.map((condition) =>
+    fieldNormalizer(condition.field),
+  );
+  if (fields.length === 0) {
+    return null;
+  }
+  const unique = new Set(fields);
+  // `onConflict` requires stable ordering. Preserve original order by filtering
+  // duplicates while respecting first occurrence.
+  return fields.filter((field) => {
+    if (!unique.has(field)) {
+      return false;
+    }
+    unique.delete(field);
+    return true;
+  });
+}
+
+const baseKyselyAdapter = createAdapterFactory<KyselyAdapterResolvedOptions>({
   hooks: {
     logger: createDebugLoggerHook<KyselyAdapterResolvedOptions>("kysely"),
     normalizeModelName: ({ options, model }) =>
@@ -254,6 +288,120 @@ const baseKyselyAdapter = createAdapterFactory<
               .executeTakeFirst();
           }
           return data;
+        },
+      ),
+      upsert: wrapOperation<AdapterUpsertArgs, unknown>(
+        "upsert",
+        async ({ model, where, create, update }) => {
+          const tableName = normalizeModelName(model);
+          const tableKey = toTableKey(tableName);
+          const normalizedWhere = normalizeWhereInput(where);
+          const expression = buildWhereExpression(
+            tableName,
+            normalizedWhere,
+            (field) => normalizeFieldName(tableName, field),
+          );
+
+          const fetchCurrent = async () => {
+            let query = client.selectFrom(tableKey).selectAll();
+            if (expression) {
+              query = query.where(expression);
+            }
+            return (await query.executeTakeFirst()) ?? null;
+          };
+
+          const conflictFields = resolveConflictFields(
+            normalizedWhere,
+            (field) => normalizeFieldName(tableName, field),
+          );
+
+          if (conflictFields && conflictFields.length > 0) {
+            const insertBuilderBase = client
+              .insertInto(tableKey)
+              .values(create as Record<string, unknown>);
+            const upsertCapable =
+              insertBuilderBase as typeof insertBuilderBase & {
+                onConflict?: (
+                  callback: (builder: {
+                    columns(columns: string[]): {
+                      doUpdateSet(
+                        changes: Record<string, unknown>,
+                      ): typeof insertBuilderBase;
+                    };
+                  }) => typeof insertBuilderBase,
+                ) => typeof insertBuilderBase;
+              };
+            if (typeof upsertCapable.onConflict === "function") {
+              const insertBuilder = upsertCapable.onConflict((oc) =>
+                oc
+                  .columns(conflictFields)
+                  .doUpdateSet(update as Record<string, unknown>),
+              );
+              try {
+                const upserted = await insertBuilder
+                  .returningAll()
+                  .executeTakeFirst();
+                if (upserted) {
+                  return upserted;
+                }
+              } catch {
+                await insertBuilder.executeTakeFirst();
+              }
+              const refetched = await fetchCurrent();
+              if (refetched) {
+                return refetched;
+              }
+              return { ...create, ...update };
+            }
+          }
+
+          const existing = await fetchCurrent();
+          if (existing) {
+            let builder = client
+              .updateTable(tableKey)
+              .set(update as Record<string, unknown>);
+            if (expression) {
+              builder = builder.where(expression);
+            }
+            let updatedCount: number | undefined;
+            try {
+              const updated = await builder.returningAll().executeTakeFirst();
+              if (updated) {
+                return updated;
+              }
+            } catch {
+              const outcome = (await builder.executeTakeFirst()) as
+                | UpdateResult
+                | undefined;
+              if (outcome) {
+                updatedCount = Number(outcome.numUpdatedRows);
+              }
+            }
+
+            if (updatedCount === undefined || updatedCount > 0) {
+              const refetched = await fetchCurrent();
+              if (refetched) {
+                return refetched;
+              }
+            }
+          }
+
+          const insertBuilder = client
+            .insertInto(tableKey)
+            .values(create as Record<string, unknown>);
+          try {
+            const inserted = await insertBuilder
+              .returningAll()
+              .executeTakeFirst();
+            if (inserted) {
+              return inserted;
+            }
+          } catch {
+            await insertBuilder.executeTakeFirst();
+          }
+
+          const refetched = await fetchCurrent();
+          return refetched ?? create;
         },
       ),
       findOne: wrapOperation<AdapterFindOneArgs, unknown | null>(

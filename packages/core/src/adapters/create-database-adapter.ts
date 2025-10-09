@@ -78,6 +78,18 @@ export interface AdapterCountArgs<TWhere = unknown> {
   where?: TWhere;
 }
 
+export interface AdapterUpsertArgs<
+  TCreate extends Record<string, unknown> = Record<string, unknown>,
+  TUpdate extends Record<string, unknown> = Record<string, unknown>,
+  TWhere = unknown,
+> {
+  model: string;
+  where: TWhere;
+  create: TCreate;
+  update: TUpdate;
+  select?: string[];
+}
+
 export interface AdapterCreateSchemaArgs {
   tables: Record<string, unknown>;
   file?: string;
@@ -85,6 +97,7 @@ export interface AdapterCreateSchemaArgs {
 
 export interface DatabaseAdapterMethods {
   create(args: AdapterCreateArgs): Promise<unknown>;
+  upsert(args: AdapterUpsertArgs): Promise<unknown>;
   update(args: AdapterUpdateArgs): Promise<unknown>;
   updateMany(args: AdapterUpdateManyArgs): Promise<number>;
   delete(args: AdapterDeleteArgs): Promise<unknown>;
@@ -131,7 +144,7 @@ export interface AdapterFactoryContext<TOptions> {
 
 export interface DatabaseAdapterDefinition<
   TOptions,
-  TMethods extends DatabaseAdapterMethods,
+  TMethods extends DatabaseAdapterMethods = DatabaseAdapterMethods,
 > {
   config:
     | DatabaseAdapterMetadata
@@ -142,7 +155,7 @@ export interface DatabaseAdapterDefinition<
 
 export interface DatabaseAdapterInstance<
   TOptions,
-  TMethods extends DatabaseAdapterMethods,
+  TMethods extends DatabaseAdapterMethods = DatabaseAdapterMethods,
 > {
   config: DatabaseAdapterMetadata;
   initialize: (
@@ -168,7 +181,7 @@ export interface DatabaseAdapterInstance<
  */
 export function createAdapterFactory<
   TOptions,
-  TMethods extends DatabaseAdapterMethods,
+  TMethods extends DatabaseAdapterMethods = DatabaseAdapterMethods,
 >(definition: DatabaseAdapterDefinition<TOptions, TMethods>) {
   return (options: TOptions): DatabaseAdapterInstance<TOptions, TMethods> => {
     const resolvedConfig =

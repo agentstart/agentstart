@@ -1,18 +1,15 @@
-import type { ModelMessage, UIMessage } from "ai";
+/* agent-frontmatter:start
+AGENT: Message processing utilities
+PURPOSE: Provide helper functions for normalizing model message payloads
+USAGE: Import to clean or augment model message arrays before streaming
+EXPORTS: fixEmptyModelMessages, addProviderOptionsToMessages
+FEATURES:
+  - Removes empty assistant messages left behind by tool executions
+  - Applies provider options to targeted messages
+SEARCHABLE: message processing, provider options, assistant message cleanup
+agent-frontmatter:end */
 
-export async function getCompleteMessages<Message extends UIMessage>(
-  _message: Message,
-  _chatId: string,
-): Promise<Message[] | undefined> {
-  // Delete any messages after this one (for regeneration scenarios)
-  // await deleteMessagesAfter(chatId, message.id);
-  // create or update last message in database
-  // await upsertMessage({ chatId, id: message.id, message });
-  // load the previous messages from the server:
-  // const messages = await loadChat(chatId);
-  // return messages;
-  return undefined;
-}
+import type { ModelMessage } from "ai";
 
 /**
  * Filter out empty assistant messages

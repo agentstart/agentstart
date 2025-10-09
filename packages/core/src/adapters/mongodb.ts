@@ -33,8 +33,8 @@ import {
   type AdapterFindOneArgs,
   type AdapterUpdateArgs,
   type AdapterUpdateManyArgs,
+  type AdapterUpsertArgs,
   createAdapterFactory,
-  type DatabaseAdapterMethods,
 } from "./create-database-adapter";
 import { createDebugLoggerHook } from "./debug";
 import { camelToSnake, pluralizeModel } from "./naming";
@@ -173,10 +173,7 @@ function buildSortDocument(
   };
 }
 
-const baseMongoAdapter = createAdapterFactory<
-  MongoAdapterResolvedOptions,
-  DatabaseAdapterMethods
->({
+const baseMongoAdapter = createAdapterFactory<MongoAdapterResolvedOptions>({
   hooks: {
     logger: createDebugLoggerHook<MongoAdapterResolvedOptions>("mongodb"),
     normalizeModelName: ({ options, model }) => {
@@ -226,6 +223,39 @@ const baseMongoAdapter = createAdapterFactory<
           }
           const inserted = await collection.findOne({ _id: insertedId });
           return inserted ?? { ...data, _id: insertedId };
+        },
+      ),
+      upsert: wrapOperation<AdapterUpsertArgs, unknown>(
+        "upsert",
+        async ({ model, where, create, update, select }) => {
+          const collectionName = normalizeModelName(model);
+          const collection = db.collection(collectionName);
+          const filter = buildFilter(collectionName, where);
+          const updateDoc: UpdateFilter<Document> = {
+            $set: update as Document,
+            ...(Object.keys(create).length > 0
+              ? { $setOnInsert: create as Document }
+              : {}),
+          };
+          const projection = convertProjection(
+            collectionName,
+            select,
+            normalizeFieldName,
+          );
+          const options: FindOneAndUpdateOptions = {
+            upsert: true,
+            returnDocument: "after",
+            projection,
+          };
+          const result = await collection.findOneAndUpdate(
+            filter,
+            updateDoc,
+            options,
+          );
+          if (result?.value) {
+            return result.value;
+          }
+          return collection.findOne(filter, { projection });
         },
       ),
       findOne: wrapOperation<AdapterFindOneArgs, unknown | null>(

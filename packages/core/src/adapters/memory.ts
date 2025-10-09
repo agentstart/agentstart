@@ -21,8 +21,8 @@ import {
   type AdapterFindOneArgs,
   type AdapterUpdateArgs,
   type AdapterUpdateManyArgs,
+  type AdapterUpsertArgs,
   createAdapterFactory,
-  type DatabaseAdapterMethods,
 } from "./create-database-adapter";
 import { createDebugLoggerHook } from "./debug";
 import { camelToSnake, pluralizeModel } from "./naming";
@@ -236,10 +236,7 @@ function sortRecords(
   return sorted;
 }
 
-const baseMemoryAdapter = createAdapterFactory<
-  MemoryAdapterResolvedOptions,
-  DatabaseAdapterMethods
->({
+const baseMemoryAdapter = createAdapterFactory<MemoryAdapterResolvedOptions>({
   hooks: {
     logger: createDebugLoggerHook<MemoryAdapterResolvedOptions>("memory"),
     normalizeModelName: ({ options, model }) =>
@@ -290,6 +287,31 @@ const baseMemoryAdapter = createAdapterFactory<
           }
           collection.push(record);
           return cloneRecord(record);
+        },
+      ),
+      upsert: wrapOperation<AdapterUpsertArgs, unknown>(
+        "upsert",
+        async ({ model, where, create, update, select }) => {
+          const collectionName = normalizeModelName(model);
+          const collection = getCollection(store, collectionName);
+          const normalizedWhere = normalizeWhereInput(where);
+          const fieldNormalizer = (field: string) =>
+            normalizeFieldName(collectionName, field);
+          const index = collection.findIndex((record) =>
+            evaluateWhere(record, normalizedWhere, fieldNormalizer),
+          );
+          if (index >= 0) {
+            const target = collection[index]!;
+            Object.assign(target, update);
+            return applyProjection(target, select);
+          }
+          const merged = { ...create, ...update };
+          if (!("id" in merged)) {
+            merged.id = generateId();
+          }
+          const record = cloneRecord(merged);
+          collection.push(record);
+          return applyProjection(record, select);
         },
       ),
       findOne: wrapOperation<AdapterFindOneArgs, unknown | null>(

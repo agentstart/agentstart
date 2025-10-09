@@ -7,7 +7,11 @@ const openrouter = createOpenRouter({
 });
 
 export async function POST(req: Request) {
-  const { message, chatId }: { message: UIMessage; chatId: string } =
+  const {
+    message,
+    chatId,
+    projectId,
+  }: { message: UIMessage; chatId: string; projectId: string } =
     await req.json();
 
   const agent = new Agent({
@@ -15,7 +19,7 @@ export async function POST(req: Request) {
     instructions: "You are a helpful assistant.",
   });
 
-  const stream = await agent.stream({ message, chatId });
+  const stream = await agent.stream({ message, chatId, projectId });
 
   return createUIMessageStreamResponse({ stream });
 }

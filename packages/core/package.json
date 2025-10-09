@@ -4,7 +4,11 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./adapters/drizzle": "./src/adapters/drizzle.ts",
+    "./adapters/kysely": "./src/adapters/kysely.ts",
+    "./adapters/mongodb": "./src/adapters/mongodb.ts",
+    "./adapters/prisma": "./src/adapters/prisma.ts"
   },
   "scripts": {
     "clean": "git clean -xdf .cache .turbo dist node_modules",

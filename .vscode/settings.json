@@ -1,13 +1,13 @@
 {
-	"editor.formatOnSave": true,
-	"editor.defaultFormatter": "biomejs.biome",
-	"editor.codeActionsOnSave": {
-		"source.fixAll.biome": "explicit",
-		"source.organizeImports.biome": "explicit"
-	},
-	"tailwindCSS.classFunctions": ["cva", "cx", "cn"],
-	"typescript.preferences.autoImportFileExcludePatterns": [
-		"zod/dist/types/index.d.ts"
-	],
-	"typescript.tsdk": "node_modules/typescript/lib"
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "biomejs.biome",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.biome": "explicit",
+    "source.organizeImports.biome": "explicit"
+  },
+  "tailwindCSS.classFunctions": ["cva", "cx", "cn"],
+  "typescript.preferences.autoImportFileExcludePatterns": [
+    "zod/dist/types/index.d.ts"
+  ],
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

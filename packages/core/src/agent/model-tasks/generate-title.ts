@@ -1,12 +1,28 @@
+/* agent-frontmatter:start
+AGENT: Title generation task
+PURPOSE: Produce chat titles and emojis using the configured language model
+USAGE: Call generateTitle with the first user message to derive chat metadata
+EXPORTS: generateTitle
+FEATURES:
+  - Enforces concise titles and emoji suggestions
+  - Handles error scenarios with safe fallbacks
+SEARCHABLE: generate title, model task, chat metadata
+agent-frontmatter:end */
+
 import { generateObject, type LanguageModel, type UIMessage } from "ai";
 import { z } from "zod";
 
+interface GenerateTitleOptions {
+  messages: UIMessage[];
+  model: LanguageModel;
+}
+
 const GENERATE_TITLE_PROMPT = `Write a short, precise title (max 5 words) and a single emoji character for this conversation. If the user prompts a url, title is "Clone <url>". Use an emoji that best describes the project.`;
 
-export async function generateTitle(
-  messages: UIMessage[],
-  model: LanguageModel,
-): Promise<{ title: string; emoji?: string }> {
+export async function generateTitle({
+  messages,
+  model,
+}: GenerateTitleOptions): Promise<{ title: string; emoji?: string }> {
   const userMessage =
     messages[0]?.parts.find((part) => part.type === "text")?.text ?? "";
 

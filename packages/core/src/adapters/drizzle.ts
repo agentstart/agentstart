@@ -40,6 +40,7 @@ import {
   type AdapterFindOneArgs,
   type AdapterUpdateArgs,
   type AdapterUpdateManyArgs,
+  type AdapterUpsertArgs,
   createAdapterFactory,
   type DatabaseAdapterMethods,
 } from "./create-database-adapter";
@@ -214,6 +215,35 @@ function ensureColumn(table: TableWithColumns, field: string): AnyColumn {
   return column;
 }
 
+function isEqualityCondition(condition: AdapterWhereCondition): boolean {
+  const operator = condition.operator ?? "eq";
+  if (operator !== "eq") {
+    return false;
+  }
+  return condition.connector !== "OR";
+}
+
+function resolveConflictColumns(
+  table: TableWithColumns,
+  conditions: AdapterWhereCondition[],
+  fieldNormalizer: (field: string) => string,
+): AnyColumn[] | null {
+  if (conditions.length === 0) {
+    return null;
+  }
+  if (!conditions.every(isEqualityCondition)) {
+    return null;
+  }
+  try {
+    const columns = conditions.map((condition) =>
+      ensureColumn(table, fieldNormalizer(condition.field)),
+    );
+    return columns.length === 0 ? null : columns;
+  } catch {
+    return null;
+  }
+}
+
 function clauseForCondition(
   table: TableWithColumns,
   condition: AdapterWhereCondition,
@@ -368,10 +398,7 @@ async function resolveReturningRecord(
   return fetched[0] ?? null;
 }
 
-const baseDrizzleAdapter = createAdapterFactory<
-  DrizzleAdapterResolvedOptions,
-  DatabaseAdapterMethods
->({
+const baseDrizzleAdapter = createAdapterFactory<DrizzleAdapterResolvedOptions>({
   hooks: {
     logger: createDebugLoggerHook<DrizzleAdapterResolvedOptions>("drizzle"),
     normalizeFieldName: ({ options, field }) =>
@@ -415,6 +442,115 @@ const baseDrizzleAdapter = createAdapterFactory<
               builder,
               data,
               undefined,
+              fieldNormalizer,
+            );
+          },
+        ),
+        upsert: wrapOperation<AdapterUpsertArgs, unknown>(
+          "upsert",
+          async ({ model, where, create, update }) => {
+            const modelName = normalizeModelName(model);
+            const table = resolveTable(modelName, currentOptions);
+            const fieldNormalizer = (field: string) =>
+              normalizeFieldName(modelName, field);
+            validateFields(table, model, create, fieldNormalizer);
+            validateFields(table, model, update, fieldNormalizer);
+            const normalizedWhere = normalizeWhereInput(where);
+            const clause = convertWhereClause(
+              table,
+              normalizedWhere,
+              fieldNormalizer,
+            );
+            const mergedValues = { ...create, ...update };
+            const conflictColumns = resolveConflictColumns(
+              table,
+              normalizedWhere,
+              fieldNormalizer,
+            );
+            const insertBuilderBase = currentDb
+              .insert<Record<string, unknown>>(table)
+              .values(create);
+            type UpsertCapableInsert = typeof insertBuilderBase & {
+              onConflictDoUpdate?: (config: {
+                target: AnyColumn | AnyColumn[];
+                set: Record<string, unknown>;
+              }) => InsertStatement<Record<string, unknown>>;
+              onDuplicateKeyUpdate?: (config: {
+                set: Record<string, unknown>;
+              }) => InsertStatement<Record<string, unknown>>;
+            };
+            const insertBuilder = insertBuilderBase as UpsertCapableInsert;
+            if (conflictColumns && conflictColumns.length > 0) {
+              if (
+                currentOptions.provider === "mysql" &&
+                typeof insertBuilder.onDuplicateKeyUpdate === "function"
+              ) {
+                const upsertBuilder = insertBuilder.onDuplicateKeyUpdate({
+                  set: update,
+                });
+                return resolveReturningRecord(
+                  currentDb,
+                  table,
+                  model,
+                  upsertBuilder,
+                  mergedValues,
+                  normalizedWhere,
+                  fieldNormalizer,
+                );
+              }
+              if (
+                currentOptions.provider !== "mysql" &&
+                typeof insertBuilder.onConflictDoUpdate === "function"
+              ) {
+                const target =
+                  conflictColumns.length === 1
+                    ? conflictColumns[0]!
+                    : conflictColumns;
+                const upsertBuilder = insertBuilder.onConflictDoUpdate({
+                  target,
+                  set: update,
+                });
+                return resolveReturningRecord(
+                  currentDb,
+                  table,
+                  model,
+                  upsertBuilder,
+                  mergedValues,
+                  normalizedWhere,
+                  fieldNormalizer,
+                );
+              }
+            }
+            let query = currentDb.select<Record<string, unknown>>().from(table);
+            if (clause.length > 0) {
+              query = query.where(...clause);
+            }
+            query = query.limit(1);
+            const existing = await query;
+            if (existing[0]) {
+              let builder = currentDb
+                .update<Record<string, unknown>>(table)
+                .set(update);
+              if (clause.length > 0) {
+                builder = builder.where(...clause);
+              }
+              return resolveReturningRecord(
+                currentDb,
+                table,
+                model,
+                builder,
+                mergedValues,
+                normalizedWhere,
+                fieldNormalizer,
+              );
+            }
+            return resolveReturningRecord(
+              currentDb,
+              table,
+              model,
+              insertBuilderBase,
+              mergedValues,
+              normalizedWhere,
               fieldNormalizer,
             );
           },

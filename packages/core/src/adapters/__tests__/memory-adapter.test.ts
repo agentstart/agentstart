@@ -112,4 +112,32 @@ describe("memoryAdapter", () => {
     });
     expect(deleteCount).toBe(1);
   });
+
+  it("upserts records using equality filters", async () => {
+    await methods.upsert({
+      model: "note",
+      where: [{ field: "id", value: "1" }],
+      create: { id: "1", title: "initial" },
+      update: { title: "initial" },
+    });
+
+    const created = await methods.findOne({
+      model: "note",
+      where: [{ field: "id", value: "1" }],
+    });
+    expect(created).toMatchObject({ title: "initial" });
+
+    await methods.upsert({
+      model: "note",
+      where: [{ field: "id", value: "1" }],
+      create: { id: "1", title: "ignored" },
+      update: { title: "updated" },
+    });
+
+    const updated = await methods.findOne({
+      model: "note",
+      where: [{ field: "id", value: "1" }],
+    });
+    expect(updated).toMatchObject({ title: "updated" });
+  });
 });
