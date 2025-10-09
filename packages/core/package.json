@@ -9,7 +9,8 @@
   "scripts": {
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "lint": "bunx biome check --write ./src",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest"
   },
   "dependencies": {
     "@agent-stack/errors": "*",
@@ -19,7 +20,13 @@
     "@agent-stack/biome-config": "*",
     "@agent-stack/tsconfig": "*",
     "@biomejs/biome": "catalog:",
-    "typescript": "catalog:"
+    "drizzle-kit": "catalog:",
+    "drizzle-orm": "catalog:",
+    "kysely": "catalog:",
+    "mongodb": "catalog:",
+    "prisma": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "peerDependencies": {
     "ai": "^5"

@@ -138,6 +138,10 @@ Keep field names and ordering consistent across files. Expand `FEATURES` or `EXP
 3. Use the template-specific dev server (`npm run dev:express`, `npm run dev:next`) to test interactions.
 4. Verify memory adapters with integration tests (see `/tooling/testing`).
 
+## Code Style Guardrails
+
+- Prefer precise TypeScript types and `unknown` over `any`. Unless a spec explicitly allows it, `any` is off limits.
+
 ## Roadmap Snapshot
 
 - ✅ Agent class core

@@ -11,6 +11,7 @@
     "db:studio": "turbo -F @agent-stack/db studio",
     "dev": "turbo watch dev --continue",
     "dev:next": "turbo watch dev -F @agent-stack/nextjs...",
+    "test": "turbo run test",
     "lint": "turbo run lint",
     "lint:ws": "bunx sherif@latest",
     "lint:ws:fix": "bunx sherif@latest -f",
@@ -29,6 +30,9 @@
   "workspaces": {
     "packages": ["apps/*", "packages/*", "tooling/*", "playground/*"],
     "catalog": {
+      "kysely": "^0.28.7",
+      "mongodb": "^6.20.0",
+      "prisma": "^6.17.0",
       "nanoid": "^5.1.6",
       "turbo": "^2.5.8",
       "@biomejs/biome": "^2.2.5",

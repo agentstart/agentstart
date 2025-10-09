@@ -13,7 +13,6 @@ import {
 } from "ai";
 
 import type { BaseContext } from "../context";
-import { generateTitle } from "../utils/generate-title";
 import {
   addProviderOptionsToMessages,
   fixEmptyModelMessages,

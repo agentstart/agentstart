@@ -1,8 +1,8 @@
 import type { ModelMessage, UIMessage } from "ai";
 
 export async function getCompleteMessages<Message extends UIMessage>(
-  message: Message,
-  chatId: string,
+  _message: Message,
+  _chatId: string,
 ): Promise<Message[] | undefined> {
   // Delete any messages after this one (for regeneration scenarios)
   // await deleteMessagesAfter(chatId, message.id);
