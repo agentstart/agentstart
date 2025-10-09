@@ -10,31 +10,10 @@ FEATURES:
 SEARCHABLE: orpc procedures, middleware, auth middleware
 agent-frontmatter:end */
 
-import { ORPCError, os } from "@orpc/server";
+import { os } from "@orpc/server";
 import type { Context } from "./context";
 
 /**
  * Public procedure - no authentication required
  */
 export const publicProcedure = os.$context<Context>();
-
-/**
- * Protected procedure - requires authentication
- * Throws if user is not authenticated
- */
-export const protectedProcedure = publicProcedure.use(({ context, next }) => {
-  if (!context.session?.user) {
-    throw new ORPCError("UNAUTHORIZED", {
-      message: "You must be logged in to perform this action",
-    });
-  }
-
-  // Return the context with guaranteed user
-  return next({
-    context: {
-      ...context,
-      session: context.session,
-      user: context.session.user,
-    },
-  });
-});

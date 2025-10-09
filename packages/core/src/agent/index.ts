@@ -9,5 +9,6 @@ SEARCHABLE: agent exports, module barrel, agent stack
 agent-frontmatter:end */
 
 export * from "./agent";
+export * from "./messages";
 export * from "./model-tasks";
 export * from "./persistence";

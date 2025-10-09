@@ -9,75 +9,27 @@ FEATURES:
 SEARCHABLE: chat router, ai api, openrouter, streaming chat
 agent-frontmatter:end */
 
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import type { AgentStackUIMessage } from "@agent-stack/core";
 import { streamToEventIterator, type } from "@orpc/server";
-import type { UIMessage } from "ai";
-import { convertToModelMessages, streamText, tool } from "ai";
-import { z } from "zod/v4";
-import { env } from "../../env";
-import { protectedProcedure } from "../procedures";
-
-const tools = {
-  time: tool({
-    description: "Get current time in a specific timezone or system timezone",
-    inputSchema: z.object({
-      timezone: z
-        .string()
-        .describe(
-          "IANA timezone name (e.g., 'America/New_York', 'Europe/London')",
-        ),
-    }),
-    execute: async ({ timezone }) => {
-      const date = new Date();
-      return {
-        timezone,
-        time: date.toLocaleTimeString("en-US", { timeZone: timezone }),
-      };
-    },
-  }),
-};
+import { publicProcedure } from "../procedures";
 
 export const chatRouter = {
-  stream: protectedProcedure
+  stream: publicProcedure
     .input(
       type<{
         chatId: string;
-        messages: UIMessage[];
-        webSearch?: boolean;
-        model: string;
+        projectId: string;
+        message: AgentStackUIMessage;
+        model?: string;
       }>(),
     )
-    .handler(async ({ input }) => {
-      const apiKey = env.OPENROUTER_API_KEY;
-
-      // Create OpenRouter client
-      const openrouter = createOpenRouter({
-        apiKey,
+    .handler(async ({ input, context }) => {
+      const result = await context.instance.stream({
+        message: input.message,
+        chatId: input.chatId,
+        projectId: input.projectId,
       });
 
-      // Select model based on web search preference
-      const model = input.webSearch
-        ? openrouter("perplexity/sonar")
-        : openrouter(input.model);
-
-      // Stream the text response
-      const result = streamText({
-        model,
-        messages: convertToModelMessages(input.messages),
-        system: `You are a helpful AI assistant. You provide clear, concise, and accurate responses. 
-When providing code examples, use appropriate syntax highlighting.
-Be friendly and professional in your communication.`,
-        tools,
-      });
-
-      // Return the streaming response
-      // Note: In actual implementation, you might need to handle streaming differently
-      // depending on your client setup
-      return streamToEventIterator(
-        result.toUIMessageStream({
-          sendSources: true,
-          sendReasoning: true,
-        }),
-      );
+      return streamToEventIterator(result);
     }),
 };

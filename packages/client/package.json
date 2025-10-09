@@ -1,5 +1,5 @@
 {
-  "name": "@agent-stack/utils",
+  "name": "@agent-stack/client",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -12,8 +12,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "nanoid": "catalog:",
-    "std-env": "catalog:"
+    "@agent-stack/api": "*",
+    "@agent-stack/core": "*",
+    "@agent-stack/utils": "*",
+    "@ai-sdk/react": "catalog:",
+    "@orpc/client": "catalog:",
+    "@orpc/server": "catalog:"
   },
   "devDependencies": {
     "@agent-stack/biome-config": "*",

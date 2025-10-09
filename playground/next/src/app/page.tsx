@@ -1,14 +1,19 @@
 "use client";
 
-import { defaultTransport } from "@agent-stack/core";
-import { useChat } from "@ai-sdk/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { client, useChat } from "@/lib/agent-client";
 
 export default function Chat() {
   const [input, setInput] = useState("");
-  const { messages, sendMessage } = useChat({
-    transport: defaultTransport,
-  });
+  const { messages, sendMessage } = useChat();
+
+  useEffect(() => {
+    async function fetchMessages() {
+      const messages = await client.messages.get({ chatId: "test-chatId" });
+      console.log("🚀 ~ Chat ~ messages:", messages);
+    }
+    fetchMessages();
+  }, []);
 
   return (
     <div className="stretch mx-auto flex w-full max-w-md flex-col py-24">

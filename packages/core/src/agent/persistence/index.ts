@@ -201,6 +201,7 @@ export async function loadChat<Message extends UIMessage>({
   chatId,
 }: LoadChatOptions): Promise<Message[]> {
   const adapter = getAdapterMethods({ memory });
+
   const records = (await adapter.findMany({
     model: "message",
     where: [{ field: "chatId", value: chatId }],

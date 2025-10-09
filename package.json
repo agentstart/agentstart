@@ -27,8 +27,9 @@
   },
   "packageManager": "bun@1.2.23",
   "workspaces": {
-    "packages": ["apps/*", "packages/*", "tooling/*", "playground/*"],
+    "packages": ["packages/*", "tooling/*", "playground/*"],
     "catalog": {
+      "std-env": "^3.9.0",
       "kysely": "^0.28.7",
       "mongodb": "^6.20.0",
       "prisma": "^6.17.0",

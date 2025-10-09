@@ -17,6 +17,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@agent-stack/api": "*",
     "@agent-stack/errors": "*",
     "@agent-stack/utils": "*"
   },

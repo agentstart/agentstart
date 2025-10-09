@@ -10,36 +10,24 @@ FEATURES:
 SEARCHABLE: orpc context, api context, auth context
 agent-frontmatter:end */
 
-import type { Auth, Session } from "@agent-stack/auth";
-import type { db as dbInstance } from "@agent-stack/db/client";
+import {
+  type Agent,
+  type DatabaseAdapterInstance,
+  memoryAdapter,
+} from "@agent-stack/core";
 
 export interface Context {
-  db: typeof dbInstance;
-  auth: Auth;
-  session: Session | null; // Better Auth session type
-  user: Session["user"] | null; // Better Auth user type
   headers: Headers;
+  instance: Agent;
+  memory: DatabaseAdapterInstance<unknown>;
 }
 
 export interface CreateContextOptions {
-  db: typeof dbInstance;
-  auth: Auth;
   headers: Headers;
+  instance: Agent;
+  memory?: DatabaseAdapterInstance<unknown>;
 }
 
-export async function createContext(
-  opts: CreateContextOptions,
-): Promise<Context> {
-  const { db, auth, headers } = opts;
-
-  // Get session from auth
-  const session = await auth.api.getSession({ headers });
-
-  return {
-    db,
-    auth,
-    session,
-    user: session?.user ?? null,
-    headers,
-  };
+export function createContext(opts: CreateContextOptions): Context {
+  return { ...opts, memory: opts.memory ?? memoryAdapter() };
 }

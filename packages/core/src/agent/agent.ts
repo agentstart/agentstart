@@ -108,10 +108,6 @@ export class Agent<
     message: Message;
     chatId: string;
     projectId: string;
-    onBeforeExecute?: (params: {
-      messages: Message[];
-      writer: UIMessageStreamWriter<Message>;
-    }) => Promise<void>;
     onFinish?: Parameters<typeof createUIMessageStream<Message>>[0]["onFinish"];
     onError?: Parameters<typeof createUIMessageStream<Message>>[0]["onError"];
   }) {
