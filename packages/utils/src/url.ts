@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: URL helpers
+PURPOSE: Resolve canonical API base URLs for agent clients and servers
+USAGE: const url = getBaseURL(customUrl, basePath, request, loadEnv)
+EXPORTS: getBaseURL
+FEATURES:
+  - Normalizes environment and request-derived origins
+  - Ensures configured base paths are appended when missing
+SEARCHABLE: url helper, base url, agent utilities
+agent-frontmatter:end */
+
 // https://github.com/better-auth/better-auth/blob/canary/packages/better-auth/src/utils/url.ts
 
 import { AgentStackError } from "@agent-stack/errors";

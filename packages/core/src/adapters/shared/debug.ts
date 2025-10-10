@@ -9,7 +9,7 @@ FEATURES:
 SEARCHABLE: adapter debug, logging hook, adapter utilities
 agent-frontmatter:end */
 
-import type { AdapterDebugLogger } from "./create-database-adapter";
+import type { AdapterDebugLogger } from "../create-database-adapter";
 
 export type AdapterDebugOption =
   | boolean

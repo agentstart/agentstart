@@ -1,12 +1,13 @@
 /* agent-frontmatter:start
 AGENT: Chat router using oRPC
-PURPOSE: AI chat completion endpoints with streaming support
-USAGE: Handles chat messages with OpenRouter integration
+PURPOSE: Stream agent responses through the shared Agent instance
+USAGE: chat.stream({ chatId, projectId, message })
+EXPORTS: chatRouter
 FEATURES:
-  - Streaming AI responses
-  - Multiple model support via OpenRouter
-  - Web search capability with Perplexity
-SEARCHABLE: chat router, ai api, openrouter, streaming chat
+  - Delegates streaming to the configured Agent
+  - Forwards client-provided chat identifiers to persistence
+  - Returns AI SDK UI message event streams
+SEARCHABLE: chat router, agent stream, rpc chat
 agent-frontmatter:end */
 
 import type { AgentStackUIMessage } from "@agent-stack/core";
@@ -23,13 +24,20 @@ export const chatRouter = {
         model?: string;
       }>(),
     )
-    .handler(async ({ input, context }) => {
-      const result = await context.instance.stream({
-        message: input.message,
-        chatId: input.chatId,
-        projectId: input.projectId,
-      });
+    .handler(async ({ input, context, errors }) => {
+      try {
+        const result = await context.instance.stream({
+          message: input.message,
+          chatId: input.chatId,
+          projectId: input.projectId,
+        });
 
-      return streamToEventIterator(result);
+        return streamToEventIterator(result);
+      } catch (error) {
+        console.error("Failed to stream chat response:", error);
+        throw errors.UNKNOWN({
+          message: "Failed to stream chat response",
+        });
+      }
     }),
 };

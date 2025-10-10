@@ -9,6 +9,10 @@ Each adapter exported from `@agent-stack/core/adapters` follows the same pattern
 Below are minimal examples for the five bundled adapters. Replace the stubbed
 clients with your real connections during integration.
 
+Adapters now live in driver-specific folders (`adapters/drizzle`, `adapters/kysely`, etc.)
+with barrel exports, so the public import paths stay the same while keeping the
+implementation self-contained.
+
 ```ts
 import {
   createAdapterFactory,
@@ -17,6 +21,7 @@ import {
   mongodbAdapter,
   prismaAdapter,
   memoryAdapter,
+  mapSelectToObject,
 } from "@agent-stack/core/adapters";
 ```
 
@@ -105,14 +110,39 @@ constructed once and reused:
 
 ```ts
 const sharedContext = {
-  schema: {},
+  schema,
   debugLog: console.log,
-  getField: () => undefined,
+  getField: (model: string, field: string) => schema[model]?.fields?.[field],
   getDefaultModelName: (model: string) => model,
   getDefaultFieldName: (_model: string, field: string) => field,
-  getFieldAttributes: () => ({}),
+  getFieldAttributes: (model: string, field: string) =>
+    schema[model]?.fields?.[field] ?? {},
 };
 ```
 
 Feel free to extend the examples with your actual schema helpers or logging
 layer.
+
+## Testing harness
+
+Unit tests that exercise adapters can reuse the shared helper exported from
+`packages/core/src/adapters/__tests__/shared/run-adapter-suite`. It runs a full
+CRUD cycle (create/find/update/delete/upsert) against a freshly initialised
+adapter instance so driver-specific suites only need to assert unique behaviour:
+
+```ts
+import { runAdapterSuite } from "../shared/run-adapter-suite";
+
+runAdapterSuite({
+  name: "memoryAdapter",
+  createAdapter: () => memoryAdapter().initialize(setupContext()),
+  scenario: { /* CRUD scenario definition */ },
+});
+```
+
+This keeps adapter coverage aligned across drivers while allowing each test file
+to assert bespoke behaviours (operation ordering, projections, transaction
+support, etc.).
+
+For helper utilities (naming, select/projection mapping, input transforms, where
+normalisation) import directly from `@agent-stack/core/adapters/shared`.

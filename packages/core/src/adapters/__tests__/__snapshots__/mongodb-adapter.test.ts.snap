@@ -44,6 +44,7 @@ exports[`mongodbAdapter > translates filters, projections, and write operations 
       ],
     },
     "op": "find",
+    "options": undefined,
   },
   {
     "op": "sort",
@@ -71,6 +72,9 @@ exports[`mongodbAdapter > translates filters, projections, and write operations 
       "id": "1",
     },
     "op": "findOneAndUpdate",
+    "options": {
+      "returnDocument": "after",
+    },
     "update": {
       "$set": {
         "status": "inactive",
@@ -99,6 +103,28 @@ exports[`mongodbAdapter > translates filters, projections, and write operations 
       "status": "active",
     },
     "op": "deleteMany",
+  },
+  {
+    "filter": {
+      "id": "1",
+    },
+    "op": "findOneAndUpdate",
+    "options": {
+      "projection": {
+        "status": 1,
+      },
+      "returnDocument": "after",
+      "upsert": true,
+    },
+    "update": {
+      "$set": {
+        "status": "pending",
+      },
+      "$setOnInsert": {
+        "id": "1",
+        "status": "active",
+      },
+    },
   },
 ]
 `;

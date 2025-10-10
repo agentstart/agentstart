@@ -1,24 +1,90 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { memoryAdapter } from "../memory";
+import { baseAdapterContext } from "./shared/context";
+import { runAdapterSuite } from "./shared/run-adapter-suite";
 
-const baseContext = {
-  schema: {},
-  debugLog: () => undefined,
-  getField: () => undefined,
-  getDefaultModelName: (model: string) => model,
-  getDefaultFieldName: (_model: string, field: string) => field,
-  getFieldAttributes: () => ({}),
-} as const;
+runAdapterSuite({
+  name: "memoryAdapter",
+  createAdapter: () =>
+    memoryAdapter({ generateId: () => "suite-id" }).initialize({
+      ...baseAdapterContext,
+    }),
+  scenario: {
+    create: {
+      model: "user",
+      data: { id: "suite-id", email: "suite@example.com", status: "active" },
+    },
+    findOne: {
+      model: "user",
+      where: [{ field: "id", value: "suite-id" }],
+    },
+    findMany: {
+      model: "user",
+      where: [{ field: "status", value: "active" }],
+    },
+    count: {
+      model: "user",
+      where: [{ field: "status", value: "active" }],
+    },
+    update: {
+      model: "user",
+      where: [{ field: "id", value: "suite-id" }],
+      update: { status: "inactive" },
+    },
+    updateMany: {
+      model: "user",
+      where: [{ field: "status", value: "inactive" }],
+      update: { tags: ["shared"] },
+    },
+    delete: {
+      model: "user",
+      where: [{ field: "id", value: "suite-id" }],
+    },
+    deleteMany: {
+      model: "user",
+      where: [{ field: "tags", value: ["shared"], operator: "in" }],
+    },
+    upsert: {
+      model: "user",
+      where: [{ field: "id", value: "suite-id" }],
+      create: {
+        id: "suite-id",
+        email: "suite@example.com",
+        status: "restored",
+      },
+      update: { status: "restored" },
+    },
+  },
+  assertions: {
+    create: (record) =>
+      expect(record).toMatchObject({
+        id: "suite-id",
+        email: "suite@example.com",
+      }),
+    findOne: (record) =>
+      expect(record).toMatchObject({
+        id: "suite-id",
+        email: "suite@example.com",
+      }),
+    findMany: (records) => expect(records.length).toBeGreaterThanOrEqual(1),
+    count: (value) => expect(value).toBeGreaterThanOrEqual(1),
+    update: (record) => expect(record).toMatchObject({ status: "inactive" }),
+    updateMany: (count) => expect(count).toBeGreaterThanOrEqual(1),
+    delete: (record) => expect(record).toMatchObject({ id: "suite-id" }),
+    deleteMany: (count) => expect(count).toBeGreaterThanOrEqual(0),
+    upsert: (record) => expect(record).toMatchObject({ status: "restored" }),
+  },
+});
 
 describe("memoryAdapter", () => {
   const adapter = memoryAdapter({ generateId: () => "generated-id" });
-  const methods = adapter.initialize({ ...baseContext });
+  const methods = adapter.initialize({ ...baseAdapterContext });
 
   beforeEach(async () => {
     // Recreate the adapter to reset state between tests.
     const fresh = memoryAdapter({ generateId: () => "generated-id" });
-    Object.assign(methods, fresh.initialize({ ...baseContext }));
+    Object.assign(methods, fresh.initialize({ ...baseAdapterContext }));
   });
 
   it("creates records and auto-generates ids", async () => {
@@ -139,5 +205,29 @@ describe("memoryAdapter", () => {
       where: [{ field: "id", value: "1" }],
     });
     expect(updated).toMatchObject({ title: "updated" });
+  });
+
+  it("applies default values defined via field attributes", async () => {
+    const adapterWithDefaults = memoryAdapter({
+      generateId: () => "generated",
+    });
+    const contextWithDefaults = {
+      ...baseAdapterContext,
+      getFieldAttributes: (model: string, field: string) => {
+        if (model === "task" && field === "__fields__") {
+          return { status: true };
+        }
+        if (model === "task" && field === "status") {
+          return { defaultValue: "pending" };
+        }
+        return {};
+      },
+    };
+    const defaultMethods = adapterWithDefaults.initialize(contextWithDefaults);
+    const created = (await defaultMethods.create({
+      model: "task",
+      data: { id: "task-1" },
+    })) as Record<string, unknown>;
+    expect(created).toMatchObject({ status: "pending" });
   });
 });

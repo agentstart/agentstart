@@ -10,10 +10,9 @@ SEARCHABLE: database adapters, drizzle adapter, storage integration
 agent-frontmatter:end */
 
 export * from "./create-database-adapter";
-export * from "./debug";
 export * from "./drizzle";
 export * from "./kysely";
 export * from "./memory";
 export * from "./mongodb";
 export * from "./prisma";
-export * from "./where";
+export * from "./shared";

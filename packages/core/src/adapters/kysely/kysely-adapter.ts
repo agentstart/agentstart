@@ -24,16 +24,18 @@ import {
   type AdapterUpsertArgs,
   createAdapterFactory,
   type DatabaseAdapterMethods,
-} from "./create-database-adapter";
-import { createDebugLoggerHook } from "./debug";
-import { camelToSnake, pluralizeModel } from "./naming";
+} from "../create-database-adapter";
 import {
   type AdapterWhereCondition,
+  applyInputTransforms,
+  camelToSnake,
+  createDebugLoggerHook,
   ensureArrayValue,
   normalizeSortInput,
   normalizeWhereInput,
+  pluralizeModel,
   splitWhereConditions,
-} from "./where";
+} from "../shared";
 
 type KyselyProvider =
   | "sqlite"
@@ -231,6 +233,7 @@ const baseKyselyAdapter = createAdapterFactory<KyselyAdapterResolvedOptions>({
     wrapOperation,
     normalizeModelName,
     normalizeFieldName,
+    getFieldAttributes,
   }) => {
     const { db } = options;
 
@@ -269,13 +272,20 @@ const baseKyselyAdapter = createAdapterFactory<KyselyAdapterResolvedOptions>({
     ): DatabaseAdapterMethods => ({
       create: wrapOperation<AdapterCreateArgs, unknown>(
         "create",
-        async ({ model, data }) => {
+        async ({ model, data, allowId }) => {
           const tableName = normalizeModelName(model);
           const tableKey = toTableKey(tableName);
+          const preparedData = applyInputTransforms({
+            action: "create",
+            model,
+            data,
+            allowId,
+            getFieldAttributes,
+          }) as Record<string, unknown>;
           try {
             const inserted = await client
               .insertInto(tableKey)
-              .values(data as Record<string, unknown>)
+              .values(preparedData)
               .returningAll()
               .executeTakeFirst();
             if (inserted) {
@@ -284,10 +294,10 @@ const baseKyselyAdapter = createAdapterFactory<KyselyAdapterResolvedOptions>({
           } catch {
             await client
               .insertInto(tableKey)
-              .values(data as Record<string, unknown>)
+              .values(preparedData)
               .executeTakeFirst();
           }
-          return data;
+          return preparedData;
         },
       ),
       upsert: wrapOperation<AdapterUpsertArgs, unknown>(
@@ -295,6 +305,18 @@ const baseKyselyAdapter = createAdapterFactory<KyselyAdapterResolvedOptions>({
         async ({ model, where, create, update }) => {
           const tableName = normalizeModelName(model);
           const tableKey = toTableKey(tableName);
+          const preparedCreate = applyInputTransforms({
+            action: "create",
+            model,
+            data: create,
+            getFieldAttributes,
+          }) as Record<string, unknown>;
+          const preparedUpdate = applyInputTransforms({
+            action: "update",
+            model,
+            data: update,
+            getFieldAttributes,
+          }) as Record<string, unknown>;
           const normalizedWhere = normalizeWhereInput(where);
           const expression = buildWhereExpression(
             tableName,
@@ -318,7 +340,7 @@ const baseKyselyAdapter = createAdapterFactory<KyselyAdapterResolvedOptions>({
           if (conflictFields && conflictFields.length > 0) {
             const insertBuilderBase = client
               .insertInto(tableKey)
-              .values(create as Record<string, unknown>);
+              .values(preparedCreate);
             const upsertCapable =
               insertBuilderBase as typeof insertBuilderBase & {
                 onConflict?: (
@@ -333,9 +355,7 @@ const baseKyselyAdapter = createAdapterFactory<KyselyAdapterResolvedOptions>({
               };
             if (typeof upsertCapable.onConflict === "function") {
               const insertBuilder = upsertCapable.onConflict((oc) =>
-                oc
-                  .columns(conflictFields)
-                  .doUpdateSet(update as Record<string, unknown>),
+                oc.columns(conflictFields).doUpdateSet(preparedUpdate),
               );
               try {
                 const upserted = await insertBuilder
@@ -351,15 +371,13 @@ const baseKyselyAdapter = createAdapterFactory<KyselyAdapterResolvedOptions>({
               if (refetched) {
                 return refetched;
               }
-              return { ...create, ...update };
+              return { ...preparedCreate, ...preparedUpdate };
             }
           }
 
           const existing = await fetchCurrent();
           if (existing) {
-            let builder = client
-              .updateTable(tableKey)
-              .set(update as Record<string, unknown>);
+            let builder = client.updateTable(tableKey).set(preparedUpdate);
             if (expression) {
               builder = builder.where(expression);
             }
@@ -388,7 +406,7 @@ const baseKyselyAdapter = createAdapterFactory<KyselyAdapterResolvedOptions>({
 
           const insertBuilder = client
             .insertInto(tableKey)
-            .values(create as Record<string, unknown>);
+            .values(preparedCreate);
           try {
             const inserted = await insertBuilder
               .returningAll()
@@ -401,7 +419,10 @@ const baseKyselyAdapter = createAdapterFactory<KyselyAdapterResolvedOptions>({
           }
 
           const refetched = await fetchCurrent();
-          return refetched ?? create;
+          if (refetched) {
+            return refetched;
+          }
+          return { ...preparedCreate, ...preparedUpdate };
         },
       ),
       findOne: wrapOperation<AdapterFindOneArgs, unknown | null>(
@@ -466,15 +487,19 @@ const baseKyselyAdapter = createAdapterFactory<KyselyAdapterResolvedOptions>({
         async ({ model, where, update }) => {
           const tableName = normalizeModelName(model);
           const tableKey = toTableKey(tableName);
+          const preparedUpdate = applyInputTransforms({
+            action: "update",
+            model,
+            data: update,
+            getFieldAttributes,
+          }) as Record<string, unknown>;
           const expression = buildWhereExpression(
             tableName,
             normalizeWhereInput(where),
             (field) => normalizeFieldName(tableName, field),
           );
 
-          let builder = db
-            .updateTable(tableKey)
-            .set(update as Record<string, unknown>);
+          let builder = db.updateTable(tableKey).set(preparedUpdate);
           if (expression) {
             builder = builder.where(expression);
           }
@@ -494,14 +519,18 @@ const baseKyselyAdapter = createAdapterFactory<KyselyAdapterResolvedOptions>({
         async ({ model, where, update }) => {
           const tableName = normalizeModelName(model);
           const tableKey = toTableKey(tableName);
+          const preparedUpdate = applyInputTransforms({
+            action: "update",
+            model,
+            data: update,
+            getFieldAttributes,
+          }) as Record<string, unknown>;
           const expression = buildWhereExpression(
             tableName,
             normalizeWhereInput(where),
             (field) => normalizeFieldName(tableName, field),
           );
-          let builder = db
-            .updateTable(tableKey)
-            .set(update as Record<string, unknown>);
+          let builder = db.updateTable(tableKey).set(preparedUpdate);
           if (expression) {
             builder = builder.where(expression);
           }
@@ -536,7 +565,12 @@ const baseKyselyAdapter = createAdapterFactory<KyselyAdapterResolvedOptions>({
               return removed;
             }
           } catch {
-            await builder.executeTakeFirst();
+            const outcome = (await builder.executeTakeFirst()) as
+              | DeleteResult
+              | undefined;
+            if (outcome && Number(outcome.numDeletedRows) > 0) {
+              return { deleted: true };
+            }
           }
           return null;
         },

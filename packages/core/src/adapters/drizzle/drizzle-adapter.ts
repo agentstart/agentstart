@@ -43,15 +43,17 @@ import {
   type AdapterUpsertArgs,
   createAdapterFactory,
   type DatabaseAdapterMethods,
-} from "./create-database-adapter";
-import { createDebugLoggerHook } from "./debug";
-import { camelToSnake, pluralizeModel } from "./naming";
+} from "../create-database-adapter";
 import {
   type AdapterWhereCondition,
+  applyInputTransforms,
+  camelToSnake,
+  createDebugLoggerHook,
   ensureArrayValue,
   normalizeWhereInput,
+  pluralizeModel,
   splitWhereConditions,
-} from "./where";
+} from "../shared";
 
 type Provider = "sqlite" | "pg" | "mysql";
 
@@ -418,6 +420,7 @@ const baseDrizzleAdapter = createAdapterFactory<DrizzleAdapterResolvedOptions>({
     wrapOperation,
     normalizeModelName,
     normalizeFieldName,
+    getFieldAttributes,
   }) => {
     const buildOperations = (
       currentDb: DrizzleExecutor,
@@ -426,21 +429,28 @@ const baseDrizzleAdapter = createAdapterFactory<DrizzleAdapterResolvedOptions>({
       return {
         create: wrapOperation<AdapterCreateArgs, unknown>(
           "create",
-          async ({ model, data }) => {
+          async ({ model, data, allowId }) => {
             const modelName = normalizeModelName(model);
             const table = resolveTable(modelName, currentOptions);
             const fieldNormalizer = (field: string) =>
               normalizeFieldName(modelName, field);
-            validateFields(table, model, data, fieldNormalizer);
+            const preparedData = applyInputTransforms({
+              action: "create",
+              model,
+              data,
+              allowId,
+              getFieldAttributes,
+            });
+            validateFields(table, model, preparedData, fieldNormalizer);
             const builder = currentDb
               .insert<Record<string, unknown>>(table)
-              .values(data);
+              .values(preparedData);
             return resolveReturningRecord(
               currentDb,
               table,
               model,
               builder,
-              data,
+              preparedData,
               undefined,
               fieldNormalizer,
             );
@@ -453,15 +463,27 @@ const baseDrizzleAdapter = createAdapterFactory<DrizzleAdapterResolvedOptions>({
             const table = resolveTable(modelName, currentOptions);
             const fieldNormalizer = (field: string) =>
               normalizeFieldName(modelName, field);
-            validateFields(table, model, create, fieldNormalizer);
-            validateFields(table, model, update, fieldNormalizer);
+            const preparedCreate = applyInputTransforms({
+              action: "create",
+              model,
+              data: create,
+              getFieldAttributes,
+            });
+            const preparedUpdate = applyInputTransforms({
+              action: "update",
+              model,
+              data: update,
+              getFieldAttributes,
+            });
+            validateFields(table, model, preparedCreate, fieldNormalizer);
+            validateFields(table, model, preparedUpdate, fieldNormalizer);
             const normalizedWhere = normalizeWhereInput(where);
             const clause = convertWhereClause(
               table,
               normalizedWhere,
               fieldNormalizer,
             );
-            const mergedValues = { ...create, ...update };
+            const mergedValues = { ...preparedCreate, ...preparedUpdate };
             const conflictColumns = resolveConflictColumns(
               table,
               normalizedWhere,
@@ -469,7 +491,7 @@ const baseDrizzleAdapter = createAdapterFactory<DrizzleAdapterResolvedOptions>({
             );
             const insertBuilderBase = currentDb
               .insert<Record<string, unknown>>(table)
-              .values(create);
+              .values(preparedCreate);
             type UpsertCapableInsert = typeof insertBuilderBase & {
               onConflictDoUpdate?: (config: {
                 target: AnyColumn | AnyColumn[];
@@ -486,7 +508,7 @@ const baseDrizzleAdapter = createAdapterFactory<DrizzleAdapterResolvedOptions>({
                 typeof insertBuilder.onDuplicateKeyUpdate === "function"
               ) {
                 const upsertBuilder = insertBuilder.onDuplicateKeyUpdate({
-                  set: update,
+                  set: preparedUpdate,
                 });
                 return resolveReturningRecord(
                   currentDb,
@@ -508,7 +530,7 @@ const baseDrizzleAdapter = createAdapterFactory<DrizzleAdapterResolvedOptions>({
                     : conflictColumns;
                 const upsertBuilder = insertBuilder.onConflictDoUpdate({
                   target,
-                  set: update,
+                  set: preparedUpdate,
                 });
                 return resolveReturningRecord(
                   currentDb,
@@ -530,7 +552,7 @@ const baseDrizzleAdapter = createAdapterFactory<DrizzleAdapterResolvedOptions>({
             if (existing[0]) {
               let builder = currentDb
                 .update<Record<string, unknown>>(table)
-                .set(update);
+                .set(preparedUpdate);
               if (clause.length > 0) {
                 builder = builder.where(...clause);
               }
@@ -645,7 +667,13 @@ const baseDrizzleAdapter = createAdapterFactory<DrizzleAdapterResolvedOptions>({
             const table = resolveTable(modelName, currentOptions);
             const fieldNormalizer = (field: string) =>
               normalizeFieldName(modelName, field);
-            validateFields(table, model, update, fieldNormalizer);
+            const preparedUpdate = applyInputTransforms({
+              action: "update",
+              model,
+              data: update,
+              getFieldAttributes,
+            });
+            validateFields(table, model, preparedUpdate, fieldNormalizer);
             const normalizedWhere = normalizeWhereInput(where);
             const clause = convertWhereClause(
               table,
@@ -654,7 +682,7 @@ const baseDrizzleAdapter = createAdapterFactory<DrizzleAdapterResolvedOptions>({
             );
             let builder = currentDb
               .update<Record<string, unknown>>(table)
-              .set(update);
+              .set(preparedUpdate);
             if (clause.length > 0) {
               builder = builder.where(...clause);
             }
@@ -663,7 +691,7 @@ const baseDrizzleAdapter = createAdapterFactory<DrizzleAdapterResolvedOptions>({
               table,
               model,
               builder,
-              update,
+              preparedUpdate,
               normalizedWhere,
               fieldNormalizer,
             );
@@ -676,7 +704,13 @@ const baseDrizzleAdapter = createAdapterFactory<DrizzleAdapterResolvedOptions>({
             const table = resolveTable(modelName, currentOptions);
             const fieldNormalizer = (field: string) =>
               normalizeFieldName(modelName, field);
-            validateFields(table, model, update, fieldNormalizer);
+            const preparedUpdate = applyInputTransforms({
+              action: "update",
+              model,
+              data: update,
+              getFieldAttributes,
+            });
+            validateFields(table, model, preparedUpdate, fieldNormalizer);
             const normalizedWhere = normalizeWhereInput(where);
             const clause = convertWhereClause(
               table,
@@ -685,7 +719,7 @@ const baseDrizzleAdapter = createAdapterFactory<DrizzleAdapterResolvedOptions>({
             );
             let builder = currentDb
               .update<Record<string, unknown>>(table)
-              .set(update);
+              .set(preparedUpdate);
             if (clause.length > 0) {
               builder = builder.where(...clause);
             }

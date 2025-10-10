@@ -2,19 +2,12 @@ import type { Kysely } from "kysely";
 import { describe, expect, it } from "vitest";
 
 import { type KyselyAdapterUserOptions, kyselyAdapter } from "../kysely";
+import { baseAdapterContext } from "./shared/context";
+import { runAdapterSuite } from "./shared/run-adapter-suite";
 
 type GenericDatabase = Record<string, Record<string, unknown>>;
 
 type Operation = { op: string; [key: string]: unknown };
-
-const baseContext = {
-  schema: {},
-  debugLog: () => undefined,
-  getField: () => undefined,
-  getDefaultModelName: (model: string) => model,
-  getDefaultFieldName: (_model: string, field: string) => field,
-  getFieldAttributes: () => ({}),
-} as const;
 
 function createKyselyStub() {
   const operations: Operation[] = [];
@@ -205,18 +198,91 @@ function createKyselyStub() {
   return { operations, db: rawDb as unknown as Kysely<GenericDatabase> };
 }
 
-describe("kyselyAdapter", () => {
+const defaultOptions: KyselyAdapterUserOptions = {
+  provider: "postgresql",
+  camelCase: true,
+  usePlural: false,
+  transaction: true,
+};
+
+function buildKyselyInstance(overrides?: {
+  getFieldAttributes?: (
+    model: string,
+    field: string,
+  ) => Record<string, unknown>;
+}) {
   const stub = createKyselyStub();
-
-  const options: KyselyAdapterUserOptions = {
-    provider: "postgresql",
-    camelCase: true,
-    usePlural: false,
-    transaction: true,
+  const adapter = kyselyAdapter(stub.db, defaultOptions);
+  const context = {
+    ...baseAdapterContext,
+    ...(overrides?.getFieldAttributes
+      ? { getFieldAttributes: overrides.getFieldAttributes }
+      : {}),
   };
+  const methods = adapter.initialize(context);
+  return { stub, methods };
+}
 
-  const adapter = kyselyAdapter(stub.db, options);
-  const methods = adapter.initialize({ ...baseContext });
+runAdapterSuite({
+  name: "kyselyAdapter",
+  createAdapter: () => buildKyselyInstance().methods,
+  scenario: {
+    create: { model: "account", data: { id: "1", status: "active" } },
+    findOne: {
+      model: "account",
+      where: [{ field: "id", value: "1" }],
+    },
+    findMany: {
+      model: "account",
+      where: [{ field: "status", value: "active" }],
+      sortBy: [{ field: "createdAt", direction: "desc" }],
+      limit: 5,
+      offset: 0,
+    },
+    count: {
+      model: "account",
+      where: [{ field: "status", value: "active" }],
+    },
+    update: {
+      model: "account",
+      where: [{ field: "id", value: "1" }],
+      update: { status: "inactive" },
+    },
+    updateMany: {
+      model: "account",
+      where: [{ field: "status", value: "inactive" }],
+      update: { tags: ["trusted"] },
+    },
+    delete: {
+      model: "account",
+      where: [{ field: "id", value: "1" }],
+    },
+    deleteMany: {
+      model: "account",
+      where: [{ field: "status", value: "inactive" }],
+    },
+    upsert: {
+      model: "account",
+      where: [{ field: "id", value: "1" }],
+      create: { id: "1", status: "archived" },
+      update: { status: "archived" },
+    },
+  },
+  assertions: {
+    create: (record) => expect(record).toMatchObject({ id: "1" }),
+    findOne: (record) => expect(record).toEqual({ id: "result" }),
+    findMany: (records) => expect(records).toEqual([{ id: "result" }]),
+    count: (value) => expect(value).toBe(0),
+    update: (record) => expect(record).toMatchObject({ status: "inactive" }),
+    updateMany: (value) => expect(value).toBe(1),
+    delete: (record) => expect(record).toMatchObject({ deleted: true }),
+    deleteMany: (value) => expect(value).toBe(1),
+    upsert: (record) => expect(record).toMatchObject({ status: "archived" }),
+  },
+});
+
+describe("kyselyAdapter", () => {
+  const { stub, methods } = buildKyselyInstance();
 
   it("executes CRUD and bulk helpers through Kysely", async () => {
     const inserted = await methods.create({
@@ -270,6 +336,21 @@ describe("kyselyAdapter", () => {
     });
     expect(deletedMany).toBe(1);
 
+    const upsertOpStart = stub.operations.length;
+    const upserted = await methods.upsert({
+      model: "account",
+      where: [{ field: "id", value: "1" }],
+      create: { id: "1", status: "archived" },
+      update: { status: "archived" },
+    });
+    expect(upserted).toMatchObject({ status: "archived" });
+    const upsertOps = stub.operations
+      .slice(upsertOpStart)
+      .map((entry) => entry.op);
+    expect(upsertOps).toEqual(
+      expect.arrayContaining(["insertInto", "updateTable", "update.set"]),
+    );
+
     expect(stub.operations.some((entry) => entry.op === "select.where")).toBe(
       true,
     );
@@ -285,5 +366,26 @@ describe("kyselyAdapter", () => {
     expect(
       stub.operations.some((entry) => entry.op === "transaction.execute"),
     ).toBe(true);
+  });
+
+  it("applies default field metadata for create operations", async () => {
+    const defaults = (model: string, field: string) => {
+      if (model === "account" && field === "__fields__") {
+        return { status: true };
+      }
+      if (model === "account" && field === "status") {
+        return { defaultValue: "pending" };
+      }
+      return {};
+    };
+    const { methods: defaultMethods } = buildKyselyInstance({
+      getFieldAttributes: defaults,
+    });
+
+    const created = await defaultMethods.create({
+      model: "account",
+      data: { id: "defaults" },
+    });
+    expect(created).toMatchObject({ status: "pending" });
   });
 });

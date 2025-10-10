@@ -5,10 +5,10 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./adapters/drizzle": "./src/adapters/drizzle.ts",
-    "./adapters/kysely": "./src/adapters/kysely.ts",
-    "./adapters/mongodb": "./src/adapters/mongodb.ts",
-    "./adapters/prisma": "./src/adapters/prisma.ts"
+    "./adapters/drizzle": "./src/adapters/drizzle/index.ts",
+    "./adapters/kysely": "./src/adapters/kysely/index.ts",
+    "./adapters/mongodb": "./src/adapters/mongodb/index.ts",
+    "./adapters/prisma": "./src/adapters/prisma/index.ts"
   },
   "scripts": {
     "clean": "git clean -xdf .cache .turbo dist node_modules",

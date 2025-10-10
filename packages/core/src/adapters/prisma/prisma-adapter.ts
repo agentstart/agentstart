@@ -24,15 +24,18 @@ import {
   type AdapterUpsertArgs,
   createAdapterFactory,
   type DatabaseAdapterMethods,
-} from "./create-database-adapter";
-import { createDebugLoggerHook } from "./debug";
-import { camelToSnake, pluralizeModel } from "./naming";
+} from "../create-database-adapter";
 import {
   type AdapterWhereCondition,
+  applyInputTransforms,
+  camelToSnake,
+  createDebugLoggerHook,
   ensureArrayValue,
+  mapSelectToObject,
   normalizeSortInput,
   normalizeWhereInput,
-} from "./where";
+  pluralizeModel,
+} from "../shared";
 
 type PrismaProvider =
   | "sqlite"
@@ -286,13 +289,7 @@ function convertSelect(
   model: string,
   normalizeFieldName: (model: string, field: string) => string,
 ) {
-  if (!select?.length) {
-    return undefined;
-  }
-  const mappedEntries = select.map(
-    (field) => [normalizeFieldName(model, field), true] as const,
-  );
-  return Object.fromEntries(mappedEntries);
+  return mapSelectToObject(select, model, normalizeFieldName, () => true);
 }
 
 const basePrismaAdapter = createAdapterFactory<PrismaAdapterResolvedOptions>({
@@ -331,6 +328,7 @@ const basePrismaAdapter = createAdapterFactory<PrismaAdapterResolvedOptions>({
     wrapOperation,
     normalizeModelName,
     normalizeFieldName,
+    getFieldAttributes,
   }) => {
     const { prisma } = options;
 
@@ -339,11 +337,18 @@ const basePrismaAdapter = createAdapterFactory<PrismaAdapterResolvedOptions>({
     ): DatabaseAdapterMethods => ({
       create: wrapOperation<AdapterCreateArgs, unknown>(
         "create",
-        async ({ model, data, select }) => {
+        async ({ model, data, select, allowId }) => {
           const modelName = normalizeModelName(model);
           const delegate = getModelDelegate(client, modelName);
-          return delegate.create({
+          const preparedData = applyInputTransforms({
+            action: "create",
+            model,
             data,
+            allowId,
+            getFieldAttributes,
+          });
+          return delegate.create({
+            data: preparedData,
             select: convertSelect(select, modelName, normalizeFieldName),
           });
         },
@@ -411,10 +416,22 @@ const basePrismaAdapter = createAdapterFactory<PrismaAdapterResolvedOptions>({
           const uniqueWhere = buildPrismaUniqueWhere(normalizedWhere, (field) =>
             normalizeFieldName(modelName, field),
           );
+          const preparedCreate = applyInputTransforms({
+            action: "create",
+            model,
+            data: create,
+            getFieldAttributes,
+          });
+          const preparedUpdate = applyInputTransforms({
+            action: "update",
+            model,
+            data: update,
+            getFieldAttributes,
+          });
           return delegate.upsert({
             where: uniqueWhere,
-            create,
-            update,
+            create: preparedCreate,
+            update: preparedUpdate,
             select: convertSelect(select, modelName, normalizeFieldName),
           });
         },
@@ -428,9 +445,15 @@ const basePrismaAdapter = createAdapterFactory<PrismaAdapterResolvedOptions>({
           const prismaWhere = buildPrismaWhere(normalizedWhere, (field) =>
             normalizeFieldName(modelName, field),
           );
+          const preparedUpdate = applyInputTransforms({
+            action: "update",
+            model,
+            data: update,
+            getFieldAttributes,
+          });
           return delegate.update({
             where: prismaWhere,
-            data: update,
+            data: preparedUpdate,
             select: convertSelect(select, modelName, normalizeFieldName),
           });
         },
@@ -444,9 +467,15 @@ const basePrismaAdapter = createAdapterFactory<PrismaAdapterResolvedOptions>({
           const prismaWhere = buildPrismaWhere(normalizedWhere, (field) =>
             normalizeFieldName(modelName, field),
           );
+          const preparedUpdate = applyInputTransforms({
+            action: "update",
+            model,
+            data: update,
+            getFieldAttributes,
+          });
           const result = await delegate.updateMany({
             where: prismaWhere,
-            data: update,
+            data: preparedUpdate,
           });
           return result.count;
         },

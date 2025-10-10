@@ -1,10 +1,12 @@
 /* agent-frontmatter:start
 AGENT: Messages router using oRPC
-PURPOSE: Provide read APIs for chat message history
-USAGE: Fetch persisted chat messages by chat identifier
+PURPOSE: Expose read-only chat history endpoints
+USAGE: messages.get({ chatId })
+EXPORTS: messagesRouter
 FEATURES:
-  - Uses loadChat helper to read from configured memory adapter
-  - Requires authenticated access
+  - Loads persisted AgentStack UI messages via loadChat
+  - Works with any configured memory adapter on the context
+  - Returns normalized message arrays for clients
 SEARCHABLE: messages router, chat history, loadChat api
 agent-frontmatter:end */
 
@@ -19,12 +21,18 @@ export const messagesRouter = {
         chatId: z.string().min(1, "Chat ID is required"),
       }),
     )
-    .handler(async ({ input, context }) => {
-      const messages = await loadChat<AgentStackUIMessage>({
-        memory: context.memory,
-        chatId: input.chatId,
-      });
-
-      return messages;
+    .handler(async ({ input, context, errors }) => {
+      try {
+        const messages = await loadChat<AgentStackUIMessage>({
+          memory: context.memory,
+          chatId: input.chatId,
+        });
+        return messages;
+      } catch (error) {
+        console.error("Error loading chat messages:", error);
+        throw errors.UNKNOWN({
+          message: "Failed to load chat messages",
+        });
+      }
     }),
 };

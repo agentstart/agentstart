@@ -2,6 +2,8 @@ import type { AnyColumn } from "drizzle-orm";
 import { describe, expect, it, vi } from "vitest";
 
 import { type DrizzleAdapterUserOptions, drizzleAdapter } from "../drizzle";
+import { baseAdapterContext } from "./shared/context";
+import { runAdapterSuite } from "./shared/run-adapter-suite";
 
 type Operation = { op: string; [key: string]: unknown };
 
@@ -178,36 +180,98 @@ function createDrizzleStub() {
   return { operations, executor };
 }
 
-const baseContext = {
-  schema: {},
-  debugLog: () => undefined,
-  getField: () => undefined,
-  getDefaultModelName: (model: string) => model,
-  getDefaultFieldName: (_model: string, field: string) => field,
-  getFieldAttributes: () => ({}),
-} as const;
+const tables = {
+  users: createTable("users", ["id", "status", "tags", "created_at"]),
+} satisfies Record<string, TableStub>;
+const schema = tables as unknown as Record<string, unknown>;
+
+const defaultOptions: DrizzleAdapterUserOptions = {
+  provider: "pg",
+  schema: schema as never,
+  usePlural: false,
+  camelCase: true,
+  transaction: true,
+};
+
+function buildDrizzleInstance(overrides?: {
+  getFieldAttributes?: (
+    model: string,
+    field: string,
+  ) => Record<string, unknown>;
+}) {
+  const stub = createDrizzleStub();
+  const adapter = drizzleAdapter(stub.executor as never, defaultOptions);
+  const context = {
+    ...baseAdapterContext,
+    schema,
+    ...(overrides?.getFieldAttributes
+      ? { getFieldAttributes: overrides.getFieldAttributes }
+      : {}),
+  };
+  const methods = adapter.initialize(context);
+  return { stub, methods };
+}
+
+runAdapterSuite({
+  name: "drizzleAdapter",
+  createAdapter: () => buildDrizzleInstance().methods,
+  scenario: {
+    create: { model: "users", data: { id: "1", status: "active" } },
+    findOne: {
+      model: "users",
+      where: [{ field: "id", value: "1" }],
+    },
+    findMany: {
+      model: "users",
+      where: [{ field: "status", value: "active" }],
+      sortBy: [{ field: "created_at", direction: "desc" }],
+      offset: 0,
+      limit: 10,
+    },
+    count: {
+      model: "users",
+      where: [{ field: "status", value: "active" }],
+    },
+    update: {
+      model: "users",
+      where: [{ field: "id", value: "1" }],
+      update: { status: "inactive" },
+    },
+    updateMany: {
+      model: "users",
+      where: [{ field: "status", value: "inactive" }],
+      update: { tags: ["beta"] },
+    },
+    delete: {
+      model: "users",
+      where: [{ field: "id", value: "1" }],
+    },
+    deleteMany: {
+      model: "users",
+      where: [{ field: "status", value: "inactive" }],
+    },
+    upsert: {
+      model: "users",
+      where: [{ field: "id", value: "1" }],
+      create: { id: "1", status: "archived" },
+      update: { status: "archived" },
+    },
+  },
+  assertions: {
+    create: (record) => expect(record).toMatchObject({ id: "1" }),
+    findOne: (record) => expect(record).toEqual({ id: "result" }),
+    findMany: (records) => expect(records).toEqual([{ id: "result" }]),
+    count: (value) => expect(value).toBe(0),
+    update: (record) => expect(record).toMatchObject({ status: "inactive" }),
+    updateMany: (value) => expect(value).toBe(1),
+    delete: (record) => expect(record).toMatchObject({ deleted: true }),
+    deleteMany: (value) => expect(value).toBe(1),
+    upsert: (record) => expect(record).toMatchObject({ status: "archived" }),
+  },
+});
 
 describe("drizzleAdapter", () => {
-  const tables = {
-    users: createTable("users", ["id", "status", "tags", "created_at"]),
-  } satisfies Record<string, TableStub>;
-  const schema = tables as unknown as Record<string, unknown>;
-
-  const stub = createDrizzleStub();
-
-  const options: DrizzleAdapterUserOptions = {
-    provider: "pg",
-    schema: schema as never,
-    usePlural: false,
-    camelCase: true,
-    transaction: true,
-  };
-
-  const adapter = drizzleAdapter(stub.executor as never, options);
-  const methods = adapter.initialize({
-    ...baseContext,
-    schema: schema,
-  });
+  const { stub, methods } = buildDrizzleInstance();
 
   it("handles CRUD and bulk helpers consistently", async () => {
     const created = await methods.create({
@@ -263,6 +327,21 @@ describe("drizzleAdapter", () => {
     });
     expect(deletedMany).toBe(1);
 
+    const upsertStart = stub.operations.length;
+    const upserted = await methods.upsert({
+      model: "users",
+      where: [{ field: "id", value: "1" }],
+      create: { id: "1", status: "archived" },
+      update: { status: "archived" },
+    });
+    expect(upserted).toMatchObject({ status: "archived" });
+    const upsertOps = stub.operations
+      .slice(upsertStart)
+      .map((entry) => entry.op);
+    expect(upsertOps).toEqual(
+      expect.arrayContaining(["insert.values", "update.set"]),
+    );
+
     expect(stub.operations.map((entry) => entry.op)).toContain("select.where");
   });
 
@@ -275,5 +354,30 @@ describe("drizzleAdapter", () => {
     });
     expect(runSpy).toHaveBeenCalled();
     expect(result).toBe("done");
+  });
+
+  it("applies default field attributes during create operations", async () => {
+    const defaults = (model: string, field: string) => {
+      if (model === "users" && field === "__fields__") {
+        return { status: true };
+      }
+      if (model === "users" && field === "status") {
+        return { defaultValue: "pending" };
+      }
+      return {};
+    };
+    const { stub: defaultStub, methods: defaultMethods } = buildDrizzleInstance(
+      { getFieldAttributes: defaults },
+    );
+
+    await defaultMethods.create({
+      model: "users",
+      data: { id: "defaults" },
+    });
+
+    const insertValues = defaultStub.operations.find(
+      (entry) => entry.op === "insert.values",
+    ) as Operation | undefined;
+    expect(insertValues?.record).toMatchObject({ status: "pending" });
   });
 });

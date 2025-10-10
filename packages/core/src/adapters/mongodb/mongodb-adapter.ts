@@ -35,16 +35,19 @@ import {
   type AdapterUpdateManyArgs,
   type AdapterUpsertArgs,
   createAdapterFactory,
-} from "./create-database-adapter";
-import { createDebugLoggerHook } from "./debug";
-import { camelToSnake, pluralizeModel } from "./naming";
+} from "../create-database-adapter";
 import {
   type AdapterWhereCondition,
+  applyInputTransforms,
+  camelToSnake,
+  createDebugLoggerHook,
   ensureArrayValue,
+  mapSelectToObject,
   normalizeSortInput,
   normalizeWhereInput,
+  pluralizeModel,
   splitWhereConditions,
-} from "./where";
+} from "../shared";
 
 export interface MongoAdapterUserOptions {
   usePlural?: boolean;
@@ -150,12 +153,7 @@ function convertProjection(
   normalizeFieldName: (model: string, field: string) => string,
 ): FindOptions<Document>["projection"] {
   // Mongo projections expect a document of `{ field: 1 }` pairs.
-  if (!select?.length) {
-    return undefined;
-  }
-  return Object.fromEntries(
-    select.map((field) => [normalizeFieldName(model, field), 1]),
-  );
+  return mapSelectToObject(select, model, normalizeFieldName, () => 1);
 }
 
 function buildSortDocument(
@@ -200,6 +198,7 @@ const baseMongoAdapter = createAdapterFactory<MongoAdapterResolvedOptions>({
     wrapOperation,
     normalizeModelName,
     normalizeFieldName,
+    getFieldAttributes,
   }) => {
     const { db } = options;
 
@@ -211,18 +210,24 @@ const baseMongoAdapter = createAdapterFactory<MongoAdapterResolvedOptions>({
     return {
       create: wrapOperation<AdapterCreateArgs, unknown>(
         "create",
-        async ({ model, data }) => {
+        async ({ model, data, allowId }) => {
           const collectionName = normalizeModelName(model);
           const collection = db.collection(collectionName);
-          const result: InsertOneResult<Document> = await collection.insertOne(
-            data as Document,
-          );
+          const prepared = applyInputTransforms({
+            action: "create",
+            model,
+            data,
+            allowId,
+            getFieldAttributes,
+          }) as Document;
+          const result: InsertOneResult<Document> =
+            await collection.insertOne(prepared);
           const insertedId = result.insertedId;
           if (!insertedId) {
-            return data;
+            return prepared;
           }
           const inserted = await collection.findOne({ _id: insertedId });
-          return inserted ?? { ...data, _id: insertedId };
+          return inserted ?? { ...prepared, _id: insertedId };
         },
       ),
       upsert: wrapOperation<AdapterUpsertArgs, unknown>(
@@ -231,10 +236,22 @@ const baseMongoAdapter = createAdapterFactory<MongoAdapterResolvedOptions>({
           const collectionName = normalizeModelName(model);
           const collection = db.collection(collectionName);
           const filter = buildFilter(collectionName, where);
+          const preparedCreate = applyInputTransforms({
+            action: "create",
+            model,
+            data: create,
+            getFieldAttributes,
+          }) as Document;
+          const preparedUpdate = applyInputTransforms({
+            action: "update",
+            model,
+            data: update,
+            getFieldAttributes,
+          }) as Document;
           const updateDoc: UpdateFilter<Document> = {
-            $set: update as Document,
-            ...(Object.keys(create).length > 0
-              ? { $setOnInsert: create as Document }
+            $set: preparedUpdate,
+            ...(Object.keys(preparedCreate).length > 0
+              ? { $setOnInsert: preparedCreate }
               : {}),
           };
           const projection = convertProjection(
@@ -274,11 +291,18 @@ const baseMongoAdapter = createAdapterFactory<MongoAdapterResolvedOptions>({
       ),
       findMany: wrapOperation<AdapterFindManyArgs, unknown[]>(
         "findMany",
-        async ({ model, where, sortBy, limit, offset }) => {
+        async ({ model, where, sortBy, limit, offset, select }) => {
           const collectionName = normalizeModelName(model);
           const collection = db.collection(collectionName);
           const filter = buildFilter(collectionName, where);
-          const cursor = collection.find(filter);
+          const projection = convertProjection(
+            collectionName,
+            select,
+            normalizeFieldName,
+          );
+          const cursor = projection
+            ? collection.find(filter, { projection })
+            : collection.find(filter);
           const sortDocument = buildSortDocument(
             collectionName,
             sortBy,
@@ -311,8 +335,14 @@ const baseMongoAdapter = createAdapterFactory<MongoAdapterResolvedOptions>({
           const collectionName = normalizeModelName(model);
           const collection = db.collection(collectionName);
           const filter = buildFilter(collectionName, where);
+          const preparedUpdate = applyInputTransforms({
+            action: "update",
+            model,
+            data: update,
+            getFieldAttributes,
+          }) as Document;
           const updateDoc: UpdateFilter<Document> = {
-            $set: update as Document,
+            $set: preparedUpdate,
           };
           const options: FindOneAndUpdateOptions = {
             returnDocument: "after",
@@ -334,8 +364,14 @@ const baseMongoAdapter = createAdapterFactory<MongoAdapterResolvedOptions>({
           const collectionName = normalizeModelName(model);
           const collection = db.collection(collectionName);
           const filter = buildFilter(collectionName, where);
+          const preparedUpdate = applyInputTransforms({
+            action: "update",
+            model,
+            data: update,
+            getFieldAttributes,
+          }) as Document;
           const updateDoc: UpdateFilter<Document> = {
-            $set: update as Document,
+            $set: preparedUpdate,
           };
           const result: MongoUpdateResult = await collection.updateMany(
             filter,

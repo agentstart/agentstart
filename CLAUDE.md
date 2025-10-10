@@ -150,7 +150,8 @@ The `SEARCHABLE` field should contain comma-separated keywords that describe the
 3. Use the template-specific dev server (`npm run dev:express`, `npm run dev:next`) to test interactions.
 4. Verify memory adapters with integration tests (see `/tooling/testing`).
 5. **Always run `bun run lint` and `bun run typecheck` after completing changes** to ensure code quality and type safety before committing.
-6. Unit tests are optional overall, but add or update them when you touch stability-critical paths (adapters, persistence flows, core runtime hooks) so regressions surface early.
+6. Default test command: use `bun run test` instead of invoking `bun test` directly, so workspace scripts stay consistent with CI.
+7. Unit tests are optional overall, but add or update them when you touch stability-critical paths (adapters, persistence flows, core runtime hooks) so regressions surface early.
 
 ## Code Style Guardrails
 

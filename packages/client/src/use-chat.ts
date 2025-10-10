@@ -1,12 +1,13 @@
 /* agent-frontmatter:start
-AGENT: Custom hook for chat streaming functionality
-PURPOSE: Encapsulates chat streaming logic with oRPC
-USAGE: const { messages, sendMessage, status } = useChatStream();
+AGENT: Chat hook factory
+PURPOSE: Build a typed `useChat` hook backed by the Agent client
+USAGE: const useChat = createUseChat(client);
+EXPORTS: createUseChat
 FEATURES:
-  - Handles streaming responses from AI
-  - Manages chat state with AI SDK
-  - Integrates with oRPC client
-SEARCHABLE: chat hook, streaming hook, ai chat logic
+  - Wraps AI SDK Chat with project/chat identifiers
+  - Streams responses via the oRPC client transport
+  - Provides toast-based error reporting
+SEARCHABLE: chat hook, agent client, streaming chat
 agent-frontmatter:end */
 
 import type { AppRouter } from "@agent-stack/api";

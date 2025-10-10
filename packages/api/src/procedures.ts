@@ -1,13 +1,12 @@
 /* agent-frontmatter:start
-AGENT: oRPC procedure definitions with middleware
-PURPOSE: Define base procedures with auth middleware
-USAGE: Import and use for creating type-safe API endpoints
+AGENT: oRPC base procedure utilities
+PURPOSE: Provide shared context helpers for agent API routers
+USAGE: Import { publicProcedure } for building type-safe endpoints
+EXPORTS: publicProcedure
 FEATURES:
-  - Public procedure for unauthenticated requests
-  - Protected procedure with auth check
-  - Context type inference
-  - Error handling
-SEARCHABLE: orpc procedures, middleware, auth middleware
+  - Binds the Agent context into oRPC procedures
+  - Establishes a common request typing surface
+SEARCHABLE: orpc procedures, agent context, rpc utilities
 agent-frontmatter:end */
 
 import { os } from "@orpc/server";
@@ -16,4 +15,7 @@ import type { Context } from "./context";
 /**
  * Public procedure - no authentication required
  */
-export const publicProcedure = os.$context<Context>();
+export const publicProcedure = os.$context<Context>().errors({
+  UNAUTHORIZED: {},
+  UNKNOWN: {},
+});

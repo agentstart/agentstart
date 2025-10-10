@@ -5,7 +5,7 @@ import {
   normalizeSortInput,
   normalizeWhereInput,
   splitWhereConditions,
-} from "../where";
+} from "../shared";
 
 describe("where helpers", () => {
   it("normalizes where clauses", () => {

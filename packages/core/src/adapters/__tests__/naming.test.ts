@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { camelToSnake, pluralizeModel } from "../naming";
+import { camelToSnake, pluralizeModel } from "../shared";
 
 describe("naming helpers", () => {
   it("pluralizeModel handles common suffixes", () => {

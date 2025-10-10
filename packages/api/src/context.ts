@@ -1,13 +1,13 @@
 /* agent-frontmatter:start
-AGENT: oRPC context creation
-PURPOSE: Create request context with auth, database, and session
-USAGE: Used by oRPC router for all procedures
+AGENT: Agent context factory
+PURPOSE: Create runtime context objects for oRPC agent procedures
+USAGE: createContext({ headers, instance, memory })
+EXPORTS: Context, CreateContextOptions, createContext
 FEATURES:
-  - Authentication context from Better Auth
-  - Database connection
-  - User session handling
-  - Request headers access
-SEARCHABLE: orpc context, api context, auth context
+  - Injects the active Agent instance into RPC handlers
+  - Provides a default in-memory adapter when none is supplied
+  - Preserves request headers for downstream tooling
+SEARCHABLE: agent context, rpc context, memory adapter
 agent-frontmatter:end */
 
 import {

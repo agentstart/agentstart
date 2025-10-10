@@ -23,16 +23,18 @@ import {
   type AdapterUpdateManyArgs,
   type AdapterUpsertArgs,
   createAdapterFactory,
-} from "./create-database-adapter";
-import { createDebugLoggerHook } from "./debug";
-import { camelToSnake, pluralizeModel } from "./naming";
+} from "../create-database-adapter";
 import {
   type AdapterWhereCondition,
+  applyInputTransforms,
+  camelToSnake,
+  createDebugLoggerHook,
   ensureArrayValue,
   normalizeSortInput,
   normalizeWhereInput,
+  pluralizeModel,
   splitWhereConditions,
-} from "./where";
+} from "../shared";
 
 export interface MemoryAdapterOptions {
   usePlural?: boolean;
@@ -258,6 +260,7 @@ const baseMemoryAdapter = createAdapterFactory<MemoryAdapterResolvedOptions>({
     wrapOperation,
     normalizeModelName,
     normalizeFieldName,
+    getFieldAttributes,
   }) => {
     const { store } = options;
     const generateId = options.generateId ?? defaultGenerateId;
@@ -278,13 +281,18 @@ const baseMemoryAdapter = createAdapterFactory<MemoryAdapterResolvedOptions>({
     return {
       create: wrapOperation<AdapterCreateArgs, unknown>(
         "create",
-        async ({ model, data }) => {
+        async ({ model, data, allowId }) => {
           const collectionName = normalizeModelName(model);
           const collection = getCollection(store, collectionName);
-          const record = cloneRecord(data);
-          if (!("id" in record)) {
-            record.id = generateId();
-          }
+          const prepared = applyInputTransforms({
+            action: "create",
+            model,
+            data,
+            allowId,
+            generateId,
+            getFieldAttributes,
+          });
+          const record = cloneRecord(prepared);
           collection.push(record);
           return cloneRecord(record);
         },
@@ -302,14 +310,34 @@ const baseMemoryAdapter = createAdapterFactory<MemoryAdapterResolvedOptions>({
           );
           if (index >= 0) {
             const target = collection[index]!;
-            Object.assign(target, update);
+            const preparedUpdate = applyInputTransforms({
+              action: "update",
+              model,
+              data: update,
+              getFieldAttributes,
+              generateId,
+            });
+            Object.assign(target, preparedUpdate);
             return applyProjection(target, select);
           }
-          const merged = { ...create, ...update };
-          if (!("id" in merged)) {
-            merged.id = generateId();
-          }
-          const record = cloneRecord(merged);
+          const preparedCreate = applyInputTransforms({
+            action: "create",
+            model,
+            data: create,
+            getFieldAttributes,
+            generateId,
+          });
+          const preparedUpdate = applyInputTransforms({
+            action: "update",
+            model,
+            data: update,
+            getFieldAttributes,
+            generateId,
+          });
+          const record = cloneRecord({
+            ...preparedCreate,
+            ...preparedUpdate,
+          });
           collection.push(record);
           return applyProjection(record, select);
         },

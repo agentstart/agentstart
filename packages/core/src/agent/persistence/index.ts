@@ -30,11 +30,6 @@ const defaultAdapterContext = {
   getFieldAttributes: () => ({}),
 } as const;
 
-const adapterCache = new WeakMap<
-  DatabaseAdapterInstance<unknown>,
-  DatabaseAdapterMethods
->();
-
 export interface AdapterContextOptions {
   memory: DatabaseAdapterInstance<unknown>;
 }
@@ -42,12 +37,7 @@ export interface AdapterContextOptions {
 export function getAdapterMethods({
   memory,
 }: AdapterContextOptions): DatabaseAdapterMethods {
-  const cached = adapterCache.get(memory);
-  if (cached) {
-    return cached;
-  }
   const methods = memory.initialize({ ...defaultAdapterContext });
-  adapterCache.set(memory, methods);
   return methods;
 }
 
@@ -138,12 +128,10 @@ export async function upsertMessage<Message extends UIMessage>({
       ) as typeof payload.message.metadata)
     : undefined;
 
-  const baseDocument: Record<string, unknown> = {
-    chatId: payload.chatId,
-    role: payload.message.role,
+  // Only mutable fields go in update; immutable fields (id, chatId, role, createdAt) only in create
+  const updateDocument: Record<string, unknown> = {
     parts: storedParts,
     ...(storedMetadata ? { metadata: storedMetadata } : {}),
-    createdAt: now,
     updatedAt: now,
   };
 
@@ -152,9 +140,11 @@ export async function upsertMessage<Message extends UIMessage>({
     where,
     create: {
       id: payload.id,
-      ...baseDocument,
+      chatId: payload.chatId,
+      role: payload.message.role,
+      createdAt: now,
     },
-    update: baseDocument,
+    update: updateDocument,
   });
 }
 
@@ -207,6 +197,7 @@ export async function loadChat<Message extends UIMessage>({
     where: [{ field: "chatId", value: chatId }],
     sortBy: [{ field: "createdAt", direction: "asc" }],
   })) as Array<Record<string, unknown>>;
+  console.log("🚀 ~ loadChat ~ records:", records);
 
   return records
     .map((record) => {

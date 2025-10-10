@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { createDebugLoggerHook } from "../debug";
+import { createDebugLoggerHook } from "../shared";
 
 describe("createDebugLoggerHook", () => {
   it("logs through console when debug=true", () => {
