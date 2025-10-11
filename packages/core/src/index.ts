@@ -1,15 +1,19 @@
 /* agent-frontmatter:start
-AGENT: Root module exports
-PURPOSE: Re-export core Agent Stack modules for consumers
-USAGE: Import from @agent-stack/core to access adapters, agents, context, and transport
-EXPORTS: adapters, agent, context, create, integrations
+AGENT: Core entry point
+PURPOSE: Re-export Agent Stack adapters, types, and database helpers
+USAGE: import { prismaAdapter, Agent, AgentStackUIMessage, loadChat } from "@agent-stack/core"
+EXPORTS: adapters, db helpers, types, Agent, AgentStackUIMessage, loadChat
 FEATURES:
-  - Serves as the primary entry point for Agent Stack consumers
-SEARCHABLE: agent stack core exports, root module
+  - Aggregates the batteries-included adapter set
+  - Surfaces shared database utilities for external consumption
+  - Exports Agent class and related types
+SEARCHABLE: core exports, adapter re-exports, database helpers
 agent-frontmatter:end */
 
 export * from "./adapters";
 export * from "./agent";
 export * from "./context";
-export * from "./create";
+export * from "./db";
+export * from "./define";
 export * from "./integrations";
+export * from "./types";

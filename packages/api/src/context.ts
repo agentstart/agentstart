@@ -10,22 +10,15 @@ FEATURES:
 SEARCHABLE: agent context, rpc context, memory adapter
 agent-frontmatter:end */
 
-import {
-  type Agent,
-  type DatabaseAdapterInstance,
-  memoryAdapter,
-} from "@agent-stack/core";
+import { type AgentStackOptions, memoryAdapter } from "@agent-stack/core";
 
-export interface Context {
+export interface Context extends AgentStackOptions {
   headers: Headers;
-  instance: Agent;
-  memory: DatabaseAdapterInstance<unknown>;
 }
 
-export interface CreateContextOptions {
+export interface CreateContextOptions extends Context {
   headers: Headers;
-  instance: Agent;
-  memory?: DatabaseAdapterInstance<unknown>;
+  memory?: AgentStackOptions["memory"];
 }
 
 export function createContext(opts: CreateContextOptions): Context {

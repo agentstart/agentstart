@@ -14,7 +14,8 @@
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "lint": "bunx biome check --write ./src",
     "typecheck": "tsc --noEmit",
-    "test": "vitest"
+    "test": "bun run prisma:push && vitest",
+    "prisma:push": "prisma db push --schema src/adapters/prisma-adapter/test/schema.prisma"
   },
   "dependencies": {
     "@agent-stack/api": "*",
@@ -25,10 +26,16 @@
     "@agent-stack/biome-config": "*",
     "@agent-stack/tsconfig": "*",
     "@biomejs/biome": "catalog:",
+    "@prisma/client": "catalog:",
+    "@types/better-sqlite3": "catalog:",
+    "@types/pg": "catalog:",
+    "better-sqlite3": "catalog:",
     "drizzle-kit": "catalog:",
     "drizzle-orm": "catalog:",
     "kysely": "catalog:",
     "mongodb": "catalog:",
+    "mysql2": "catalog:",
+    "pg": "catalog:",
     "prisma": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

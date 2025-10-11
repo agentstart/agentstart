@@ -19,8 +19,7 @@
       "outputs": [".vitest", "coverage/**"]
     },
     "lint": {
-      "dependsOn": ["^topo", "^build"],
-      "outputs": [".cache/.biomecache"]
+      "dependsOn": ["^topo", "^build"]
     },
     "typecheck": {
       "dependsOn": ["^topo", "^build"],

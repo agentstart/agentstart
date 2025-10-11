@@ -12,9 +12,9 @@ agent-frontmatter:end */
 
 import { appRouter, createContext } from "@agent-stack/api";
 import { RPCHandler } from "@orpc/server/fetch";
-import type { CreateAgentOptions } from "../create";
+import type { AgentStackOptions } from "../types";
 
-export function toNextJsHandler(options: CreateAgentOptions) {
+export function toNextJsHandler(options: AgentStackOptions) {
   const handler = new RPCHandler(appRouter);
 
   const basePath = options.basePath ?? ("/api/agent" as const);
@@ -22,8 +22,7 @@ export function toNextJsHandler(options: CreateAgentOptions) {
   const handleRequest = async (request: Request) => {
     const context = createContext({
       headers: new Headers(request.headers),
-      instance: options.instance,
-      memory: options.instance.memory,
+      ...options,
     });
 
     const { response } = await handler.handle(request, {

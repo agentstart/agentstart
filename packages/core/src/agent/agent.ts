@@ -23,8 +23,8 @@ import {
   type UIMessage,
   type UIMessageStreamWriter,
 } from "ai";
-import { type DatabaseAdapterInstance, memoryAdapter } from "../adapters";
 import type { BaseContext } from "../context";
+import type { Adapter } from "../types";
 import type { AgentStackUIMessage } from "./messages";
 import {
   addProviderOptionsToMessages,
@@ -47,7 +47,6 @@ export interface AgentSettings<
   Message extends UIMessage,
   Context extends Omit<BaseContext, "writer">,
 > extends AISDK_AgentSettings<ToolSet> {
-  memory?: DatabaseAdapterInstance<unknown>;
   instructions: string;
   agentsMDPrompt?: string;
   context?: Context;
@@ -61,7 +60,6 @@ export class Agent<
   Context extends Omit<BaseContext, "writer"> = Omit<BaseContext, "writer">,
 > {
   // Core properties
-  memory: DatabaseAdapterInstance<unknown>;
   instructions: string;
   agentsMDPrompt?: string;
   context?: Context;
@@ -83,14 +81,12 @@ export class Agent<
   }
 
   constructor({
-    memory = memoryAdapter(),
     instructions,
     agentsMDPrompt,
     context,
     messageMetadata,
     ...settings
   }: AgentSettings<Message, Context>) {
-    this.memory = memory;
     this.instructions = instructions;
     this.agentsMDPrompt = agentsMDPrompt;
     this.context = context;
@@ -105,6 +101,7 @@ export class Agent<
   }
 
   async stream(options: {
+    adapter: Adapter;
     message: Message;
     chatId: string;
     projectId: string;
@@ -112,7 +109,7 @@ export class Agent<
     onError?: Parameters<typeof createUIMessageStream<Message>>[0]["onError"];
   }) {
     const uiMessages = (await getCompleteMessages({
-      memory: this.memory,
+      adapter: options.adapter,
       message: options.message,
       chatId: options.chatId,
     })) ?? [options.message];
@@ -132,13 +129,13 @@ export class Agent<
           // Update database
           await Promise.all([
             updateChatTitle({
-              memory: this.memory,
+              adapter: options.adapter,
               chatId: options.chatId,
               title,
               emoji,
             }),
             updateProjectTitle({
-              memory: this.memory,
+              adapter: options.adapter,
               projectId: options.projectId,
               title,
               emoji,
@@ -208,7 +205,7 @@ export class Agent<
           setting.responseMessage.parts.length > 0
         ) {
           await upsertMessage({
-            memory: this.memory,
+            adapter: options.adapter,
             payload: {
               id: setting.responseMessage.id,
               chatId: options.chatId,

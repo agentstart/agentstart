@@ -59,6 +59,9 @@
       },
       "security": {
         "noDangerouslySetInnerHtml": "off"
+      },
+      "performance": {
+        "noAccumulatingSpread": "off"
       }
     }
   },

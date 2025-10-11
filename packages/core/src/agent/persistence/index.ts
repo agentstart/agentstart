@@ -2,43 +2,20 @@
 AGENT: Agent memory actions
 PURPOSE: Provide persistence helpers backed by the configured adapter
 USAGE: Import to read or mutate chat, project, and message records
-EXPORTS: getAdapterMethods, updateChatTitle, updateProjectTitle, upsertMessage, deleteMessagesAfter, loadChat, getCompleteMessages
+EXPORTS: updateChatTitle, updateProjectTitle, upsertMessage, deleteMessagesAfter, loadChat, getCompleteMessages
 FEATURES:
-  - Normalizes adapter initialization through a cached context
+  - Works with any adapter implementing the shared Adapter interface
   - Applies consistent timestamp handling and payload sanitization
   - Uses object-based parameters for extensibility
 SEARCHABLE: agent actions, memory helpers, chat persistence
 agent-frontmatter:end */
 
 import type { UIMessage } from "ai";
-
-import type {
-  AdapterWhereCondition,
-  DatabaseAdapterInstance,
-  DatabaseAdapterMethods,
-} from "../../adapters";
+import type { Adapter, Where as AdapterWhere } from "../../types";
 import type { AgentStackUIMessage } from "../messages";
 
-type AdapterWhere = AdapterWhereCondition[];
-
-const defaultAdapterContext = {
-  schema: {},
-  debugLog: () => undefined,
-  getField: () => undefined,
-  getDefaultModelName: (model: string) => model,
-  getDefaultFieldName: (_model: string, field: string) => field,
-  getFieldAttributes: () => ({}),
-} as const;
-
 export interface AdapterContextOptions {
-  memory: DatabaseAdapterInstance<unknown>;
-}
-
-export function getAdapterMethods({
-  memory,
-}: AdapterContextOptions): DatabaseAdapterMethods {
-  const methods = memory.initialize({ ...defaultAdapterContext });
-  return methods;
+  adapter: Adapter;
 }
 
 export interface UpdateChatTitleOptions extends AdapterContextOptions {
@@ -48,12 +25,11 @@ export interface UpdateChatTitleOptions extends AdapterContextOptions {
 }
 
 export async function updateChatTitle({
-  memory,
+  adapter,
   chatId,
   title,
   emoji,
 }: UpdateChatTitleOptions) {
-  const adapter = getAdapterMethods({ memory });
   const updatePayload: Record<string, unknown> = {
     title,
     updatedAt: new Date().toISOString(),
@@ -76,12 +52,11 @@ export interface UpdateProjectTitleOptions extends AdapterContextOptions {
 }
 
 export async function updateProjectTitle({
-  memory,
+  adapter,
   projectId,
   title,
   emoji,
 }: UpdateProjectTitleOptions) {
-  const adapter = getAdapterMethods({ memory });
   const updatePayload: Record<string, unknown> = {
     title,
     updatedAt: new Date().toISOString(),
@@ -109,15 +84,18 @@ export interface UpsertMessageOptions<Message extends UIMessage>
 }
 
 export async function upsertMessage<Message extends UIMessage>({
-  memory,
+  adapter,
   payload,
 }: UpsertMessageOptions<Message>) {
   if (!payload.message.parts || payload.message.parts.length === 0) {
     throw new Error("Message must have at least one part");
   }
 
-  const adapter = getAdapterMethods({ memory });
-  const where: AdapterWhere = [{ field: "id", value: payload.id }];
+  if (!adapter.upsert) {
+    throw new Error("Configured adapter does not implement upsert.");
+  }
+
+  const where: AdapterWhere[] = [{ field: "id", value: payload.id }];
   const now = new Date().toISOString();
   const storedParts = JSON.parse(
     JSON.stringify(payload.message.parts),
@@ -128,7 +106,6 @@ export async function upsertMessage<Message extends UIMessage>({
       ) as typeof payload.message.metadata)
     : undefined;
 
-  // Only mutable fields go in update; immutable fields (id, chatId, role, createdAt) only in create
   const updateDocument: Record<string, unknown> = {
     parts: storedParts,
     ...(storedMetadata ? { metadata: storedMetadata } : {}),
@@ -154,11 +131,10 @@ export interface DeleteMessagesAfterOptions extends AdapterContextOptions {
 }
 
 export async function deleteMessagesAfter({
-  memory,
+  adapter,
   chatId,
   messageId,
 }: DeleteMessagesAfterOptions) {
-  const adapter = getAdapterMethods({ memory });
   const target = (await adapter.findOne({
     model: "message",
     where: [
@@ -187,17 +163,14 @@ export interface LoadChatOptions extends AdapterContextOptions {
 }
 
 export async function loadChat<Message extends UIMessage>({
-  memory,
+  adapter,
   chatId,
 }: LoadChatOptions): Promise<Message[]> {
-  const adapter = getAdapterMethods({ memory });
-
   const records = (await adapter.findMany({
     model: "message",
     where: [{ field: "chatId", value: chatId }],
-    sortBy: [{ field: "createdAt", direction: "asc" }],
+    sortBy: { field: "createdAt", direction: "asc" },
   })) as Array<Record<string, unknown>>;
-  console.log("🚀 ~ loadChat ~ records:", records);
 
   return records
     .map((record) => {
@@ -231,18 +204,14 @@ export interface GetCompleteMessagesOptions<Message extends UIMessage>
 export async function getCompleteMessages<
   Message extends UIMessage = AgentStackUIMessage,
 >({
-  memory,
+  adapter,
   message,
   chatId,
 }: GetCompleteMessagesOptions<Message>): Promise<Message[] | undefined> {
-  // Delete any messages after this one (for regeneration scenarios)
-  await deleteMessagesAfter({ memory, chatId, messageId: message.id });
-  // create or update last message in database
+  await deleteMessagesAfter({ adapter, chatId, messageId: message.id });
   await upsertMessage({
-    memory,
+    adapter,
     payload: { chatId, id: message.id, message },
   });
-  // load the previous messages from the server:
-  const messages = await loadChat<Message>({ memory, chatId });
-  return messages;
+  return loadChat<Message>({ adapter, chatId });
 }

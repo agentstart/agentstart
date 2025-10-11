@@ -1,4 +1,4 @@
-import { Agent, createAgent, mongodbAdapter } from "@agent-stack/core";
+import { Agent, defineAgentStack, mongodbAdapter } from "@agent-stack/core";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { db } from "@/db";
 
@@ -9,12 +9,12 @@ const openrouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
 });
 
-const instance = new Agent({
+const agent = new Agent({
   model: openrouter("x-ai/grok-4-fast"),
   instructions: "You are a helpful assistant.",
-  memory: mongodbAdapter(db),
 });
 
-export const agent = createAgent({
-  instance,
+export const agentStack = defineAgentStack({
+  memory: mongodbAdapter(db),
+  agents: [agent],
 });

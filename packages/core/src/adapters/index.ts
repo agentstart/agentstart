@@ -1,18 +1,16 @@
 /* agent-frontmatter:start
-AGENT: Adapter exports
-PURPOSE: Re-export database adapter helpers and built-in implementations
-USAGE: Import from @agent-stack/core/adapters
-EXPORTS: createAdapterFactory, drizzleAdapter
+AGENT: Adapters barrel export
+PURPOSE: Central re-export point for all adapter implementations
+USAGE: import { drizzleAdapter, kyselyAdapter, memoryAdapter, mongodbAdapter, prismaAdapter } from "../adapters"
+EXPORTS: All adapter implementations and their utilities
 FEATURES:
-  - Centralizes adapter exports
-  - Keeps consumers decoupled from file structure
-SEARCHABLE: database adapters, drizzle adapter, storage integration
+  - Re-exports all 5 adapter implementations
+  - Includes adapter-specific types and utilities (e.g., Kysely dialect, types)
+SEARCHABLE: adapter exports, drizzle kysely memory mongodb prisma
 agent-frontmatter:end */
 
-export * from "./create-database-adapter";
-export * from "./drizzle";
-export * from "./kysely";
-export * from "./memory";
-export * from "./mongodb";
-export * from "./prisma";
-export * from "./shared";
+export * from "./drizzle-adapter";
+export * from "./kysely-adapter";
+export * from "./memory-adapter";
+export * from "./mongodb-adapter";
+export * from "./prisma-adapter";

@@ -1,8 +1,0 @@
-{
-  "extends": "@agent-stack/tsconfig/base.json",
-  "compilerOptions": {
-    "jsx": "preserve"
-  },
-  "include": ["."],
-  "exclude": ["node_modules"]
-}

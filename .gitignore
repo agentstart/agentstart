@@ -56,3 +56,6 @@ dist/
 
 # next-intl
 *.d.json.ts
+
+*.sqlite
+*.db

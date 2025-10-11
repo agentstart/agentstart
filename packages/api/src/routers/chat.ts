@@ -10,7 +10,8 @@ FEATURES:
 SEARCHABLE: chat router, agent stream, rpc chat
 agent-frontmatter:end */
 
-import type { AgentStackUIMessage } from "@agent-stack/core";
+import { type AgentStackUIMessage, getAdapter } from "@agent-stack/core";
+import { AgentStackError } from "@agent-stack/errors";
 import { streamToEventIterator, type } from "@orpc/server";
 import { publicProcedure } from "../procedures";
 
@@ -26,7 +27,18 @@ export const chatRouter = {
     )
     .handler(async ({ input, context, errors }) => {
       try {
-        const result = await context.instance.stream({
+        const agent = context.agents.at(0);
+        if (!agent) {
+          throw new AgentStackError(
+            "AGENT_NOT_CONFIGURED",
+            "No agent configured",
+          );
+        }
+
+        const adapter = await getAdapter(context);
+
+        const result = await agent.stream({
+          adapter,
           message: input.message,
           chatId: input.chatId,
           projectId: input.projectId,

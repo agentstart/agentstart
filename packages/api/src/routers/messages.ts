@@ -10,7 +10,11 @@ FEATURES:
 SEARCHABLE: messages router, chat history, loadChat api
 agent-frontmatter:end */
 
-import { type AgentStackUIMessage, loadChat } from "@agent-stack/core";
+import {
+  type AgentStackUIMessage,
+  getAdapter,
+  loadChat,
+} from "@agent-stack/core";
 import { z } from "zod/v4";
 import { publicProcedure } from "../procedures";
 
@@ -23,8 +27,9 @@ export const messagesRouter = {
     )
     .handler(async ({ input, context, errors }) => {
       try {
+        const adapter = await getAdapter(context);
         const messages = await loadChat<AgentStackUIMessage>({
-          memory: context.memory,
+          adapter,
           chatId: input.chatId,
         });
         return messages;

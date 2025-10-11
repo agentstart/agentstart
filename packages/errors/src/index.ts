@@ -4,7 +4,7 @@ Automatically identifies errors and provides fix commands
 agent-frontmatter:end */
 
 // Standard error class with fix suggestions
-export class AppError extends Error {
+export class AgentStackError extends Error {
   constructor(
     public code: string,
     message: string,
@@ -13,7 +13,7 @@ export class AppError extends Error {
     public statusCode = 500,
   ) {
     super(message);
-    this.name = "AppError";
+    this.name = "AgentStackError";
   }
 }
 
@@ -89,7 +89,7 @@ export const errorPatterns: ErrorPattern[] = [
 
   // Environment errors
   {
-    pattern: /Cannot find module.*\.env/,
+    pattern: /Cannot find module.*\\.env/,
     code: "ENV_FILE_MISSING",
     message: "Environment file not found",
     fix: "cp .env.example .env",
@@ -174,7 +174,7 @@ export function handleError(error: unknown): never {
   );
 
   if (matchedPattern) {
-    throw new AppError(
+    throw new AgentStackError(
       matchedPattern.code,
       matchedPattern.message,
       matchedPattern.fix,
@@ -184,7 +184,7 @@ export function handleError(error: unknown): never {
   }
 
   // If no pattern matches, throw generic error
-  throw new AppError(
+  throw new AgentStackError(
     "UNKNOWN_ERROR",
     errorMessage || "An unknown error occurred",
     undefined,
@@ -194,7 +194,7 @@ export function handleError(error: unknown): never {
 }
 
 // Helper to format error for display
-export function formatError(error: AppError): string {
+export function formatError(error: AgentStackError): string {
   let output = `❌ Error: ${error.message}\n`;
   output += `   Code: ${error.code}\n`;
 
@@ -212,15 +212,15 @@ export function formatError(error: AppError): string {
   return output;
 }
 
-// Helper to check if error is AppError
-export function isAppError(error: unknown): error is AppError {
-  return error instanceof AppError;
+// Helper to check if error is AgentStackError
+export function isAgentStackError(error: unknown): error is AgentStackError {
+  return error instanceof AgentStackError;
 }
 
 // Common error factories for consistent error creation
 export const errors = {
   unauthorized: () =>
-    new AppError(
+    new AgentStackError(
       "AUTH_REQUIRED",
       "Authentication required",
       "Sign in to continue",
@@ -229,7 +229,7 @@ export const errors = {
     ),
 
   forbidden: () =>
-    new AppError(
+    new AgentStackError(
       "FORBIDDEN",
       "Access denied",
       "Check user permissions",
@@ -238,7 +238,7 @@ export const errors = {
     ),
 
   notFound: (resource = "Resource") =>
-    new AppError(
+    new AgentStackError(
       "NOT_FOUND",
       `${resource} not found`,
       `Verify the ${resource.toLowerCase()} exists`,
@@ -247,7 +247,7 @@ export const errors = {
     ),
 
   badRequest: (message = "Invalid request") =>
-    new AppError(
+    new AgentStackError(
       "BAD_REQUEST",
       message,
       "Check request parameters",
@@ -256,7 +256,7 @@ export const errors = {
     ),
 
   serverError: (message = "Internal server error") =>
-    new AppError(
+    new AgentStackError(
       "SERVER_ERROR",
       message,
       "Check server logs",
@@ -264,13 +264,3 @@ export const errors = {
       500,
     ),
 } as const;
-
-export class AgentStackError extends Error {
-  constructor(
-    public code: string,
-    message: string,
-  ) {
-    super(message);
-    this.name = "AgentStackError";
-  }
-}
