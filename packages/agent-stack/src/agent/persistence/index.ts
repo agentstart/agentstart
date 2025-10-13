@@ -11,6 +11,7 @@ SEARCHABLE: agent actions, memory helpers, chat persistence
 agent-frontmatter:end */
 
 import type { UIMessage } from "ai";
+import type { DBChat } from "../../db";
 import type { Adapter, Where as AdapterWhere } from "../../types";
 import type { AgentStackUIMessage } from "../messages";
 
@@ -97,18 +98,26 @@ export async function upsertMessage<Message extends UIMessage>({
 
   const where: AdapterWhere[] = [{ field: "id", value: payload.id }];
   const now = new Date().toISOString();
-  const storedParts = JSON.parse(
-    JSON.stringify(payload.message.parts),
-  ) as typeof payload.message.parts;
-  const storedMetadata = payload.message.metadata
-    ? (JSON.parse(
-        JSON.stringify(payload.message.metadata),
-      ) as typeof payload.message.metadata)
-    : undefined;
+
+  const serializedParts = JSON.stringify(payload.message.parts);
+  const serializedMetadata =
+    payload.message.metadata !== undefined
+      ? JSON.stringify(payload.message.metadata)
+      : undefined;
+  const attachmentsValue = (
+    payload.message as {
+      attachments?: unknown;
+    }
+  ).attachments;
+  const serializedAttachments =
+    attachmentsValue !== undefined
+      ? JSON.stringify(attachmentsValue)
+      : undefined;
 
   const updateDocument: Record<string, unknown> = {
-    parts: storedParts,
-    ...(storedMetadata ? { metadata: storedMetadata } : {}),
+    parts: serializedParts,
+    ...(serializedMetadata ? { metadata: serializedMetadata } : {}),
+    ...(serializedAttachments ? { attachments: serializedAttachments } : {}),
     updatedAt: now,
   };
 
@@ -166,34 +175,103 @@ export async function loadChat<Message extends UIMessage>({
   adapter,
   chatId,
 }: LoadChatOptions): Promise<Message[]> {
-  const records = (await adapter.findMany({
+  const records = await adapter.findMany<Record<string, unknown>>({
     model: "message",
     where: [{ field: "chatId", value: chatId }],
     sortBy: { field: "createdAt", direction: "asc" },
-  })) as Array<Record<string, unknown>>;
+  });
 
   return records
     .map((record) => {
-      const parts = Array.isArray(record.parts)
-        ? (JSON.parse(JSON.stringify(record.parts)) as Message["parts"])
-        : undefined;
+      let parts: Message["parts"] | undefined;
+
+      if (Array.isArray(record.parts)) {
+        parts = record.parts as Message["parts"];
+      } else if (typeof record.parts === "string") {
+        try {
+          const parsed = JSON.parse(record.parts);
+          if (Array.isArray(parsed)) {
+            parts = parsed as Message["parts"];
+          }
+        } catch (error) {
+          console.error("Failed to parse message parts", {
+            chatId,
+            messageId: record.id,
+            error,
+          });
+        }
+      }
       if (!parts || parts.length === 0) {
         return undefined;
       }
-      const metadata =
-        typeof record.metadata === "object" && record.metadata !== null
-          ? (JSON.parse(JSON.stringify(record.metadata)) as Message["metadata"])
-          : undefined;
+      let metadata: Message["metadata"] | undefined;
+      let attachments: unknown;
+      if (typeof record.metadata === "string") {
+        try {
+          metadata = JSON.parse(record.metadata) as Message["metadata"];
+        } catch (error) {
+          console.error("Failed to parse message metadata", {
+            chatId,
+            messageId: record.id,
+            error,
+          });
+        }
+      } else if (
+        typeof record.metadata === "object" &&
+        record.metadata !== null
+      ) {
+        metadata = JSON.parse(
+          JSON.stringify(record.metadata),
+        ) as Message["metadata"];
+      }
+      if (typeof record.attachments === "string") {
+        try {
+          attachments = JSON.parse(record.attachments);
+        } catch (error) {
+          console.error("Failed to parse message attachments", {
+            chatId,
+            messageId: record.id,
+            error,
+          });
+        }
+      } else if (
+        Array.isArray(record.attachments) ||
+        (typeof record.attachments === "object" && record.attachments !== null)
+      ) {
+        attachments = JSON.parse(JSON.stringify(record.attachments));
+      }
 
-      return {
+      const message = {
         id: String(record.id ?? ""),
         role: record.role as Message["role"],
         parts,
         ...(metadata ? { metadata } : {}),
       } as Message;
+      if (attachments !== undefined) {
+        (message as Message & { attachments?: unknown }).attachments =
+          attachments;
+      }
+      return message;
     })
     .filter((message): message is Message => Boolean(message));
 }
+
+export interface GetChatsByProjectIdOptions extends AdapterContextOptions {
+  projectId: string;
+}
+
+export const getChatsByProjectId = async ({
+  adapter,
+  projectId,
+}: GetChatsByProjectIdOptions): Promise<DBChat[]> => {
+  const records = await adapter.findMany<DBChat>({
+    model: "chat",
+    where: [{ field: "projectId", value: projectId }],
+    sortBy: { field: "updatedAt", direction: "desc" },
+  });
+
+  return records;
+};
 
 export interface GetCompleteMessagesOptions<Message extends UIMessage>
   extends AdapterContextOptions {

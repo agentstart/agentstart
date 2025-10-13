@@ -15,7 +15,7 @@ import { getAdapter } from "agent-stack/db";
 import { z } from "zod/v4";
 import { publicProcedure } from "../procedures";
 
-export const messagesRouter = {
+export const messageRouter = {
   get: publicProcedure
     .input(
       z.object({

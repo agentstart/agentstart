@@ -18,4 +18,5 @@ import type { Context } from "./context";
 export const publicProcedure = os.$context<Context>().errors({
   UNAUTHORIZED: {},
   UNKNOWN: {},
+  INTERNAL_SERVER_ERROR: {},
 });

@@ -16,7 +16,8 @@
     "@agent-stack/utils": "*",
     "@ai-sdk/react": "catalog:",
     "@orpc/client": "catalog:",
-    "@orpc/server": "catalog:"
+    "@orpc/server": "catalog:",
+    "zustand": "catalog:"
   },
   "devDependencies": {
     "@agent-stack/biome-config": "*",

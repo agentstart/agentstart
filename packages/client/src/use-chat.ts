@@ -26,7 +26,7 @@ import type { ChatTransport } from "ai";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import type { StoreApi, UseBoundStore } from "zustand";
-import { type ChatStoreWithSync, getChatStore } from "./store";
+import { type AgentStoreWithSync, getAgentStore } from "./store/agent";
 
 export function createUseChat(client: RouterClient<AppRouter>) {
   const chat = new Chat<AgentStackUIMessage>({
@@ -34,13 +34,14 @@ export function createUseChat(client: RouterClient<AppRouter>) {
     transport: {
       async sendMessages(options) {
         const lastMessage = options.messages.at(-1)!;
+        const body = options.body as {
+          chatId: string;
+          projectId: string;
+        };
         return eventIteratorToStream(
           await client.chat.stream(
             {
-              ...options.body,
-              projectId: "test-projectId",
-              chatId: "test-chatId",
-              model: "test-modelId",
+              ...body,
               message: lastMessage,
             },
             { signal: options.abortSignal },
@@ -69,7 +70,7 @@ export function createUseChat(client: RouterClient<AppRouter>) {
 type UseChatOptionsWithStore<TMessage extends UIMessage = UIMessage> =
   UseChatOptions<TMessage> & {
     storeId?: string;
-    store?: UseBoundStore<StoreApi<ChatStoreWithSync<TMessage>>>;
+    store?: UseBoundStore<StoreApi<AgentStoreWithSync<TMessage>>>;
   };
 
 function useChat<TMessage extends UIMessage = UIMessage>(
@@ -83,9 +84,9 @@ function useChat<TMessage extends UIMessage = UIMessage>(
   const chatHelpers = useOriginalChat<TMessage>(originalOptions);
 
   // Use custom store if provided, otherwise get/create default store
-  const store = customStore || getChatStore(storeId);
+  const store = customStore || getAgentStore(storeId);
   const storeRef =
-    useRef<UseBoundStore<StoreApi<ChatStoreWithSync<TMessage>>>>(store);
+    useRef<UseBoundStore<StoreApi<AgentStoreWithSync<TMessage>>>>(store);
 
   useEffect(() => {
     if (!storeRef.current) return;

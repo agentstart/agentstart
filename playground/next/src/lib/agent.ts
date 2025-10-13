@@ -2,6 +2,7 @@ import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { Agent, defineAgentConfig } from "agent-stack";
 import { drizzleAdapter } from "agent-stack/adapters/drizzle";
 import { db } from "@/db";
+import * as schema from "@/db/schema";
 
 if (!process.env.MODEL_PROVIDER_API_KEY) {
   throw new Error("Missing MODEL_PROVIDER_API_KEY");
@@ -16,6 +17,7 @@ const agent = new Agent({
 export const agentStack = defineAgentConfig({
   memory: drizzleAdapter(db, {
     provider: "pg",
+    schema,
   }),
   appName: "example-nextjs",
   agent,

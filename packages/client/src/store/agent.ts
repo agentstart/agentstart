@@ -3,24 +3,24 @@ import { create, type StoreApi, type UseBoundStore } from "zustand";
 import { devtools } from "zustand/middleware";
 import { useShallow } from "zustand/shallow";
 
-export interface ChatStore<TMessage extends UIMessage = UIMessage>
+export interface AgentStore<TMessage extends UIMessage = UIMessage>
   extends UseChatHelpers<TMessage> {}
 
 // Internal sync method for connecting with useChat
-export interface ChatStoreWithSync<TMessage extends UIMessage = UIMessage>
-  extends ChatStore<TMessage> {
-  _syncState: (newState: Partial<ChatStore<TMessage>>) => void;
+export interface AgentStoreWithSync<TMessage extends UIMessage = UIMessage>
+  extends AgentStore<TMessage> {
+  _syncState: (newState: Partial<AgentStore<TMessage>>) => void;
 }
 
 // Store instances map (using any for simplicity due to generic constraints)
 const storeInstances = new Map<
   string,
   // biome-ignore lint/suspicious/noExplicitAny: is fine
-  UseBoundStore<StoreApi<ChatStoreWithSync<any>>>
+  UseBoundStore<StoreApi<AgentStoreWithSync<any>>>
 >();
 
-function createChatStore<TMessage extends UIMessage = UIMessage>() {
-  return create<ChatStoreWithSync<TMessage>>()(
+function createAgentStore<TMessage extends UIMessage = UIMessage>() {
+  return create<AgentStoreWithSync<TMessage>>()(
     devtools(
       (set) => ({
         // Default state matching UseChatHelpers interface
@@ -39,30 +39,33 @@ function createChatStore<TMessage extends UIMessage = UIMessage>() {
         clearError: () => {},
 
         // Internal sync method for useChat integration
-        _syncState: (newState: Partial<ChatStore<TMessage>>) => {
+        _syncState: (newState: Partial<AgentStore<TMessage>>) => {
           set(newState, false, "syncFromUseChat");
         },
       }),
       {
-        name: "agent-stack-chat-store",
+        name: "agent-stack-agent-store",
       },
     ),
   );
 }
 
-export function getChatStore<TMessage extends UIMessage = UIMessage>(
+export function getAgentStore<TMessage extends UIMessage = UIMessage>(
   storeId: string = "default",
 ) {
   if (!storeInstances.has(storeId)) {
-    storeInstances.set(storeId, createChatStore<TMessage>());
+    storeInstances.set(storeId, createAgentStore<TMessage>());
   }
   return storeInstances.get(storeId)!;
 }
 
-export function useChatStore<
+export function useAgentStore<
   TMessage extends UIMessage = UIMessage,
   T = unknown,
->(selector: (state: ChatStore<TMessage>) => T, storeId: string = "default"): T {
-  const useStore = getChatStore(storeId);
+>(
+  selector: (state: AgentStore<TMessage>) => T,
+  storeId: string = "default",
+): T {
+  const useStore = getAgentStore(storeId);
   return useStore(useShallow(selector));
 }

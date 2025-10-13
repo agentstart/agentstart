@@ -11,7 +11,8 @@ SEARCHABLE: orpc router, main router, api router
 agent-frontmatter:end */
 
 import { chatRouter } from "./routers/chat";
-import { messagesRouter } from "./routers/messages";
+import { messageRouter } from "./routers/message";
+import { projectRouter } from "./routers/project";
 
 /**
  * Main API router combining all procedures
@@ -19,7 +20,8 @@ import { messagesRouter } from "./routers/messages";
  */
 export const appRouter = {
   chat: chatRouter,
-  messages: messagesRouter,
+  message: messageRouter,
+  project: projectRouter,
 };
 
 // Export the router type for client usage

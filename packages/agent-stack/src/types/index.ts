@@ -35,7 +35,7 @@ export type Where = {
 
 export type Adapter = {
   id: string;
-  create: <T extends Record<string, unknown>, R = T>(data: {
+  create: <T extends Record<string, unknown>, R = T & { id: string }>(data: {
     model: string;
     data: T;
     select?: string[];
@@ -136,6 +136,7 @@ export type AgentStackOptions = {
   memory?: Memory;
   secondaryMemory?: SecondaryMemory;
   agent: Agent;
+  getUserId?: (headers: Headers) => string | Promise<string>;
   advanced?: {
     generateId?:
       | false

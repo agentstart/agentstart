@@ -12,11 +12,44 @@ agent-frontmatter:end */
 
 import { AgentStackError } from "@agent-stack/utils";
 import { streamToEventIterator, type } from "@orpc/server";
-import type { AgentStackUIMessage } from "agent-stack";
+import {
+  type AgentStackUIMessage,
+  getChatsByProjectId,
+  loadChat,
+} from "agent-stack";
 import { getAdapter } from "agent-stack/db";
+import z from "zod";
 import { publicProcedure } from "../procedures";
 
 export const chatRouter = {
+  getChats: publicProcedure
+    .input(z.object({ projectId: z.string() }))
+    .handler(async ({ input, context }) => {
+      const adapter = await getAdapter(context);
+
+      const chats = await getChatsByProjectId({
+        adapter,
+        projectId: input.projectId,
+      });
+
+      // First chat is the most recent (already sorted by updatedAt desc)
+      const activeChat = chats[0] || null;
+
+      return {
+        chats,
+        activeChatId: activeChat?.id || null,
+      };
+    }),
+
+  loadMessages: publicProcedure
+    .input(z.object({ chatId: z.string() }))
+    .handler(async ({ input, context }) => {
+      const adapter = await getAdapter(context);
+
+      const messages = await loadChat({ adapter, chatId: input.chatId });
+      return messages;
+    }),
+
   stream: publicProcedure
     .input(
       type<{

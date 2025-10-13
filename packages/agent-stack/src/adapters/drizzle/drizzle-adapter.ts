@@ -12,7 +12,7 @@ import {
   or,
   type SQL,
 } from "drizzle-orm";
-import { getTables } from "../../db";
+import { type FieldAttribute, getTables } from "../../db";
 import type { Adapter, AgentStackOptions, Where } from "../../types";
 import { withApplyDefault } from "../utils";
 
@@ -27,6 +27,89 @@ const createTransform = (
   options: Omit<AgentStackOptions, "agent">,
 ) => {
   const schema = getTables(options);
+  const isSqliteProvider = config.provider === "sqlite";
+
+  const getFieldAttribute = (model: string, field: string) => {
+    if (field === "id") {
+      return undefined;
+    }
+    const table = schema[model];
+    if (!table) {
+      throw new AgentStackError(
+        "DRIZZLE_TABLE_MISSING",
+        `Table ${model} not found in schema`,
+      );
+    }
+    return table.fields[field];
+  };
+
+  const normalizeDateForWrite = (
+    value: unknown,
+    fieldAttr: FieldAttribute | undefined,
+  ) => {
+    if (
+      !fieldAttr ||
+      fieldAttr.type !== "date" ||
+      value === undefined ||
+      value === null
+    ) {
+      return value;
+    }
+    if (value instanceof Date) {
+      return isSqliteProvider ? value.toISOString() : value;
+    }
+    if (typeof value === "string" || typeof value === "number") {
+      const parsed = new Date(value);
+      if (!Number.isNaN(parsed.getTime())) {
+        return isSqliteProvider ? parsed.toISOString() : parsed;
+      }
+    }
+    return value;
+  };
+
+  const normalizeDateForQuery = (
+    value: unknown,
+    model: string,
+    field: string,
+  ) => {
+    const fieldAttr = getFieldAttribute(model, field);
+    if (
+      !fieldAttr ||
+      fieldAttr.type !== "date" ||
+      value === undefined ||
+      value === null
+    ) {
+      return value;
+    }
+    if (value instanceof Date) {
+      return isSqliteProvider ? value.toISOString() : value;
+    }
+    if (typeof value === "string" || typeof value === "number") {
+      const parsed = new Date(value);
+      if (!Number.isNaN(parsed.getTime())) {
+        return isSqliteProvider ? parsed.toISOString() : parsed;
+      }
+    }
+    return value;
+  };
+
+  const normalizeDateForOutput = (
+    value: unknown,
+    fieldAttr: FieldAttribute | undefined,
+  ) => {
+    if (
+      !fieldAttr ||
+      fieldAttr.type !== "date" ||
+      value === undefined ||
+      value === null
+    ) {
+      return value;
+    }
+    if (value instanceof Date) {
+      return value.toISOString();
+    }
+    return value;
+  };
 
   function getField(model: string, field: string) {
     if (field === "id") {
@@ -105,7 +188,10 @@ const createTransform = (
             `The value for the field "${w.field}" must be an array when using the "in" operator.`,
           );
         }
-        return [inArray(schemaModel[field], w.value)];
+        const normalizedValues = w.value.map((entry) =>
+          normalizeDateForQuery(entry, model, w.field),
+        );
+        return [inArray(schemaModel[field], normalizedValues)];
       }
 
       if (w.operator === "contains") {
@@ -121,14 +207,26 @@ const createTransform = (
       }
 
       if (w.operator === "lt") {
-        return [lt(schemaModel[field], w.value)];
+        return [
+          lt(
+            schemaModel[field],
+            normalizeDateForQuery(w.value, model, w.field),
+          ),
+        ];
       }
 
       if (w.operator === "lte") {
-        return [lte(schemaModel[field], w.value)];
+        return [
+          lte(
+            schemaModel[field],
+            normalizeDateForQuery(w.value, model, w.field),
+          ),
+        ];
       }
 
-      return [eq(schemaModel[field], w.value)];
+      return [
+        eq(schemaModel[field], normalizeDateForQuery(w.value, model, w.field)),
+      ];
     }
     const andGroup = where.filter((w) => w.connector === "AND" || !w.connector);
     const orGroup = where.filter((w) => w.connector === "OR");
@@ -143,15 +241,24 @@ const createTransform = (
               `The value for the field "${w.field}" must be an array when using the "in" operator.`,
             );
           }
-          return inArray(schemaModel[field], w.value);
+          const normalizedValues = w.value.map((entry) =>
+            normalizeDateForQuery(entry, model, w.field),
+          );
+          return inArray(schemaModel[field], normalizedValues);
         }
-        return eq(schemaModel[field], w.value);
+        return eq(
+          schemaModel[field],
+          normalizeDateForQuery(w.value, model, w.field),
+        );
       }),
     );
     const orClause = or(
       ...orGroup.map((w) => {
         const field = getField(model, w.field);
-        return eq(schemaModel[field], w.value);
+        return eq(
+          schemaModel[field],
+          normalizeDateForQuery(w.value, model, w.field),
+        );
       }),
     );
 
@@ -203,10 +310,10 @@ const createTransform = (
         if (value === undefined && !fieldAttr.defaultValue) {
           continue;
         }
-        transformedData[fieldAttr.fieldName || field] = withApplyDefault(
-          value,
+        const appliedDefault = withApplyDefault(value, fieldAttr, action);
+        transformedData[fieldAttr.fieldName || field] = normalizeDateForWrite(
+          appliedDefault,
           fieldAttr,
-          action,
         );
       }
       return transformedData;
@@ -241,7 +348,8 @@ const createTransform = (
         }
         const field = tableSchema[key];
         if (field) {
-          transformedData[key] = base[field.fieldName || key];
+          const rawValue = base[field.fieldName || key];
+          transformedData[key] = normalizeDateForOutput(rawValue, field);
         }
       }
       return transformedData;
