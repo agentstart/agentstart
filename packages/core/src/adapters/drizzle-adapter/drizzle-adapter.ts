@@ -25,7 +25,7 @@ export interface DB {
 const createTransform = (
   db: DB,
   config: DrizzleAdapterConfig,
-  options: Omit<AgentStackOptions, "agents">,
+  options: Omit<AgentStackOptions, "agent">,
 ) => {
   const schema = getAuthTables(options);
 
@@ -346,7 +346,7 @@ function checkMissingFields(
 
 export const drizzleAdapter =
   (db: DB, config: DrizzleAdapterConfig) =>
-  (options: Omit<AgentStackOptions, "agents">) => {
+  (options: Omit<AgentStackOptions, "agent">) => {
     const {
       transformInput,
       transformOutput,

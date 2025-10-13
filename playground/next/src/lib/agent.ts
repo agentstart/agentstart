@@ -16,5 +16,5 @@ const agent = new Agent({
 
 export const agentStack = defineAgentStack({
   memory: mongodbAdapter(db),
-  agents: [agent],
+  agent,
 });

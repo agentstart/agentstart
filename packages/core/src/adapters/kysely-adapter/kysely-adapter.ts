@@ -20,7 +20,7 @@ interface KyselyAdapterConfig {
 
 const createTransform = (
   db: Kysely<any>,
-  options: Omit<AgentStackOptions, "agents">,
+  options: Omit<AgentStackOptions, "agent">,
   config?: KyselyAdapterConfig,
 ) => {
   const schema = getAuthTables(options);
@@ -332,7 +332,7 @@ const createTransform = (
 
 export const kyselyAdapter =
   (db: Kysely<any>, config?: KyselyAdapterConfig) =>
-  (opts: Omit<AgentStackOptions, "agents">) => {
+  (opts: Omit<AgentStackOptions, "agent">) => {
     const {
       transformInput,
       withReturning,

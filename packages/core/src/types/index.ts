@@ -133,7 +133,7 @@ export type AgentStackOptions = {
   basePath?: `/${string}`;
   memory?: Memory;
   secondaryMemory?: SecondaryMemory;
-  agents: Agent[];
+  agent: Agent;
   advanced?: {
     generateId?:
       | false

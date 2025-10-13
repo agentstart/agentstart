@@ -24,5 +24,8 @@
     "@agent-stack/tsconfig": "*",
     "@biomejs/biome": "catalog:",
     "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "^19"
   }
 }

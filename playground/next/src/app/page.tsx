@@ -1,19 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { client, useChat } from "@/lib/agent-client";
+import { client, useChat, useChatStore } from "@/lib/agent-client";
 
-export default function Chat() {
+export default function Page() {
+  useChat();
   const [input, setInput] = useState("");
-  const { messages, sendMessage } = useChat();
+
+  const messages = useChatStore((state) => state.messages);
+  const setMessages = useChatStore((state) => state.setMessages);
+  const sendMessage = useChatStore((state) => state.sendMessage);
 
   useEffect(() => {
     async function fetchMessages() {
       const messages = await client.messages.get({ chatId: "test-chatId" });
-      console.log("🚀 ~ Chat ~ messages:", messages);
+      setMessages(messages);
     }
     fetchMessages();
-  }, []);
+  }, [setMessages]);
 
   return (
     <div className="stretch mx-auto flex w-full max-w-md flex-col py-24">

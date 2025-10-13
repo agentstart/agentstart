@@ -51,7 +51,7 @@ function getDatabaseType(
 }
 
 export const createKyselyAdapter = async (
-  options: Omit<AgentStackOptions, "agents">,
+  options: Omit<AgentStackOptions, "agent">,
 ) => {
   const db = options.memory;
 

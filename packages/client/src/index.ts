@@ -31,3 +31,5 @@ export function createAgentClient(config?: AgentClientConfig) {
 
   return { client, useChat };
 }
+
+export * from "./store";

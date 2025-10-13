@@ -4,7 +4,7 @@ import { getAuthTables } from "..";
 import { convertFromDB, convertToDB } from "../utils";
 
 describe("db helpers", () => {
-  const options: Omit<AgentStackOptions, "agents"> = {
+  const options: Omit<AgentStackOptions, "agent"> = {
     project: {
       modelName: "projects",
       fields: {

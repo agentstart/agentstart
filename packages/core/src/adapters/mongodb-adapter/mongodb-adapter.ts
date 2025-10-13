@@ -3,7 +3,7 @@ import { getAuthTables } from "../../db";
 import type { Adapter, AgentStackOptions, Where } from "../../types";
 import { withApplyDefault } from "../utils";
 
-const createTransform = (options: Omit<AgentStackOptions, "agents">) => {
+const createTransform = (options: Omit<AgentStackOptions, "agent">) => {
   const schema = getAuthTables(options);
   /**
    * if custom id gen is provided we don't want to override with object id
@@ -274,7 +274,7 @@ const createTransform = (options: Omit<AgentStackOptions, "agents">) => {
 };
 
 export const mongodbAdapter =
-  (db: Db) => (options: Omit<AgentStackOptions, "agents">) => {
+  (db: Db) => (options: Omit<AgentStackOptions, "agent">) => {
     const transform = createTransform(options);
     const hasCustomId = options.advanced?.generateId;
     return {

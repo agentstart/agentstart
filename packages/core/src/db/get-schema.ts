@@ -12,7 +12,7 @@ agent-frontmatter:end */
 import type { AgentStackOptions } from "../types";
 import { type FieldAttribute, getAuthTables } from ".";
 
-export function getSchema(config: Omit<AgentStackOptions, "agents">): Record<
+export function getSchema(config: Omit<AgentStackOptions, "agent">): Record<
   string,
   {
     modelName: string;

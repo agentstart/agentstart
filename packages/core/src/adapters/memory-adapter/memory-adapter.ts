@@ -21,7 +21,7 @@ const toComparable = (value: unknown): string | number => {
   return value === null || value === undefined ? "" : String(value);
 };
 
-const createTransform = (options: Omit<AgentStackOptions, "agents">) => {
+const createTransform = (options: Omit<AgentStackOptions, "agent">) => {
   const schema = getAuthTables(options);
 
   function getField(model: string, field: string): string {
@@ -170,7 +170,7 @@ const createTransform = (options: Omit<AgentStackOptions, "agents">) => {
 
 export const memoryAdapter =
   (db: MemoryDB = {}) =>
-  (options: Omit<AgentStackOptions, "agents">) => {
+  (options: Omit<AgentStackOptions, "agent">) => {
     const { transformInput, transformOutput, convertWhereClause, getField } =
       createTransform(options);
 

@@ -19,7 +19,7 @@ import { runAdapterTest } from "../../test";
 import { drizzleAdapter } from "..";
 import * as schema from "./schema";
 
-const TEST_DB_URL = "postgres://user:password@localhost:5432/agent_stack";
+const TEST_DB_URL = "postgres://user:password@localhost:5432/agent-stack";
 
 const createTestPool = () => new Pool({ connectionString: TEST_DB_URL });
 
@@ -35,7 +35,7 @@ const cleanupDatabase = async (postgres: Kysely<unknown>) => {
   await postgres.destroy();
 };
 
-const createTestOptions = (pg: Pool): Omit<AgentStackOptions, "agents"> => ({
+const createTestOptions = (pg: Pool): Omit<AgentStackOptions, "agent"> => ({
   memory: pg,
 });
 

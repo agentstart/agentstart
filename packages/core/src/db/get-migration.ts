@@ -85,7 +85,7 @@ export function matchType(
   return matches;
 }
 
-export async function getMigrations(config: Omit<AgentStackOptions, "agents">) {
+export async function getMigrations(config: Omit<AgentStackOptions, "agent">) {
   const agentStackSchema = getSchema(config);
 
   let { kysely: db, databaseType: dbType } = await createKyselyAdapter(config);

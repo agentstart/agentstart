@@ -15,7 +15,7 @@ services:
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: agent_stack
+      POSTGRES_DB: agent-stack
     ports:
       - "5432:5432"
     volumes:
@@ -26,7 +26,7 @@ services:
     container_name: mysql
     environment:
       MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: agent_stack
+      MYSQL_DATABASE: agent-stack
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     ports:

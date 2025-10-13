@@ -22,7 +22,7 @@ export type AdapterDbSchema = Record<
 >;
 
 export const getAuthTables = (
-  options: Omit<AgentStackOptions, "agents">,
+  options: Omit<AgentStackOptions, "agent">,
 ): AdapterDbSchema => {
   return {
     project: {

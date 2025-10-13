@@ -27,7 +27,7 @@ export const chatRouter = {
     )
     .handler(async ({ input, context, errors }) => {
       try {
-        const agent = context.agents.at(0);
+        const agent = context.agent;
         if (!agent) {
           throw new AgentStackError(
             "AGENT_NOT_CONFIGURED",

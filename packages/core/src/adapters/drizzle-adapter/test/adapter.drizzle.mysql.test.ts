@@ -18,17 +18,17 @@ import { runAdapterTest } from "../../test";
 import { drizzleAdapter } from "..";
 import * as schema from "./schema.mysql";
 
-const TEST_DB_MYSQL_URL = "mysql://user:password@localhost:3306/agent_stack";
+const TEST_DB_MYSQL_URL = "mysql://user:password@localhost:3306/agent-stack";
 
 const createTestPool = () => createPool(TEST_DB_MYSQL_URL);
 
 const cleanupDatabase = async (mysql: Pool) => {
-  await mysql.query("DROP DATABASE IF EXISTS agent_stack");
-  await mysql.query("CREATE DATABASE agent_stack");
+  await mysql.query("DROP DATABASE IF EXISTS agent-stack");
+  await mysql.query("CREATE DATABASE agent-stack");
   await mysql.end();
 };
 
-const createTestOptions = (pool: Pool): Omit<AgentStackOptions, "agents"> => ({
+const createTestOptions = (pool: Pool): Omit<AgentStackOptions, "agent"> => ({
   memory: pool,
 });
 

@@ -34,7 +34,7 @@ interface PrismaClientInternal {
 
 const createTransform = (
   _config: PrismaConfig,
-  options: Omit<AgentStackOptions, "agents">,
+  options: Omit<AgentStackOptions, "agent">,
 ) => {
   const schema = getAuthTables(options);
 
@@ -257,7 +257,7 @@ const compareValues = (left: unknown, right: unknown): number => {
 
 export const prismaAdapter =
   (prisma: PrismaClient, config: PrismaConfig) =>
-  (options: Omit<AgentStackOptions, "agents">) => {
+  (options: Omit<AgentStackOptions, "agent">) => {
     const db = prisma as PrismaClientInternal;
     const {
       transformInput,

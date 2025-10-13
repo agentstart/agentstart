@@ -20,7 +20,7 @@ import type { AgentStackOptions } from "../../../types";
 import { runAdapterTest } from "../../test";
 import { kyselyAdapter } from "..";
 
-const MYSQL_URL = "mysql://user:password@localhost:3306/agent_stack";
+const MYSQL_URL = "mysql://user:password@localhost:3306/agent-stack";
 
 const setupMysql = async () => {
   const pool = createPool(MYSQL_URL);
@@ -52,7 +52,7 @@ describe("adapter test", async () => {
   const createOptions = (memory: AgentStackOptions["memory"]) =>
     ({
       memory,
-    }) satisfies Omit<AgentStackOptions, "agents">;
+    }) satisfies Omit<AgentStackOptions, "agent">;
 
   const sqliteOptions = createOptions({
     db: sqliteKy,
@@ -81,9 +81,9 @@ describe("adapter test", async () => {
   afterAll(async () => {
     if (mysqlInit.pool) {
       await mysqlInit.pool
-        .query("DROP DATABASE IF EXISTS agent_stack")
+        .query("DROP DATABASE IF EXISTS agent-stack")
         .catch(() => {});
-      await mysqlInit.pool.query("CREATE DATABASE agent_stack").catch(() => {});
+      await mysqlInit.pool.query("CREATE DATABASE agent-stack").catch(() => {});
       await mysqlInit.pool.end();
     }
 

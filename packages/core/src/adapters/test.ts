@@ -15,7 +15,7 @@ import type { Adapter, AgentStackOptions } from "../types";
 
 interface AdapterTestOptions {
   getAdapter: (
-    customOptions?: Omit<AgentStackOptions, "memory" | "agents">,
+    customOptions?: Omit<AgentStackOptions, "memory" | "agent">,
   ) => Promise<Adapter>;
   skipGenerateIdTest?: boolean;
 }
