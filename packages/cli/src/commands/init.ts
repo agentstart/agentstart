@@ -25,6 +25,7 @@ import {
 } from "@clack/prompts";
 import chalk from "chalk";
 import { Command } from "commander";
+import { parse } from "dotenv";
 import fs from "fs-extra";
 import { format as prettierFormat } from "prettier";
 import semver from "semver";
@@ -35,6 +36,58 @@ import { formatMilliseconds } from "../utils/format-ms";
 import { getPackageInfo } from "../utils/get-package-info";
 import { getTsconfigInfo } from "../utils/get-tsconfig-info";
 import { installDependencies } from "../utils/install-dependencies";
+
+/**
+ * Find a configuration file by searching through prioritized paths
+ */
+function findConfigPath({
+  cwd,
+  filenames,
+  directories,
+  scopedPaths = [],
+  getPriority,
+}: {
+  cwd: string;
+  filenames: string[];
+  directories: string[];
+  scopedPaths?: string[];
+  getPriority: (candidate: string) => number;
+}): string {
+  const basePaths = [
+    ...filenames,
+    ...directories.flatMap((directory) =>
+      filenames.map((file) => `${directory}/${file}`),
+    ),
+  ];
+
+  const possiblePaths = Array.from(
+    new Set([
+      ...scopedPaths,
+      ...basePaths,
+      ...basePaths.map((candidate) => `src/${candidate}`),
+      ...basePaths.map((candidate) => `app/${candidate}`),
+    ]),
+  );
+
+  const prioritizedPaths = possiblePaths
+    .map((pathOption, index) => ({ pathOption, index }))
+    .sort((a, b) => {
+      const priorityDifference =
+        getPriority(a.pathOption) - getPriority(b.pathOption);
+      if (priorityDifference !== 0) return priorityDifference;
+      return a.index - b.index;
+    })
+    .map(({ pathOption }) => pathOption);
+
+  for (const possiblePath of prioritizedPaths) {
+    const fullPath = path.join(cwd, possiblePath);
+    if (fs.existsSync(fullPath)) {
+      return fullPath;
+    }
+  }
+
+  return "";
+}
 
 /**
  * Should only use any database that is core DBs, and supports the Agent Stack CLI generate functionality.
@@ -88,11 +141,11 @@ const getDefaultAgentConfig = async ({ appName }: { appName?: string }) =>
     [
       `import { createOpenRouter } from "@openrouter/ai-sdk-provider";
        import { Agent, defineAgentConfig } from "agent-stack";`,
-      `if (!process.env.OPENROUTER_API_KEY) {
-         throw new Error("Missing OPENROUTER_API_KEY");
+      `if (!process.env.MODEL_PROVIDER_API_KEY) {
+         throw new Error("Missing MODEL_PROVIDER_API_KEY");
        }
        const openrouter = createOpenRouter({
-         apiKey: process.env.OPENROUTER_API_KEY,
+         apiKey: process.env.MODEL_PROVIDER_API_KEY,
        });`,
       `const agent = new Agent({
          model: openrouter("x-ai/grok-4-fast"),
@@ -109,22 +162,24 @@ const getDefaultAgentConfig = async ({ appName }: { appName?: string }) =>
     },
   );
 
-type SupportedFrameworks =
-  | "vanilla"
-  | "react"
-  | "vue"
-  | "svelte"
-  | "solid"
-  | "nextjs";
+// type SupportedFrameworks =
+//   | "vanilla"
+//   | "react"
+//   | "vue"
+//   | "svelte"
+//   | "solid"
+//   | "nextjs";
 
 /**
  * Compose the base agent client config wired to the generated server config.
  */
-const getDefaultAgentClientConfig = async ({
-  framework,
-}: {
-  framework: SupportedFrameworks;
-}) => {
+const getDefaultAgentClientConfig = async (
+  //   {
+  //   framework,
+  // }: {
+  //   framework: SupportedFrameworks;
+  // }
+) => {
   return await prettierFormat(
     [
       `import { createAgentClient, useChatStore } from "agent-stack/client";`,
@@ -149,7 +204,7 @@ const optionsSchema = z.object({
 
 const outroText = `🥳 All Done, Happy Hacking!`;
 
-export async function initAction(opts: unknown) {
+export async function initAction(opts: z.infer<typeof optionsSchema>) {
   console.log();
   intro("👋 Initializing Agent Stack");
 
@@ -158,12 +213,12 @@ export async function initAction(opts: unknown) {
   const cwd = path.resolve(options.cwd);
   let packageManagerPreference: "bun" | "pnpm" | "yarn" | "npm" | undefined;
 
-  let config_path: string = "";
-  const framework: SupportedFrameworks = "vanilla";
+  let configPath: string = "";
+  // const framework: SupportedFrameworks = "vanilla";
 
   const format = async (code: string) =>
     await prettierFormat(code, {
-      filepath: config_path,
+      filepath: configPath,
       ...defaultFormatOptions,
     });
 
@@ -242,100 +297,104 @@ export async function initAction(opts: unknown) {
 
   // ===== install agent-stack =====
   const s = spinner({ indicator: "dots" });
-  s.start(`Checking agent-stack installation`);
 
-  let latestAgentStackVersion: string;
-  try {
-    latestAgentStackVersion = await getLatestNpmVersion("agent-stack");
-  } catch (error) {
-    log.error(`❌ Couldn't get latest version of agent-stack.`);
-    console.error(error);
-    process.exit(1);
-  }
+  if (process.env.NODE_ENV !== "development") {
+    s.start(`Checking agent-stack installation`);
+    let latestAgentStackVersion: string;
+    try {
+      latestAgentStackVersion = await getLatestNpmVersion("agent-stack");
+    } catch (error) {
+      log.error(`❌ Couldn't get latest version of agent-stack.`);
+      console.error(error);
+      process.exit(1);
+    }
 
-  if (
-    !packageInfo.dependencies ||
-    !Object.keys(packageInfo.dependencies).includes("agent-stack")
-  ) {
-    s.stop("Finished fetching latest version of agent-stack.");
-    const s2 = spinner({ indicator: "dots" });
-    const shouldInstallAgentStackDep = await confirm({
-      message: `Would you like to install Agent Stack?`,
-    });
-    if (isCancel(shouldInstallAgentStackDep)) {
-      cancel(`✋ Operation cancelled.`);
-      process.exit(0);
-    }
-    if (packageManagerPreference === undefined) {
-      packageManagerPreference = await getPackageManager();
-    }
-    if (shouldInstallAgentStackDep) {
-      s2.start(
-        `Installing Agent Stack using ${chalk.bold(packageManagerPreference)}`,
-      );
-      try {
-        const start = Date.now();
-        await installDependencies({
-          dependencies: ["agent-stack@latest"],
-          packageManager: packageManagerPreference,
-          cwd: cwd,
-        });
-        s2.stop(
-          `Agent Stack installed ${chalk.greenBright(
-            `successfully`,
-          )}! ${chalk.gray(`(${formatMilliseconds(Date.now() - start)})`)}`,
-        );
-      } catch (error: unknown) {
-        s2.stop(`Failed to install Agent Stack:`);
-        console.error(getErrorMessage(error));
-        process.exit(1);
+    if (
+      !packageInfo.dependencies ||
+      !Object.keys(packageInfo.dependencies).includes("agent-stack")
+    ) {
+      s.stop("Finished fetching latest version of agent-stack.");
+      const s2 = spinner({ indicator: "dots" });
+      const shouldInstallAgentStackDep = await confirm({
+        message: `Would you like to install Agent Stack?`,
+      });
+      if (isCancel(shouldInstallAgentStackDep)) {
+        cancel(`✋ Operation cancelled.`);
+        process.exit(0);
       }
-    }
-  } else if (
-    packageInfo.dependencies["agent-stack"] !== "workspace:*" &&
-    semver.lt(
-      semver.coerce(packageInfo.dependencies["agent-stack"])?.toString()!,
-      semver.clean(latestAgentStackVersion)!,
-    )
-  ) {
-    s.stop("Finished fetching latest version of agent-stack.");
-    const shouldInstallAgentStackDep = await confirm({
-      message: `Your current Agent Stack dependency is out-of-date. Would you like to update it? (${chalk.bold(
-        packageInfo.dependencies["agent-stack"],
-      )} → ${chalk.bold(`v${latestAgentStackVersion}`)})`,
-    });
-    if (isCancel(shouldInstallAgentStackDep)) {
-      cancel(`✋ Operation cancelled.`);
-      process.exit(0);
-    }
-    if (shouldInstallAgentStackDep) {
       if (packageManagerPreference === undefined) {
         packageManagerPreference = await getPackageManager();
       }
-      const s = spinner({ indicator: "dots" });
-      s.start(
-        `Updating Agent Stack using ${chalk.bold(packageManagerPreference)}`,
-      );
-      try {
-        const start = Date.now();
-        await installDependencies({
-          dependencies: ["agent-stack@latest"],
-          packageManager: packageManagerPreference,
-          cwd: cwd,
-        });
-        s.stop(
-          `Agent Stack updated ${chalk.greenBright(
-            `successfully`,
-          )}! ${chalk.gray(`(${formatMilliseconds(Date.now() - start)})`)}`,
+      if (shouldInstallAgentStackDep) {
+        s2.start(
+          `Installing Agent Stack using ${chalk.bold(packageManagerPreference)}`,
         );
-      } catch (error: unknown) {
-        s.stop(`Failed to update Agent Stack:`);
-        log.error(getErrorMessage(error));
-        process.exit(1);
+        try {
+          const start = Date.now();
+          await installDependencies({
+            dependencies: ["agent-stack@latest"],
+            packageManager: packageManagerPreference,
+            cwd: cwd,
+          });
+          s2.stop(
+            `Agent Stack installed ${chalk.greenBright(
+              `successfully`,
+            )}! ${chalk.gray(`(${formatMilliseconds(Date.now() - start)})`)}`,
+          );
+        } catch (error: unknown) {
+          s2.stop(`Failed to install Agent Stack:`);
+          console.error(getErrorMessage(error));
+          process.exit(1);
+        }
       }
+    } else if (
+      packageInfo.dependencies["agent-stack"] !== "workspace:*" &&
+      semver.lt(
+        semver.coerce(packageInfo.dependencies["agent-stack"])?.toString()!,
+        semver.clean(latestAgentStackVersion)!,
+      )
+    ) {
+      s.stop("Finished fetching latest version of agent-stack.");
+      const shouldInstallAgentStackDep = await confirm({
+        message: `Your current Agent Stack dependency is out-of-date. Would you like to update it? (${chalk.bold(
+          packageInfo.dependencies["agent-stack"],
+        )} → ${chalk.bold(`v${latestAgentStackVersion}`)})`,
+      });
+      if (isCancel(shouldInstallAgentStackDep)) {
+        cancel(`✋ Operation cancelled.`);
+        process.exit(0);
+      }
+      if (shouldInstallAgentStackDep) {
+        if (packageManagerPreference === undefined) {
+          packageManagerPreference = await getPackageManager();
+        }
+        const s = spinner({ indicator: "dots" });
+        s.start(
+          `Updating Agent Stack using ${chalk.bold(packageManagerPreference)}`,
+        );
+        try {
+          const start = Date.now();
+          await installDependencies({
+            dependencies: ["agent-stack@latest"],
+            packageManager: packageManagerPreference,
+            cwd: cwd,
+          });
+          s.stop(
+            `Agent Stack updated ${chalk.greenBright(
+              `successfully`,
+            )}! ${chalk.gray(`(${formatMilliseconds(Date.now() - start)})`)}`,
+          );
+        } catch (error: unknown) {
+          s.stop(`Failed to update Agent Stack:`);
+          log.error(getErrorMessage(error));
+          process.exit(1);
+        }
+      }
+    } else {
+      s.stop(
+        `Agent Stack dependencies are ${chalk.greenBright(`up-to-date`)}!`,
+      );
     }
-  } else {
-    s.stop(`Agent Stack dependencies are ${chalk.greenBright(`up-to-date`)}!`);
   }
 
   // ===== appName =====
@@ -357,37 +416,29 @@ export async function initAction(opts: unknown) {
 
   // ===== config path =====
 
-  let possiblePaths = ["agent.ts", "agent.tsx", "agent.js", "agent.jsx"];
-  possiblePaths = [
-    ...possiblePaths,
-    ...possiblePaths.map((it) => `lib/server/${it}`),
-    ...possiblePaths.map((it) => `server/${it}`),
-    ...possiblePaths.map((it) => `lib/${it}`),
-    ...possiblePaths.map((it) => `utils/${it}`),
-  ];
-  possiblePaths = [
-    ...possiblePaths,
-    ...possiblePaths.map((it) => `src/${it}`),
-    ...possiblePaths.map((it) => `app/${it}`),
-  ];
-
   if (options.config) {
-    config_path = path.join(cwd, options.config);
+    configPath = path.join(cwd, options.config);
   } else {
-    for (const possiblePath of possiblePaths) {
-      const doesExist = fs.existsSync(path.join(cwd, possiblePath));
-      if (doesExist) {
-        config_path = path.join(cwd, possiblePath);
-        break;
-      }
-    }
+    configPath = findConfigPath({
+      cwd,
+      filenames: ["agent.ts", "agent.tsx", "agent.js", "agent.jsx"],
+      directories: ["lib/server", "server", "lib", "utils"],
+      getPriority: (candidate: string) => {
+        if (candidate.startsWith("src/lib/")) return 0;
+        if (candidate.startsWith("app/lib/")) return 1;
+        if (candidate.startsWith("src/")) return 2;
+        if (candidate.startsWith("app/")) return 3;
+        if (!candidate.includes("/")) return 5;
+        return 4;
+      },
+    });
   }
 
   // ===== create agent config =====
   let current_user_config = "";
   let database: SupportedDatabases | null = null;
 
-  if (!config_path) {
+  if (!configPath) {
     const shouldCreateAgentConfig = await select({
       message: `Would you like to create an agent config file?`,
       options: [
@@ -420,8 +471,30 @@ export async function initAction(opts: unknown) {
         database = prompted_database;
       }
 
-      const filePath = path.join(cwd, "agent.ts");
-      config_path = filePath;
+      const preferredCreationDirectories = [
+        {
+          base: path.join(cwd, "src"),
+          target: path.join(cwd, "src", "lib"),
+        },
+        {
+          base: path.join(cwd, "app"),
+          target: path.join(cwd, "app", "lib"),
+        },
+      ];
+      let targetConfigDirectory = cwd;
+
+      for (const candidate of preferredCreationDirectories) {
+        if (await fs.pathExists(candidate.base)) {
+          targetConfigDirectory = candidate.target;
+          break;
+        }
+      }
+      if (targetConfigDirectory !== cwd) {
+        await fs.ensureDir(targetConfigDirectory);
+      }
+
+      const filePath = path.join(targetConfigDirectory, "agent.ts");
+      configPath = filePath;
       log.info(`Creating agent config file: ${filePath}`);
       try {
         current_user_config = await getDefaultAgentConfig({
@@ -435,7 +508,7 @@ export async function initAction(opts: unknown) {
         });
         current_user_config = generatedCode;
         await fs.writeFile(filePath, current_user_config);
-        config_path = filePath;
+        configPath = filePath;
         log.success(`🚀 Agent config file successfully created!`);
 
         if (envs.length !== 0) {
@@ -538,13 +611,13 @@ export async function initAction(opts: unknown) {
     }
   } else {
     log.message();
-    log.success(`Found agent config file. ${chalk.gray(`(${config_path})`)}`);
+    log.success(`Found agent config file. ${chalk.gray(`(${configPath})`)}`);
     log.message();
   }
 
   // ===== agent client path =====
 
-  let possibleClientPaths = [
+  const clientFilenames = [
     "agent-client.ts",
     "agent-client.tsx",
     "agent-client.js",
@@ -554,27 +627,56 @@ export async function initAction(opts: unknown) {
     "client.js",
     "client.jsx",
   ];
-  possibleClientPaths = [
-    ...possibleClientPaths,
-    ...possibleClientPaths.map((it) => `lib/server/${it}`),
-    ...possibleClientPaths.map((it) => `server/${it}`),
-    ...possibleClientPaths.map((it) => `lib/${it}`),
-    ...possibleClientPaths.map((it) => `utils/${it}`),
-  ];
-  possibleClientPaths = [
-    ...possibleClientPaths,
-    ...possibleClientPaths.map((it) => `src/${it}`),
-    ...possibleClientPaths.map((it) => `app/${it}`),
-  ];
 
-  let agentClientConfigPath: string | null = null;
-  for (const possiblePath of possibleClientPaths) {
-    const doesExist = fs.existsSync(path.join(cwd, possiblePath));
-    if (doesExist) {
-      agentClientConfigPath = path.join(cwd, possiblePath);
-      break;
-    }
-  }
+  // Calculate scoped paths to prioritize client files in the same directory as config
+  const configDirectoryRelative = configPath
+    ? path.relative(cwd, path.dirname(configPath))
+    : null;
+  const normalizedConfigDirectory =
+    configDirectoryRelative !== null
+      ? configDirectoryRelative.split(path.sep).join("/")
+      : null;
+  const configScopedClientPaths =
+    normalizedConfigDirectory === null
+      ? []
+      : clientFilenames.map((file) =>
+          normalizedConfigDirectory === ""
+            ? file
+            : `${normalizedConfigDirectory}/${file}`,
+        );
+
+  const agentClientConfigPath =
+    findConfigPath({
+      cwd,
+      filenames: clientFilenames,
+      directories: ["lib/server", "server", "lib", "utils"],
+      scopedPaths: configScopedClientPaths,
+      getPriority: (candidate: string) => {
+        const normalizedCandidate = candidate.replace(/\\/g, "/");
+        // Highest priority: same directory as agent config
+        if (normalizedConfigDirectory !== null) {
+          if (
+            normalizedConfigDirectory === "" &&
+            !normalizedCandidate.includes("/")
+          ) {
+            return -1;
+          }
+          if (
+            normalizedConfigDirectory !== "" &&
+            normalizedCandidate.startsWith(`${normalizedConfigDirectory}/`)
+          ) {
+            return -1;
+          }
+        }
+        // Standard priorities
+        if (normalizedCandidate.startsWith("src/lib/")) return 0;
+        if (normalizedCandidate.startsWith("app/lib/")) return 1;
+        if (normalizedCandidate.startsWith("src/")) return 2;
+        if (normalizedCandidate.startsWith("app/")) return 3;
+        if (!normalizedCandidate.includes("/")) return 5;
+        return 4;
+      },
+    }) || null;
 
   if (!agentClientConfigPath) {
     const choice = await select({
@@ -589,17 +691,28 @@ export async function initAction(opts: unknown) {
       process.exit(0);
     }
     if (choice === "yes") {
-      agentClientConfigPath = path.join(cwd, "agent-client.ts");
-      log.info(`Creating agent client config file: ${agentClientConfigPath}`);
+      const agentClientDirectory =
+        configPath !== "" ? path.dirname(configPath) : cwd;
+      await fs.ensureDir(agentClientDirectory);
+      const newAgentClientConfigPath = path.join(
+        agentClientDirectory,
+        "agent-client.ts",
+      );
+      log.info(
+        `Creating agent client config file: ${newAgentClientConfigPath}`,
+      );
       try {
-        const contents = await getDefaultAgentClientConfig({
-          framework: framework,
-        });
-        await fs.writeFile(agentClientConfigPath, contents);
+        const contents =
+          await getDefaultAgentClientConfig(
+            //   {
+            //   framework: framework,
+            // }
+          );
+        await fs.writeFile(newAgentClientConfigPath, contents);
         log.success(`🚀 Agent client config file successfully created!`);
       } catch (error) {
         log.error(
-          `Failed to create agent client config file: ${agentClientConfigPath}`,
+          `Failed to create agent client config file: ${newAgentClientConfigPath}`,
         );
         log.error(JSON.stringify(error, null, 2));
         process.exit(1);
@@ -613,6 +726,91 @@ export async function initAction(opts: unknown) {
         `(${agentClientConfigPath})`,
       )}`,
     );
+  }
+
+  if (targetEnvFile !== "none") {
+    try {
+      const fileContents = await fs.readFile(
+        path.join(cwd, targetEnvFile),
+        "utf8",
+      );
+      const parsed = parse(fileContents);
+      let isMissingModelProviderApiKey = false;
+      if (parsed.MODEL_PROVIDER_API_KEY === undefined)
+        isMissingModelProviderApiKey = true;
+      if (isMissingModelProviderApiKey) {
+        const txt = chalk.bold(`MODEL_PROVIDER_API_KEY`);
+        log.warn(`Missing ${txt} in ${targetEnvFile}`);
+
+        const shouldAdd = await select({
+          message: `Do you want to add ${txt} to ${targetEnvFile}?`,
+          options: [
+            { label: "Yes", value: "yes" },
+            { label: "No", value: "no" },
+            { label: "Choose other file(s)", value: "other" },
+          ],
+        });
+        if (isCancel(shouldAdd)) {
+          cancel(`✋ Operation cancelled.`);
+          process.exit(0);
+        }
+        const envs: string[] = [];
+        if (isMissingModelProviderApiKey) {
+          envs.push("MODEL_PROVIDER_API_KEY");
+        }
+        if (shouldAdd === "yes") {
+          try {
+            await updateEnvs({
+              files: [path.join(cwd, targetEnvFile)],
+              envs: envs,
+              isCommented: false,
+            });
+          } catch (error) {
+            log.error(`Failed to add ENV variables to ${targetEnvFile}`);
+            log.error(JSON.stringify(error, null, 2));
+            process.exit(1);
+          }
+          log.success(`🚀 ENV variables successfully added!`);
+        } else if (shouldAdd === "no") {
+          log.info(`Skipping ENV step.`);
+        } else if (shouldAdd === "other") {
+          if (!envFiles.length) {
+            cancel("No env files found. Please create an env file first.");
+            process.exit(0);
+          }
+          const envFilesToUpdate = await multiselect({
+            message: "Select the .env files you want to update",
+            options: envFiles.map((x) => ({
+              value: path.join(cwd, x),
+              label: x,
+            })),
+            required: false,
+          });
+          if (isCancel(envFilesToUpdate)) {
+            cancel("✋ Operation cancelled.");
+            process.exit(0);
+          }
+          if (envFilesToUpdate.length === 0) {
+            log.info("No .env files to update. Skipping...");
+          } else {
+            try {
+              await updateEnvs({
+                files: envFilesToUpdate,
+                envs: envs,
+                isCommented: false,
+              });
+            } catch (error) {
+              log.error(`Failed to update .env files:`);
+              log.error(JSON.stringify(error, null, 2));
+              process.exit(1);
+            }
+            log.success(`🚀 ENV files successfully updated!`);
+          }
+        }
+      }
+    } catch {
+      // if fails, ignore, and do not proceed with ENV operations.
+    }
   }
 
   outro(outroText);
@@ -744,6 +942,9 @@ async function updateEnvs({
     }
     if (env === "DATABASE_URL") {
       return `"The URL of your database"`;
+    }
+    if (env === "MODEL_PROVIDER_API_KEY") {
+      return `"" # Your Model Provider API key, e.g. from OpenRouter (https://openrouter.ai)`;
     }
   }
 }

@@ -32,8 +32,8 @@ type CommonIndexConfig = {
 };
 
 const START_OF_AGENT_STACK: CommonIndexConfig = {
-  regex: /agentStack\({()/m,
-  getIndex: ({ matchIndex }) => matchIndex + "agentStack({".length,
+  regex: /defineAgentConfig\({()/m,
+  getIndex: ({ matchIndex }) => matchIndex + "defineAgentConfig({".length,
 };
 
 const getErrorMessage = (error: unknown) => {
@@ -125,7 +125,9 @@ export async function generateConfig({
             START_OF_AGENT_STACK,
           );
           if (!startOfAgentStack) {
-            throw new Error("Couldn't find start of agentStack() function.");
+            throw new Error(
+              "[addDb] Couldn't find start of agentStack() function.",
+            );
           }
           opts.config = insertContent({
             line: startOfAgentStack.line - 1,
@@ -347,13 +349,15 @@ export async function generateConfig({
 
       const startOfAgentStack = getGroupInfo(opts.config, START_OF_AGENT_STACK);
       if (!startOfAgentStack) {
-        throw new Error("Couldn't find start of agentStack() function.");
+        throw new Error(
+          "[addDatabase] Couldn't find start of agentStack() function.",
+        );
       }
       const newContent = insertContent({
         line: startOfAgentStack.line,
         character: startOfAgentStack.character,
         content: opts.config,
-        insert_content: `database: ${databaseCode},`,
+        insert_content: `memory: ${databaseCode},`,
       });
 
       try {

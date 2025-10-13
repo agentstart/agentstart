@@ -63,7 +63,7 @@ describe("getConfig", async () => {
        import {db} from "@server/db/db";
 
        export const agentStack = defineAgentConfig({
-          database: prismaAdapter(db, {
+          memory: prismaAdapter(db, {
               provider: 'sqlite'
           })
        })`,
@@ -115,7 +115,7 @@ describe("getConfig", async () => {
        import {db} from "prismaDbClient";
 
        export const agentStack = defineAgentConfig({
-          database: prismaAdapter(db, {
+          memory: prismaAdapter(db, {
               provider: 'sqlite'
           }),
        })`,
@@ -167,7 +167,7 @@ describe("getConfig", async () => {
        import {db} from "@server/db/db";
 
        export const agentStack = defineAgentConfig({
-          database: prismaAdapter(db, {
+          memory: prismaAdapter(db, {
               provider: 'sqlite'
           })
        })`,
@@ -219,7 +219,7 @@ describe("getConfig", async () => {
        import {db} from "prismaDbClient";
 
        export const agentStack = defineAgentConfig({
-          database: prismaAdapter(db, {
+          memory: prismaAdapter(db, {
               provider: 'sqlite'
           })
        })`,
@@ -271,7 +271,7 @@ describe("getConfig", async () => {
        import {db} from "../db/db";
 
        export const agentStack = defineAgentConfig({
-          database: prismaAdapter(db, {
+          memory: prismaAdapter(db, {
               provider: 'sqlite'
           })
        })`,
@@ -323,7 +323,7 @@ describe("getConfig", async () => {
        import {db} from "@server/db/db";
 
        export const agentStack = defineAgentConfig({
-          database: prismaAdapter(db, {
+          memory: prismaAdapter(db, {
               provider: 'sqlite'
           })
        })`,

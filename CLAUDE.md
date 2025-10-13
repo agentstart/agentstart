@@ -7,7 +7,7 @@ Deliver a batteries-included framework that lets developers assemble production-
 ## Quick Setup Workflow
 
 1. Install the core package: `npm install agent-stack` (or `pnpm add agent-stack`).
-2. Provide runtime credentials: define `E2B_API_KEY` and `OPENROUTER_API_KEY` in your environment.
+2. Provide runtime credentials: define `E2B_API_KEY` and `MODEL_PROVIDER_API_KEY` in your environment.
 3. Author `agent-stack.config.ts` to select adapters, tools, memory stores, and templates.
 4. Generate backing tables: `npx agent-stack/cli generate`.
 5. Mount the handler inside your API surface (e.g. Next.js route, Express handler, or serverless function).
@@ -139,7 +139,7 @@ The `SEARCHABLE` field should contain comma-separated keywords that describe the
 ## Environment & Secrets
 
 - `E2B_API_KEY`: access to sandboxed code execution.
-- `OPENROUTER_API_KEY`: large language model routing.
+- `MODEL_PROVIDER_API_KEY`: large language model routing.
 - Optional: database credentials for the memory adapters (`DATABASE_URL`), vector store keys, storage bucket secrets.
 - Store secrets in `.env` (not committed) and surface them in deployment platforms.
 
