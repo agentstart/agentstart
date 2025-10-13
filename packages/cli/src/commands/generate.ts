@@ -9,6 +9,7 @@ import prompts from "prompts";
 import yoctoSpinner from "yocto-spinner";
 import { z } from "zod";
 import { getGenerator } from "../generators";
+import { findConfigPath } from "../utils/find-config-path";
 import { getConfig } from "../utils/get-config";
 
 const generateActionSchema = z.object({
@@ -57,6 +58,54 @@ export async function generateAction(
     logger.info("Your schema is already up to date.");
     process.exit(0);
   }
+
+  let targetFilePath: string;
+
+  if (options.output) {
+    // Use the user-provided output path directly
+    targetFilePath = options.output;
+  } else {
+    // First check whether a schema file with the same name already exists
+    const existingSchemaPath = findConfigPath({
+      cwd,
+      filenames: [schema.fileName],
+      directories: ["db", "database", "lib/db", "server/db"],
+      getPriority: (candidate: string) => {
+        // Priority: src/db > db > src/lib/db > lib/db > src/ > root
+        if (candidate.startsWith("src/db/")) return 0;
+        if (candidate.startsWith("db/")) return 1;
+        if (candidate.startsWith("src/lib/db/")) return 2;
+        if (candidate.startsWith("lib/db/")) return 3;
+        if (candidate.startsWith("src/")) return 4;
+        if (!candidate.includes("/")) return 6;
+        return 5;
+      },
+    });
+
+    if (existingSchemaPath) {
+      // Found an existing file, reuse that location
+      targetFilePath = existingSchemaPath;
+      schema.fileName = path.relative(cwd, existingSchemaPath);
+    } else {
+      // Not found; choose a new location based on the priority list
+      const preferredDirectories = [
+        { path: path.join(cwd, "src", "db"), check: path.join(cwd, "src") },
+        { path: path.join(cwd, "db"), check: cwd },
+      ];
+
+      let targetDirectory = cwd;
+      for (const { path: dir, check } of preferredDirectories) {
+        if (await fs.pathExists(check)) {
+          targetDirectory = dir;
+          break;
+        }
+      }
+
+      targetFilePath = path.join(targetDirectory, schema.fileName);
+      schema.fileName = path.relative(cwd, targetFilePath);
+    }
+  }
+
   if (schema.append || schema.overwrite) {
     let confirm = options.y;
     if (!confirm) {
@@ -73,19 +122,19 @@ export async function generateAction(
     }
 
     if (confirm) {
-      const exist = fs.existsSync(path.join(cwd, schema.fileName));
+      const exist = fs.existsSync(targetFilePath);
       if (!exist) {
-        await fsExtra.mkdir(path.dirname(path.join(cwd, schema.fileName)), {
+        await fsExtra.mkdir(path.dirname(targetFilePath), {
           recursive: true,
         });
       }
       if (schema.overwrite) {
-        await fsExtra.writeFile(path.join(cwd, schema.fileName), schema.code);
+        await fsExtra.writeFile(targetFilePath, schema.code);
       } else {
-        await fsExtra.appendFile(path.join(cwd, schema.fileName), schema.code);
+        await fsExtra.appendFile(targetFilePath, schema.code);
       }
       logger.success(
-        `🚀 Schema was ${
+        `✅ Schema was ${
           schema.overwrite ? "overwritten" : "appended"
         } successfully!`,
       );
@@ -105,6 +154,7 @@ export async function generateAction(
       message: `Do you want to generate the schema to ${chalk.yellow(
         schema.fileName,
       )}?`,
+      initial: true,
     });
     confirm = response.confirm;
   }
@@ -114,21 +164,15 @@ export async function generateAction(
     process.exit(1);
   }
 
-  if (!options.output) {
-    const dirExist = fs.existsSync(
-      path.dirname(path.join(cwd, schema.fileName)),
-    );
-    if (!dirExist) {
-      await fsExtra.mkdir(path.dirname(path.join(cwd, schema.fileName)), {
-        recursive: true,
-      });
-    }
+  const dirExist = fs.existsSync(path.dirname(targetFilePath));
+  if (!dirExist) {
+    await fsExtra.mkdir(path.dirname(targetFilePath), {
+      recursive: true,
+    });
   }
-  await fsExtra.writeFile(
-    options.output || path.join(cwd, schema.fileName),
-    schema.code,
-  );
-  logger.success(`🚀 Schema was generated successfully!`);
+
+  await fsExtra.writeFile(targetFilePath, schema.code);
+  logger.success(`✅ Schema was generated successfully!`);
   process.exit(0);
 }
 

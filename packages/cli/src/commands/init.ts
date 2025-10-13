@@ -32,62 +32,11 @@ import semver from "semver";
 import { z } from "zod";
 import { generateConfig } from "../generators/agent-config";
 import { checkPackageManagers } from "../utils/check-package-managers";
+import { findConfigPath } from "../utils/find-config-path";
 import { formatMilliseconds } from "../utils/format-ms";
 import { getPackageInfo } from "../utils/get-package-info";
 import { getTsconfigInfo } from "../utils/get-tsconfig-info";
 import { installDependencies } from "../utils/install-dependencies";
-
-/**
- * Find a configuration file by searching through prioritized paths
- */
-function findConfigPath({
-  cwd,
-  filenames,
-  directories,
-  scopedPaths = [],
-  getPriority,
-}: {
-  cwd: string;
-  filenames: string[];
-  directories: string[];
-  scopedPaths?: string[];
-  getPriority: (candidate: string) => number;
-}): string {
-  const basePaths = [
-    ...filenames,
-    ...directories.flatMap((directory) =>
-      filenames.map((file) => `${directory}/${file}`),
-    ),
-  ];
-
-  const possiblePaths = Array.from(
-    new Set([
-      ...scopedPaths,
-      ...basePaths,
-      ...basePaths.map((candidate) => `src/${candidate}`),
-      ...basePaths.map((candidate) => `app/${candidate}`),
-    ]),
-  );
-
-  const prioritizedPaths = possiblePaths
-    .map((pathOption, index) => ({ pathOption, index }))
-    .sort((a, b) => {
-      const priorityDifference =
-        getPriority(a.pathOption) - getPriority(b.pathOption);
-      if (priorityDifference !== 0) return priorityDifference;
-      return a.index - b.index;
-    })
-    .map(({ pathOption }) => pathOption);
-
-  for (const possiblePath of prioritizedPaths) {
-    const fullPath = path.join(cwd, possiblePath);
-    if (fs.existsSync(fullPath)) {
-      return fullPath;
-    }
-  }
-
-  return "";
-}
 
 /**
  * Should only use any database that is core DBs, and supports the Agent Stack CLI generate functionality.

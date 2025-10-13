@@ -3,20 +3,14 @@
   "private": true,
   "scripts": {
     "up": "bunx ncu -i -p bun -w",
-    "build": "turbo run build",
+    "build": "turbo run build --filter !{playground/*}",
     "clean": "git clean -xdf node_modules",
     "clean:workspaces": "turbo run clean",
-    "db:push": "turbo -F @agent-stack/db push",
-    "db:studio": "turbo -F @agent-stack/db studio",
     "dev": "turbo watch dev --continue",
-    "dev:next": "turbo watch dev -F @agent-stack/nextjs...",
     "test": "turbo run test",
     "lint": "turbo run lint",
     "lint:ws": "bunx sherif@latest -f",
     "typecheck": "turbo run typecheck",
-    "ui-add": "turbo run ui-add",
-    "stripe:webhook": "stripe listen --forward-to localhost:3000/api/auth/stripe/webhook",
-    "i18n": "turbo run i18n",
     "docker:up": "docker compose up -d"
   },
   "devDependencies": {

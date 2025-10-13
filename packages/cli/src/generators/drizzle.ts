@@ -32,28 +32,14 @@ export const generateDrizzleSchema: SchemaGenerator = async ({
   const databaseType: DrizzleProvider = adapterOptions.provider ?? "sqlite";
   const usePlural = adapterOptions.usePlural ?? false;
 
-  const hasBigint = Object.values(tables).some((table) =>
-    Object.values(table.fields).some((field) => field.bigint),
-  );
+  const importTokens: string[] = [];
+  const useToken = (token: string) => {
+    if (!importTokens.includes(token)) {
+      importTokens.push(token);
+    }
+  };
 
-  const importTokens = new Set<string>();
-  importTokens.add(`${databaseType}Table`);
-  importTokens.add("text");
-  if (databaseType === "mysql") {
-    importTokens.add("varchar");
-    importTokens.add("int");
-  } else {
-    importTokens.add("integer");
-  }
-  if (databaseType !== "sqlite") {
-    importTokens.add("timestamp");
-    importTokens.add("boolean");
-  }
-  if (hasBigint && databaseType !== "sqlite") {
-    importTokens.add("bigint");
-  }
-
-  let code = `import { ${Array.from(importTokens).join(", ")} } from "drizzle-orm/${databaseType}-core";\n`;
+  useToken(`${databaseType}Table`);
 
   const fileExist = fs.existsSync(filePath);
 
@@ -63,71 +49,100 @@ export const generateDrizzleSchema: SchemaGenerator = async ({
     switch (field.type) {
       case "string": {
         if (databaseType === "mysql" && field.unique) {
+          useToken("varchar");
           return `varchar('${dbName}', { length: 255 })`;
         }
         if (databaseType === "mysql" && field.references) {
+          useToken("varchar");
           return `varchar('${dbName}', { length: 36 })`;
         }
+        useToken("text");
         return `text('${dbName}')`;
       }
       case "boolean": {
         if (databaseType === "sqlite") {
+          useToken("integer");
           return `integer('${dbName}', { mode: 'boolean' })`;
         }
+        useToken("boolean");
         return `boolean('${dbName}')`;
       }
       case "number": {
         if (databaseType === "sqlite") {
+          useToken("integer");
           return `integer('${dbName}')`;
         }
         if (field.bigint) {
+          useToken("bigint");
           return `bigint('${dbName}', { mode: 'number' })`;
         }
-        return databaseType === "mysql"
-          ? `int('${dbName}')`
-          : `integer('${dbName}')`;
+        if (databaseType === "mysql") {
+          useToken("int");
+          return `int('${dbName}')`;
+        }
+        useToken("integer");
+        return `integer('${dbName}')`;
       }
       case "date": {
         if (databaseType === "sqlite") {
+          useToken("integer");
           return `integer('${dbName}', { mode: 'timestamp' })`;
         }
+        useToken("timestamp");
         return `timestamp('${dbName}')`;
       }
       default: {
         if (field.type === "string[]") {
+          useToken("text");
           return `text('${dbName}')`;
         }
         if (field.type === "number[]") {
           if (databaseType === "sqlite") {
+            useToken("integer");
             return `integer('${dbName}')`;
           }
-          return databaseType === "mysql"
-            ? `int('${dbName}')`
-            : `integer('${dbName}')`;
+          if (databaseType === "mysql") {
+            useToken("int");
+            return `int('${dbName}')`;
+          }
+          useToken("integer");
+          return `integer('${dbName}')`;
         }
+        useToken("text");
         return `text('${dbName}')`;
       }
     }
   };
 
+  const idLine = (() => {
+    if (databaseType === "mysql") {
+      useToken("varchar");
+      return `varchar('id', { length: 36 }).primaryKey()`;
+    }
+    useToken("text");
+    return `text('id').primaryKey()`;
+  })();
+
+  const tableBlocks: string[] = [];
+
   for (const [, table] of Object.entries(tables)) {
     const modelName = usePlural ? `${table.modelName}s` : table.modelName;
-    const fieldLines = Object.entries(table.fields).map(([fieldKey, attr]) => {
-      const base = resolveField(fieldKey, attr);
-      const notNull = attr.required ? ".notNull()" : "";
-      const unique = attr.unique ? ".unique()" : "";
-      const reference = attr.references
-        ? `.references(() => ${
-            usePlural ? `${attr.references.model}s` : attr.references.model
-          }.${attr.references.field}, { onDelete: 'cascade' })`
-        : "";
-      return `  ${fieldKey}: ${base}${notNull}${unique}${reference},`;
-    });
-
-    const idLine =
-      databaseType === "mysql"
-        ? `varchar('id', { length: 36 }).primaryKey()`
-        : `text('id').primaryKey()`;
+    const fieldLines = Object.entries(table.fields)
+      .map(([fieldKey, attr]) => {
+        if (fieldKey === "id") {
+          return null;
+        }
+        const base = resolveField(fieldKey, attr);
+        const notNull = attr.required ? ".notNull()" : "";
+        const unique = attr.unique ? ".unique()" : "";
+        const reference = attr.references
+          ? `.references(() => ${
+              usePlural ? `${attr.references.model}s` : attr.references.model
+            }.${attr.references.field}, { onDelete: 'cascade' })`
+          : "";
+        return `  ${fieldKey}: ${base}${notNull}${unique}${reference},`;
+      })
+      .filter(Boolean) as string[];
 
     const schemaLines = [
       `export const ${modelName} = ${databaseType}Table("${convertToSnakeCase(
@@ -138,8 +153,11 @@ export const generateDrizzleSchema: SchemaGenerator = async ({
       `});`,
     ];
 
-    code += `\n${schemaLines.join("\n")}\n`;
+    tableBlocks.push(schemaLines.join("\n"));
   }
+
+  const importLine = `import { ${importTokens.join(", ")} } from "drizzle-orm/${databaseType}-core";`;
+  const code = `${importLine}\n\n${tableBlocks.join("\n\n")}\n`;
 
   return {
     code,

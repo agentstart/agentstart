@@ -28,11 +28,6 @@ export const getTables = (
     project: {
       modelName: options.project?.modelName || "project",
       fields: {
-        id: {
-          type: "string",
-          required: true,
-          fieldName: options.project?.fields?.id || "id",
-        },
         authorId: {
           type: "string",
           required: true,
@@ -72,11 +67,6 @@ export const getTables = (
     chat: {
       modelName: options.chat?.modelName || "chat",
       fields: {
-        id: {
-          type: "string",
-          required: true,
-          fieldName: options.chat?.fields?.id || "id",
-        },
         projectId: {
           type: "string",
           required: true,
@@ -126,11 +116,6 @@ export const getTables = (
     message: {
       modelName: options.message?.modelName || "message",
       fields: {
-        id: {
-          type: "string",
-          required: true,
-          fieldName: options.message?.fields?.id || "id",
-        },
         chatId: {
           type: "string",
           required: true,
