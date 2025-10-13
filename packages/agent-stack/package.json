@@ -1,0 +1,49 @@
+{
+  "name": "agent-stack",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./db": "./src/db/index.ts",
+    "./client": "./src/client/index.ts",
+    "./adapters/drizzle": "./src/adapters/drizzle/index.ts",
+    "./adapters/kysely": "./src/adapters/kysely/index.ts",
+    "./adapters/mongodb": "./src/adapters/mongodb/index.ts",
+    "./adapters/prisma": "./src/adapters/prisma/index.ts",
+    "./adapters/memory": "./src/adapters/memory/index.ts"
+  },
+  "scripts": {
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "lint": "bunx biome check --write ./src",
+    "typecheck": "tsc --noEmit",
+    "test": "bun run prisma:push && vitest",
+    "prisma:push": "prisma db push --schema src/adapters/prisma/test/schema.prisma"
+  },
+  "dependencies": {
+    "@agent-stack/api": "*",
+    "@agent-stack/client": "*",
+    "@agent-stack/utils": "*"
+  },
+  "devDependencies": {
+    "@agent-stack/biome-config": "*",
+    "@agent-stack/tsconfig": "*",
+    "@biomejs/biome": "catalog:",
+    "@prisma/client": "catalog:",
+    "@types/better-sqlite3": "catalog:",
+    "@types/pg": "catalog:",
+    "better-sqlite3": "catalog:",
+    "drizzle-kit": "catalog:",
+    "drizzle-orm": "catalog:",
+    "kysely": "catalog:",
+    "mongodb": "catalog:",
+    "mysql2": "catalog:",
+    "pg": "catalog:",
+    "prisma": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "ai": "^5"
+  }
+}

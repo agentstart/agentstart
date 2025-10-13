@@ -24,6 +24,5 @@ agent-frontmatter:end */
     },
     "baseUrl": "."
   },
-  "include": ["agent-stack.config.ts"],
   "exclude": ["node_modules"]
 }

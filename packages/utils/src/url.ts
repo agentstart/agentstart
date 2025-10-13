@@ -11,7 +11,7 @@ agent-frontmatter:end */
 
 // https://github.com/better-auth/better-auth/blob/canary/packages/better-auth/src/utils/url.ts
 
-import { AgentStackError } from "@agent-stack/errors";
+import { AgentStackError } from "@agent-stack/utils";
 import { env } from "std-env";
 
 function checkHasPath(url: string): boolean {

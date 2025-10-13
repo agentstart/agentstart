@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@agent-stack/api": "*",
-    "@agent-stack/core": "*",
     "@agent-stack/utils": "*",
     "@ai-sdk/react": "catalog:",
     "@orpc/client": "catalog:",

@@ -8,5 +8,8 @@ FEATURES:
 SEARCHABLE: agent utils, helper exports, generate id
 agent-frontmatter:end */
 
+export * from "./error";
 export * from "./generate-id";
+export * from "./logger";
+export * from "./string";
 export * from "./url";

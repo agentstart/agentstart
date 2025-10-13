@@ -1,31 +1,29 @@
 {
-	"name": "@agent-stack/api",
-	"version": "0.1.0",
-	"private": true,
-	"type": "module",
-	"exports": {
-		".": "./src/index.ts",
-		"./env": "./env.ts"
-	},
-	"license": "MIT",
-	"scripts": {
-		"clean": "git clean -xdf .cache .turbo dist node_modules",
-		"lint": "bunx biome check --write ./src",
-		"typecheck": "tsc --noEmit"
-	},
-	"dependencies": {
-		"@agent-stack/auth": "*",
-		"@agent-stack/db": "*",
-		"@openrouter/ai-sdk-provider": "catalog:",
-		"@orpc/server": "catalog:",
-		"@t3-oss/env-nextjs": "catalog:",
-		"ai": "catalog:",
-		"zod": "catalog:"
-	},
-	"devDependencies": {
-		"@agent-stack/biome-config": "*",
-		"@agent-stack/tsconfig": "*",
-		"@biomejs/biome": "catalog:",
-		"typescript": "catalog:"
-	}
+  "name": "@agent-stack/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./env": "./env.ts"
+  },
+  "license": "MIT",
+  "scripts": {
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "lint": "bunx biome check --write ./src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@openrouter/ai-sdk-provider": "catalog:",
+    "@orpc/server": "catalog:",
+    "@t3-oss/env-nextjs": "catalog:",
+    "ai": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@agent-stack/biome-config": "*",
+    "@agent-stack/tsconfig": "*",
+    "@biomejs/biome": "catalog:",
+    "typescript": "catalog:"
+  }
 }

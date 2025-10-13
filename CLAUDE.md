@@ -92,7 +92,7 @@ The agent class orchestrates prompts, tool execution, and memory updates. Tools 
 import { innerTools, documentTools } from "agent-stack/tools";
 import { postgresMemory } from "agent-stack/memory/postgres";
 
-export default defineAgentStackConfig({
+export default agentStackConfig({
   prompts: {
     mission: "./prompts/mission.md",
     summary: "./prompts/summary.md",

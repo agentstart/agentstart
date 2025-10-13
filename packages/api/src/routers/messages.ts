@@ -10,11 +10,8 @@ FEATURES:
 SEARCHABLE: messages router, chat history, loadChat api
 agent-frontmatter:end */
 
-import {
-  type AgentStackUIMessage,
-  getAdapter,
-  loadChat,
-} from "@agent-stack/core";
+import { type AgentStackUIMessage, loadChat } from "agent-stack";
+import { getAdapter } from "agent-stack/db";
 import { z } from "zod/v4";
 import { publicProcedure } from "../procedures";
 

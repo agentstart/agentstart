@@ -2,7 +2,7 @@
 - [x] Rewrite Kysely adapter test matrix (`packages/core/src/adapters/kysely-adapter/test/adapter.kysley.test.ts`) against the new schema; replace `getTestInstance` and other legacy Agent Stack helpers with lightweight fixtures or mocks.
 - [x] Update the MongoDB adapter test (`packages/core/src/adapters/mongodb-adapter/adapter.mongo-db.test.ts`) to mirror the shared adapter suite and remove legacy Agent Stack auth flows. _(Skips automatically on CI; requires a local MongoDB at `MONGODB_URL`.)_
 - [x] Decide on a sane local test strategy for adapters (in-memory vs. real services) and mark long-running suites with `describe.skipIf` or container checks so `bun run test` can complete reliably. _(Set `RUN_ADAPTER_DB_TESTS=true` locally to exercise Postgres/MySQL/Mongo paths; CI keeps them skipped.)_
-- [x] Restore an `@agent-stack/core` entry point (`packages/core/src/index.ts`) that re-exports the trimmed adapters, db helpers, and types introduced during the migration.
+- [x] Restore an `agent-stack` entry point (`packages/core/src/index.ts`) that re-exports the trimmed adapters, db helpers, and types introduced during the migration.
 - [x] Implement `upsert` support for the Drizzle adapter in `packages/core/src/adapters/drizzle-adapter/drizzle-adapter.ts` and cover the path with an adapter regression test.
 - [x] Implement `upsert` support for the Kysely adapter in `packages/core/src/adapters/kysely-adapter/kysely-adapter.ts` alongside targeted test coverage.
 - [x] Implement `upsert` support for the Prisma adapter in `packages/core/src/adapters/prisma-adapter/prisma-adapter.ts`, plus add an assertion to `packages/core/src/adapters/prisma-adapter/test/adapter.prisma.test.ts`.

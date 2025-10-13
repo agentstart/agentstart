@@ -1,0 +1,61 @@
+{
+  "name": "@agent-stack/cli",
+  "version": "0.1.0",
+  "description": "The CLI for Agent Stack",
+  "module": "dist/index.mjs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xinyao27/agent-stack",
+    "directory": "packages/cli"
+  },
+  "main": "./dist/index.mjs",
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "start": "node ./dist/index.mjs",
+    "test": "vitest",
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "lint": "bunx biome check --write ./src",
+    "typecheck": "tsc --noEmit"
+  },
+  "publishConfig": {
+    "executableFiles": ["./dist/index.mjs"]
+  },
+  "exports": "./dist/index.mjs",
+  "bin": "./dist/index.mjs",
+  "devDependencies": {
+    "@types/diff": "catalog:",
+    "@types/semver": "catalog:",
+    "@types/fs-extra": "catalog:",
+    "typescript": "catalog:",
+    "tsdown": "catalog:",
+    "vitest": "catalog:"
+  },
+  "dependencies": {
+    "@babel/preset-react": "catalog:",
+    "@babel/preset-typescript": "catalog:",
+    "@clack/prompts": "catalog:",
+    "@mrleebo/prisma-ast": "catalog:",
+    "@prisma/client": "catalog:",
+    "@types/better-sqlite3": "catalog:",
+    "@types/prompts": "catalog:",
+    "agent-stack": "workspace:*",
+    "@agent-stack/utils": "workspace:*",
+    "better-sqlite3": "catalog:",
+    "c12": "catalog:",
+    "chalk": "catalog:",
+    "commander": "catalog:",
+    "dotenv": "catalog:",
+    "prettier": "catalog:",
+    "drizzle-orm": "catalog:",
+    "fs-extra": "catalog:",
+    "get-tsconfig": "catalog:",
+    "prisma": "catalog:",
+    "prompts": "catalog:",
+    "semver": "catalog:",
+    "tinyexec": "catalog:",
+    "yocto-spinner": "catalog:",
+    "zod": "catalog:"
+  },
+  "files": ["dist"]
+}

@@ -10,9 +10,10 @@ FEATURES:
 SEARCHABLE: chat router, agent stream, rpc chat
 agent-frontmatter:end */
 
-import { type AgentStackUIMessage, getAdapter } from "@agent-stack/core";
-import { AgentStackError } from "@agent-stack/errors";
+import { AgentStackError } from "@agent-stack/utils";
 import { streamToEventIterator, type } from "@orpc/server";
+import type { AgentStackUIMessage } from "agent-stack";
+import { getAdapter } from "agent-stack/db";
 import { publicProcedure } from "../procedures";
 
 export const chatRouter = {

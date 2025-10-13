@@ -1,5 +1,6 @@
-import { Agent, defineAgentStack, mongodbAdapter } from "@agent-stack/core";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { Agent, defineAgentConfig } from "agent-stack";
+import { drizzleAdapter } from "agent-stack/adapters/drizzle";
 import { db } from "@/db";
 
 if (!process.env.OPENROUTER_API_KEY) {
@@ -14,7 +15,8 @@ const agent = new Agent({
   instructions: "You are a helpful assistant.",
 });
 
-export const agentStack = defineAgentStack({
-  memory: mongodbAdapter(db),
+export const agentStack = defineAgentConfig({
+  appName: "Next.js Playground",
+  memory: drizzleAdapter(db, { provider: "pg" }),
   agent,
 });

@@ -11,7 +11,6 @@ SEARCHABLE: chat hook, agent client, streaming chat
 agent-frontmatter:end */
 
 import type { AppRouter } from "@agent-stack/api";
-import type { AgentStackUIMessage } from "@agent-stack/core";
 import { generateId } from "@agent-stack/utils";
 import {
   Chat,
@@ -22,6 +21,7 @@ import {
 } from "@ai-sdk/react";
 import { eventIteratorToStream } from "@orpc/client";
 import type { RouterClient } from "@orpc/server";
+import type { AgentStackUIMessage } from "agent-stack";
 import type { ChatTransport } from "ai";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";

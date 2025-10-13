@@ -1,0 +1,214 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`generate > should generate drizzle schema 1`] = `
+"import { pgTable, text, integer, timestamp, boolean } from "drizzle-orm/pg-core";
+
+export const project = pgTable("project", {
+  id: text('id').primaryKey(),
+  id: text('id').notNull(),
+  authorId: text('author_id').notNull(),
+  title: text('title').notNull(),
+  emoji: text('emoji'),
+  visibility: text('visibility').notNull(),
+  createdAt: timestamp('created_at').notNull(),
+  updatedAt: timestamp('updated_at').notNull(),
+});
+
+export const chat = pgTable("chat", {
+  id: text('id').primaryKey(),
+  id: text('id').notNull(),
+  projectId: text('project_id').notNull().references(() => project.id, { onDelete: 'cascade' }),
+  title: text('title').notNull(),
+  userId: text('user_id').notNull(),
+  visibility: text('visibility').notNull(),
+  lastContext: text('last_context'),
+  createdAt: timestamp('created_at').notNull(),
+  updatedAt: timestamp('updated_at').notNull(),
+});
+
+export const message = pgTable("message", {
+  id: text('id').primaryKey(),
+  id: text('id').notNull(),
+  chatId: text('chat_id').notNull().references(() => chat.id, { onDelete: 'cascade' }),
+  role: text('role').notNull(),
+  parts: text('parts').notNull(),
+  attachments: text('attachments'),
+  metadata: text('metadata'),
+  createdAt: timestamp('created_at').notNull(),
+  updatedAt: timestamp('updated_at').notNull(),
+});
+"
+`;
+
+exports[`generate > should generate kysely schema 1`] = `
+"create table "project" ("id" text not null primary key, "authorId" text not null, "title" text not null, "emoji" text, "visibility" text not null, "createdAt" date not null, "updatedAt" date not null);
+
+create table "chat" ("id" text not null primary key, "projectId" text not null references "project" ("id"), "title" text not null, "userId" text not null, "visibility" text not null, "lastContext" text, "createdAt" date not null, "updatedAt" date not null);
+
+create table "message" ("id" text not null primary key, "chatId" text not null references "chat" ("id"), "role" text not null, "parts" text not null, "attachments" text, "metadata" text, "createdAt" date not null, "updatedAt" date not null);"
+`;
+
+exports[`generate > should generate prisma schema 1`] = `
+"
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id         String   @id
+  authorId   String
+  title      String
+  emoji      String?
+  visibility String
+  createdAt  DateTime
+  updatedAt  DateTime
+  chats      Chat[]
+
+  @@map("project")
+}
+
+model Chat {
+  id          String    @id
+  projectId   String
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title       String
+  userId      String
+  visibility  String
+  lastContext String?
+  createdAt   DateTime
+  updatedAt   DateTime
+  messages    Message[]
+
+  @@map("chat")
+}
+
+model Message {
+  id          String   @id
+  chatId      String
+  chat        Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  role        String
+  parts       String
+  attachments String?
+  metadata    String?
+  createdAt   DateTime
+  updatedAt   DateTime
+
+  @@map("message")
+}
+"
+`;
+
+exports[`generate > should generate prisma schema for mongodb 1`] = `
+"
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id         String   @id @map("_id")
+  authorId   String
+  title      String
+  emoji      String?
+  visibility String
+  createdAt  DateTime
+  updatedAt  DateTime
+  chats      Chat[]
+
+  @@map("project")
+}
+
+model Chat {
+  id          String    @id @map("_id")
+  projectId   String
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title       String
+  userId      String
+  visibility  String
+  lastContext String?
+  createdAt   DateTime
+  updatedAt   DateTime
+  messages    Message[]
+
+  @@map("chat")
+}
+
+model Message {
+  id          String   @id @map("_id")
+  chatId      String
+  chat        Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  role        String
+  parts       String
+  attachments String?
+  metadata    String?
+  createdAt   DateTime
+  updatedAt   DateTime
+
+  @@map("message")
+}
+"
+`;
+
+exports[`generate > should generate prisma schema for mysql 1`] = `
+"
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id         String   @id @db.Text
+  authorId   String   @db.Text
+  title      String   @db.Text
+  emoji      String?  @db.Text
+  visibility String   @db.Text
+  createdAt  DateTime
+  updatedAt  DateTime
+  chats      Chat[]
+
+  @@map("project")
+}
+
+model Chat {
+  id          String    @id @db.Text
+  projectId   String
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title       String    @db.Text
+  userId      String    @db.Text
+  visibility  String    @db.Text
+  lastContext String?   @db.Text
+  createdAt   DateTime
+  updatedAt   DateTime
+  messages    Message[]
+
+  @@map("chat")
+}
+
+model Message {
+  id          String   @id @db.Text
+  chatId      String
+  chat        Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  role        String   @db.Text
+  parts       String   @db.Text
+  attachments String?  @db.Text
+  metadata    String?  @db.Text
+  createdAt   DateTime
+  updatedAt   DateTime
+
+  @@map("message")
+}
+"
+`;
