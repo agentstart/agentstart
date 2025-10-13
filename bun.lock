@@ -62,7 +62,7 @@
       "version": "0.1.0",
       "bin": "./dist/index.mjs",
       "dependencies": {
-        "@agent-stack/utils": "*",
+        "@agent-stack/utils": "workspace:*",
         "@babel/preset-react": "catalog:",
         "@babel/preset-typescript": "catalog:",
         "@clack/prompts": "catalog:",
@@ -70,13 +70,14 @@
         "@prisma/client": "catalog:",
         "@types/better-sqlite3": "catalog:",
         "@types/prompts": "catalog:",
-        "agent-stack": "*",
+        "agent-stack": "workspace:*",
         "better-sqlite3": "catalog:",
         "c12": "catalog:",
         "chalk": "catalog:",
         "commander": "catalog:",
         "dotenv": "catalog:",
         "drizzle-orm": "catalog:",
+        "figlet": "catalog:",
         "fs-extra": "catalog:",
         "get-tsconfig": "catalog:",
         "prettier": "catalog:",
@@ -247,6 +248,7 @@
     "drizzle-orm": "^0.44.6",
     "drizzle-zod": "^0.8.3",
     "embla-carousel-react": "^8.6.0",
+    "figlet": "^1.9.3",
     "fs-extra": "^11.3.2",
     "fumadocs-core": "^15.8.5",
     "fumadocs-mdx": "^12.0.3",
@@ -922,6 +924,8 @@
     "fast-check": ["fast-check@3.23.2", "", { "dependencies": { "pure-rand": "^6.1.0" } }, "sha512-h5+1OzzfCC3Ef7VbtKdcv7zsstUQwUDlYpUTvjeUsJAssPgLn7QzbboPtL5ro04Mq0rPOsMzl7q5hIbRs2wD1A=="],
 
     "fdir": ["fdir@6.5.0", "", { "peerDependencies": { "picomatch": "^3 || ^4" }, "optionalPeers": ["picomatch"] }, "sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg=="],
+
+    "figlet": ["figlet@1.9.3", "", { "dependencies": { "commander": "^14.0.0" }, "bin": { "figlet": "bin/index.js" } }, "sha512-majPgOpVtrZN1iyNGbsUP6bOtZ6eaJgg5HHh0vFvm5DJhh8dc+FJpOC4GABvMZ/A7XHAJUuJujhgUY/2jPWgMA=="],
 
     "file-uri-to-path": ["file-uri-to-path@1.0.0", "", {}, "sha512-0Zt+s3L7Vf1biwWZ29aARiVYLx7iMGnEUl9x33fbB/j3jR81u/O2LbqK+Bm1CDSNDKVtJ/YjwY7TUd5SkeLQLw=="],
 

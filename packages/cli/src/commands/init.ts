@@ -202,11 +202,11 @@ const optionsSchema = z.object({
   "package-manager": z.string().optional(),
 });
 
-const outroText = `🥳 All Done, Happy Hacking!`;
+const outroText = `✅ Setup complete!`;
 
 export async function initAction(opts: z.infer<typeof optionsSchema>) {
   console.log();
-  intro("👋 Initializing Agent Stack");
+  intro("Agent Stack Setup");
 
   const options = optionsSchema.parse(opts);
 
@@ -235,7 +235,7 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
   // ===== ENV files =====
   const envFiles = await getEnvFiles(cwd);
   if (!envFiles.length) {
-    outro("❌ No .env files found. Please create an env file first.");
+    outro("❌ No .env files found. Create one first.");
     process.exit(0);
   }
   let targetEnvFile: string;
@@ -257,18 +257,16 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
   }
   if (tsconfigInfo.compilerOptions?.strict !== true) {
     log.warn(
-      `Agent Stack requires your tsconfig.json to have "compilerOptions.strict" set to true.`,
+      `Agent Stack requires your tsconfig.json to have ${chalk.bold("compilerOptions.strict")} set to true.`,
     );
-    const shouldAdd = await confirm({
-      message: `Would you like us to set ${chalk.bold(
-        `strict`,
-      )} to ${chalk.bold(`true`)}?`,
+    const enableStrict = await confirm({
+      message: `Enable ${chalk.bold("strict")} mode?`,
     });
-    if (isCancel(shouldAdd)) {
-      cancel(`✋ Operation cancelled.`);
+    if (isCancel(enableStrict)) {
+      cancel(`Operation cancelled`);
       process.exit(0);
     }
-    if (shouldAdd) {
+    if (enableStrict) {
       try {
         await fs.writeFile(
           path.join(cwd, "tsconfig.json"),
@@ -284,11 +282,9 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
           ),
           "utf-8",
         );
-        log.success(`🚀 tsconfig.json successfully updated!`);
+        log.success(`✅ tsconfig.json updated`);
       } catch (error) {
-        log.error(
-          `Failed to add "compilerOptions.strict" to your tsconfig.json file.`,
-        );
+        log.error(`Failed to update tsconfig.json`);
         console.error(error);
         process.exit(1);
       }
@@ -299,12 +295,12 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
   const s = spinner({ indicator: "dots" });
 
   if (process.env.NODE_ENV !== "development") {
-    s.start(`Checking agent-stack installation`);
+    s.start(`Checking agent-stack version`);
     let latestAgentStackVersion: string;
     try {
       latestAgentStackVersion = await getLatestNpmVersion("agent-stack");
     } catch (error) {
-      log.error(`❌ Couldn't get latest version of agent-stack.`);
+      log.error(`❌ Failed to fetch latest version`);
       console.error(error);
       process.exit(1);
     }
@@ -313,21 +309,21 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
       !packageInfo.dependencies ||
       !Object.keys(packageInfo.dependencies).includes("agent-stack")
     ) {
-      s.stop("Finished fetching latest version of agent-stack.");
+      s.stop("Finished version check");
       const s2 = spinner({ indicator: "dots" });
-      const shouldInstallAgentStackDep = await confirm({
-        message: `Would you like to install Agent Stack?`,
+      const installDep = await confirm({
+        message: `Install agent-stack?`,
       });
-      if (isCancel(shouldInstallAgentStackDep)) {
-        cancel(`✋ Operation cancelled.`);
+      if (isCancel(installDep)) {
+        cancel(`Operation cancelled`);
         process.exit(0);
       }
       if (packageManagerPreference === undefined) {
         packageManagerPreference = await getPackageManager();
       }
-      if (shouldInstallAgentStackDep) {
+      if (installDep) {
         s2.start(
-          `Installing Agent Stack using ${chalk.bold(packageManagerPreference)}`,
+          `Installing agent-stack with ${chalk.bold(packageManagerPreference)}`,
         );
         try {
           const start = Date.now();
@@ -337,12 +333,10 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
             cwd: cwd,
           });
           s2.stop(
-            `Agent Stack installed ${chalk.greenBright(
-              `successfully`,
-            )}! ${chalk.gray(`(${formatMilliseconds(Date.now() - start)})`)}`,
+            `✅ agent-stack installed ${chalk.gray(`(${formatMilliseconds(Date.now() - start)})`)}`,
           );
         } catch (error: unknown) {
-          s2.stop(`Failed to install Agent Stack:`);
+          s2.stop(`❌ Installation failed`);
           console.error(getErrorMessage(error));
           process.exit(1);
         }
@@ -354,23 +348,23 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
         semver.clean(latestAgentStackVersion)!,
       )
     ) {
-      s.stop("Finished fetching latest version of agent-stack.");
-      const shouldInstallAgentStackDep = await confirm({
-        message: `Your current Agent Stack dependency is out-of-date. Would you like to update it? (${chalk.bold(
+      s.stop("Finished version check");
+      const updateDep = await confirm({
+        message: `Update agent-stack? (${chalk.bold(
           packageInfo.dependencies["agent-stack"],
         )} → ${chalk.bold(`v${latestAgentStackVersion}`)})`,
       });
-      if (isCancel(shouldInstallAgentStackDep)) {
-        cancel(`✋ Operation cancelled.`);
+      if (isCancel(updateDep)) {
+        cancel(`Operation cancelled`);
         process.exit(0);
       }
-      if (shouldInstallAgentStackDep) {
+      if (updateDep) {
         if (packageManagerPreference === undefined) {
           packageManagerPreference = await getPackageManager();
         }
         const s = spinner({ indicator: "dots" });
         s.start(
-          `Updating Agent Stack using ${chalk.bold(packageManagerPreference)}`,
+          `Updating agent-stack with ${chalk.bold(packageManagerPreference)}`,
         );
         try {
           const start = Date.now();
@@ -380,20 +374,16 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
             cwd: cwd,
           });
           s.stop(
-            `Agent Stack updated ${chalk.greenBright(
-              `successfully`,
-            )}! ${chalk.gray(`(${formatMilliseconds(Date.now() - start)})`)}`,
+            `✅ agent-stack updated ${chalk.gray(`(${formatMilliseconds(Date.now() - start)})`)}`,
           );
         } catch (error: unknown) {
-          s.stop(`Failed to update Agent Stack:`);
+          s.stop(`❌ Update failed`);
           log.error(getErrorMessage(error));
           process.exit(1);
         }
       }
     } else {
-      s.stop(
-        `Agent Stack dependencies are ${chalk.greenBright(`up-to-date`)}!`,
-      );
+      s.stop(`✅ agent-stack is up-to-date`);
     }
   }
 
@@ -403,10 +393,10 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
   let appName: string;
   if (!packageJson.name) {
     const newAppName = await text({
-      message: "What is the name of your application?",
+      message: "Application name:",
     });
     if (isCancel(newAppName)) {
-      cancel("✋ Operation cancelled.");
+      cancel("Operation cancelled");
       process.exit(0);
     }
     appName = newAppName;
@@ -439,33 +429,33 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
   let database: SupportedDatabases | null = null;
 
   if (!configPath) {
-    const shouldCreateAgentConfig = await select({
-      message: `Would you like to create an agent config file?`,
+    const createConfig = await select({
+      message: `Create agent config?`,
       options: [
         { label: "Yes", value: "yes" },
         { label: "No", value: "no" },
       ],
     });
-    if (isCancel(shouldCreateAgentConfig)) {
-      cancel(`✋ Operation cancelled.`);
+    if (isCancel(createConfig)) {
+      cancel(`Operation cancelled`);
       process.exit(0);
     }
-    if (shouldCreateAgentConfig === "yes") {
-      const shouldSetupDb = await confirm({
-        message: `Would you like to set up your ${chalk.bold(`database`)}?`,
+    if (createConfig === "yes") {
+      const setupDb = await confirm({
+        message: `Set up ${chalk.bold("database")}?`,
         initialValue: true,
       });
-      if (isCancel(shouldSetupDb)) {
-        cancel(`✋ Operating cancelled.`);
+      if (isCancel(setupDb)) {
+        cancel(`Operation cancelled`);
         process.exit(0);
       }
-      if (shouldSetupDb) {
+      if (setupDb) {
         const prompted_database = await select({
-          message: "Choose a Database Dialect",
+          message: "Database dialect:",
           options: supportedDatabases.map((it) => ({ value: it, label: it })),
         });
         if (isCancel(prompted_database)) {
-          cancel(`✋ Operating cancelled.`);
+          cancel(`Operation cancelled`);
           process.exit(0);
         }
         database = prompted_database;
@@ -495,7 +485,7 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
 
       const filePath = path.join(targetConfigDirectory, "agent.ts");
       configPath = filePath;
-      log.info(`Creating agent config file: ${filePath}`);
+      log.info(`Creating: ${filePath}`);
       try {
         current_user_config = await getDefaultAgentConfig({
           appName,
@@ -509,22 +499,20 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
         current_user_config = generatedCode;
         await fs.writeFile(filePath, current_user_config);
         configPath = filePath;
-        log.success(`🚀 Agent config file successfully created!`);
+        log.success(`✅ Agent config created`);
 
         if (envs.length !== 0) {
-          log.info(
-            `There are ${envs.length} environment variables for your database of choice.`,
-          );
-          const shouldUpdateEnvs = await confirm({
-            message: `Would you like us to update your ENV files?`,
+          log.info(`Found ${envs.length} environment variables for database`);
+          const updateEnvFiles = await confirm({
+            message: `Update .env files?`,
           });
-          if (isCancel(shouldUpdateEnvs)) {
-            cancel("✋ Operation cancelled.");
+          if (isCancel(updateEnvFiles)) {
+            cancel("Operation cancelled");
             process.exit(0);
           }
-          if (shouldUpdateEnvs) {
+          if (updateEnvFiles) {
             const filesToUpdate = await multiselect({
-              message: "Select the .env files you want to update",
+              message: "Select .env files to update:",
               options: envFiles.map((x) => ({
                 value: path.join(cwd, x),
                 label: x,
@@ -532,11 +520,11 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
               required: false,
             });
             if (isCancel(filesToUpdate)) {
-              cancel("✋ Operation cancelled.");
+              cancel("Operation cancelled");
               process.exit(0);
             }
             if (filesToUpdate.length === 0) {
-              log.info("No .env files to update. Skipping...");
+              log.info("Skipping .env updates");
             } else {
               try {
                 await updateEnvs({
@@ -545,38 +533,36 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
                   isCommented: true,
                 });
               } catch (error) {
-                log.error(`Failed to update .env files:`);
+                log.error(`Failed to update .env files`);
                 log.error(JSON.stringify(error, null, 2));
                 process.exit(1);
               }
-              log.success(`🚀 ENV files successfully updated!`);
+              log.success(`✅ ENV files updated`);
             }
           }
         }
         if (dependencies.length !== 0) {
           log.info(
-            `There are ${
-              dependencies.length
-            } dependencies to install. (${dependencies
+            `Dependencies needed: ${dependencies
               .map((x) => chalk.green(x))
-              .join(", ")})`,
+              .join(", ")}`,
           );
-          const shouldInstallDeps = await confirm({
-            message: `Would you like us to install dependencies?`,
+          const installDeps = await confirm({
+            message: `Install dependencies?`,
           });
-          if (isCancel(shouldInstallDeps)) {
-            cancel("✋ Operation cancelled.");
+          if (isCancel(installDeps)) {
+            cancel("Operation cancelled");
             process.exit(0);
           }
-          if (shouldInstallDeps) {
+          if (installDeps) {
             const s = spinner({ indicator: "dots" });
             if (packageManagerPreference === undefined) {
               packageManagerPreference = await getPackageManager();
             }
             s.start(
-              `Installing dependencies using ${chalk.bold(
+              `Installing dependencies with ${chalk.bold(
                 packageManagerPreference,
-              )}...`,
+              )}`,
             );
             try {
               const start = Date.now();
@@ -586,32 +572,28 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
                 cwd: cwd,
               });
               s.stop(
-                `Dependencies installed ${chalk.greenBright(
-                  `successfully`,
-                )} ${chalk.gray(
+                `✅ Dependencies installed ${chalk.gray(
                   `(${formatMilliseconds(Date.now() - start)})`,
                 )}`,
               );
             } catch (error: unknown) {
-              s.stop(
-                `Failed to install dependencies using ${packageManagerPreference}:`,
-              );
+              s.stop(`❌ Installation failed`);
               log.error(getErrorMessage(error));
               process.exit(1);
             }
           }
         }
       } catch (error) {
-        log.error(`Failed to create agent config file: ${filePath}`);
+        log.error(`Failed to create agent config: ${filePath}`);
         console.error(error);
         process.exit(1);
       }
-    } else if (shouldCreateAgentConfig === "no") {
-      log.info(`Skipping agent config file creation.`);
+    } else if (createConfig === "no") {
+      log.info(`Skipping agent config`);
     }
   } else {
     log.message();
-    log.success(`Found agent config file. ${chalk.gray(`(${configPath})`)}`);
+    log.success(`Found agent config ${chalk.gray(`(${configPath})`)}`);
     log.message();
   }
 
@@ -679,18 +661,18 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
     }) || null;
 
   if (!agentClientConfigPath) {
-    const choice = await select({
-      message: `Would you like to create an agent client config file?`,
+    const createClientConfig = await select({
+      message: `Create agent client config?`,
       options: [
         { label: "Yes", value: "yes" },
         { label: "No", value: "no" },
       ],
     });
-    if (isCancel(choice)) {
-      cancel(`✋ Operation cancelled.`);
+    if (isCancel(createClientConfig)) {
+      cancel(`Operation cancelled`);
       process.exit(0);
     }
-    if (choice === "yes") {
+    if (createClientConfig === "yes") {
       const agentClientDirectory =
         configPath !== "" ? path.dirname(configPath) : cwd;
       await fs.ensureDir(agentClientDirectory);
@@ -698,9 +680,7 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
         agentClientDirectory,
         "agent-client.ts",
       );
-      log.info(
-        `Creating agent client config file: ${newAgentClientConfigPath}`,
-      );
+      log.info(`Creating: ${newAgentClientConfigPath}`);
       try {
         const contents =
           await getDefaultAgentClientConfig(
@@ -709,22 +689,20 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
             // }
           );
         await fs.writeFile(newAgentClientConfigPath, contents);
-        log.success(`🚀 Agent client config file successfully created!`);
+        log.success(`✅ Agent client config created`);
       } catch (error) {
         log.error(
-          `Failed to create agent client config file: ${newAgentClientConfigPath}`,
+          `Failed to create agent client config: ${newAgentClientConfigPath}`,
         );
         log.error(JSON.stringify(error, null, 2));
         process.exit(1);
       }
-    } else if (choice === "no") {
-      log.info(`Skipping agent client config file creation.`);
+    } else if (createClientConfig === "no") {
+      log.info(`Skipping agent client config`);
     }
   } else {
     log.success(
-      `Found agent client config file. ${chalk.gray(
-        `(${agentClientConfigPath})`,
-      )}`,
+      `Found agent client config ${chalk.gray(`(${agentClientConfigPath})`)}`,
     );
   }
 
@@ -742,23 +720,23 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
         const txt = chalk.bold(`MODEL_PROVIDER_API_KEY`);
         log.warn(`Missing ${txt} in ${targetEnvFile}`);
 
-        const shouldAdd = await select({
-          message: `Do you want to add ${txt} to ${targetEnvFile}?`,
+        const addApiKey = await select({
+          message: `Add ${txt} to ${targetEnvFile}?`,
           options: [
             { label: "Yes", value: "yes" },
             { label: "No", value: "no" },
             { label: "Choose other file(s)", value: "other" },
           ],
         });
-        if (isCancel(shouldAdd)) {
-          cancel(`✋ Operation cancelled.`);
+        if (isCancel(addApiKey)) {
+          cancel(`Operation cancelled`);
           process.exit(0);
         }
         const envs: string[] = [];
         if (isMissingModelProviderApiKey) {
           envs.push("MODEL_PROVIDER_API_KEY");
         }
-        if (shouldAdd === "yes") {
+        if (addApiKey === "yes") {
           try {
             await updateEnvs({
               files: [path.join(cwd, targetEnvFile)],
@@ -770,16 +748,16 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
             log.error(JSON.stringify(error, null, 2));
             process.exit(1);
           }
-          log.success(`🚀 ENV variables successfully added!`);
-        } else if (shouldAdd === "no") {
-          log.info(`Skipping ENV step.`);
-        } else if (shouldAdd === "other") {
+          log.success(`✅ ENV variables added`);
+        } else if (addApiKey === "no") {
+          log.info(`Skipping ENV setup`);
+        } else if (addApiKey === "other") {
           if (!envFiles.length) {
-            cancel("No env files found. Please create an env file first.");
+            cancel("No env files found. Create one first");
             process.exit(0);
           }
           const envFilesToUpdate = await multiselect({
-            message: "Select the .env files you want to update",
+            message: "Select .env files to update:",
             options: envFiles.map((x) => ({
               value: path.join(cwd, x),
               label: x,
@@ -787,11 +765,11 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
             required: false,
           });
           if (isCancel(envFilesToUpdate)) {
-            cancel("✋ Operation cancelled.");
+            cancel("Operation cancelled");
             process.exit(0);
           }
           if (envFilesToUpdate.length === 0) {
-            log.info("No .env files to update. Skipping...");
+            log.info("Skipping .env updates");
           } else {
             try {
               await updateEnvs({
@@ -800,11 +778,11 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
                 isCommented: false,
               });
             } catch (error) {
-              log.error(`Failed to update .env files:`);
+              log.error(`Failed to update .env files`);
               log.error(JSON.stringify(error, null, 2));
               process.exit(1);
             }
-            log.success(`🚀 ENV files successfully updated!`);
+            log.success(`✅ ENV files updated`);
           }
         }
       }

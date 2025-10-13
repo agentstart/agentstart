@@ -12,7 +12,9 @@ FEATURES:
 SEARCHABLE: cli entrypoint, commander setup, agent-stack binary
 agent-frontmatter:end */
 
+import chalk from "chalk";
 import { Command } from "commander";
+import figlet from "figlet";
 import { generate } from "./commands/generate";
 import { init } from "./commands/init";
 import { migrate } from "./commands/migrate";
@@ -24,6 +26,16 @@ process.on("SIGINT", () => process.exit(0));
 process.on("SIGTERM", () => process.exit(0));
 
 async function main() {
+  console.log(
+    chalk.cyan(
+      figlet.textSync("AgentStack", {
+        font: "Standard",
+        horizontalLayout: "default",
+        verticalLayout: "default",
+      }),
+    ),
+  );
+
   const program = new Command("agent-stack");
   let packageInfo: Record<string, string> = {};
   try {

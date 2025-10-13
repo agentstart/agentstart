@@ -29,6 +29,7 @@
   "workspaces": {
     "packages": ["packages/*", "tooling/*", "playground/*"],
     "catalog": {
+      "figlet": "^1.9.3",
       "prettier": "^3.6.2",
       "tsdown": "^0.15.6",
       "@prisma/client": "^6.17.1",
