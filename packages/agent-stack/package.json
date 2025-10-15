@@ -4,16 +4,90 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./db": "./src/db/index.ts",
-    "./client": "./src/client/index.ts",
-    "./adapters/drizzle": "./src/adapters/drizzle/index.ts",
-    "./adapters/kysely": "./src/adapters/kysely/index.ts",
-    "./adapters/mongodb": "./src/adapters/mongodb/index.ts",
-    "./adapters/prisma": "./src/adapters/prisma/index.ts",
-    "./adapters/memory": "./src/adapters/memory/index.ts"
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./db": {
+      "import": {
+        "types": "./dist/db/index.d.ts",
+        "default": "./dist/db/index.js"
+      },
+      "require": {
+        "types": "./dist/db/index.d.cts",
+        "default": "./dist/db/index.cjs"
+      }
+    },
+    "./client": {
+      "import": {
+        "types": "./dist/client/index.d.ts",
+        "default": "./dist/client/index.js"
+      },
+      "require": {
+        "types": "./dist/client/index.d.cts",
+        "default": "./dist/client/index.cjs"
+      }
+    },
+    "./adapters/drizzle": {
+      "import": {
+        "types": "./dist/adapters/drizzle/index.d.ts",
+        "default": "./dist/adapters/drizzle/index.js"
+      },
+      "require": {
+        "types": "./dist/adapters/drizzle/index.d.cts",
+        "default": "./dist/adapters/drizzle/index.cjs"
+      }
+    },
+    "./adapters/kysely": {
+      "import": {
+        "types": "./dist/adapters/kysely/index.d.ts",
+        "default": "./dist/adapters/kysely/index.js"
+      },
+      "require": {
+        "types": "./dist/adapters/kysely/index.d.cts",
+        "default": "./dist/adapters/kysely/index.cjs"
+      }
+    },
+    "./adapters/mongodb": {
+      "import": {
+        "types": "./dist/adapters/mongodb/index.d.ts",
+        "default": "./dist/adapters/mongodb/index.js"
+      },
+      "require": {
+        "types": "./dist/adapters/mongodb/index.d.cts",
+        "default": "./dist/adapters/mongodb/index.cjs"
+      }
+    },
+    "./adapters/prisma": {
+      "import": {
+        "types": "./dist/adapters/prisma/index.d.ts",
+        "default": "./dist/adapters/prisma/index.js"
+      },
+      "require": {
+        "types": "./dist/adapters/prisma/index.d.cts",
+        "default": "./dist/adapters/prisma/index.cjs"
+      }
+    },
+    "./adapters/memory": {
+      "import": {
+        "types": "./dist/adapters/memory/index.d.ts",
+        "default": "./dist/adapters/memory/index.js"
+      },
+      "require": {
+        "types": "./dist/adapters/memory/index.d.cts",
+        "default": "./dist/adapters/memory/index.cjs"
+      }
+    }
   },
   "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "lint": "bunx biome check --write ./src",
     "typecheck": "tsc --noEmit",
