@@ -2,7 +2,7 @@
 AGENT: Tool schema definitions
 PURPOSE: Define input and output schemas for all chat tools
 USAGE: Import tool schemas and types for chat message tool invocations
-EXPORTS: toolInputSchema, toolOutputSchema, ChatToolInput, ChatToolOutput, ChatToolSet, ChatMessagePart
+EXPORTS: toolInputSchema, toolOutputSchema, ChatToolInput, AgentStackToolOutput, ChatToolSet, ChatMessagePart
 FEATURES:
   - Zod schemas for tool inputs and outputs
   - Type inference for tool invocations

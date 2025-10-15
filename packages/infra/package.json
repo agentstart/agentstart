@@ -1,0 +1,24 @@
+{
+  "name": "@agent-stack/infra",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "lint": "bunx biome check --write ./src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@agent-stack/utils": "workspace:*",
+    "redis": "catalog:"
+  },
+  "devDependencies": {
+    "@agent-stack/biome-config": "*",
+    "@agent-stack/tsconfig": "*",
+    "@biomejs/biome": "catalog:",
+    "typescript": "catalog:"
+  }
+}

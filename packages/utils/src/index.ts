@@ -9,6 +9,8 @@ SEARCHABLE: agent utils, helper exports, generate id
 agent-frontmatter:end */
 
 export * from "./error";
+export * from "./file";
+export * from "./format";
 export * from "./generate-id";
 export * from "./logger";
 export * from "./string";

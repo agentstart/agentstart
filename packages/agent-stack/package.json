@@ -23,6 +23,7 @@
   "dependencies": {
     "@agent-stack/api": "*",
     "@agent-stack/client": "*",
+    "@agent-stack/sandbox": "*",
     "@agent-stack/utils": "*"
   },
   "devDependencies": {

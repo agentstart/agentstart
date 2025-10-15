@@ -8,8 +8,10 @@ FEATURES:
 SEARCHABLE: agent context, base context, writer interface
 agent-frontmatter:end */
 
+import type { SandboxManagerAPI } from "@agent-stack/sandbox";
 import type { UIMessageStreamWriter } from "ai";
 
 export interface BaseContext {
   writer: UIMessageStreamWriter;
+  sandboxManager: SandboxManagerAPI;
 }

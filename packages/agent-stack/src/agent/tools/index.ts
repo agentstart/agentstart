@@ -1,19 +1,27 @@
-/* agent-frontmatter:start
-AGENT: Agent tools registry
-PURPOSE: Register and configure tools available to the agent
-USAGE: Import agentTools() to get the configured tool set
-EXPORTS: agentTools
-FEATURES:
-  - Alphabetically sorts tools by name for consistency
-  - Adds Anthropic cache control to the last tool for optimal caching
-  - Returns ToolSet compatible with AI SDK
-SEARCHABLE: agent tools, tool registry, tool configuration, cache control
-agent-frontmatter:end */
-
 import type { ToolSet } from "ai";
 
+import { bash } from "./bash/tool";
+import { glob } from "./glob/tool";
+import { grep } from "./grep/tool";
+import { ls } from "./ls/tool";
+import { multiUpdate } from "./multi-update/tool";
+import { read } from "./read/tool";
+import { todoWrite } from "./todo-write/tool";
+import { update } from "./update/tool";
+import { write } from "./write/tool";
+
 export const agentTools = () => {
-  const tools: ToolSet = {};
+  const tools: ToolSet = {
+    multiUpdate,
+    update,
+    read,
+    write,
+    bash,
+    glob,
+    grep,
+    ls,
+    todoWrite,
+  };
 
   // Get entries and sort in one pass
   const entries = Object.entries(tools).sort(([nameA], [nameB]) =>
@@ -44,3 +52,5 @@ export const agentTools = () => {
   // Reconstruct sorted tools object
   return Object.fromEntries(entries) as ToolSet;
 };
+
+export type Tools = ReturnType<typeof agentTools>;
