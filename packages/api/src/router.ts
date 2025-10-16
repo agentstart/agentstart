@@ -10,18 +10,16 @@ FEATURES:
 SEARCHABLE: orpc router, main router, api router
 agent-frontmatter:end */
 
-import { chatRouter } from "./routers/chat";
 import { messageRouter } from "./routers/message";
-import { projectRouter } from "./routers/project";
+import { threadRouter } from "./routers/thread";
 
 /**
  * Main API router combining all procedures
  * Each procedure can be accessed via RPC or REST
  */
 export const appRouter = {
-  chat: chatRouter,
+  thread: threadRouter,
   message: messageRouter,
-  project: projectRouter,
 };
 
 // Export the router type for client usage

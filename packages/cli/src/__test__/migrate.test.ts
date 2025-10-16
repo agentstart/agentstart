@@ -1,4 +1,4 @@
-import { defineAgentConfig } from "agent-stack";
+import { defineAgentConfig } from "@agent-stack/agent";
 import Database from "better-sqlite3";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { migrateAction } from "../commands/migrate";
@@ -32,13 +32,13 @@ describe("migrate base agent instance", () => {
     });
     const res = db
       .prepare(
-        `INSERT INTO project (id, authorId, title, visibility, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO thread (id, title, userId, visibility, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)`,
       )
       .run(
-        "proj-1",
+        "thread-1",
+        "My Test Thread",
         "user-123",
-        "My Test Project",
-        "public",
+        "private",
         new Date().toISOString(),
         new Date().toISOString(),
       );

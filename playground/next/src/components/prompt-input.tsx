@@ -20,15 +20,15 @@ import {
 import { client } from "@/lib/agent-client";
 
 /**
- * PromptInput component - Main entry point for creating new projects
+ * PromptInput component - Main entry point for creating new threads
  *
  * Flow:
  * 1. User enters prompt and submits
- * 2. Streaming API creates project in database
+ * 2. Streaming API creates thread in database
  * 3. Checks sandbox quota availability
  * 4. May queue if all sandboxes are busy (with retry logic)
  * 5. Creates sandbox environment
- * 6. Navigates to project page when complete
+ * 6. Navigates to thread page when complete
  *
  * Status updates are displayed in real-time with appropriate styling
  */
@@ -42,11 +42,11 @@ export function PromptInput() {
       setIsCreating(true);
 
       try {
-        // Call the streaming project creation API
-        const { projectId } = await client.project.create();
-        router.push(`/project/${projectId}`);
+        // Call the streaming thread creation API
+        const { threadId } = await client.thread.create();
+        router.push(`/thread/${threadId}`);
       } catch (error) {
-        console.error("Failed to create project:", error);
+        console.error("Failed to create thread:", error);
       } finally {
         setIsCreating(false);
       }

@@ -131,10 +131,10 @@ const getDefaultAgentClientConfig = async (
 ) => {
   return await prettierFormat(
     [
-      `import { createAgentClient, useAgentStore } from "agent-stack/client";`,
-      `export const { client, useChat } = createAgentClient();`,
+      `import { createAgentClient, useAgentStore, useThreadStore } from "agent-stack/client";`,
+      `export const { client, useThread } = createAgentClient();`,
       "",
-      `export { useAgentStore };`,
+      `export { useAgentStore, useThreadStore };`,
     ].join("\n"),
     {
       filepath: "agent-client.ts",

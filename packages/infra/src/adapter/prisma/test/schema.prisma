@@ -1,0 +1,34 @@
+generator client {
+    provider        = "prisma-client-js"
+    previewFeatures = ["strictUndefinedChecks"]
+}
+
+datasource db {
+    provider = "sqlite"
+    url      = "file:.db/dev.db"
+}
+
+model Thread {
+    id          String   @id @default(cuid())
+    title       String
+    userId      String
+    visibility  String   @default("private")
+    lastContext Json?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @default(now()) @updatedAt
+
+    messages Message[]
+}
+
+model Message {
+    id          String   @id @default(cuid())
+    threadId    String
+    role        String
+    parts       Json
+    attachments Json?
+    metadata    Json?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @default(now()) @updatedAt
+
+    thread Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+}

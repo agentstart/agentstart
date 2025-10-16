@@ -1,4 +1,4 @@
-import { getMigrations } from "agent-stack/db";
+import { getMigrations } from "@agent-stack/infra/db";
 import type { SchemaGenerator } from "./types";
 
 export const generateMigrations: SchemaGenerator = async ({

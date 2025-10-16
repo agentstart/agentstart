@@ -43,7 +43,7 @@ The agent class orchestrates prompts, tool execution, and memory updates. Tools 
 
 - **Mission prompt**: defines the agent’s role, guardrails, and high-level objectives.
 - **Summary prompt**: condenses long conversations into a rolling digest.
-- **System prompt variants**: specialization layers for different adapters (CLI, chat, workflow).
+- **System prompt variants**: specialization layers for different adapters (CLI, thread, workflow).
 - Prompts are versioned and selectable per environment; store them alongside the config.
 
 ### Tools
@@ -64,7 +64,7 @@ The agent class orchestrates prompts, tool execution, and memory updates. Tools 
 ### Components
 
 - UI blocks consumed by dashboards or embed surfaces.
-- `AIElements`: prebuilt chat widgets and inspector panes.
+- `AIElements`: prebuilt thread widgets and inspector panes.
 - `Block`: low-level layout primitives for composing custom experiences.
 - Components receive streams/events from the agent class; keep them presentation-only.
 

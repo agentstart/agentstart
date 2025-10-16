@@ -10,7 +10,7 @@ FEATURES:
 SEARCHABLE: sandbox manager api, lifecycle typing, sandbox contracts
 agent-frontmatter:end */
 
-import type { KV } from "@agent-stack/infra";
+import type { KV } from "@agent-stack/infra/kv";
 import type { BashAPI } from "./bash";
 import type { DevAPI } from "./dev";
 import type { FileSystemAPI } from "./file-system";

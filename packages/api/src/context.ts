@@ -10,8 +10,8 @@ FEATURES:
 SEARCHABLE: agent context, rpc context, memory adapter
 agent-frontmatter:end */
 
-import type { AgentStackOptions } from "agent-stack";
-import { memoryAdapter } from "agent-stack/adapters/memory";
+import type { AgentStackOptions } from "@agent-stack/agent";
+import { memoryAdapter } from "@agent-stack/infra/adapter";
 
 export interface Context extends AgentStackOptions {
   headers: Headers;
@@ -19,8 +19,6 @@ export interface Context extends AgentStackOptions {
 }
 
 export interface CreateContextOptions extends Omit<Context, "getUserId"> {
-  headers: Headers;
-  memory?: AgentStackOptions["memory"];
   getUserId?: (headers: Headers) => string | Promise<string>;
 }
 

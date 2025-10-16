@@ -1,8 +1,8 @@
 import {
   createAgentClient,
   useAgentStore,
-  useChatStore,
+  useThreadStore,
 } from "agent-stack/client";
-export const { client, useChat } = createAgentClient();
+export const { client, useThread } = createAgentClient();
 
-export { useAgentStore, useChatStore };
+export { useAgentStore, useThreadStore };

@@ -1,6 +1,6 @@
 import path from "node:path";
+import { getAdapter } from "@agent-stack/infra/db";
 import { logger } from "@agent-stack/utils";
-import { getAdapter } from "agent-stack/db";
 import chalk from "chalk";
 import { Command } from "commander";
 import fs from "fs-extra";
@@ -40,10 +40,14 @@ export async function generateAction(
     return;
   }
 
-  const adapter = await getAdapter(config).catch((e) => {
-    logger.error(e.message);
+  const adapter = await getAdapter(config).catch((error: unknown) => {
+    const message = error instanceof Error ? error.message : String(error);
+    logger.error(message);
     process.exit(1);
   });
+  if (!adapter) {
+    return;
+  }
 
   const spinner = yoctoSpinner({ text: "preparing schema..." }).start();
 

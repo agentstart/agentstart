@@ -1,4 +1,4 @@
-import type { KV } from "@agent-stack/infra";
+import type { KV } from "@agent-stack/infra/kv";
 import { Sandbox, type SandboxOpts } from "@e2b/code-interpreter";
 import type { BashAPI } from "../../types/bash";
 import type { DevAPI } from "../../types/dev";
@@ -26,7 +26,7 @@ import { Git } from "./git";
  * ```typescript
  * // In Agent initialization
  * const sandboxManager = await SandboxManager.connectOrCreate({
- *   sandboxId: cachedSandboxId, // from previous session
+ *   sandboxId: cachedSandboxId, // from previous thread
  *   kv: kvClient,
  *   githubToken: token
  * });

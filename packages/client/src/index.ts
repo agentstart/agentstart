@@ -1,35 +1,15 @@
 /* agent-frontmatter:start
-AGENT: Agent client factory
-PURPOSE: Configure oRPC client instances for Agent Stack APIs
-USAGE: createAgentClient({ baseURL })
-EXPORTS: createAgentClient
+AGENT: Client entry point
+PURPOSE: Re-export client-side hooks and stores for Agent Stack integrations
+USAGE: import { useAgentStore, useThread } from \"@agent-stack/client\"
+EXPORTS: useThread, useAgentStore, getAgentStore, configureAgentClient
 FEATURES:
-  - Automatic AppRouter typing
-  - Client-friendly authentication header wiring
-  - Base URL resolution via getClientConfig
-SEARCHABLE: agent client, orpc client, api client, rpc client
+  - Surfaces Zustand stores for agent state management
+  - Exposes thread synchronisation hooks
+  - Provides client configuration helpers
+SEARCHABLE: agent client, zustand store, thread hook
 agent-frontmatter:end */
 
-import type { AppRouter } from "@agent-stack/api";
-import { createORPCClient } from "@orpc/client";
-import { RPCLink } from "@orpc/client/fetch";
-import type { RouterClient } from "@orpc/server";
-import { type AgentClientConfig, getClientConfig } from "./config";
-import { createUseChat } from "./use-chat";
-
-export function createAgentClient(config?: AgentClientConfig) {
-  const { baseURL } = getClientConfig(config);
-
-  const link = new RPCLink({
-    url: () => baseURL,
-  });
-
-  // Create the client with proper typing
-  const client: RouterClient<AppRouter> = createORPCClient(link);
-
-  const useChat = createUseChat(client);
-
-  return { client, useChat };
-}
-
-export * from "./store";
+export * from "./config";
+export * from "./store/index";
+export * from "./use-thread";

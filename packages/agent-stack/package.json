@@ -34,54 +34,14 @@
         "default": "./dist/client/index.cjs"
       }
     },
-    "./adapters/drizzle": {
+    "./adapter": {
       "import": {
-        "types": "./dist/adapters/drizzle/index.d.ts",
-        "default": "./dist/adapters/drizzle/index.js"
+        "types": "./dist/adapter/index.d.ts",
+        "default": "./dist/adapter/index.js"
       },
       "require": {
-        "types": "./dist/adapters/drizzle/index.d.cts",
-        "default": "./dist/adapters/drizzle/index.cjs"
-      }
-    },
-    "./adapters/kysely": {
-      "import": {
-        "types": "./dist/adapters/kysely/index.d.ts",
-        "default": "./dist/adapters/kysely/index.js"
-      },
-      "require": {
-        "types": "./dist/adapters/kysely/index.d.cts",
-        "default": "./dist/adapters/kysely/index.cjs"
-      }
-    },
-    "./adapters/mongodb": {
-      "import": {
-        "types": "./dist/adapters/mongodb/index.d.ts",
-        "default": "./dist/adapters/mongodb/index.js"
-      },
-      "require": {
-        "types": "./dist/adapters/mongodb/index.d.cts",
-        "default": "./dist/adapters/mongodb/index.cjs"
-      }
-    },
-    "./adapters/prisma": {
-      "import": {
-        "types": "./dist/adapters/prisma/index.d.ts",
-        "default": "./dist/adapters/prisma/index.js"
-      },
-      "require": {
-        "types": "./dist/adapters/prisma/index.d.cts",
-        "default": "./dist/adapters/prisma/index.cjs"
-      }
-    },
-    "./adapters/memory": {
-      "import": {
-        "types": "./dist/adapters/memory/index.d.ts",
-        "default": "./dist/adapters/memory/index.js"
-      },
-      "require": {
-        "types": "./dist/adapters/memory/index.d.cts",
-        "default": "./dist/adapters/memory/index.cjs"
+        "types": "./dist/adapter/index.d.cts",
+        "default": "./dist/adapter/index.cjs"
       }
     }
   },
@@ -92,10 +52,13 @@
     "lint": "bunx biome check --write ./src",
     "typecheck": "tsc --noEmit",
     "test": "bun run prisma:push && vitest",
-    "prisma:push": "prisma db push --schema src/adapters/prisma/test/schema.prisma"
+    "prisma:push": "prisma db push --schema src/adapter/prisma/test/schema.prisma"
   },
   "dependencies": {
     "@agent-stack/api": "*",
+    "@agent-stack/agent": "*",
+    "@agent-stack/infra": "*",
+    "@agent-stack/integration": "*",
     "@agent-stack/client": "*",
     "@agent-stack/sandbox": "*",
     "@agent-stack/utils": "*"
@@ -116,6 +79,7 @@
     "pg": "catalog:",
     "prisma": "catalog:",
     "typescript": "catalog:",
+    "tsdown": "catalog:",
     "vitest": "catalog:"
   },
   "peerDependencies": {

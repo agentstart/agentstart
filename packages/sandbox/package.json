@@ -4,9 +4,14 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
   "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "lint": "bunx biome check --write ./src",
     "typecheck": "tsc --noEmit"
@@ -22,6 +27,7 @@
     "@agent-stack/biome-config": "*",
     "@agent-stack/tsconfig": "*",
     "@biomejs/biome": "catalog:",
+    "tsdown": "catalog:",
     "typescript": "catalog:"
   }
 }

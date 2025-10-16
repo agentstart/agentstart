@@ -1,4 +1,4 @@
-import type { Adapter, AgentStackOptions } from "agent-stack";
+import type { Adapter, AgentStackOptions } from "@agent-stack/agent";
 
 export type SchemaGenerator = (opts: {
   file?: string;

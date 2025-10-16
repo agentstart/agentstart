@@ -151,10 +151,10 @@ async function promptForPackage(packages: WorkspacePackage[]) {
   return selected;
 }
 
-async function promptForDependencyName() {
-  const dependency = await text({
-    message: "Enter the dependency name",
-    placeholder: "Example: react, @scope/pkg",
+async function promptForDependencyNames() {
+  const dependencyInput = await text({
+    message: "Enter the dependency name(s)",
+    placeholder: "Example: react, @scope/pkg or react @scope/pkg",
     validate: (value) => {
       if (!value || !value.trim()) {
         return "Dependency name cannot be empty";
@@ -163,12 +163,31 @@ async function promptForDependencyName() {
     },
   });
 
-  if (isCancel(dependency)) {
+  if (isCancel(dependencyInput)) {
     cancel("Dependency installation cancelled.");
     process.exit(0);
   }
 
-  return dependency.trim();
+  const dependencies = dependencyInput
+    .split(/[\s,]+/)
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+
+  if (dependencies.length === 0) {
+    log.error("No valid dependency names provided.");
+    process.exit(1);
+  }
+
+  const uniqueDependencies = Array.from(
+    new Set(dependencies.map((entry) => getDependencyName(entry))),
+  ).filter(Boolean);
+
+  if (uniqueDependencies.length === 0) {
+    log.error("Failed to derive dependency names from the provided input.");
+    process.exit(1);
+  }
+
+  return uniqueDependencies;
 }
 
 async function promptForDependencyGroup(): Promise<DependencyGroup> {
@@ -190,7 +209,7 @@ async function promptForDependencyGroup(): Promise<DependencyGroup> {
 
 async function updateWorkspacePackage(
   target: WorkspacePackage,
-  dependency: string,
+  dependencies: string[],
   group: DependencyGroup,
 ): Promise<boolean> {
   const rawPackageJson = await readFile(target.packageJsonPath, "utf8");
@@ -208,17 +227,32 @@ async function updateWorkspacePackage(
           value: packageJson.devDependencies ?? {},
         };
 
-  if (bucket.value[dependency] === "catalog:") {
+  const currentRecord = { ...bucket.value };
+  const addedDependencies: string[] = [];
+
+  for (const dependency of dependencies) {
+    if (currentRecord[dependency] === "catalog:") {
+      log.info(
+        `${target.name}: ${group} already includes ${dependency}@catalog:, skipping.`,
+      );
+      continue;
+    }
+
+    currentRecord[dependency] = "catalog:";
+    addedDependencies.push(dependency);
+    log.success(
+      `${target.name}: queued ${dependency}@catalog: for ${group}.`,
+    );
+  }
+
+  if (addedDependencies.length === 0) {
     log.info(
-      `${target.name}: ${group} already includes ${dependency}@catalog:, skipping.`,
+      `${target.name}: ${group} already contains all requested dependencies.`,
     );
     return false;
   }
 
-  const nextRecord = sortRecord({
-    ...bucket.value,
-    [dependency]: "catalog:",
-  });
+  const nextRecord = sortRecord(currentRecord);
 
   if (bucket.key === "dependencies") {
     packageJson.dependencies = nextRecord;
@@ -233,7 +267,9 @@ async function updateWorkspacePackage(
   }
 
   await writeFile(target.packageJsonPath, nextContent, "utf8");
-  log.success(`${target.name}: wrote ${dependency}@catalog: to ${group}.`);
+  log.success(
+    `${target.name}: wrote ${addedDependencies.join(", ")}@catalog: to ${group}.`,
+  );
   return true;
 }
 
@@ -308,32 +344,36 @@ async function main() {
     }
 
     const targetPackage = await promptForPackage(packages);
-    const dependencyName = await promptForDependencyName();
+    const dependencyNames = await promptForDependencyNames();
 
-    let latestVersion: string;
-    try {
-      latestVersion = await fetchLatestVersion(dependencyName);
-    } catch (error) {
-      log.error(
-        `Failed to resolve the latest version for ${dependencyName}. Please confirm the package name.`,
-      );
-      log.error(error instanceof Error ? error.message : String(error));
-      process.exit(1);
+    const resolvedVersions: Record<string, string> = {};
+
+    for (const dependencyName of dependencyNames) {
+      try {
+        const latestVersion = await fetchLatestVersion(dependencyName);
+        resolvedVersions[dependencyName] = latestVersion;
+        log.info(`Resolved ${dependencyName}@${latestVersion}`);
+      } catch (error) {
+        log.error(
+          `Failed to resolve the latest version for ${dependencyName}. Please confirm the package name.`,
+        );
+        log.error(error instanceof Error ? error.message : String(error));
+        process.exit(1);
+      }
     }
-
-    log.info(`Resolved ${dependencyName}@${latestVersion}`);
 
     const dependencyGroup = await promptForDependencyGroup();
 
     const packageUpdated = await updateWorkspacePackage(
       targetPackage,
-      dependencyName,
+      dependencyNames,
       dependencyGroup,
     );
 
-    const catalogUpdated = await updateCatalogEntries([dependencyName], {
-      [dependencyName]: latestVersion,
-    });
+    const catalogUpdated = await updateCatalogEntries(
+      dependencyNames,
+      resolvedVersions,
+    );
 
     if (packageUpdated || catalogUpdated) {
       await runBunInstall();

@@ -10,8 +10,8 @@ FEATURES:
 SEARCHABLE: drizzle schema, cli generator, database scaffolding
 agent-frontmatter:end */
 
+import { type FieldAttribute, getTables } from "@agent-stack/infra/db";
 import { convertToSnakeCase } from "@agent-stack/utils";
-import { type FieldAttribute, getTables } from "agent-stack/db";
 import fs from "fs-extra";
 import type { SchemaGenerator } from "./types";
 
@@ -125,7 +125,7 @@ export const generateDrizzleSchema: SchemaGenerator = async ({
 
   const tableBlocks: string[] = [];
 
-  for (const [, table] of Object.entries(tables)) {
+  for (const table of Object.values(tables)) {
     const modelName = usePlural ? `${table.modelName}s` : table.modelName;
     const fieldLines = Object.entries(table.fields)
       .map(([fieldKey, attr]) => {

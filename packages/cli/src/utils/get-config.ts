@@ -11,12 +11,12 @@ SEARCHABLE: cli config, config loader, agent resolver
 agent-frontmatter:end */
 
 import path from "node:path";
+import type { AgentStackOptions } from "@agent-stack/agent";
 import { logger } from "@agent-stack/utils";
 // @ts-expect-error
 import babelPresetReact from "@babel/preset-react";
 // @ts-expect-error
 import babelPresetTypescript from "@babel/preset-typescript";
-import type { AgentStackOptions } from "agent-stack";
 import { loadConfig } from "c12";
 import fs from "fs-extra";
 import { addSvelteKitEnvModules } from "./add-svelte-kit-env-modules";

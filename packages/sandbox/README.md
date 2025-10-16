@@ -5,7 +5,7 @@ Provides unified sandbox management for both E2B and Node.js environments with a
 ## Architecture Overview
 
 ```
-Agent Instance (per project/session)
+Agent Instance (per project/thread)
   └── SandboxManager (single instance)
        ├── FileSystem API
        ├── Bash API
@@ -42,7 +42,7 @@ class Agent {
   async initialize(config: AgentConfig) {
     // Create or reconnect to existing sandbox
     this.sandboxManager = await SandboxManager.connectOrCreate({
-      sandboxId: config.cachedSandboxId, // from previous session
+      sandboxId: config.cachedSandboxId, // from previous thread
       kv: createKV(),
       githubToken: config.githubToken,
       timeout: 300000, // 5 minutes
@@ -67,7 +67,7 @@ class Agent {
     await this.sandboxManager.dispose();
   }
 
-  // Provide sandboxId for next session
+  // Provide sandboxId for next thread
   getSandboxId(): string | null {
     return this.sandboxManager.getSandboxId();
   }
@@ -271,7 +271,7 @@ class Agent {
 
 1. **Initialize Once**: Create `SandboxManager` during Agent initialization
 2. **Inject Everywhere**: Pass the manager instance to all tools
-3. **Cache Sandbox ID**: Save `getSandboxId()` for next session to enable reconnection
+3. **Cache Sandbox ID**: Save `getSandboxId()` for next thread to enable reconnection
 4. **Dispose Properly**: Call `dispose()` when Agent is done
 5. **Let Auto-KeepAlive Work**: Don't manually call `keepAlive()` unless you have a specific reason
 
