@@ -1,4 +1,4 @@
-import type { Adapter, AgentStackOptions, Where } from "@agent-stack/agent";
+import type { Adapter, AgentStackOptions, Where } from "@agent-stack/types";
 import { AgentStackError, generateId } from "@agent-stack/utils";
 import {
   and,

@@ -9,7 +9,7 @@ FEATURES:
 SEARCHABLE: drizzle mysql test, thread message
 agent-frontmatter:end */
 
-import type { AgentStackOptions } from "@agent-stack/agent";
+import type { AgentStackOptions } from "@agent-stack/types";
 import { drizzle } from "drizzle-orm/mysql2";
 import { createPool, type Pool } from "mysql2/promise";
 import { afterAll, describe, expect, test } from "vitest";

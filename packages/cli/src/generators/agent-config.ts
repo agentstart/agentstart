@@ -268,7 +268,7 @@ export async function generateConfig({
           envs: [],
           imports: [
             {
-              path: "agent-stack/adapters/drizzle",
+              path: "agent-stack/adapter",
               variables: [
                 {
                   name: "drizzleAdapter",
@@ -300,7 +300,7 @@ export async function generateConfig({
           code_before_agentStack: "const client = new PrismaClient();",
           imports: [
             {
-              path: "agent-stack/adapters/prisma",
+              path: "agent-stack/adapter",
               variables: [
                 {
                   name: "prismaAdapter",
@@ -328,7 +328,7 @@ export async function generateConfig({
           ].join("\n"),
           imports: [
             {
-              path: "agent-stack/adapters/mongo",
+              path: "agent-stack/adapter",
               variables: [
                 {
                   name: "mongodbAdapter",

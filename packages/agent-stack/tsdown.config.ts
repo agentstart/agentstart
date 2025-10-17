@@ -8,7 +8,10 @@ export default defineConfig({
     "./src/db.ts",
     "./src/integration.ts",
   ],
-  unbundle: true,
   dts: true,
+  unbundle: true,
+  exports: {
+    devExports: true,
+  },
   format: ["cjs", "esm"],
 });

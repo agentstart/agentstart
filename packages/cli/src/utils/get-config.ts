@@ -11,7 +11,7 @@ SEARCHABLE: cli config, config loader, agent resolver
 agent-frontmatter:end */
 
 import path from "node:path";
-import type { AgentStackOptions } from "@agent-stack/agent";
+import type { AgentStackOptions } from "@agent-stack/types";
 import { logger } from "@agent-stack/utils";
 // @ts-expect-error
 import babelPresetReact from "@babel/preset-react";

@@ -1,4 +1,4 @@
-Use this tool to create and manage a structured task list for your current coding thread. This helps you track progress, organize complex tasks, and demonstrate thoroughness to the user.
+export default `Use this tool to create and manage a structured task list for your current coding thread. This helps you track progress, organize complex tasks, and demonstrate thoroughness to the user.
 It also helps the user understand the progress of the task and overall progress of their requests.
 
 ## When to Use This Tool
@@ -54,3 +54,4 @@ NOTE that you should not use this tool if there is only one trivial task to do. 
    - Use clear, descriptive task names
 
 When in doubt, use this tool. Being proactive with task management demonstrates attentiveness and ensures you complete all requirements successfully.
+`;

@@ -59,7 +59,7 @@ describe("getConfig", async () => {
     await fs.writeFile(
       path.join(agentPath, "agent.ts"),
       `import {defineAgentConfig} from "agent-stack";
-       import {prismaAdapter} from "agent-stack/adapters/prisma";      
+       import {prismaAdapter} from "agent-stack/adapter";      
        import {db} from "@server/db/db";
 
        export const agentStack = defineAgentConfig({
@@ -111,7 +111,7 @@ describe("getConfig", async () => {
     await fs.writeFile(
       path.join(agentPath, "agent.ts"),
       `import {defineAgentConfig} from "agent-stack";
-       import {prismaAdapter} from "agent-stack/adapters/prisma";      
+       import {prismaAdapter} from "agent-stack/adapter";      
        import {db} from "prismaDbClient";
 
        export const agentStack = defineAgentConfig({
@@ -163,7 +163,7 @@ describe("getConfig", async () => {
     await fs.writeFile(
       path.join(agentPath, "agent.ts"),
       `import {defineAgentConfig} from "agent-stack";
-       import {prismaAdapter} from "agent-stack/adapters/prisma";      
+       import {prismaAdapter} from "agent-stack/adapter";      
        import {db} from "@server/db/db";
 
        export const agentStack = defineAgentConfig({
@@ -215,7 +215,7 @@ describe("getConfig", async () => {
     await fs.writeFile(
       path.join(agentPath, "agent.ts"),
       `import {defineAgentConfig} from "agent-stack";
-       import {prismaAdapter} from "agent-stack/adapters/prisma";      
+       import {prismaAdapter} from "agent-stack/adapter";      
        import {db} from "prismaDbClient";
 
        export const agentStack = defineAgentConfig({
@@ -267,7 +267,7 @@ describe("getConfig", async () => {
     await fs.writeFile(
       path.join(agentPath, "agent.ts"),
       `import {defineAgentConfig} from "agent-stack";
-       import {prismaAdapter} from "agent-stack/adapters/prisma";      
+       import {prismaAdapter} from "agent-stack/adapter";      
        import {db} from "../db/db";
 
        export const agentStack = defineAgentConfig({
@@ -319,7 +319,7 @@ describe("getConfig", async () => {
     await fs.writeFile(
       path.join(agentPath, "agent.ts"),
       `import {defineAgentConfig} from "agent-stack";
-       import {prismaAdapter} from "agent-stack/adapters/prisma";      
+       import {prismaAdapter} from "agent-stack/adapter";      
        import {db} from "@server/db/db";
 
        export const agentStack = defineAgentConfig({

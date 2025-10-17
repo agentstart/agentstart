@@ -1,4 +1,4 @@
-Reads a file from the filesystem. You can access any file directly by using this tool.
+export default `Reads a file from the filesystem. You can access any file directly by using this tool.
 
 Assume this tool is able to read all files on the machine. If the User provides a path to a file assume that path is valid. It is okay to read a file that does not exist; an error will be returned.
 
@@ -13,3 +13,4 @@ Usage:
 - This tool can read PDF files (.pdf). PDFs are processed page by page, extracting both text and visual content for analysis.
 - You have the capability to call multiple tools in a single response. It is always better to speculatively read multiple files as a batch that are potentially useful.
 - If you read a file that exists but has empty contents you will receive a system reminder warning in place of file contents.
+`;

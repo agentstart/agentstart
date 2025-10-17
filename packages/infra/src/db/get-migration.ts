@@ -9,13 +9,12 @@ FEATURES:
 SEARCHABLE: migration helper, kysely migration, adapter schema diff
 agent-frontmatter:end */
 
-import type { AgentStackOptions } from "@agent-stack/agent";
+import type { AgentStackOptions, KyselyDatabaseType } from "@agent-stack/types";
 import type {
   AlterTableColumnAlteringBuilder,
   CreateTableBuilder,
 } from "kysely";
 import { createKyselyAdapter } from "../adapter/kysely/dialect";
-import type { KyselyDatabaseType } from "../adapter/kysely/types";
 import type { FieldAttribute, FieldType } from ".";
 import { getSchema } from "./get-schema";
 

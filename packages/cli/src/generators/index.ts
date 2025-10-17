@@ -1,4 +1,4 @@
-import type { Adapter, AgentStackOptions } from "@agent-stack/agent";
+import type { Adapter, AgentStackOptions } from "@agent-stack/types";
 import { logger } from "@agent-stack/utils";
 import { generateDrizzleSchema } from "./drizzle";
 import { generateMigrations } from "./kysely";

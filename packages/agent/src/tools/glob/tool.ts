@@ -7,7 +7,7 @@ import {
   toolOutputSchema,
 } from "../../messages";
 import { getRichError } from "../get-rich-error";
-import description from "./description.md";
+import description from "./description";
 
 // Constants
 const RESULT_LIMIT = 100; // Maximum number of results to return

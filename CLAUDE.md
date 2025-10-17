@@ -152,6 +152,7 @@ The `SEARCHABLE` field should contain comma-separated keywords that describe the
 5. **Always run `bun run lint` and `bun run typecheck` after completing changes** to ensure code quality and type safety before committing.
 6. Default test command: use `bun run test` instead of invoking `bun test` directly, so workspace scripts stay consistent with CI.
 7. Unit tests are optional overall, but add or update them when you touch stability-critical paths (adapters, persistence flows, core runtime hooks) so regressions surface early.
+8. Reference packages managed by the root `catalog` via their `catalog:` alias (use `catalog:` with no version suffix) instead of installing explicit versions, so dependency updates stay centralized.
 
 ## Code Style Guardrails
 

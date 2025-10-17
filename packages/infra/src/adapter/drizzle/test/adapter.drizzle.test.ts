@@ -9,7 +9,7 @@ FEATURES:
 SEARCHABLE: drizzle postgres test, thread message
 agent-frontmatter:end */
 
-import type { AgentStackOptions } from "@agent-stack/agent";
+import type { AgentStackOptions } from "@agent-stack/types";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Kysely, PostgresDialect, sql } from "kysely";
 import { Pool } from "pg";

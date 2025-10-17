@@ -9,7 +9,7 @@ FEATURES:
 SEARCHABLE: adapter schema, normalize tables, getSchema
 agent-frontmatter:end */
 
-import type { AgentStackOptions } from "@agent-stack/agent";
+import type { AgentStackOptions } from "@agent-stack/types";
 import { type FieldAttribute, getTables } from ".";
 
 export function getSchema(config: Omit<AgentStackOptions, "agent">): Record<

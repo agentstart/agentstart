@@ -7,7 +7,7 @@ import {
 } from "../../messages";
 import { commitChanges } from "../commit-changes";
 import { getRichError } from "../get-rich-error";
-import description from "./description.md";
+import description from "./description";
 import { replace } from "./replacers";
 
 export const update = tool({

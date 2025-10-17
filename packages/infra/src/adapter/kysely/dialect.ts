@@ -1,6 +1,6 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: is fine */
 
-import type { AgentStackOptions } from "@agent-stack/agent";
+import type { AgentStackOptions, KyselyDatabaseType } from "@agent-stack/types";
 import {
   type Dialect,
   Kysely,
@@ -12,7 +12,6 @@ import {
   type SqliteDatabase,
   SqliteDialect,
 } from "kysely";
-import type { KyselyDatabaseType } from "./types";
 
 function getDatabaseType(
   db: AgentStackOptions["memory"],

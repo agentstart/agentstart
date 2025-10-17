@@ -1,4 +1,4 @@
-import type { AgentStackOptions } from "@agent-stack/agent";
+import type { AgentStackOptions } from "@agent-stack/types";
 import { describe, expect, it } from "vitest";
 import { getTables } from "..";
 import { convertFromDB, convertToDB } from "../utils";

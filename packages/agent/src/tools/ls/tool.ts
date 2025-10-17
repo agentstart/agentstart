@@ -8,7 +8,7 @@ import {
   toolOutputSchema,
 } from "../../messages";
 import { getRichError } from "../get-rich-error";
-import description from "./description.md";
+import description from "./description";
 
 // Default ignore patterns for common build/cache directories
 export const DEFAULT_IGNORE_PATTERNS = [

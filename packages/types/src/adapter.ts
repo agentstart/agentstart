@@ -10,11 +10,11 @@ FEATURES:
 SEARCHABLE: adapter types, agent stack options, database models
 agent-frontmatter:end */
 
-import type { KyselyDatabaseType } from "@agent-stack/infra/adapter";
-import type { FieldAttribute } from "@agent-stack/infra/db";
 import type { Database } from "better-sqlite3";
 import type { Dialect, Kysely } from "kysely";
 import type { Agent } from "./agent";
+import type { FieldAttribute } from "./field";
+import type { KyselyDatabaseType } from "./kysely";
 
 export type Where = {
   operator?:

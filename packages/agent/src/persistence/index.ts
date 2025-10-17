@@ -11,9 +11,9 @@ SEARCHABLE: agent actions, memory helpers, thread persistence
 agent-frontmatter:end */
 
 import type { DBThread } from "@agent-stack/infra/db";
+import type { Adapter, Where as AdapterWhere } from "@agent-stack/types";
 import type { UIMessage } from "ai";
 import type { AgentStackUIMessage } from "../messages/index";
-import type { Adapter, Where as AdapterWhere } from "../types";
 
 export interface AdapterContextOptions {
   adapter: Adapter;

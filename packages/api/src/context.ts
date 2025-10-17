@@ -10,8 +10,8 @@ FEATURES:
 SEARCHABLE: agent context, rpc context, memory adapter
 agent-frontmatter:end */
 
-import type { AgentStackOptions } from "@agent-stack/agent";
 import { memoryAdapter } from "@agent-stack/infra/adapter";
+import type { AgentStackOptions } from "@agent-stack/types";
 
 export interface Context extends AgentStackOptions {
   headers: Headers;

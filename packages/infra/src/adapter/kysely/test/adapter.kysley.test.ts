@@ -10,7 +10,7 @@ SEARCHABLE: kysely adapter test, thread message
 agent-frontmatter:end */
 
 import path from "node:path";
-import type { AgentStackOptions } from "@agent-stack/agent";
+import type { AgentStackOptions } from "@agent-stack/types";
 import Database from "better-sqlite3";
 import fs from "fs-extra";
 import { Kysely, MysqlDialect, SqliteDialect } from "kysely";

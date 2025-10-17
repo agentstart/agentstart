@@ -10,6 +10,7 @@ FEATURES:
 SEARCHABLE: agent class, message streaming, persistence orchestration
 agent-frontmatter:end */
 
+import type { Adapter } from "@agent-stack/types";
 import { generateId } from "@agent-stack/utils";
 import {
   Experimental_Agent as AISDK_Agent,
@@ -35,7 +36,6 @@ import {
   updateThreadTitle,
   upsertMessage,
 } from "./persistence/index";
-import type { Adapter } from "./types";
 
 type InferUIMessageMetadata<T extends UIMessage> = T extends UIMessage<
   infer METADATA

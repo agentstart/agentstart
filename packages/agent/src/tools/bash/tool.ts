@@ -8,7 +8,7 @@ import {
 } from "../../messages/tool";
 import { commitChanges } from "../commit-changes";
 import { getRichError } from "../get-rich-error";
-import description from "./description.md";
+import description from "./description";
 
 // Constants
 const MAX_OUTPUT_LENGTH = 30000; // Maximum output length (30000 characters)

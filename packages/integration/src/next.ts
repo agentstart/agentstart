@@ -10,9 +10,9 @@ FEATURES:
 SEARCHABLE: next.js handler, agent integration, rpc handler
 agent-frontmatter:end */
 
-import type { AgentStackOptions } from "@agent-stack/agent";
 import type { CreateContextOptions } from "@agent-stack/api";
 import { appRouter, createContext } from "@agent-stack/api";
+import type { AgentStackOptions } from "@agent-stack/types";
 import { RPCHandler } from "@orpc/server/fetch";
 
 export function toNextJsHandler(options: AgentStackOptions) {

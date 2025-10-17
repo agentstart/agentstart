@@ -10,7 +10,7 @@ FEATURES:
 SEARCHABLE: adapter schema, table metadata, getTables, thread schema
 agent-frontmatter:end */
 
-import type { AgentStackOptions } from "@agent-stack/agent";
+import type { AgentStackOptions } from "@agent-stack/types";
 import type { FieldAttribute } from "./field";
 
 export type AdapterDbSchema = Record<

@@ -55,8 +55,6 @@ export class SandboxManager implements SandboxManagerAPI {
   private lastActivityTime: number = Date.now();
   private config: E2BSandboxConfig;
 
-  static listActiveSandboxes = Sandbox.list;
-
   /**
    * Private constructor - use static factory methods instead
    */

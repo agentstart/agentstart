@@ -7,7 +7,7 @@ import {
   toolOutputSchema,
 } from "../../messages";
 import { getRichError } from "../get-rich-error";
-import description from "./description.md";
+import description from "./description";
 
 const DEFAULT_READ_LIMIT = 2000;
 const MAX_LINE_LENGTH = 2000;

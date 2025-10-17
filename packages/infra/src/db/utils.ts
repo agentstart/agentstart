@@ -9,7 +9,7 @@ FEATURES:
 SEARCHABLE: adapter utils, getAdapter, field conversion
 agent-frontmatter:end */
 
-import type { Adapter, AgentStackOptions } from "@agent-stack/agent";
+import type { Adapter, AgentStackOptions } from "@agent-stack/types";
 import { AgentStackError } from "@agent-stack/utils";
 import { createKyselyAdapter } from "../adapter/kysely/dialect";
 import { kyselyAdapter } from "../adapter/kysely/index";

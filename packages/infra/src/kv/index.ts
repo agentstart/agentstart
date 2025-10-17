@@ -1,8 +1,8 @@
 import process from "node:process";
 import { logger } from "@agent-stack/utils";
-import { createClient } from "redis";
+import { createClient, type RedisClientType } from "redis";
 
-export function createKV() {
+export function createKV(): RedisClientType {
   const client = createClient({
     url: process.env.REDIS_URL || "redis://localhost:6379",
   });
@@ -15,7 +15,7 @@ export function createKV() {
     logger.info("KV Client disconnected due to process exit");
   });
 
-  return client;
+  return client as RedisClientType;
 }
 
-export type KV = ReturnType<typeof createKV>;
+export type KV = RedisClientType;

@@ -24,7 +24,6 @@ import { eventIteratorToStream } from "@orpc/client";
 import type { RouterClient } from "@orpc/server";
 import type { ChatTransport, UIDataTypes, UIMessageChunk } from "ai";
 import { useEffect, useRef } from "react";
-import { toast } from "sonner";
 import type { StoreApi, UseBoundStore } from "zustand";
 import { type AgentStoreWithSync, getAgentStore } from "./store/agent";
 
@@ -52,7 +51,6 @@ export function createUseThread(client: RouterClient<AppRouter>) {
       },
     } satisfies ChatTransport<AgentStackUIMessage>,
     onError: (error) => {
-      toast.error(`Communication error with the AI: ${error.message}`);
       console.error("Error sending message:", error);
     },
   });

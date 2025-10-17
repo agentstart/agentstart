@@ -1,4 +1,4 @@
-import type { Adapter, AgentStackOptions, Where } from "@agent-stack/agent";
+import type { Adapter, AgentStackOptions, Where } from "@agent-stack/types";
 import { generateId } from "@agent-stack/utils";
 import { getTables } from "../../db/index";
 import { withApplyDefault } from "../utils";

@@ -1,6 +1,6 @@
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { Agent, defineAgentConfig } from "agent-stack";
-import { drizzleAdapter } from "agent-stack/adapters/drizzle";
+import { drizzleAdapter } from "agent-stack/adapter";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 

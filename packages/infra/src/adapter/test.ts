@@ -9,7 +9,7 @@ FEATURES:
 SEARCHABLE: adapter test suite, thread message validation
 agent-frontmatter:end */
 
-import type { Adapter, AgentStackOptions } from "@agent-stack/agent";
+import type { Adapter, AgentStackOptions } from "@agent-stack/types";
 import { expect, test } from "vitest";
 import type { DBMessage, DBThread } from "../db/schema";
 

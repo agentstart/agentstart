@@ -1,6 +1,11 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: is fine */
 
-import type { Adapter, AgentStackOptions, Where } from "@agent-stack/agent";
+import type {
+  Adapter,
+  AgentStackOptions,
+  KyselyDatabaseType,
+  Where,
+} from "@agent-stack/types";
 import { generateId } from "@agent-stack/utils";
 import {
   type InsertQueryBuilder,
@@ -10,7 +15,6 @@ import {
 } from "kysely";
 import { getTables } from "../../db/index";
 import { withApplyDefault } from "../utils";
-import type { KyselyDatabaseType } from "./types";
 
 interface KyselyAdapterConfig {
   /**

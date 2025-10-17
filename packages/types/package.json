@@ -1,5 +1,5 @@
 {
-  "name": "@agent-stack/agent",
+  "name": "@agent-stack/types",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -15,15 +15,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@agent-stack/infra": "workspace:*",
-    "@agent-stack/integration": "workspace:*",
-    "@agent-stack/sandbox": "workspace:*",
-    "@agent-stack/types": "workspace:*",
-    "@agent-stack/utils": "workspace:*",
-    "ai": "catalog:",
     "nanoid": "catalog:",
-    "path-browserify-esm": "catalog:",
-    "zod": "catalog:"
+    "shiki": "catalog:",
+    "std-env": "catalog:"
   },
   "devDependencies": {
     "@agent-stack/biome-config": "workspace:*",
@@ -32,7 +26,8 @@
     "@types/better-sqlite3": "catalog:",
     "kysely": "catalog:",
     "tsdown": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",

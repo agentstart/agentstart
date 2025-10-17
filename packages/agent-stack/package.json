@@ -4,46 +4,11 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "require": {
-        "types": "./dist/index.d.cts",
-        "default": "./dist/index.cjs"
-      }
-    },
-    "./db": {
-      "import": {
-        "types": "./dist/db/index.d.ts",
-        "default": "./dist/db/index.js"
-      },
-      "require": {
-        "types": "./dist/db/index.d.cts",
-        "default": "./dist/db/index.cjs"
-      }
-    },
-    "./client": {
-      "import": {
-        "types": "./dist/client/index.d.ts",
-        "default": "./dist/client/index.js"
-      },
-      "require": {
-        "types": "./dist/client/index.d.cts",
-        "default": "./dist/client/index.cjs"
-      }
-    },
-    "./adapter": {
-      "import": {
-        "types": "./dist/adapter/index.d.ts",
-        "default": "./dist/adapter/index.js"
-      },
-      "require": {
-        "types": "./dist/adapter/index.d.cts",
-        "default": "./dist/adapter/index.cjs"
-      }
-    }
+    ".": "./src/index.ts",
+    "./adapter": "./src/adapter.ts",
+    "./client": "./src/client.ts",
+    "./db": "./src/db.ts",
+    "./package.json": "./package.json"
   },
   "scripts": {
     "build": "tsdown",
@@ -55,17 +20,18 @@
     "prisma:push": "prisma db push --schema src/adapter/prisma/test/schema.prisma"
   },
   "dependencies": {
-    "@agent-stack/api": "*",
-    "@agent-stack/agent": "*",
-    "@agent-stack/infra": "*",
-    "@agent-stack/integration": "*",
-    "@agent-stack/client": "*",
-    "@agent-stack/sandbox": "*",
-    "@agent-stack/utils": "*"
+    "@agent-stack/agent": "workspace:*",
+    "@agent-stack/api": "workspace:*",
+    "@agent-stack/client": "workspace:*",
+    "@agent-stack/infra": "workspace:*",
+    "@agent-stack/integration": "workspace:*",
+    "@agent-stack/sandbox": "workspace:*",
+    "@agent-stack/types": "workspace:*",
+    "@agent-stack/utils": "workspace:*"
   },
   "devDependencies": {
-    "@agent-stack/biome-config": "*",
-    "@agent-stack/tsconfig": "*",
+    "@agent-stack/biome-config": "workspace:*",
+    "@agent-stack/tsconfig": "workspace:*",
     "@biomejs/biome": "catalog:",
     "@prisma/client": "catalog:",
     "@types/better-sqlite3": "catalog:",
@@ -78,11 +44,35 @@
     "mysql2": "catalog:",
     "pg": "catalog:",
     "prisma": "catalog:",
-    "typescript": "catalog:",
     "tsdown": "catalog:",
+    "typescript": "catalog:",
     "vitest": "catalog:"
   },
   "peerDependencies": {
     "ai": "^5"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts",
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "require": "./dist/index.cjs"
+      },
+      "./adapter": {
+        "import": "./dist/adapter.js",
+        "require": "./dist/adapter.cjs"
+      },
+      "./client": {
+        "import": "./dist/client.js",
+        "require": "./dist/client.cjs"
+      },
+      "./db": {
+        "import": "./dist/db.js",
+        "require": "./dist/db.cjs"
+      },
+      "./package.json": "./package.json"
+    }
   }
 }

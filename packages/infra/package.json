@@ -4,18 +4,10 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./adapter": {
-      "types": "./dist/adapter/index.d.ts",
-      "default": "./dist/adapter/index.js"
-    },
-    "./db": {
-      "types": "./dist/db/index.d.ts",
-      "default": "./dist/db/index.js"
-    },
-    "./kv": {
-      "types": "./dist/kv/index.d.ts",
-      "default": "./dist/kv/index.js"
-    }
+    "./adapter": "./src/adapter/index.ts",
+    "./db": "./src/db/index.ts",
+    "./kv": "./src/kv/index.ts",
+    "./package.json": "./package.json"
   },
   "scripts": {
     "build": "tsdown",
@@ -25,14 +17,36 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@agent-stack/types": "workspace:*",
     "@agent-stack/utils": "workspace:*",
-    "redis": "catalog:"
+    "better-sqlite3": "catalog:",
+    "drizzle-orm": "catalog:",
+    "fs-extra": "catalog:",
+    "kysely": "catalog:",
+    "mongodb": "catalog:",
+    "mysql2": "catalog:",
+    "pg": "catalog:",
+    "redis": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "@agent-stack/biome-config": "*",
-    "@agent-stack/tsconfig": "*",
+    "@agent-stack/biome-config": "workspace:*",
+    "@agent-stack/tsconfig": "workspace:*",
     "@biomejs/biome": "catalog:",
+    "@prisma/client": "catalog:",
+    "@types/better-sqlite3": "catalog:",
+    "@types/fs-extra": "catalog:",
+    "@types/pg": "catalog:",
     "tsdown": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "publishConfig": {
+    "exports": {
+      "./adapter": "./dist/adapter/index.js",
+      "./db": "./dist/db/index.js",
+      "./kv": "./dist/kv/index.js",
+      "./package.json": "./package.json"
+    }
   }
 }

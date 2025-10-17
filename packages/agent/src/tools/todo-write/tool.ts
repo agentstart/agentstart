@@ -5,7 +5,7 @@ import {
   toolInputSchema,
   toolOutputSchema,
 } from "../../messages";
-import description from "./description.md";
+import description from "./description";
 
 export const todoWrite = tool({
   description,
