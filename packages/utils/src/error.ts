@@ -1,4 +1,4 @@
-export class AgentStackError extends Error {
+export class AgentStartError extends Error {
   constructor(
     public code: string,
     message: string,
@@ -7,6 +7,6 @@ export class AgentStackError extends Error {
     public statusCode = 500,
   ) {
     super(message);
-    this.name = "AgentStackError";
+    this.name = "AgentStartError";
   }
 }

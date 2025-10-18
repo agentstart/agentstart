@@ -1,4 +1,4 @@
-import { getMigrations } from "agent-stack/db";
+import { getMigrations } from "agentstart/db";
 import type { SchemaGenerator } from "./types";
 
 export const generateMigrations: SchemaGenerator = async ({
@@ -11,7 +11,7 @@ export const generateMigrations: SchemaGenerator = async ({
     code: migrations,
     fileName:
       file ||
-      `./@agent-stack/core_migrations/${new Date()
+      `./@agentstart/core_migrations/${new Date()
         .toISOString()
         .replace(/:/g, "-")}.sql`,
   };

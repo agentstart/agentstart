@@ -3,7 +3,7 @@
   "extends": ["config:base"],
   "packageRules": [
     {
-      "matchPackagePatterns": ["^@agent-stack/"],
+      "matchPackagePatterns": ["^@agentstart/"],
       "enabled": false
     }
   ],

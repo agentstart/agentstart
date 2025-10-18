@@ -1,5 +1,5 @@
-import { formatDate, formatSize } from "@agent-stack/utils";
-import type { Tools } from "agent-stack/agent";
+import { formatDate, formatSize } from "@agentstart/utils";
+import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
 import { FileIcon, FolderIcon, LinkIcon } from "lucide-react";
 import {

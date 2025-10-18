@@ -1,6 +1,6 @@
 /* agent-frontmatter:start
-AGENT: Agent Stack CLI prisma generator
-PURPOSE: Update Prisma schema files using Agent Stack metadata
+AGENT: Agent Start CLI prisma generator
+PURPOSE: Update Prisma schema files using Agent Start metadata
 USAGE: await generatePrismaSchema({ adapter, options, file })
 EXPORTS: generatePrismaSchema
 FEATURES:
@@ -11,9 +11,9 @@ SEARCHABLE: prisma schema, cli generator, database scaffolding
 agent-frontmatter:end */
 
 import path from "node:path";
-import { capitalizeFirstLetter } from "@agent-stack/utils";
+import { capitalizeFirstLetter } from "@agentstart/utils";
 import { produceSchema } from "@mrleebo/prisma-ast";
-import { type FieldType, getTables } from "agent-stack/db";
+import { type FieldType, getTables } from "agentstart/db";
 import fs from "fs-extra";
 import type { SchemaGenerator } from "./types";
 

@@ -1,5 +1,5 @@
 /* agent-frontmatter:start
-AGENT: Agent Stack CLI migrate command
+AGENT: Agent Start CLI migrate command
 PURPOSE: Apply pending database migrations using the configured adapter
 USAGE: await migrateAction(commandOptions)
 EXPORTS: migrateAction, migrate
@@ -7,12 +7,12 @@ FEATURES:
   - Validates project configuration before running migrations
   - Streams migration progress with spinner feedback
   - Supports non-interactive mode via confirmation flag
-SEARCHABLE: cli migrate, database migrations, agent stack
+SEARCHABLE: cli migrate, database migrations, agent start
 agent-frontmatter:end */
 
 import path from "node:path";
-import { logger } from "@agent-stack/utils";
-import { getAdapter, getMigrations } from "agent-stack/db";
+import { logger } from "@agentstart/utils";
+import { getAdapter, getMigrations } from "agentstart/db";
 import chalk from "chalk";
 import { Command } from "commander";
 import fs from "fs-extra";
@@ -57,13 +57,13 @@ export async function migrateAction(opts: z.infer<typeof migrateActionSchema>) {
   if (db.id !== "kysely") {
     if (db.id === "prisma") {
       logger.error(
-        "The migrate command only works with the built-in Kysely adapter. For Prisma, run `npx @agent-stack/cli generate` to create the schema, then use Prisma’s migrate or push to apply it.",
+        "The migrate command only works with the built-in Kysely adapter. For Prisma, run `npx @agentstart/cli generate` to create the schema, then use Prisma’s migrate or push to apply it.",
       );
       process.exit(0);
     }
     if (db.id === "drizzle") {
       logger.error(
-        "The migrate command only works with the built-in Kysely adapter. For Drizzle, run `npx @agent-stack/cli generate` to create the schema, then use Drizzle’s migrate or push to apply it.",
+        "The migrate command only works with the built-in Kysely adapter. For Drizzle, run `npx @agentstart/cli generate` to create the schema, then use Drizzle’s migrate or push to apply it.",
       );
       process.exit(0);
     }

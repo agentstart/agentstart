@@ -1,5 +1,5 @@
 {
-  "name": "@agent-stack/root",
+  "name": "@agentstart/root",
   "private": true,
   "scripts": {
     "up": "bun run scripts/update-deps.ts",
@@ -15,8 +15,8 @@
     "docker:up": "docker compose up -d"
   },
   "devDependencies": {
-    "@agent-stack/tsconfig": "workspace:*",
-    "@agent-stack/biome-config": "workspace:*",
+    "@agentstart/tsconfig": "workspace:*",
+    "@agentstart/biome-config": "workspace:*",
     "@biomejs/biome": "catalog:",
     "@clack/prompts": "catalog:",
     "execa": "catalog:",

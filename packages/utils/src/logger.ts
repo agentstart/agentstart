@@ -68,7 +68,7 @@ const formatMessage = (level: LogLevel, message: string): string => {
   const timestamp = new Date().toISOString();
   return `${colors.dim}${timestamp}${colors.reset} ${
     levelColors[level]
-  }${level.toUpperCase()}${colors.reset} ${colors.bright}[Agent Stack]:${
+  }${level.toUpperCase()}${colors.reset} ${colors.bright}[Agent Start]:${
     colors.reset
   } ${message}`;
 };

@@ -3,12 +3,12 @@ AGENT: Root TypeScript configuration
 PURPOSE: Base TypeScript config for monorepo root
 USAGE: Extended by packages and apps
 FEATURES:
-  - Path aliases for @agent-stack/* packages
+  - Path aliases for @agentstart/* packages
 SEARCHABLE: typescript config, tsconfig, type configuration
 agent-frontmatter:end */
 
 {
-  "extends": "@agent-stack/tsconfig/internal-package.json",
+  "extends": "@agentstart/tsconfig/internal-package.json",
   "compilerOptions": {
     "module": "esnext",
     "forceConsistentCasingInFileNames": true,

@@ -1,4 +1,4 @@
-# Agent Stack – Agent Framework Overview
+# Agent Start – Agent Framework Overview
 
 ## Mission
 
@@ -6,10 +6,10 @@ Deliver a batteries-included framework that lets developers assemble production-
 
 ## Quick Setup Workflow
 
-1. Install the core package: `npm install agent-stack` (or `pnpm add agent-stack`).
+1. Install the core package: `npm install agentstart` (or `pnpm add agentstart`).
 2. Provide runtime credentials: define `E2B_API_KEY` and `MODEL_PROVIDER_API_KEY` in your environment.
-3. Author `agent-stack.config.ts` to select adapters, tools, memory stores, and templates.
-4. Generate backing tables: `npx agent-stack/cli generate`.
+3. Author `agentstart.config.ts` to select adapters, tools, memory stores, and templates.
+4. Generate backing tables: `npx agentstart/cli generate`.
 5. Mount the handler inside your API surface (e.g. Next.js route, Express handler, or serverless function).
 
 ## System Architecture
@@ -51,7 +51,7 @@ The agent class orchestrates prompts, tool execution, and memory updates. Tools 
 - **Inner tools**: built-in capabilities (`run_code`, `sandbox_browser`, `search_sources`, `shell_exec`).
 - **Document tools**: ingest external files, create embeddings, and expose retrieval actions.
 - Tools share a base interface: `name`, `description`, `schema`, and `handler`.
-- Registration occurs inside `agent-stack.config.ts`. Use `const tools = [...innerTools, ...documentTools];`
+- Registration occurs inside `agentstart.config.ts`. Use `const tools = [...innerTools, ...documentTools];`
 
 ### Memory
 
@@ -78,7 +78,7 @@ The agent class orchestrates prompts, tool execution, and memory updates. Tools 
   - `express` – Node.js REST integration
 - Each template wires prompts, memory, and tools according to best practices.
 
-## Configuration (`agent-stack.config.ts`)
+## Configuration (`agentstart.config.ts`)
 
 - Export a default config object that declares:
   - `prompts`: mission + summary definitions.
@@ -89,10 +89,10 @@ The agent class orchestrates prompts, tool execution, and memory updates. Tools 
 - Example skeleton:
 
 ```ts
-import { innerTools, documentTools } from "agent-stack/tools";
-import { postgresMemory } from "agent-stack/memory/postgres";
+import { innerTools, documentTools } from "agentstart/tools";
+import { postgresMemory } from "agentstart/memory/postgres";
 
-export default agentStackConfig({
+export default agentStartConfig({
   prompts: {
     mission: "./prompts/mission.md",
     summary: "./prompts/summary.md",
@@ -146,7 +146,7 @@ The `SEARCHABLE` field should contain comma-separated keywords that describe the
 ## Development Workflow
 
 1. Update prompts or tool definitions.
-2. Run `npx agent-stack/cli generate` after schema changes to keep memory tables aligned.
+2. Run `npx agentstart/cli generate` after schema changes to keep memory tables aligned.
 3. Use the template-specific dev server (`npm run dev:express`, `npm run dev:next`) to test interactions.
 4. Verify memory adapters with integration tests (see `/tooling/testing`).
 5. **Always run `bun run lint` and `bun run typecheck` after completing changes** to ensure code quality and type safety before committing.

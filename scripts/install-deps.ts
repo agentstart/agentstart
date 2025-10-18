@@ -335,7 +335,7 @@ async function runBunInstall() {
 
 async function main() {
   try {
-    intro("Agent Stack dependency installation");
+    intro("Agent Start dependency installation");
 
     const packages = await getWorkspacePackages();
     if (packages.length === 0) {

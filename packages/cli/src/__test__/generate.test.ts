@@ -1,5 +1,5 @@
-import type { AgentStackOptions } from "agent-stack";
-import { drizzleAdapter, prismaAdapter } from "agent-stack/db";
+import type { AgentStartOptions } from "agentstart";
+import { drizzleAdapter, prismaAdapter } from "agentstart/db";
 import Database from "better-sqlite3";
 import { describe, expect, it } from "vitest";
 import { generateDrizzleSchema } from "../generators/drizzle";
@@ -15,7 +15,7 @@ describe("generate", async () => {
         {
           provider: "postgresql",
         },
-      )({} as AgentStackOptions),
+      )({} as AgentStartOptions),
       options: {
         memory: prismaAdapter(
           {},
@@ -36,7 +36,7 @@ describe("generate", async () => {
         {
           provider: "mongodb",
         },
-      )({} as AgentStackOptions),
+      )({} as AgentStartOptions),
       options: {
         memory: prismaAdapter(
           {},
@@ -57,7 +57,7 @@ describe("generate", async () => {
         {
           provider: "mysql",
         },
-      )({} as AgentStackOptions),
+      )({} as AgentStartOptions),
       options: {
         memory: prismaAdapter(
           {},
@@ -79,7 +79,7 @@ describe("generate", async () => {
           provider: "pg",
           schema: {},
         },
-      )({} as AgentStackOptions),
+      )({} as AgentStartOptions),
       options: {
         memory: drizzleAdapter(
           {},

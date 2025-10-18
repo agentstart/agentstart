@@ -1,4 +1,4 @@
-import { toNextJsHandler } from "agent-stack";
-import { agentStack } from "@/lib/agent"; // path to your auth file
+import { toNextJsHandler } from "agentstart";
+import { agentStart } from "@/lib/agent"; // path to your auth file
 
-export const { POST, GET } = toNextJsHandler(agentStack);
+export const { POST, GET } = toNextJsHandler(agentStart);

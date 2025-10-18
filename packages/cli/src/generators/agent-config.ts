@@ -1,6 +1,6 @@
 /* agent-frontmatter:start
-AGENT: Agent Stack CLI generator
-PURPOSE: Compose Agent Stack configuration files with optional database wiring
+AGENT: Agent Start CLI generator
+PURPOSE: Compose Agent Start configuration files with optional database wiring
 USAGE: await generateConfig({ current_user_config, format, spinner, database })
 EXPORTS: generateConfig, Import
 FEATURES:
@@ -10,7 +10,7 @@ FEATURES:
 SEARCHABLE: cli generator, agent config, database generator
 agent-frontmatter:end */
 
-import { logger } from "@agent-stack/utils";
+import { logger } from "@agentstart/utils";
 import type { spinner as clackSpinner } from "@clack/prompts";
 import type { SupportedDatabases } from "../commands/init";
 
@@ -31,7 +31,7 @@ type CommonIndexConfig = {
   }) => number | null;
 };
 
-const START_OF_AGENT_STACK: CommonIndexConfig = {
+const START_OF_AGENT_START: CommonIndexConfig = {
   regex: /defineAgentConfig\({()/m,
   getIndex: ({ matchIndex }) => matchIndex + "defineAgentConfig({".length,
 };
@@ -111,29 +111,29 @@ export async function generateConfig({
         dependencies,
         envs,
         imports,
-        code_before_agentStack,
+        code_before_agentStart,
       }: {
         imports: Import[];
         db_code: string;
         envs: string[];
         dependencies: string[];
-        code_before_agentStack?: string;
+        code_before_agentStart?: string;
       }) => {
-        if (code_before_agentStack) {
-          const startOfAgentStack = getGroupInfo(
+        if (code_before_agentStart) {
+          const startOfAgentStart = getGroupInfo(
             opts.config,
-            START_OF_AGENT_STACK,
+            START_OF_AGENT_START,
           );
-          if (!startOfAgentStack) {
+          if (!startOfAgentStart) {
             throw new Error(
-              "[addDb] Couldn't find start of agentStack() function.",
+              "[addDb] Couldn't find start of agentStart() function.",
             );
           }
           opts.config = insertContent({
-            line: startOfAgentStack.line - 1,
+            line: startOfAgentStart.line - 1,
             character: 0,
             content: opts.config,
-            insert_content: `\n${code_before_agentStack}\n`,
+            insert_content: `\n${code_before_agentStart}\n`,
           });
         }
 
@@ -225,7 +225,7 @@ export async function generateConfig({
             },
           })`;
         await addDb({
-          code_before_agentStack: dialectCode,
+          code_before_agentStart: dialectCode,
           db_code: `dialect`,
           dependencies: ["tedious", "tarn", "kysely"],
           envs: ["DATABASE_URL"],
@@ -268,7 +268,7 @@ export async function generateConfig({
           envs: [],
           imports: [
             {
-              path: "agent-stack/adapter",
+              path: "agentstart/db",
               variables: [
                 {
                   name: "drizzleAdapter",
@@ -297,10 +297,10 @@ export async function generateConfig({
           )}",\n})`,
           dependencies: [`@prisma/client`],
           envs: [],
-          code_before_agentStack: "const client = new PrismaClient();",
+          code_before_agentStart: "const client = new PrismaClient();",
           imports: [
             {
-              path: "agent-stack/adapter",
+              path: "agentstart/db",
               variables: [
                 {
                   name: "prismaAdapter",
@@ -322,13 +322,13 @@ export async function generateConfig({
           db_code: `mongodbAdapter(db)`,
           dependencies: ["mongodb"],
           envs: [`DATABASE_URL`],
-          code_before_agentStack: [
+          code_before_agentStart: [
             `const client = new MongoClient(process.env.DATABASE_URL || "mongodb://localhost:27017/database");`,
             `const db = client.db();`,
           ].join("\n"),
           imports: [
             {
-              path: "agent-stack/adapter",
+              path: "agentstart/db",
               variables: [
                 {
                   name: "mongodbAdapter",
@@ -347,15 +347,15 @@ export async function generateConfig({
         });
       }
 
-      const startOfAgentStack = getGroupInfo(opts.config, START_OF_AGENT_STACK);
-      if (!startOfAgentStack) {
+      const startOfAgentStart = getGroupInfo(opts.config, START_OF_AGENT_START);
+      if (!startOfAgentStart) {
         throw new Error(
-          "[addDatabase] Couldn't find start of agentStack() function.",
+          "[addDatabase] Couldn't find start of agentStart() function.",
         );
       }
       const newContent = insertContent({
-        line: startOfAgentStack.line,
-        character: startOfAgentStack.character,
+        line: startOfAgentStart.line,
+        character: startOfAgentStart.character,
         content: opts.config,
         insert_content: `memory: ${databaseCode},`,
       });

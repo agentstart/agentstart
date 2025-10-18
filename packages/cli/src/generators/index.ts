@@ -1,5 +1,5 @@
-import { logger } from "@agent-stack/utils";
-import type { Adapter, AgentStackOptions } from "agent-stack";
+import { logger } from "@agentstart/utils";
+import type { Adapter, AgentStartOptions } from "agentstart";
 import { generateDrizzleSchema } from "./drizzle";
 import { generateMigrations } from "./kysely";
 import { generatePrismaSchema } from "./prisma";
@@ -13,7 +13,7 @@ export const adapters = {
 export const getGenerator = (opts: {
   adapter: Adapter;
   file?: string;
-  options: AgentStackOptions;
+  options: AgentStartOptions;
 }) => {
   const adapter = opts.adapter;
   const generator =

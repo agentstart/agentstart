@@ -1,17 +1,17 @@
 /* agent-frontmatter:start
-AGENT: Agent Stack CLI drizzle generator
-PURPOSE: Produce Drizzle ORM schema files from Agent Stack metadata
+AGENT: Agent Start CLI drizzle generator
+PURPOSE: Produce Drizzle ORM schema files from Agent Start metadata
 USAGE: await generateDrizzleSchema({ adapter, options, file })
 EXPORTS: generateDrizzleSchema
 FEATURES:
-  - Maps Agent Stack models into drizzle table definitions
+  - Maps Agent Start models into drizzle table definitions
   - Respects adapter options like provider and pluralization
   - Generates or updates agent schema files on demand
 SEARCHABLE: drizzle schema, cli generator, database scaffolding
 agent-frontmatter:end */
 
-import { convertToSnakeCase } from "@agent-stack/utils";
-import { type FieldAttribute, getTables } from "agent-stack/db";
+import { convertToSnakeCase } from "@agentstart/utils";
+import { type FieldAttribute, getTables } from "agentstart/db";
 import fs from "fs-extra";
 import type { SchemaGenerator } from "./types";
 
@@ -43,7 +43,7 @@ export const generateDrizzleSchema: SchemaGenerator = async ({
 
   const fileExist = fs.existsSync(filePath);
 
-  // Map Agent Stack field metadata to drizzle column builders.
+  // Map Agent Start field metadata to drizzle column builders.
   const resolveField = (fieldName: string, field: FieldAttribute): string => {
     const dbName = convertToSnakeCase(fieldName);
     switch (field.type) {

@@ -1,4 +1,4 @@
-import { defineAgentConfig } from "agent-stack/agent";
+import { defineAgentConfig } from "agentstart/agent";
 import Database from "better-sqlite3";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { migrateAction } from "../commands/migrate";
@@ -7,7 +7,7 @@ import * as config from "../utils/get-config";
 describe("migrate base agent instance", () => {
   const db = new Database(":memory:");
 
-  const agentStack = defineAgentConfig({
+  const agentStart = defineAgentConfig({
     memory: db,
     // biome-ignore lint/suspicious/noExplicitAny: is fine
     agent: {} as any,
@@ -17,7 +17,7 @@ describe("migrate base agent instance", () => {
     vi.spyOn(process, "exit").mockImplementation((code) => {
       return code as never;
     });
-    vi.spyOn(config, "getConfig").mockImplementation(async () => agentStack);
+    vi.spyOn(config, "getConfig").mockImplementation(async () => agentStart);
   });
 
   afterEach(async () => {

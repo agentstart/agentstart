@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
 /* agent-frontmatter:start
-AGENT: Agent Stack CLI entrypoint
-PURPOSE: Register CLI subcommands and expose the agent-stack executable
-USAGE: invoked via `agent-stack` after package installation
+AGENT: Agent Start CLI entrypoint
+PURPOSE: Register CLI subcommands and expose the agentstart executable
+USAGE: invoked via `agentstart` after package installation
 EXPORTS: main
 FEATURES:
   - Loads package metadata for version reporting
   - Registers generate/migrate/init commands
   - Ensures graceful shutdown on termination signals
-SEARCHABLE: cli entrypoint, commander setup, agent-stack binary
+SEARCHABLE: cli entrypoint, commander setup, agentstart binary
 agent-frontmatter:end */
 
 import chalk from "chalk";
@@ -28,7 +28,7 @@ process.on("SIGTERM", () => process.exit(0));
 async function main() {
   console.log(
     chalk.cyan(
-      figlet.textSync("AgentStack", {
+      figlet.textSync("AgentStart", {
         font: "Standard",
         horizontalLayout: "default",
         verticalLayout: "default",
@@ -36,7 +36,7 @@ async function main() {
     ),
   );
 
-  const program = new Command("agent-stack");
+  const program = new Command("agentstart");
   let packageInfo: Record<string, string> = {};
   try {
     packageInfo = await getPackageInfo();
@@ -48,7 +48,7 @@ async function main() {
     .addCommand(generate)
     .addCommand(init)
     .version(packageInfo.version || "1.1.2")
-    .description("Agent Stack CLI");
+    .description("Agent Start CLI");
   program.parse();
 }
 

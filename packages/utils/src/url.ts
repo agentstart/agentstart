@@ -11,8 +11,8 @@ agent-frontmatter:end */
 
 // https://github.com/better-auth/better-auth/blob/canary/packages/better-auth/src/utils/url.ts
 
-import { AgentStackError } from "@agent-stack/utils";
 import { env } from "std-env";
+import { AgentStartError } from "./error";
 
 function checkHasPath(url: string): boolean {
   try {
@@ -20,7 +20,7 @@ function checkHasPath(url: string): boolean {
     const pathname = parsedUrl.pathname.replace(/\/+$/, "") || "/";
     return pathname !== "/";
   } catch {
-    throw new AgentStackError(
+    throw new AgentStartError(
       "INVALID_BASE_URL",
       `Invalid base URL: ${url}. Please provide a valid base URL.`,
     );
@@ -55,7 +55,6 @@ export function getBaseURL(
 
   if (loadEnv !== false) {
     const fromEnv =
-      env.AGENT_STACK_URL ||
       env.NEXT_PUBLIC_BETTER_AUTH_URL ||
       env.PUBLIC_BETTER_AUTH_URL ||
       env.NUXT_PUBLIC_BETTER_AUTH_URL ||
@@ -76,7 +75,7 @@ export function getBaseURL(
   if (request) {
     const url = getOrigin(request.url);
     if (!url) {
-      throw new AgentStackError(
+      throw new AgentStartError(
         "INVALID_BASE_URL",
         "Could not get origin from request. Please provide a valid base URL.",
       );

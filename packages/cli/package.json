@@ -1,11 +1,11 @@
 {
-  "name": "@agent-stack/cli",
+  "name": "@agentstart/cli",
   "version": "0.1.0",
-  "description": "The CLI for Agent Stack",
+  "description": "The CLI for Agent Start",
   "module": "./dist/index.mjs",
   "repository": {
     "type": "git",
-    "url": "https://github.com/xinyao27/agent-stack",
+    "url": "https://github.com/xinyao27/agentstart",
     "directory": "packages/cli"
   },
   "main": "./dist/index.mjs",
@@ -33,8 +33,8 @@
   },
   "bin": "./dist/index.mjs",
   "devDependencies": {
-    "@agent-stack/biome-config": "workspace:*",
-    "@agent-stack/tsconfig": "workspace:*",
+    "@agentstart/biome-config": "workspace:*",
+    "@agentstart/tsconfig": "workspace:*",
     "@types/fs-extra": "catalog:",
     "@types/semver": "catalog:",
     "diff": "catalog:",
@@ -43,7 +43,7 @@
     "vitest": "catalog:"
   },
   "dependencies": {
-    "@agent-stack/utils": "workspace:*",
+    "@agentstart/utils": "workspace:*",
     "@babel/preset-react": "catalog:",
     "@babel/preset-typescript": "catalog:",
     "@clack/prompts": "catalog:",
@@ -51,7 +51,7 @@
     "@prisma/client": "catalog:",
     "@types/better-sqlite3": "catalog:",
     "@types/prompts": "catalog:",
-    "agent-stack": "workspace:*",
+    "agentstart": "workspace:*",
     "better-sqlite3": "catalog:",
     "c12": "catalog:",
     "chalk": "catalog:",

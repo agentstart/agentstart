@@ -1,5 +1,5 @@
 {
-  "name": "@agent-stack/utils",
+  "name": "@agentstart/utils",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -20,8 +20,8 @@
     "std-env": "catalog:"
   },
   "devDependencies": {
-    "@agent-stack/biome-config": "workspace:*",
-    "@agent-stack/tsconfig": "workspace:*",
+    "@agentstart/biome-config": "workspace:*",
+    "@agentstart/tsconfig": "workspace:*",
     "@biomejs/biome": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:",

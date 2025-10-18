@@ -15,4 +15,4 @@ export const db = drizzle({ client: sql });
 //   throw new Error("Missing DATABASE_URL");
 // }
 // const mongo = new MongoClient(process.env.DATABASE_URL!);
-// export const db = mongo.db("agent-stack");
+// export const db = mongo.db("agentstart");

@@ -1,5 +1,5 @@
 /* agent-frontmatter:start
-AGENT: Agent Stack CLI config loader
+AGENT: Agent Start CLI config loader
 PURPOSE: Resolve agent configuration files and normalize runtime options
 USAGE: await getConfig({ cwd, configPath })
 EXPORTS: getConfig
@@ -11,12 +11,12 @@ SEARCHABLE: cli config, config loader, agent resolver
 agent-frontmatter:end */
 
 import path from "node:path";
-import { logger } from "@agent-stack/utils";
+import { logger } from "@agentstart/utils";
 // @ts-expect-error
 import babelPresetReact from "@babel/preset-react";
 // @ts-expect-error
 import babelPresetTypescript from "@babel/preset-typescript";
-import type { AgentStackOptions } from "agent-stack";
+import type { AgentStartOptions } from "agentstart";
 import { loadConfig } from "c12";
 import fs from "fs-extra";
 import { addSvelteKitEnvModules } from "./add-svelte-kit-env-modules";
@@ -107,55 +107,55 @@ export async function getConfig({
   shouldThrowOnError?: boolean;
 }) {
   try {
-    let configFile: AgentStackOptions | null = null;
+    let configFile: AgentStartOptions | null = null;
     if (configPath) {
       let resolvedPath: string = path.join(cwd, configPath);
       if (fs.existsSync(configPath)) resolvedPath = configPath; // If the configPath is a file, use it as is, as it means the path wasn't relative.
       const { config } = await loadConfig<{
-        agentStack?: AgentStackOptions;
-        default?: AgentStackOptions;
+        agentStart?: AgentStartOptions;
+        default?: AgentStartOptions;
       }>({
         configFile: resolvedPath,
         dotenv: true,
         jitiOptions: jitiOptions(cwd),
       });
-      if (!config.agentStack && !config.default) {
+      if (!config.agentStart && !config.default) {
         if (shouldThrowOnError) {
           throw new Error(
             `Couldn't read your agent config in ${resolvedPath}. Make sure to default export your agent instance or to export as a variable named agent.`,
           );
         }
         logger.error(
-          `[#agent-stack]: Couldn't read your agent config in ${resolvedPath}. Make sure to default export your agent instance or to export as a variable named agent.`,
+          `[#agentstart]: Couldn't read your agent config in ${resolvedPath}. Make sure to default export your agent instance or to export as a variable named agent.`,
         );
         process.exit(1);
       }
-      configFile = config.agentStack || config.default || null;
+      configFile = config.agentStart || config.default || null;
     }
 
     if (!configFile) {
       for (const possiblePath of possiblePaths) {
         try {
           const { config } = await loadConfig<{
-            agentStack?: AgentStackOptions;
-            default?: AgentStackOptions;
+            agentStart?: AgentStartOptions;
+            default?: AgentStartOptions;
           }>({
             configFile: possiblePath,
             jitiOptions: jitiOptions(cwd),
           });
           const hasConfig = Object.keys(config).length > 0;
           if (hasConfig) {
-            configFile = config.agentStack || config.default || null;
+            configFile = config.agentStart || config.default || null;
             if (!configFile) {
               if (shouldThrowOnError) {
                 throw new Error(
                   "Couldn't read your agent config. Make sure to default export your agent instance or to export as a variable named agent.",
                 );
               }
-              logger.error("[#agent-stack]: Couldn't read your agent config.");
+              logger.error("[#agentstart]: Couldn't read your agent config.");
               console.log("");
               logger.info(
-                "[#agent-stack]: Make sure to default export your agent instance or to export as a variable named agent.",
+                "[#agentstart]: Make sure to default export your agent instance or to export as a variable named agent.",
               );
               process.exit(1);
             }
@@ -184,7 +184,7 @@ export async function getConfig({
           if (shouldThrowOnError) {
             throw e;
           }
-          logger.error("[#agent-stack]: Couldn't read your agent config.", e);
+          logger.error("[#agentstart]: Couldn't read your agent config.", e);
           process.exit(1);
         }
       }

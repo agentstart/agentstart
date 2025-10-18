@@ -1,5 +1,5 @@
 /* agent-frontmatter:start
-AGENT: Agent Stack CLI package metadata helper
+AGENT: Agent Start CLI package metadata helper
 PURPOSE: Read package.json details for version and description reporting
 USAGE: const pkg = getPackageInfo(cwd)
 EXPORTS: getPackageInfo

@@ -1,4 +1,4 @@
-import type { Tools } from "agent-stack/agent";
+import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
 import { FileIcon, HashIcon } from "lucide-react";
 import { CodeBlock } from "@/components/ai-elements/code-block";

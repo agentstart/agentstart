@@ -1,11 +1,11 @@
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { drizzleAdapter } from "agent-stack/adapter";
 import {
   Agent,
   defineAgentConfig,
   innerTools,
   osTools,
-} from "agent-stack/agent";
+} from "agentstart/agent";
+import { drizzleAdapter } from "agentstart/db";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 
@@ -23,7 +23,7 @@ const agent = new Agent({
     ...osTools,
   },
 });
-export const agentStack = defineAgentConfig({
+export const agentStart = defineAgentConfig({
   memory: drizzleAdapter(db, {
     provider: "pg",
     schema,

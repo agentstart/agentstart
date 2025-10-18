@@ -1,6 +1,6 @@
 import path from "node:path";
-import { logger } from "@agent-stack/utils";
-import { getAdapter } from "agent-stack/db";
+import { logger } from "@agentstart/utils";
+import { getAdapter } from "agentstart/db";
 import chalk from "chalk";
 import { Command } from "commander";
 import fs from "fs-extra";

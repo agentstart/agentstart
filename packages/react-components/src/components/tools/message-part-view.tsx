@@ -1,4 +1,4 @@
-import type { AgentStackUIMessage, Tools } from "agent-stack/agent";
+import type { AgentStartUIMessage, Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
 import {
   BrainIcon,
@@ -29,7 +29,7 @@ import { WriteFile } from "./write";
 type ToolPart<K extends keyof Tools> = ToolUIPart<InferUITools<Pick<Tools, K>>>;
 
 interface Props {
-  part: AgentStackUIMessage["parts"][number];
+  part: AgentStartUIMessage["parts"][number];
   isStreaming: boolean;
   isLast?: boolean;
 }

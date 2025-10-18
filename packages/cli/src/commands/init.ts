@@ -1,13 +1,13 @@
 /* agent-frontmatter:start
-AGENT: Agent Stack CLI init command
+AGENT: Agent Start CLI init command
 PURPOSE: Bootstrap agent configuration, env files, and optional database wiring
 USAGE: await initAction(commandOptions)
 EXPORTS: init, initAction
 FEATURES:
-  - Guides users through Agent Stack setup with interactive prompts
+  - Guides users through Agent Start setup with interactive prompts
   - Writes server/client config files and installs supporting deps
   - Updates environment variables while keeping plugin logic minimal
-SEARCHABLE: cli init, agent stack setup, bootstrap workflow
+SEARCHABLE: cli init, agent start setup, bootstrap workflow
 agent-frontmatter:end */
 
 import path from "node:path";
@@ -39,7 +39,7 @@ import { getTsconfigInfo } from "../utils/get-tsconfig-info";
 import { installDependencies } from "../utils/install-dependencies";
 
 /**
- * Should only use any database that is core DBs, and supports the Agent Stack CLI generate functionality.
+ * Should only use any database that is core DBs, and supports the Agent Start CLI generate functionality.
  */
 const supportedDatabases = [
   // Built-in kysely
@@ -89,7 +89,7 @@ const getDefaultAgentConfig = async ({ appName }: { appName?: string }) =>
   await prettierFormat(
     [
       `import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-       import { Agent, defineAgentConfig } from "agent-stack";`,
+       import { Agent, defineAgentConfig } from "agentstart";`,
       `if (!process.env.MODEL_PROVIDER_API_KEY) {
          throw new Error("Missing MODEL_PROVIDER_API_KEY");
        }
@@ -100,7 +100,7 @@ const getDefaultAgentConfig = async ({ appName }: { appName?: string }) =>
          model: openrouter("x-ai/grok-4-fast"),
          instructions: "You are a helpful assistant.",
        });`,
-      `export const agentStack = defineAgentConfig({
+      `export const agentStart = defineAgentConfig({
          ${appName ? `appName: "${appName}",` : ""}
          agent,
        });`,
@@ -131,7 +131,7 @@ const getDefaultAgentClientConfig = async (
 ) => {
   return await prettierFormat(
     [
-      `import { createAgentClient, useAgentStore, useThreadStore } from "agent-stack/client";`,
+      `import { createAgentClient, useAgentStore, useThreadStore } from "agentstart/client";`,
       `export const { client, useThread } = createAgentClient();`,
       "",
       `export { useAgentStore, useThreadStore };`,
@@ -155,7 +155,7 @@ const outroText = `✅ Setup complete!`;
 
 export async function initAction(opts: z.infer<typeof optionsSchema>) {
   console.log();
-  intro("Agent Stack Setup");
+  intro("Agent Start Setup");
 
   const options = optionsSchema.parse(opts);
 
@@ -206,7 +206,7 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
   }
   if (tsconfigInfo.compilerOptions?.strict !== true) {
     log.warn(
-      `Agent Stack requires your tsconfig.json to have ${chalk.bold("compilerOptions.strict")} set to true.`,
+      `Agent Start requires your tsconfig.json to have ${chalk.bold("compilerOptions.strict")} set to true.`,
     );
     const enableStrict = await confirm({
       message: `Enable ${chalk.bold("strict")} mode?`,
@@ -240,14 +240,14 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
     }
   }
 
-  // ===== install agent-stack =====
+  // ===== install agentstart =====
   const s = spinner({ indicator: "dots" });
 
   if (process.env.NODE_ENV !== "development") {
-    s.start(`Checking agent-stack version`);
-    let latestAgentStackVersion: string;
+    s.start(`Checking agentstart version`);
+    let latestAgentStartVersion: string;
     try {
-      latestAgentStackVersion = await getLatestNpmVersion("agent-stack");
+      latestAgentStartVersion = await getLatestNpmVersion("agentstart");
     } catch (error) {
       log.error(`❌ Failed to fetch latest version`);
       console.error(error);
@@ -256,12 +256,12 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
 
     if (
       !packageInfo.dependencies ||
-      !Object.keys(packageInfo.dependencies).includes("agent-stack")
+      !Object.keys(packageInfo.dependencies).includes("agentstart")
     ) {
       s.stop("Finished version check");
       const s2 = spinner({ indicator: "dots" });
       const installDep = await confirm({
-        message: `Install agent-stack?`,
+        message: `Install agentstart?`,
       });
       if (isCancel(installDep)) {
         cancel(`Operation cancelled`);
@@ -272,17 +272,17 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
       }
       if (installDep) {
         s2.start(
-          `Installing agent-stack with ${chalk.bold(packageManagerPreference)}`,
+          `Installing agentstart with ${chalk.bold(packageManagerPreference)}`,
         );
         try {
           const start = Date.now();
           await installDependencies({
-            dependencies: ["agent-stack@latest"],
+            dependencies: ["agentstart@latest"],
             packageManager: packageManagerPreference,
             cwd: cwd,
           });
           s2.stop(
-            `✅ agent-stack installed ${chalk.gray(`(${formatMilliseconds(Date.now() - start)})`)}`,
+            `✅ agentstart installed ${chalk.gray(`(${formatMilliseconds(Date.now() - start)})`)}`,
           );
         } catch (error: unknown) {
           s2.stop(`❌ Installation failed`);
@@ -291,17 +291,17 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
         }
       }
     } else if (
-      packageInfo.dependencies["agent-stack"] !== "workspace:*" &&
+      packageInfo.dependencies.agentstart !== "workspace:*" &&
       semver.lt(
-        semver.coerce(packageInfo.dependencies["agent-stack"])?.toString()!,
-        semver.clean(latestAgentStackVersion)!,
+        semver.coerce(packageInfo.dependencies.agentstart)?.toString()!,
+        semver.clean(latestAgentStartVersion)!,
       )
     ) {
       s.stop("Finished version check");
       const updateDep = await confirm({
-        message: `Update agent-stack? (${chalk.bold(
-          packageInfo.dependencies["agent-stack"],
-        )} → ${chalk.bold(`v${latestAgentStackVersion}`)})`,
+        message: `Update agentstart? (${chalk.bold(
+          packageInfo.dependencies.agentstart,
+        )} → ${chalk.bold(`v${latestAgentStartVersion}`)})`,
       });
       if (isCancel(updateDep)) {
         cancel(`Operation cancelled`);
@@ -313,17 +313,17 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
         }
         const s = spinner({ indicator: "dots" });
         s.start(
-          `Updating agent-stack with ${chalk.bold(packageManagerPreference)}`,
+          `Updating agentstart with ${chalk.bold(packageManagerPreference)}`,
         );
         try {
           const start = Date.now();
           await installDependencies({
-            dependencies: ["agent-stack@latest"],
+            dependencies: ["agentstart@latest"],
             packageManager: packageManagerPreference,
             cwd: cwd,
           });
           s.stop(
-            `✅ agent-stack updated ${chalk.gray(`(${formatMilliseconds(Date.now() - start)})`)}`,
+            `✅ agentstart updated ${chalk.gray(`(${formatMilliseconds(Date.now() - start)})`)}`,
           );
         } catch (error: unknown) {
           s.stop(`❌ Update failed`);
@@ -332,7 +332,7 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
         }
       }
     } else {
-      s.stop(`✅ agent-stack is up-to-date`);
+      s.stop(`✅ agentstart is up-to-date`);
     }
   }
 
