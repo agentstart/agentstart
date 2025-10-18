@@ -13,7 +13,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@agent-stack/agent": "workspace:*",
     "@agent-stack/utils": "workspace:*",
     "@hookform/resolvers": "catalog:",
     "@radix-ui/react-accordion": "catalog:",
@@ -43,6 +42,7 @@
     "@radix-ui/react-toggle-group": "catalog:",
     "@radix-ui/react-tooltip": "catalog:",
     "@radix-ui/react-use-controllable-state": "catalog:",
+    "agent-stack": "workspace:*",
     "ai": "catalog:",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",

@@ -10,8 +10,8 @@ FEATURES:
 SEARCHABLE: drizzle schema, cli generator, database scaffolding
 agent-frontmatter:end */
 
-import { type FieldAttribute, getTables } from "@agent-stack/infra/db";
 import { convertToSnakeCase } from "@agent-stack/utils";
+import { type FieldAttribute, getTables } from "agent-stack/db";
 import fs from "fs-extra";
 import type { SchemaGenerator } from "./types";
 

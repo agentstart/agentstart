@@ -1,9 +1,0 @@
-{
-  "extends": "@agent-stack/tsconfig/internal-package.json",
-  "compilerOptions": {
-    "outDir": "dist",
-    "tsBuildInfoFile": ".cache/tsbuildinfo.json"
-  },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"]
-}

@@ -1,6 +1,11 @@
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { Agent, defineAgentConfig } from "agent-stack";
 import { drizzleAdapter } from "agent-stack/adapter";
+import {
+  Agent,
+  defineAgentConfig,
+  innerTools,
+  osTools,
+} from "agent-stack/agent";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 
@@ -13,6 +18,10 @@ const openrouter = createOpenRouter({
 const agent = new Agent({
   model: openrouter("x-ai/grok-4-fast"),
   instructions: "You are a helpful assistant.",
+  tools: {
+    ...innerTools,
+    ...osTools,
+  },
 });
 export const agentStack = defineAgentConfig({
   memory: drizzleAdapter(db, {

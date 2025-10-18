@@ -1,4 +1,4 @@
-import type { AgentStackUIMessage, Tools } from "@agent-stack/agent";
+import type { AgentStackUIMessage, Tools } from "agent-stack/agent";
 import type { InferUITools, ToolUIPart } from "ai";
 import {
   BrainIcon,

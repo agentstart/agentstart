@@ -1,5 +1,6 @@
 "use client";
 
+import type { AgentStackUIMessage } from "agent-stack";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -42,9 +43,11 @@ export default function Page() {
       return;
     }
 
-    client.message.get({ threadId: activeThreadId }).then((messages) => {
-      setMessages(messages);
-    });
+    client.message
+      .get({ threadId: activeThreadId })
+      .then((messages: AgentStackUIMessage[]) => {
+        setMessages(messages);
+      });
   }, [activeThreadId, setMessages]);
 
   return (

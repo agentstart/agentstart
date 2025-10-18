@@ -1,5 +1,5 @@
-import type { Tools } from "@agent-stack/agent";
 import { getLanguageFromFilePath } from "@agent-stack/utils";
+import type { Tools } from "agent-stack/agent";
 import type { InferUITools, ToolUIPart } from "ai";
 import { FileIcon } from "lucide-react";
 import { CodeBlock } from "@/components/ai-elements/code-block";

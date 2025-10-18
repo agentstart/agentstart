@@ -28,7 +28,7 @@
     }
   },
   "exports": {
-    ".": "./src/index.ts",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
   "bin": "./dist/index.mjs",
@@ -43,9 +43,6 @@
     "vitest": "catalog:"
   },
   "dependencies": {
-    "@agent-stack/agent": "workspace:*",
-    "@agent-stack/infra": "workspace:*",
-    "@agent-stack/types": "workspace:*",
     "@agent-stack/utils": "workspace:*",
     "@babel/preset-react": "catalog:",
     "@babel/preset-typescript": "catalog:",

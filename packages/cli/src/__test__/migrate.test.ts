@@ -1,4 +1,4 @@
-import { defineAgentConfig } from "@agent-stack/agent";
+import { defineAgentConfig } from "agent-stack/agent";
 import Database from "better-sqlite3";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { migrateAction } from "../commands/migrate";

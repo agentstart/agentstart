@@ -1,5 +1,5 @@
-import { drizzleAdapter, prismaAdapter } from "@agent-stack/infra/adapter";
-import type { AgentStackOptions } from "@agent-stack/types";
+import type { AgentStackOptions } from "agent-stack";
+import { drizzleAdapter, prismaAdapter } from "agent-stack/db";
 import Database from "better-sqlite3";
 import { describe, expect, it } from "vitest";
 import { generateDrizzleSchema } from "../generators/drizzle";

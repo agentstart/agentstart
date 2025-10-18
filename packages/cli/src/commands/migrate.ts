@@ -11,8 +11,8 @@ SEARCHABLE: cli migrate, database migrations, agent stack
 agent-frontmatter:end */
 
 import path from "node:path";
-import { getAdapter, getMigrations } from "@agent-stack/infra/db";
 import { logger } from "@agent-stack/utils";
+import { getAdapter, getMigrations } from "agent-stack/db";
 import chalk from "chalk";
 import { Command } from "commander";
 import fs from "fs-extra";

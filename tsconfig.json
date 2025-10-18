@@ -10,19 +10,10 @@ agent-frontmatter:end */
 {
   "extends": "@agent-stack/tsconfig/internal-package.json",
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "commonjs",
-    "lib": ["ES2020"],
-    "esModuleInterop": true,
-    "skipLibCheck": true,
+    "module": "esnext",
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "strict": true,
-    "moduleResolution": "node",
-    "paths": {
-      "@agent-stack/*": ["./packages/*/src"]
-    },
-    "baseUrl": "."
+    "moduleResolution": "node"
   },
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "include": ["scripts"]
 }

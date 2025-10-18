@@ -1,4 +1,4 @@
-import type { Tools } from "@agent-stack/agent";
+import type { Tools } from "agent-stack/agent";
 import type { InferUITools, ToolUIPart } from "ai";
 import {
   AlertCircleIcon,

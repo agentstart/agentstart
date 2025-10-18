@@ -5,35 +5,13 @@
       "name": "agent-stack",
       "devDependencies": {
         "@agent-stack/biome-config": "workspace:*",
+        "@agent-stack/tsconfig": "workspace:*",
         "@biomejs/biome": "catalog:",
         "@clack/prompts": "catalog:",
+        "@types/fs-extra": "catalog:",
         "execa": "catalog:",
         "fs-extra": "catalog:",
         "turbo": "catalog:",
-        "typescript": "catalog:",
-      },
-    },
-    "packages/agent": {
-      "name": "@agent-stack/agent",
-      "version": "0.1.0",
-      "dependencies": {
-        "@agent-stack/infra": "workspace:*",
-        "@agent-stack/integration": "workspace:*",
-        "@agent-stack/sandbox": "workspace:*",
-        "@agent-stack/types": "workspace:*",
-        "@agent-stack/utils": "workspace:*",
-        "ai": "catalog:",
-        "nanoid": "catalog:",
-        "path-browserify-esm": "catalog:",
-        "zod": "catalog:",
-      },
-      "devDependencies": {
-        "@agent-stack/biome-config": "workspace:*",
-        "@agent-stack/tsconfig": "workspace:*",
-        "@biomejs/biome": "catalog:",
-        "@types/better-sqlite3": "catalog:",
-        "kysely": "catalog:",
-        "tsdown": "catalog:",
         "typescript": "catalog:",
       },
     },
@@ -41,14 +19,18 @@
       "name": "agent-stack",
       "version": "0.1.0",
       "dependencies": {
-        "@agent-stack/agent": "workspace:*",
-        "@agent-stack/api": "workspace:*",
-        "@agent-stack/client": "workspace:*",
-        "@agent-stack/infra": "workspace:*",
-        "@agent-stack/integration": "workspace:*",
-        "@agent-stack/sandbox": "workspace:*",
-        "@agent-stack/types": "workspace:*",
         "@agent-stack/utils": "workspace:*",
+        "@ai-sdk/react": "catalog:",
+        "@e2b/code-interpreter": "catalog:",
+        "@orpc/client": "catalog:",
+        "@orpc/server": "catalog:",
+        "chokidar": "catalog:",
+        "fast-glob": "catalog:",
+        "nanoid": "catalog:",
+        "pathe": "catalog:",
+        "redis": "catalog:",
+        "zod": "catalog:",
+        "zustand": "catalog:",
       },
       "devDependencies": {
         "@agent-stack/biome-config": "workspace:*",
@@ -56,7 +38,9 @@
         "@biomejs/biome": "catalog:",
         "@prisma/client": "catalog:",
         "@types/better-sqlite3": "catalog:",
+        "@types/fs-extra": "catalog:",
         "@types/pg": "catalog:",
+        "@types/react": "catalog:",
         "better-sqlite3": "catalog:",
         "drizzle-kit": "catalog:",
         "drizzle-orm": "catalog:",
@@ -65,34 +49,14 @@
         "mysql2": "catalog:",
         "pg": "catalog:",
         "prisma": "catalog:",
+        "react": "catalog:",
         "tsdown": "catalog:",
         "typescript": "catalog:",
         "vitest": "catalog:",
       },
       "peerDependencies": {
         "ai": "^5",
-      },
-    },
-    "packages/api": {
-      "name": "@agent-stack/api",
-      "version": "0.1.0",
-      "dependencies": {
-        "@agent-stack/agent": "workspace:*",
-        "@agent-stack/infra": "workspace:*",
-        "@agent-stack/types": "workspace:*",
-        "@agent-stack/utils": "workspace:*",
-        "@openrouter/ai-sdk-provider": "catalog:",
-        "@orpc/server": "catalog:",
-        "@t3-oss/env-nextjs": "catalog:",
-        "ai": "catalog:",
-        "zod": "catalog:",
-      },
-      "devDependencies": {
-        "@agent-stack/biome-config": "workspace:*",
-        "@agent-stack/tsconfig": "workspace:*",
-        "@biomejs/biome": "catalog:",
-        "tsdown": "catalog:",
-        "typescript": "catalog:",
+        "react": "^19",
       },
     },
     "packages/cli": {
@@ -100,9 +64,6 @@
       "version": "0.1.0",
       "bin": "./dist/index.mjs",
       "dependencies": {
-        "@agent-stack/agent": "workspace:*",
-        "@agent-stack/infra": "workspace:*",
-        "@agent-stack/types": "workspace:*",
         "@agent-stack/utils": "workspace:*",
         "@babel/preset-react": "catalog:",
         "@babel/preset-typescript": "catalog:",
@@ -140,81 +101,10 @@
         "vitest": "catalog:",
       },
     },
-    "packages/client": {
-      "name": "@agent-stack/client",
-      "version": "0.1.0",
-      "dependencies": {
-        "@agent-stack/agent": "workspace:*",
-        "@agent-stack/api": "workspace:*",
-        "@agent-stack/infra": "workspace:*",
-        "@agent-stack/utils": "workspace:*",
-        "@ai-sdk/react": "catalog:",
-        "@orpc/client": "catalog:",
-        "@orpc/server": "catalog:",
-        "ai": "catalog:",
-        "zustand": "catalog:",
-      },
-      "devDependencies": {
-        "@agent-stack/biome-config": "workspace:*",
-        "@agent-stack/tsconfig": "workspace:*",
-        "@biomejs/biome": "catalog:",
-        "tsdown": "catalog:",
-        "typescript": "catalog:",
-      },
-      "peerDependencies": {
-        "@types/react": "^19",
-        "react": "^19",
-      },
-    },
-    "packages/infra": {
-      "name": "@agent-stack/infra",
-      "version": "0.1.0",
-      "dependencies": {
-        "@agent-stack/types": "workspace:*",
-        "@agent-stack/utils": "workspace:*",
-        "better-sqlite3": "catalog:",
-        "drizzle-orm": "catalog:",
-        "fs-extra": "catalog:",
-        "kysely": "catalog:",
-        "mongodb": "catalog:",
-        "mysql2": "catalog:",
-        "pg": "catalog:",
-        "redis": "catalog:",
-        "zod": "catalog:",
-      },
-      "devDependencies": {
-        "@agent-stack/biome-config": "workspace:*",
-        "@agent-stack/tsconfig": "workspace:*",
-        "@biomejs/biome": "catalog:",
-        "@prisma/client": "catalog:",
-        "@types/better-sqlite3": "catalog:",
-        "@types/fs-extra": "catalog:",
-        "@types/pg": "catalog:",
-        "tsdown": "catalog:",
-        "typescript": "catalog:",
-        "vitest": "catalog:",
-      },
-    },
-    "packages/integration": {
-      "name": "@agent-stack/integration",
-      "version": "0.1.0",
-      "dependencies": {
-        "@agent-stack/types": "workspace:*",
-        "@orpc/server": "catalog:",
-      },
-      "devDependencies": {
-        "@agent-stack/biome-config": "workspace:*",
-        "@agent-stack/tsconfig": "workspace:*",
-        "@biomejs/biome": "catalog:",
-        "tsdown": "catalog:",
-        "typescript": "catalog:",
-      },
-    },
     "packages/react-components": {
       "name": "@agent-stack/react-components",
       "version": "0.1.0",
       "dependencies": {
-        "@agent-stack/agent": "workspace:*",
         "@agent-stack/utils": "workspace:*",
         "@hookform/resolvers": "catalog:",
         "@radix-ui/react-accordion": "catalog:",
@@ -244,6 +134,7 @@
         "@radix-ui/react-toggle-group": "catalog:",
         "@radix-ui/react-tooltip": "catalog:",
         "@radix-ui/react-use-controllable-state": "catalog:",
+        "agent-stack": "workspace:*",
         "ai": "catalog:",
         "class-variance-authority": "catalog:",
         "clsx": "catalog:",
@@ -282,46 +173,6 @@
         "react-dom": "catalog:",
         "tsdown": "catalog:",
         "typescript": "catalog:",
-      },
-    },
-    "packages/sandbox": {
-      "name": "@agent-stack/sandbox",
-      "version": "0.1.0",
-      "dependencies": {
-        "@agent-stack/infra": "workspace:*",
-        "@e2b/code-interpreter": "catalog:",
-        "chokidar": "catalog:",
-        "execa": "catalog:",
-        "fast-glob": "catalog:",
-        "nanoid": "catalog:",
-        "path-browserify-esm": "catalog:",
-      },
-      "devDependencies": {
-        "@agent-stack/biome-config": "workspace:*",
-        "@agent-stack/tsconfig": "workspace:*",
-        "@biomejs/biome": "catalog:",
-        "tsdown": "catalog:",
-        "typescript": "catalog:",
-        "vitest": "catalog:",
-      },
-    },
-    "packages/types": {
-      "name": "@agent-stack/types",
-      "version": "0.1.0",
-      "dependencies": {
-        "nanoid": "catalog:",
-        "shiki": "catalog:",
-        "std-env": "catalog:",
-      },
-      "devDependencies": {
-        "@agent-stack/biome-config": "workspace:*",
-        "@agent-stack/tsconfig": "workspace:*",
-        "@biomejs/biome": "catalog:",
-        "@types/better-sqlite3": "catalog:",
-        "kysely": "catalog:",
-        "tsdown": "catalog:",
-        "typescript": "catalog:",
-        "vitest": "catalog:",
       },
     },
     "packages/utils": {
@@ -388,7 +239,7 @@
     },
   },
   "catalog": {
-    "@ai-sdk/anthropic": "^2.0.31",
+    "@ai-sdk/anthropic": "^2.0.33",
     "@ai-sdk/openai": "^2.0.52",
     "@ai-sdk/react": "^2.0.76",
     "@babel/preset-react": "^7.27.1",
@@ -434,7 +285,7 @@
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@radix-ui/react-use-controllable-state": "^1.2.2",
-    "@react-email/components": "^0.5.6",
+    "@react-email/components": "^0.5.7",
     "@stripe/stripe-js": "^8.1.0",
     "@t3-oss/env-nextjs": "^0.13.8",
     "@tailwindcss/container-queries": "^0.1.1",
@@ -483,7 +334,7 @@
     "fumadocs-ui": "^15.8.5",
     "get-tsconfig": "^4.12.0",
     "harden-react-markdown": "^1.1.5",
-    "hono": "^4.10.0",
+    "hono": "^4.10.1",
     "input-otp": "^1.4.2",
     "jiti": "^2.6.1",
     "katex": "^0.16.25",
@@ -496,7 +347,7 @@
     "next": "^15.5.6",
     "next-intl": "^4.3.12",
     "next-themes": "^0.4.6",
-    "path-browserify-esm": "^1.0.6",
+    "pathe": "^2.0.3",
     "pg": "^8.16.3",
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
@@ -505,7 +356,7 @@
     "react": "^19.2.0",
     "react-day-picker": "^9.11.1",
     "react-dom": "^19.0.0",
-    "react-email": "4.3.0",
+    "react-email": "4.3.1",
     "react-hook-form": "^7.65.0",
     "react-markdown": "^10.1.0",
     "react-resizable-panels": "^3.0.6",
@@ -515,7 +366,7 @@
     "rehype-katex": "^7.0.1",
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
-    "resend": "^6.1.3",
+    "resend": "^6.2.0",
     "rough-notation": "^0.5.1",
     "semver": "^7.7.3",
     "server-only": "^0.0.1",
@@ -551,27 +402,13 @@
     },
   },
   "packages": {
-    "@agent-stack/agent": ["@agent-stack/agent@workspace:packages/agent"],
-
-    "@agent-stack/api": ["@agent-stack/api@workspace:packages/api"],
-
     "@agent-stack/biome-config": ["@agent-stack/biome-config@workspace:tooling/biome"],
 
     "@agent-stack/cli": ["@agent-stack/cli@workspace:packages/cli"],
 
-    "@agent-stack/client": ["@agent-stack/client@workspace:packages/client"],
-
-    "@agent-stack/infra": ["@agent-stack/infra@workspace:packages/infra"],
-
-    "@agent-stack/integration": ["@agent-stack/integration@workspace:packages/integration"],
-
     "@agent-stack/react-components": ["@agent-stack/react-components@workspace:packages/react-components"],
 
-    "@agent-stack/sandbox": ["@agent-stack/sandbox@workspace:packages/sandbox"],
-
     "@agent-stack/tsconfig": ["@agent-stack/tsconfig@workspace:tooling/typescript"],
-
-    "@agent-stack/types": ["@agent-stack/types@workspace:packages/types"],
 
     "@agent-stack/utils": ["@agent-stack/utils@workspace:packages/utils"],
 
@@ -1137,10 +974,6 @@
 
     "@swc/helpers": ["@swc/helpers@0.5.15", "", { "dependencies": { "tslib": "^2.8.0" } }, "sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g=="],
 
-    "@t3-oss/env-core": ["@t3-oss/env-core@0.13.8", "", { "peerDependencies": { "arktype": "^2.1.0", "typescript": ">=5.0.0", "valibot": "^1.0.0-beta.7 || ^1.0.0", "zod": "^3.24.0 || ^4.0.0-beta.0" }, "optionalPeers": ["arktype", "typescript", "valibot", "zod"] }, "sha512-L1inmpzLQyYu4+Q1DyrXsGJYCXbtXjC4cICw1uAKv0ppYPQv656lhZPU91Qd1VS6SO/bou1/q5ufVzBGbNsUpw=="],
-
-    "@t3-oss/env-nextjs": ["@t3-oss/env-nextjs@0.13.8", "", { "dependencies": { "@t3-oss/env-core": "0.13.8" }, "peerDependencies": { "arktype": "^2.1.0", "typescript": ">=5.0.0", "valibot": "^1.0.0-beta.7 || ^1.0.0", "zod": "^3.24.0 || ^4.0.0-beta.0" }, "optionalPeers": ["arktype", "typescript", "valibot", "zod"] }, "sha512-QmTLnsdQJ8BiQad2W2nvV6oUpH4oMZMqnFEjhVpzU0h3sI9hn8zb8crjWJ1Amq453mGZs6A4v4ihIeBFDOrLeQ=="],
-
     "@tailwindcss/node": ["@tailwindcss/node@4.1.14", "", { "dependencies": { "@jridgewell/remapping": "^2.3.4", "enhanced-resolve": "^5.18.3", "jiti": "^2.6.0", "lightningcss": "1.30.1", "magic-string": "^0.30.19", "source-map-js": "^1.2.1", "tailwindcss": "4.1.14" } }, "sha512-hpz+8vFk3Ic2xssIA3e01R6jkmsAhvkQdXlEbRTk6S10xDAtiQiM3FyvZVGsucefq764euO/b8WUW9ysLdThHw=="],
 
     "@tailwindcss/oxide": ["@tailwindcss/oxide@4.1.14", "", { "dependencies": { "detect-libc": "^2.0.4", "tar": "^7.5.1" }, "optionalDependencies": { "@tailwindcss/oxide-android-arm64": "4.1.14", "@tailwindcss/oxide-darwin-arm64": "4.1.14", "@tailwindcss/oxide-darwin-x64": "4.1.14", "@tailwindcss/oxide-freebsd-x64": "4.1.14", "@tailwindcss/oxide-linux-arm-gnueabihf": "4.1.14", "@tailwindcss/oxide-linux-arm64-gnu": "4.1.14", "@tailwindcss/oxide-linux-arm64-musl": "4.1.14", "@tailwindcss/oxide-linux-x64-gnu": "4.1.14", "@tailwindcss/oxide-linux-x64-musl": "4.1.14", "@tailwindcss/oxide-wasm32-wasi": "4.1.14", "@tailwindcss/oxide-win32-arm64-msvc": "4.1.14", "@tailwindcss/oxide-win32-x64-msvc": "4.1.14" } }, "sha512-23yx+VUbBwCg2x5XWdB8+1lkPajzLmALEfMb51zZUBYaYVPDQvBSD/WYDqiVyBIo2BZFa3yw1Rpy3G2Jp+K0dw=="],
@@ -1549,7 +1382,7 @@
 
     "dts-resolver": ["dts-resolver@2.1.2", "", { "peerDependencies": { "oxc-resolver": ">=11.0.0" }, "optionalPeers": ["oxc-resolver"] }, "sha512-xeXHBQkn2ISSXxbJWD828PFjtyg+/UrMDo7W4Ffcs7+YWCquxU8YjV1KoxuiL+eJ5pg3ll+bC6flVv61L3LKZg=="],
 
-    "e2b": ["e2b@2.3.0", "", { "dependencies": { "@bufbuild/protobuf": "^2.6.2", "@connectrpc/connect": "2.0.0-rc.3", "@connectrpc/connect-web": "2.0.0-rc.3", "chalk": "^5.3.0", "compare-versions": "^6.1.0", "dockerfile-ast": "^0.7.1", "glob": "^11.0.3", "openapi-fetch": "^0.14.1", "platform": "^1.3.6", "tar": "^7.4.3" } }, "sha512-EX05vM7XnOuQMBc2IYXg7s5CS0k7cZ6SS++UVjEHSu+AnrBFCqvcaVLfGtjB1xgm7RFdjLvrUuh7sTAoHBTMEg=="],
+    "e2b": ["e2b@2.3.2", "", { "dependencies": { "@bufbuild/protobuf": "^2.6.2", "@connectrpc/connect": "2.0.0-rc.3", "@connectrpc/connect-web": "2.0.0-rc.3", "chalk": "^5.3.0", "compare-versions": "^6.1.0", "dockerfile-ast": "^0.7.1", "glob": "^11.0.3", "openapi-fetch": "^0.14.1", "platform": "^1.3.6", "tar": "^7.4.3" } }, "sha512-wvOzwLgWeZ8eZnvL0qW8FfP8OzuuSyYoYfhmTdqvRaZJimEXNZR25qwyPTJ6uvd4KJymzX7D/2mOXV1j7/ei+A=="],
 
     "eastasianwidth": ["eastasianwidth@0.2.0", "", {}, "sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA=="],
 
@@ -1990,8 +1823,6 @@
     "parse-ms": ["parse-ms@4.0.0", "", {}, "sha512-TXfryirbmq34y8QBwgqCVLi+8oA3oWx2eAnSn62ITyEhEYaWRlVZ2DvMM9eZbMs/RfxPu/PK/aBLyGj4IrqMHw=="],
 
     "parse5": ["parse5@7.3.0", "", { "dependencies": { "entities": "^6.0.0" } }, "sha512-IInvU7fabl34qmi9gY8XOVxhYyMyuH2xUNpb2q8/Y+7552KlejkRvqvD19nMoUW/uQGGbqNpA6Tufu5FL5BZgw=="],
-
-    "path-browserify-esm": ["path-browserify-esm@1.0.6", "", {}, "sha512-9nUwYvvu/yq1PYrUyYCihNWmpzacaRYF6gGbjLWErrZ4MRDWyfPN7RpE8E7tsw8eqBU/rr7mcoTXbS+Vih8uUA=="],
 
     "path-data-parser": ["path-data-parser@0.1.0", "", {}, "sha512-NOnmBpt5Y2RWbuv0LMzsayp3lVylAHLPUTut412ZA3l+C4uw4ZVkQbjShYCQ8TCpUMdPapr4YjUqLYD6v68j+w=="],
 
