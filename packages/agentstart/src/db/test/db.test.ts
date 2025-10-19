@@ -16,6 +16,11 @@ describe("db helpers", () => {
         parts: "message_parts",
       },
     },
+    todo: {
+      fields: {
+        todos: "todo_payload",
+      },
+    },
   };
 
   it("applies custom model and field names", () => {
@@ -24,6 +29,13 @@ describe("db helpers", () => {
     expect(tables.thread?.modelName).toBe("threads");
     expect(tables.thread?.fields.title?.fieldName).toBe("thread_title");
     expect(tables.message?.fields.parts?.fieldName).toBe("message_parts");
+    expect(tables.todo?.fields.todos?.fieldName).toBe("todo_payload");
+    expect(Object.keys(tables.todo?.fields ?? {})).toEqual([
+      "threadId",
+      "todos",
+      "createdAt",
+      "updatedAt",
+    ]);
   });
 
   it("converts logical values to database columns and back", () => {
@@ -52,5 +64,23 @@ describe("db helpers", () => {
       userId: "author-1",
       title: "Agent Start",
     });
+  });
+
+  it("defines todo table with thread reference and defaults", () => {
+    const tables = getTables(options);
+    const todoFields = tables.todo?.fields;
+
+    expect(todoFields).toBeDefined();
+
+    expect(todoFields?.threadId?.references).toMatchObject({
+      model: "threads",
+      field: "id",
+      onDelete: "cascade",
+    });
+    expect(todoFields?.todos?.required).toBe(true);
+    expect(todoFields?.todos?.type).toBe("json");
+    expect(todoFields?.todos?.validator?.output).toBeDefined();
+    expect(typeof todoFields?.createdAt?.defaultValue).toBe("function");
+    expect(typeof todoFields?.updatedAt?.defaultValue).toBe("function");
   });
 });

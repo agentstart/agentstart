@@ -65,7 +65,7 @@ export type Adapter = {
   }) => Promise<number>;
   delete: (data: { model: string; where: Where[] }) => Promise<void>;
   deleteMany: (data: { model: string; where: Where[] }) => Promise<number>;
-  upsert?: <T>(data: {
+  upsert: <T>(data: {
     model: string;
     where: Where[];
     create: Record<string, unknown>;
@@ -144,4 +144,5 @@ export type AgentStartOptions = {
   };
   thread?: ModelOptions;
   message?: ModelOptions;
+  todo?: ModelOptions;
 };

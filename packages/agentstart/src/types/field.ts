@@ -16,6 +16,7 @@ export type FieldType =
   | "number"
   | "boolean"
   | "date"
+  | "json"
   | `${"string" | "number"}[]`
   | string[];
 
@@ -68,8 +69,10 @@ export type InferValueType<T extends FieldType> = T extends "string"
     ? number
     : T extends "boolean"
       ? boolean
-      : T extends "date"
-        ? Date
+    : T extends "date"
+      ? Date
+      : T extends "json"
+        ? unknown
         : T extends `${infer Inner}[]`
           ? Inner extends "string"
             ? string[]

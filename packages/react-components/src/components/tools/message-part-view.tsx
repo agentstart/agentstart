@@ -22,7 +22,7 @@ import { Glob } from "./glob";
 import { Grep } from "./grep";
 import { Ls } from "./ls";
 import { ReadFile } from "./read";
-import { TodoWrite } from "./todo-write";
+import { Todo } from "./todo";
 import { UpdateFile } from "./update";
 import { WriteFile } from "./write";
 
@@ -82,10 +82,11 @@ export const MessagePart = memo(function MessagePart({
           <Ls part={part as ToolPart<"ls">} />
         </TaskItem>
       );
+    case "tool-todoRead":
     case "tool-todoWrite":
       return (
         <TaskItem icon={ListTodoIcon} isLast={isLast}>
-          <TodoWrite part={part as ToolPart<"todoWrite">} />
+          <Todo part={part as ToolPart<"todoWrite"> | ToolPart<"todoRead">} />
         </TaskItem>
       );
 

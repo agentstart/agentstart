@@ -12,6 +12,7 @@ agent-frontmatter:end */
 
 import type { AgentStartOptions } from "@/types";
 import type { FieldAttribute } from "./field";
+import { todoPayloadSchema } from "./schema";
 
 export type AdapterDbSchema = Record<
   string,
@@ -110,6 +111,43 @@ export const getTables = (
           fieldName: options.message?.fields?.updatedAt || "updatedAt",
         },
         ...(options.message?.additionalFields ?? {}),
+      },
+    },
+    todo: {
+      modelName: options.todo?.modelName || "todo",
+      fields: {
+        threadId: {
+          type: "string",
+          required: true,
+          fieldName: options.todo?.fields?.threadId || "threadId",
+          references: {
+            model: options.thread?.modelName || "thread",
+            field: "id",
+            onDelete: "cascade",
+          },
+        },
+        todos: {
+          type: "json",
+          required: true,
+          fieldName: options.todo?.fields?.todos || "todos",
+          validator: {
+            input: todoPayloadSchema,
+            output: todoPayloadSchema,
+          },
+        },
+        createdAt: {
+          type: "date",
+          required: true,
+          defaultValue: () => new Date(),
+          fieldName: options.todo?.fields?.createdAt || "createdAt",
+        },
+        updatedAt: {
+          type: "date",
+          required: true,
+          defaultValue: () => new Date(),
+          fieldName: options.todo?.fields?.updatedAt || "updatedAt",
+        },
+        ...(options.todo?.additionalFields ?? {}),
       },
     },
   };

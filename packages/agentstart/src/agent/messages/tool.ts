@@ -173,7 +173,9 @@ export const toolInputSchema = z.object({
         z.object({
           id: z.string().optional(),
           content: z.string().min(1),
-          status: z.enum(["pending", "inProgress", "completed", "cancelled"]),
+          status: z
+            .enum(["pending", "inProgress", "completed", "cancelled"])
+            .default("pending"),
           priority: z.enum(["high", "medium", "low"]).default("medium"),
         }),
       )
@@ -277,17 +279,6 @@ export const toolOutputSchema = z.object({
             priority: z.enum(["high", "medium", "low"]),
           }),
         ),
-        stats: z
-          .object({
-            total: z.number(),
-            completed: z.number(),
-            inProgress: z.number(),
-            pending: z.number(),
-            highPriority: z.number(),
-            mediumPriority: z.number(),
-            lowPriority: z.number(),
-          })
-          .optional(),
       })
       .optional(),
   }),
@@ -304,17 +295,6 @@ export const toolOutputSchema = z.object({
             priority: z.enum(["high", "medium", "low"]),
           }),
         ),
-        stats: z
-          .object({
-            total: z.number(),
-            completed: z.number(),
-            inProgress: z.number(),
-            pending: z.number(),
-            highPriority: z.number(),
-            mediumPriority: z.number(),
-            lowPriority: z.number(),
-          })
-          .optional(),
       })
       .optional(),
   }),

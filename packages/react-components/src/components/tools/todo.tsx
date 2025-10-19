@@ -53,13 +53,13 @@ const getPriorityBadge = (priority: string) => {
   );
 };
 
-export interface TodoWriteProps {
-  part: ToolUIPart<InferUITools<Pick<Tools, "todoWrite">>>;
+export interface TodoProps {
+  part:
+    | ToolUIPart<InferUITools<Pick<Tools, "todoRead">>>
+    | ToolUIPart<InferUITools<Pick<Tools, "todoWrite">>>;
 }
 
-export function TodoWrite({
-  part: { type, state, output, errorText },
-}: TodoWriteProps) {
+export function Todo({ part: { type, state, output, errorText } }: TodoProps) {
   if (!output) {
     return (
       <Tool>
@@ -71,14 +71,7 @@ export function TodoWrite({
     );
   }
 
-  const stats = output.metadata?.stats;
   const todos = output.metadata?.todos || [];
-
-  const completionPercentage = stats
-    ? stats.total > 0
-      ? Math.round((stats.completed / stats.total) * 100)
-      : 0
-    : 0;
 
   const groupedTodos = todos.reduce(
     (acc, todo) => {
@@ -98,48 +91,6 @@ export function TodoWrite({
     </div>
   ) : (
     <>
-      {/* Progress Bar */}
-      {stats && stats.total > 0 && (
-        <div className="mt-2 mb-3">
-          <div className="mb-1 flex justify-between text-muted-foreground text-xs">
-            <span>
-              {stats.completed} of {stats.total} completed
-            </span>
-            <span>{completionPercentage}%</span>
-          </div>
-          <div className="h-2 w-full rounded-full bg-muted">
-            <div
-              className="h-2 rounded-full bg-green-600 transition-all duration-500"
-              style={{ width: `${completionPercentage}%` }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Stats */}
-      {stats && (
-        <div className="mb-2 flex gap-4 text-muted-foreground text-xs">
-          {stats.pending > 0 && (
-            <span className="flex items-center gap-1">
-              <CircleIcon className="h-3 w-3" />
-              {stats.pending} pending
-            </span>
-          )}
-          {stats.inProgress > 0 && (
-            <span className="flex items-center gap-1 text-blue-600">
-              <ClockIcon className="h-3 w-3" />
-              {stats.inProgress} in progress
-            </span>
-          )}
-          {stats.completed > 0 && (
-            <span className="flex items-center gap-1 text-green-600">
-              <CheckCircle2Icon className="h-3 w-3" />
-              {stats.completed} done
-            </span>
-          )}
-        </div>
-      )}
-
       {/* Todo Items */}
       <div className="space-y-3">
         {statusOrder.map((status) => {

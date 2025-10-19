@@ -116,7 +116,7 @@ export class Agent<
 
   async stream(options: AgentStreamOptions) {
     const uiMessages = (await getCompleteMessages({
-      adapter: options.adapter,
+      db: options.adapter,
       message: options.message,
       threadId: options.threadId,
     })) ?? [options.message];
@@ -135,7 +135,7 @@ export class Agent<
           });
           // Update database
           await updateThreadTitle({
-            adapter: options.adapter,
+            db: options.adapter,
             threadId: options.threadId,
             title,
             emoji,
@@ -204,7 +204,7 @@ export class Agent<
           setting.responseMessage.parts.length > 0
         ) {
           await upsertMessage({
-            adapter: options.adapter,
+            db: options.adapter,
             payload: {
               id: setting.responseMessage.id,
               threadId: options.threadId,

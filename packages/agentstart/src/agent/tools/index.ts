@@ -1,11 +1,12 @@
-import { bash } from "./bash/tool";
-import { glob } from "./glob/tool";
-import { grep } from "./grep/tool";
-import { ls } from "./ls/tool";
-import { read } from "./read/tool";
-import { todoWrite } from "./todo-write/tool";
-import { update } from "./update/tool";
-import { write } from "./write/tool";
+import { bash } from "./bash";
+import { glob } from "./glob";
+import { grep } from "./grep";
+import { ls } from "./ls";
+import { read } from "./read";
+import { todoRead } from "./todo-read";
+import { todoWrite } from "./todo-write";
+import { update } from "./update";
+import { write } from "./write";
 
 const tools = {
   update,
@@ -15,12 +16,14 @@ const tools = {
   glob,
   grep,
   ls,
+  todoRead,
   todoWrite,
 } as const;
 
 export type Tools = typeof tools;
 
 export const innerTools = {
+  todoRead,
   todoWrite,
 };
 export const osTools = {

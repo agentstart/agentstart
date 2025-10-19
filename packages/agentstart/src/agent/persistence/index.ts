@@ -1,10 +1,10 @@
 /* agent-frontmatter:start
 AGENT: Agent memory actions
-PURPOSE: Provide persistence helpers backed by the configured adapter
+PURPOSE: Provide persistence helpers backed by the configured db
 USAGE: Import to read or mutate thread and message records
 EXPORTS: updateThreadTitle, upsertMessage, deleteMessagesAfter, loadThread, getCompleteMessages, getThreads
 FEATURES:
-  - Works with any adapter implementing the shared Adapter interface
+  - Works with any db implementing the shared Adapter interface
   - Applies consistent timestamp handling and payload sanitization
   - Uses object-based parameters for extensibility
 SEARCHABLE: agent actions, memory helpers, thread persistence
@@ -16,7 +16,7 @@ import type { DBThread } from "@/db";
 import type { Adapter, Where as AdapterWhere } from "@/types";
 
 export interface AdapterContextOptions {
-  adapter: Adapter;
+  db: Adapter;
 }
 
 export interface UpdateThreadTitleOptions extends AdapterContextOptions {
@@ -26,7 +26,7 @@ export interface UpdateThreadTitleOptions extends AdapterContextOptions {
 }
 
 export async function updateThreadTitle({
-  adapter,
+  db,
   threadId,
   title,
   emoji,
@@ -39,7 +39,7 @@ export async function updateThreadTitle({
     updatePayload.emoji = emoji;
   }
 
-  await adapter.update({
+  await db.update({
     model: "thread",
     where: [{ field: "id", value: threadId }],
     update: updatePayload,
@@ -58,15 +58,11 @@ export interface UpsertMessageOptions<Message extends UIMessage>
 }
 
 export async function upsertMessage<Message extends UIMessage>({
-  adapter,
+  db,
   payload,
 }: UpsertMessageOptions<Message>) {
   if (!payload.message.parts || payload.message.parts.length === 0) {
     throw new Error("Message must have at least one part");
-  }
-
-  if (!adapter.upsert) {
-    throw new Error("Configured adapter does not implement upsert.");
   }
 
   const where: AdapterWhere[] = [{ field: "id", value: payload.id }];
@@ -94,7 +90,7 @@ export async function upsertMessage<Message extends UIMessage>({
     updatedAt: now,
   };
 
-  await adapter.upsert({
+  await db.upsert({
     model: "message",
     where,
     create: {
@@ -113,11 +109,11 @@ export interface DeleteMessagesAfterOptions extends AdapterContextOptions {
 }
 
 export async function deleteMessagesAfter({
-  adapter,
+  db,
   threadId,
   messageId,
 }: DeleteMessagesAfterOptions) {
-  const target = (await adapter.findOne({
+  const target = (await db.findOne({
     model: "message",
     where: [
       { field: "id", value: messageId },
@@ -131,7 +127,7 @@ export async function deleteMessagesAfter({
     return;
   }
 
-  await adapter.deleteMany({
+  await db.deleteMany({
     model: "message",
     where: [
       { field: "threadId", value: threadId },
@@ -145,10 +141,10 @@ export interface LoadThreadOptions extends AdapterContextOptions {
 }
 
 export async function loadThread<Message extends UIMessage>({
-  adapter,
+  db,
   threadId,
 }: LoadThreadOptions): Promise<Message[]> {
-  const records = await adapter.findMany<Record<string, unknown>>({
+  const records = await db.findMany<Record<string, unknown>>({
     model: "message",
     where: [{ field: "threadId", value: threadId }],
     sortBy: { field: "createdAt", direction: "asc" },
@@ -234,14 +230,14 @@ export interface GetThreadsOptions extends AdapterContextOptions {
 }
 
 export const getThreads = async ({
-  adapter,
+  db,
   userId,
 }: GetThreadsOptions): Promise<DBThread[]> => {
   const where = userId
     ? ([{ field: "userId", value: userId }] as AdapterWhere[])
     : undefined;
 
-  const records = await adapter.findMany<DBThread>({
+  const records = await db.findMany<DBThread>({
     model: "thread",
     where,
     sortBy: { field: "updatedAt", direction: "desc" },
@@ -259,14 +255,14 @@ export interface GetCompleteMessagesOptions<Message extends UIMessage>
 export async function getCompleteMessages<
   Message extends UIMessage = AgentStartUIMessage,
 >({
-  adapter,
+  db,
   message,
   threadId,
 }: GetCompleteMessagesOptions<Message>): Promise<Message[] | undefined> {
-  await deleteMessagesAfter({ adapter, threadId, messageId: message.id });
+  await deleteMessagesAfter({ db, threadId, messageId: message.id });
   await upsertMessage({
-    adapter,
+    db,
     payload: { threadId, id: message.id, message },
   });
-  return loadThread<Message>({ adapter, threadId });
+  return loadThread<Message>({ db, threadId });
 }

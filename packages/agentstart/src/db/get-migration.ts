@@ -13,6 +13,7 @@ import type {
   AlterTableColumnAlteringBuilder,
   CreateTableBuilder,
 } from "kysely";
+import { sql } from "kysely";
 import { createKyselyAdapter } from "@/db/adapter/kysely/dialect";
 import type { AgentStartOptions, KyselyDatabaseType } from "@/types";
 import type { FieldAttribute, FieldType } from ".";
@@ -74,6 +75,9 @@ export function matchType(
   dbType: KyselyDatabaseType,
 ) {
   if (fieldType === "string[]" || fieldType === "number[]") {
+    return columnDataType.toLowerCase().includes("json");
+  }
+  if (fieldType === "json") {
     return columnDataType.toLowerCase().includes("json");
   }
   const types = map[dbType];
@@ -198,6 +202,12 @@ export async function getMigrations(config: Omit<AgentStartOptions, "agent">) {
         mysql: "boolean",
         mssql: "smallint",
       },
+      json: {
+        sqlite: "text",
+        postgres: "jsonb",
+        mysql: "json",
+        mssql: "nvarchar(max)" as unknown as string,
+      },
       number: {
         sqlite: field.bigint ? "bigint" : "integer",
         postgres: field.bigint ? "bigint" : "integer",
@@ -210,7 +220,7 @@ export async function getMigrations(config: Omit<AgentStartOptions, "agent">) {
         mysql: "datetime",
         mssql: "datetime",
       },
-    } as const;
+    };
     if (dbType === "sqlite" && (type === "string[]" || type === "number[]")) {
       return "text";
     }
@@ -231,7 +241,7 @@ export async function getMigrations(config: Omit<AgentStartOptions, "agent">) {
         const type = getType(field);
         const exec = db.schema
           .alterTable(table.table)
-          .addColumn(fieldName, type, (col) => {
+          .addColumn(fieldName, sql.raw(type), (col) => {
             col = field.required !== false ? col.notNull() : col;
             if (field.references) {
               col = col.references(
@@ -253,7 +263,7 @@ export async function getMigrations(config: Omit<AgentStartOptions, "agent">) {
         .createTable(table.table)
         .addColumn(
           "id",
-          dbType === "mysql" || dbType === "mssql" ? "varchar(36)" : "text",
+          sql.raw(dbType === "mysql" || dbType === "mssql" ? "varchar(36)" : "text"),
           (col) => col.primaryKey().notNull(),
         );
 
@@ -262,7 +272,7 @@ export async function getMigrations(config: Omit<AgentStartOptions, "agent">) {
           continue;
         }
         const type = getType(field);
-        dbT = dbT.addColumn(fieldName, type, (col) => {
+        dbT = dbT.addColumn(fieldName, sql.raw(type), (col) => {
           col = field.required !== false ? col.notNull() : col;
           if (field.references) {
             col = col.references(

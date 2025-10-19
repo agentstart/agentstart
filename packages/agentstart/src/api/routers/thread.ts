@@ -19,13 +19,13 @@ import { getAdapter } from "@/db";
 
 export const threadRouter = {
   list: publicProcedure.handler(async ({ context }) => {
-    const adapter = await getAdapter(context);
+    const db = await getAdapter(context);
     const userId = context.getUserId
       ? await context.getUserId(context.headers)
       : undefined;
 
     const threads = await getThreads({
-      adapter,
+      db,
       userId,
     });
 
@@ -78,10 +78,10 @@ export const threadRouter = {
   loadMessages: publicProcedure
     .input(z.object({ threadId: z.string() }))
     .handler(async ({ input, context }) => {
-      const adapter = await getAdapter(context);
+      const db = await getAdapter(context);
 
       const messages = await loadThread({
-        adapter,
+        db,
         threadId: input.threadId,
       });
       return messages;

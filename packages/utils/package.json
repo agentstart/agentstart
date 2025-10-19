@@ -15,6 +15,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "uuid": "catalog:",
     "nanoid": "catalog:",
     "shiki": "catalog:",
     "std-env": "catalog:"

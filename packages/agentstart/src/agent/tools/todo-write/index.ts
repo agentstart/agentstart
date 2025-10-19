@@ -1,22 +1,26 @@
-import { randomUUID } from "node:crypto";
+import { generateUuidFromData } from "@agentstart/utils";
 import { tool } from "ai";
+import type { BaseContext } from "@/agent/context";
 import {
   type AgentStartToolOutput,
   toolInputSchema,
   toolOutputSchema,
 } from "@/agent/messages";
+import type { DBTodo } from "@/db";
 import description from "./description";
 
 export const todoWrite = tool({
   description,
   inputSchema: toolInputSchema.shape["todo-write"],
   outputSchema: toolOutputSchema.shape["todo-write"],
-  async *execute({ todos }) {
+  async *execute({ todos }, { experimental_context: context }) {
+    const { threadId, db } = context as BaseContext;
+
     // Add IDs to todos that don't have them
     const todosWithIds = todos.map((todo) => ({
       ...todo,
-      id: todo.id ?? randomUUID(),
-      priority: todo.priority || "medium",
+      id: todo.id ?? generateUuidFromData(`${threadId}-${todo.content}`),
+      priority: todo.priority,
     }));
 
     // Validate that only one task is inProgress
@@ -38,40 +42,29 @@ export const todoWrite = tool({
       } satisfies AgentStartToolOutput["todo-write"];
     }
 
-    // Calculate statistics
-    const stats = {
-      total: todosWithIds.length,
-      completed: todosWithIds.filter((todo) => todo.status === "completed")
-        .length,
-      inProgress: inProgressCount,
-      pending: todosWithIds.filter((todo) => todo.status === "pending").length,
-      highPriority: todosWithIds.filter((todo) => todo.priority === "high")
-        .length,
-      mediumPriority: todosWithIds.filter((todo) => todo.priority === "medium")
-        .length,
-      lowPriority: todosWithIds.filter((todo) => todo.priority === "low")
-        .length,
+    const now = new Date();
+    const document: Omit<DBTodo, "createdAt" | "updatedAt"> = {
+      id: generateUuidFromData(threadId),
+      threadId,
+      todos: todosWithIds,
     };
+    await db.upsert({
+      model: "todo",
+      where: [{ field: "threadId", value: threadId }],
+      create: {
+        ...document,
+        createdAt: now,
+        updatedAt: now,
+      },
+      update: { ...document, updatedAt: now },
+    });
 
-    // Generate summary message
-    const completionPercentage =
-      stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
-
-    let prompt = `Todo list updated successfully. `;
-    prompt += `${stats.total} total task${stats.total !== 1 ? "s" : ""}: `;
-    prompt += `${stats.completed} completed (${completionPercentage}%), `;
-    prompt += `${stats.inProgress} in progress, `;
-    prompt += `${stats.pending} pending.`;
-
-    if (stats.highPriority > 0) {
-      prompt += ` ${stats.highPriority} high priority task${
-        stats.highPriority !== 1 ? "s" : ""
-      }.`;
-    }
+    const prompt = `${todos.filter((x) => x.status !== "completed").length} todos:
+${JSON.stringify(todos, null, 2)}`;
 
     yield {
       status: "done" as const,
-      metadata: { todos: todosWithIds, stats },
+      metadata: { todos: todosWithIds },
       prompt,
     } satisfies AgentStartToolOutput["todo-write"];
   },

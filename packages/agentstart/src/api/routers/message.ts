@@ -24,9 +24,9 @@ export const messageRouter = {
     )
     .handler(async ({ input, context, errors }) => {
       try {
-        const adapter = await getAdapter(context);
+        const db = await getAdapter(context);
         const messages = await loadThread<AgentStartUIMessage>({
-          adapter,
+          db,
           threadId: input.threadId,
         });
         return messages;
