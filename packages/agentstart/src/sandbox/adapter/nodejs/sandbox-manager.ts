@@ -11,7 +11,6 @@ SEARCHABLE: nodejs sandbox manager, local sandbox implementation, adapter lifecy
 agent-frontmatter:end */
 
 import type { BashAPI } from "@/sandbox/types/bash";
-import type { DevAPI } from "@/sandbox/types/dev";
 import type { FileSystemAPI } from "@/sandbox/types/file-system";
 import type { GitAPI } from "@/sandbox/types/git";
 import type {
@@ -21,7 +20,6 @@ import type {
 } from "@/sandbox/types/sandbox-manager";
 
 import { Bash } from "./bash";
-import { Dev } from "./dev";
 import { FileSystem } from "./file-system";
 import { Git } from "./git";
 
@@ -62,7 +60,6 @@ export class SandboxManager implements SandboxManagerAPI {
   readonly fs: FileSystemAPI;
   readonly bash: BashAPI;
   readonly git: GitAPI;
-  readonly dev: DevAPI;
 
   private sandboxId: string;
   private createdAt: number = Date.now();
@@ -79,7 +76,6 @@ export class SandboxManager implements SandboxManagerAPI {
     this.fs = new FileSystem(this.workingDirectory);
     this.bash = new Bash(this.workingDirectory);
     this.git = new Git(this.workingDirectory);
-    this.dev = new Dev(this.workingDirectory);
 
     instances.set(this.sandboxId, this);
   }
@@ -276,7 +272,6 @@ export class SandboxManager implements SandboxManagerAPI {
       );
       (this as { bash: BashAPI }).bash = new Bash(this.workingDirectory);
       (this as { git: GitAPI }).git = new Git(this.workingDirectory);
-      (this as { dev: DevAPI }).dev = new Dev(this.workingDirectory);
     }
   }
 

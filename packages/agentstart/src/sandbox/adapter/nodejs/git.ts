@@ -29,6 +29,17 @@ import type {
   GitStatus,
   GitSyncOptions,
 } from "@/sandbox/types/git";
+import {
+  buildGitAddCommand,
+  buildGitCheckoutCommand,
+  buildGitCloneCommand,
+  buildGitCommitCommand,
+  buildGitFetchCommand,
+  buildGitInitCommand,
+  buildGitSyncCommand,
+  extractCommitHash,
+  parseGitStatusPorcelain,
+} from "@/sandbox/utils/git";
 
 import { Bash } from "./bash";
 
@@ -152,14 +163,7 @@ export class Git implements GitAPI {
     const resolvedPath = targetPath
       ? path.join(this.workingDirectory, targetPath)
       : this.workingDirectory;
-    let command = "init";
-
-    if (options?.initialBranch) {
-      command += ` --initial-branch=${options.initialBranch}`;
-    }
-    if (options?.bare) {
-      command += " --bare";
-    }
+    const command = buildGitInitCommand(options);
 
     const result = await this.executeGitCommand(command, resolvedPath);
 
@@ -175,23 +179,7 @@ export class Git implements GitAPI {
    * Clone a git repository
    */
   async clone(url: string, options?: GitCloneOptions): Promise<GitResult> {
-    let command = `clone "${url}"`;
-
-    if (options?.directory) {
-      command += ` "${options.directory}"`;
-    }
-    if (options?.branch) {
-      command += ` --branch ${options.branch}`;
-    }
-    if (options?.depth) {
-      command += ` --depth ${options.depth}`;
-    }
-    if (options?.recursive) {
-      command += " --recursive";
-    }
-    if (options?.bare) {
-      command += " --bare";
-    }
+    const command = buildGitCloneCommand(url, options);
 
     const result = await this.executeGitCommand(command);
 
@@ -226,71 +214,7 @@ export class Git implements GitAPI {
       resolvedPath,
     );
 
-    const lines = result.stdout.split("\n").filter((line) => line);
-    const status: GitStatus = {
-      branch: "unknown",
-      clean: true,
-      modified: [],
-      staged: [],
-      untracked: [],
-      deleted: [],
-      renamed: [],
-    };
-
-    for (const line of lines) {
-      if (line.startsWith("##")) {
-        // Branch info
-        const branchMatch = /## (.+?)(?:\.\.\.(.+))?$/.exec(line);
-        if (branchMatch?.[1]) {
-          // Handle "No commits yet on <branch>" for new repositories
-          const noCommitsMatch = /No commits yet on (.+)/.exec(branchMatch[1]);
-          if (noCommitsMatch?.[1]) {
-            status.branch = noCommitsMatch[1];
-          } else {
-            status.branch = branchMatch[1];
-          }
-          if (branchMatch[2]) {
-            const aheadBehind = /\[ahead (\d+)(?:, behind (\d+))?\]/.exec(
-              branchMatch[2],
-            );
-            if (aheadBehind?.[1]) {
-              status.ahead = parseInt(aheadBehind[1], 10) || 0;
-              status.behind = aheadBehind[2] ? parseInt(aheadBehind[2], 10) : 0;
-            }
-          }
-        }
-      } else {
-        status.clean = false;
-        const statusCode = line.substring(0, 2);
-        const filename = line.substring(3);
-
-        if (statusCode.startsWith("M") || statusCode[1] === "M") {
-          status.modified.push(filename);
-        }
-        if (
-          statusCode.startsWith("A") ||
-          statusCode.startsWith("M") ||
-          statusCode.startsWith("D") ||
-          statusCode.startsWith("R")
-        ) {
-          status.staged.push(filename);
-        }
-        if (statusCode === "??") {
-          status.untracked.push(filename);
-        }
-        if (statusCode.startsWith("D") || statusCode[1] === "D") {
-          status.deleted.push(filename);
-        }
-        if (statusCode.startsWith("R")) {
-          const [from, to] = filename.split(" -> ");
-          if (from && to) {
-            status.renamed.push({ from, to });
-          }
-        }
-      }
-    }
-
-    return status;
+    return parseGitStatusPorcelain(result.stdout);
   }
 
   /**
@@ -303,16 +227,7 @@ export class Git implements GitAPI {
       update?: boolean;
     },
   ): Promise<GitResult> {
-    const fileList = Array.isArray(files) ? files.join(" ") : files;
-    let command = `add ${fileList}`;
-
-    if (options?.force) {
-      command += " --force";
-    }
-    if (options?.update) {
-      command += " --update";
-    }
-
+    const command = buildGitAddCommand(files, options);
     const result = await this.executeGitCommand(command);
 
     return {
@@ -329,38 +244,9 @@ export class Git implements GitAPI {
   async commit(
     options: GitCommitOptions,
   ): Promise<GitResult & { hash?: string }> {
-    let command = "commit";
-
-    if (options.all) {
-      command += " --all";
-    }
-    if (options.amend) {
-      command += " --amend";
-    }
-    if (options.noVerify) {
-      command += " --no-verify";
-    }
-    if (options.signoff) {
-      command += " --signoff";
-    }
-    if (options.author) {
-      command += ` --author="${options.author.name} <${options.author.email}>"`;
-    }
-
-    command += ` -m "${options.message.replace(/"/g, '\\"')}"`;
-
+    const command = buildGitCommitCommand(options);
     const result = await this.executeGitCommand(command);
-
-    // Extract commit hash from output
-    let hash: string | undefined;
-    // Handle both regular commits and root commits
-    const hashMatch =
-      /\[(?:[\w\s-]+\s+)?(?:\(root-commit\)\s+)?([a-f0-9]+)\]/.exec(
-        result.stdout,
-      );
-    if (hashMatch?.[1]) {
-      hash = hashMatch[1];
-    }
+    const hash = extractCommitHash(result.stdout);
 
     return {
       success: result.exitCode === 0,
@@ -375,24 +261,7 @@ export class Git implements GitAPI {
    * Push commits to remote repository
    */
   async push(options?: GitSyncOptions): Promise<GitResult> {
-    let command = "push";
-
-    if (options?.remote) {
-      command += ` ${options.remote}`;
-    }
-    if (options?.branch) {
-      command += ` ${options.branch}`;
-    }
-    if (options?.force) {
-      command += " --force";
-    }
-    if (options?.setUpstream) {
-      command += " --set-upstream";
-    }
-    if (options?.tags) {
-      command += " --tags";
-    }
-
+    const command = buildGitSyncCommand("push", options);
     const result = await this.executeGitCommand(command);
 
     return {
@@ -407,24 +276,7 @@ export class Git implements GitAPI {
    * Pull changes from remote repository
    */
   async pull(options?: GitSyncOptions): Promise<GitResult> {
-    let command = "pull";
-
-    if (options?.remote) {
-      command += ` ${options.remote}`;
-    }
-    if (options?.branch) {
-      command += ` ${options.branch}`;
-    }
-    if (options?.force) {
-      command += " --force";
-    }
-    if (options?.rebase) {
-      command += " --rebase";
-    }
-    if (options?.tags) {
-      command += " --tags";
-    }
-
+    const command = buildGitSyncCommand("pull", options);
     const result = await this.executeGitCommand(command);
 
     return {
@@ -445,23 +297,7 @@ export class Git implements GitAPI {
     prune?: boolean;
     tags?: boolean;
   }): Promise<GitResult> {
-    let command = "fetch";
-
-    if (options?.all) {
-      command += " --all";
-    } else if (options?.remote) {
-      command += ` ${options.remote}`;
-      if (options?.branch) {
-        command += ` ${options.branch}`;
-      }
-    }
-    if (options?.prune) {
-      command += " --prune";
-    }
-    if (options?.tags) {
-      command += " --tags";
-    }
-
+    const command = buildGitFetchCommand(options);
     const result = await this.executeGitCommand(command);
 
     return {
@@ -483,20 +319,7 @@ export class Git implements GitAPI {
       file?: boolean;
     },
   ): Promise<GitResult> {
-    let command = "checkout";
-
-    if (options?.create) {
-      command += " -b";
-    }
-    if (options?.force) {
-      command += " --force";
-    }
-    if (options?.file) {
-      command += " --";
-    }
-
-    command += ` ${target}`;
-
+    const command = buildGitCheckoutCommand(target, options);
     const result = await this.executeGitCommand(command);
 
     return {

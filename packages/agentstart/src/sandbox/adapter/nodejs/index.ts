@@ -9,7 +9,6 @@ SEARCHABLE: nodejs sandbox adapter, sandbox exports, node runtime wrappers
 agent-frontmatter:end */
 
 export { Bash } from "./bash";
-export { Dev } from "./dev";
 export { FileSystem } from "./file-system";
 export { Git } from "./git";
 export { SandboxManager } from "./sandbox-manager";

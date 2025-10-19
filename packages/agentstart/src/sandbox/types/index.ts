@@ -10,7 +10,6 @@ SEARCHABLE: sandbox types index, barrel export, typings aggregator
 agent-frontmatter:end */
 
 export * from "./bash";
-export * from "./dev";
 export * from "./file-system";
 export * from "./git";
 export * from "./sandbox-manager";

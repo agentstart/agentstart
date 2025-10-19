@@ -13,7 +13,7 @@ agent-frontmatter:end */
 import * as fs from "node:fs/promises";
 import path from "node:path";
 import { type Options as ExecaOptions, execaCommand } from "execa";
-import fg from "fast-glob";
+import glob from "fast-glob";
 
 import type {
   BashAPI,
@@ -24,15 +24,7 @@ import type {
   ShellCommandPromise,
   ShellCommandResult,
 } from "@/sandbox/types/bash";
-
-const toText = (chunk: unknown): string => {
-  if (typeof chunk === "string") return chunk;
-  if (chunk instanceof Uint8Array) {
-    return Buffer.from(chunk).toString("utf8");
-  }
-  if (chunk === null || chunk === undefined) return "";
-  return String(chunk);
-};
+import { chunkToString, interpolateTemplate } from "@/sandbox/utils/text";
 
 /**
  * Node.js implementation of BashAPI
@@ -69,7 +61,7 @@ export class Bash implements BashAPI {
       vals: unknown[],
       providedOptions: ShellCommandOptions = {},
     ): ShellCommandPromise => {
-      const command = this.buildCommand(strings, vals);
+      const command = interpolateTemplate(strings, vals);
       return this.run(command, providedOptions);
     };
 
@@ -99,73 +91,58 @@ export class Bash implements BashAPI {
     };
 
     const child = execaCommand(command, execaOptions);
-    const stdoutChunks: string[] = [];
-    const stderrChunks: string[] = [];
 
-    if (options.background && typeof child.unref === "function") {
-      child.unref();
-    }
+    if (options.background) child.unref?.();
 
-    let requestTimeout: NodeJS.Timeout | null = null;
     let abortReason: string | undefined;
-    if (typeof options.requestTimeoutMs === "number") {
-      abortReason = `Command timed out after ${options.requestTimeoutMs}ms`;
-      requestTimeout = setTimeout(() => {
-        if (!child.killed) {
-          child.kill("SIGTERM");
+    const requestTimeout = options.requestTimeoutMs
+      ? setTimeout(() => {
+          abortReason = `Command timed out after ${options.requestTimeoutMs}ms`;
+          if (!child.killed) child.kill("SIGTERM");
+        }, options.requestTimeoutMs)
+      : null;
+    requestTimeout?.unref?.();
+
+    const createStreamHandler =
+      (callback?: (text: string) => void | Promise<void>) =>
+      (chunk: unknown): void => {
+        if (!callback) return;
+        const text = chunkToString(chunk);
+        if (text) {
+          Promise.resolve(callback(text)).catch((error) => {
+            console.warn(
+              `Stream handler failed for command '${command}':`,
+              error,
+            );
+          });
         }
-      }, options.requestTimeoutMs);
-      requestTimeout.unref?.();
-    }
+      };
 
-    const handleStdout = (chunk: unknown): void => {
-      const text = toText(chunk);
-      if (text) {
-        stdoutChunks.push(text);
-      }
-      if (options.onStdout) {
-        Promise.resolve(options.onStdout(text)).catch((error) => {
-          console.warn(
-            `onStdout handler failed for command '${command}':`,
-            error,
-          );
-        });
-      }
-    };
+    child.stdout?.on("data", createStreamHandler(options.onStdout));
+    child.stderr?.on("data", createStreamHandler(options.onStderr));
 
-    const handleStderr = (chunk: unknown): void => {
-      const text = toText(chunk);
-      if (text) {
-        stderrChunks.push(text);
-      }
-      if (options.onStderr) {
-        Promise.resolve(options.onStderr(text)).catch((error) => {
-          console.warn(
-            `onStderr handler failed for command '${command}':`,
-            error,
-          );
-        });
-      }
-    };
-
-    child.stdout?.on("data", handleStdout);
-    child.stderr?.on("data", handleStderr);
+    const buildResult = (
+      stdout: string,
+      stderr: string,
+      exitCode: number,
+      errorMessage?: string,
+    ): ShellCommandResult => ({
+      exitCode,
+      stdout,
+      stderr,
+      error: errorMessage || (exitCode === 0 ? undefined : stderr),
+      command,
+      duration: Date.now() - start,
+    });
 
     try {
       const result = await child;
-      const stdout = stdoutChunks.join("") || toText(result.stdout);
-      const stderr = stderrChunks.join("") || toText(result.stderr);
-      const exitCode =
-        typeof result.exitCode === "number" ? result.exitCode : 0;
-
-      return {
-        exitCode,
-        stdout,
-        stderr,
-        error: exitCode === 0 ? undefined : stderr || result.shortMessage,
-        command,
-        duration: Date.now() - start,
-      };
+      return buildResult(
+        chunkToString(result.stdout),
+        chunkToString(result.stderr),
+        result.exitCode ?? 0,
+        result.exitCode === 0 ? undefined : result.shortMessage,
+      );
     } catch (error) {
       const err = error as {
         exitCode?: number;
@@ -175,37 +152,15 @@ export class Bash implements BashAPI {
         message?: string;
       };
 
-      const stdout = stdoutChunks.join("") || toText(err.stdout);
-      const stderr = stderrChunks.join("") || toText(err.stderr);
-      const message =
-        abortReason || err.shortMessage || err.message || String(error);
-
-      return {
-        exitCode: typeof err.exitCode === "number" ? err.exitCode : 1,
-        stdout,
-        stderr: stderr || message,
-        error: message,
-        command,
-        duration: Date.now() - start,
-      };
+      return buildResult(
+        chunkToString(err.stdout),
+        chunkToString(err.stderr),
+        err.exitCode ?? 1,
+        abortReason || err.shortMessage || err.message || String(error),
+      );
     } finally {
-      if (requestTimeout) {
-        clearTimeout(requestTimeout);
-      }
+      if (requestTimeout) clearTimeout(requestTimeout);
     }
-  }
-
-  private buildCommand(
-    strings: TemplateStringsArray,
-    values: unknown[],
-  ): string {
-    return strings.reduce(
-      (command, segment, index) =>
-        command +
-        segment +
-        (index < values.length ? String(values[index]) : ""),
-      "",
-    );
   }
 
   /**
@@ -253,7 +208,7 @@ export class Bash implements BashAPI {
       const pattern = recursive
         ? includePattern
         : includePattern.replace(/\*\*/g, "*");
-      const matches = await fg(pattern, {
+      const matches = await glob(pattern, {
         cwd: searchPath,
         ignore: excludes,
         onlyFiles: true,

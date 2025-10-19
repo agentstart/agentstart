@@ -12,7 +12,6 @@ agent-frontmatter:end */
 
 import type { KV } from "@/kv";
 import type { BashAPI } from "./bash";
-import type { DevAPI } from "./dev";
 import type { FileSystemAPI } from "./file-system";
 import type { GitAPI } from "./git";
 
@@ -109,11 +108,6 @@ export interface SandboxManagerAPI {
    * Git command surface exposed by the sandbox.
    */
   readonly git: GitAPI;
-
-  /**
-   * Development command lifecycle controls.
-   */
-  readonly dev: DevAPI;
 
   /**
    * Access the underlying provider-specific sandbox instance.

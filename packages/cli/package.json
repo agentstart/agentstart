@@ -37,7 +37,6 @@
     "@agentstart/tsconfig": "workspace:*",
     "@types/fs-extra": "catalog:",
     "@types/semver": "catalog:",
-    "diff": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
@@ -60,12 +59,10 @@
     "drizzle-orm": "catalog:",
     "figlet": "catalog:",
     "fs-extra": "catalog:",
-    "get-tsconfig": "catalog:",
     "prettier": "catalog:",
     "prisma": "catalog:",
     "prompts": "catalog:",
     "semver": "catalog:",
-    "tinyexec": "catalog:",
     "yocto-spinner": "catalog:",
     "zod": "catalog:"
   },

@@ -47,7 +47,6 @@
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
     "cmdk": "catalog:",
-    "date-fns": "catalog:",
     "embla-carousel-react": "catalog:",
     "input-otp": "catalog:",
     "lucide-react": "catalog:",
@@ -58,7 +57,6 @@
     "react-hook-form": "catalog:",
     "react-resizable-panels": "catalog:",
     "react-syntax-highlighter": "catalog:",
-    "recharts": "catalog:",
     "sonner": "catalog:",
     "streamdown": "catalog:",
     "tailwind-merge": "catalog:",
@@ -79,7 +77,6 @@
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "tsdown": "catalog:",
     "typescript": "catalog:"
   }
 }

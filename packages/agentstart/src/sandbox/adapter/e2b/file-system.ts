@@ -10,6 +10,23 @@ import type {
 } from "@/sandbox/types/file-system";
 import { DEFAULT_WORKING_DIRECTORY } from "./constants";
 
+const GLOB_SPECIAL_CHARS_REGEX = /([.+^=!:${}()|[\]\\])/g;
+const GLOB_DOUBLE_WILDCARD = /\*\*/g;
+const GLOB_SINGLE_STAR = /\*/g;
+const GLOB_SINGLE_WILDCARD = /\?/g;
+const DOUBLE_WILDCARD_PLACEHOLDER = /__DOUBLE_WILDCARD__/g;
+
+const escapeForRegex = (pattern: string): string =>
+  pattern
+    .replace(GLOB_DOUBLE_WILDCARD, "__DOUBLE_WILDCARD__")
+    .replace(GLOB_SPECIAL_CHARS_REGEX, "\\$1")
+    .replace(DOUBLE_WILDCARD_PLACEHOLDER, ".*")
+    .replace(GLOB_SINGLE_STAR, "[^/]*")
+    .replace(GLOB_SINGLE_WILDCARD, "[^/]");
+
+const globToRegex = (pattern: string): RegExp =>
+  new RegExp(`^${escapeForRegex(pattern)}$`);
+
 /**
  * E2B Sandbox implementation of FileSystemAPI
  * Provides file system operations using E2B Sandbox native API
@@ -20,6 +37,7 @@ export class FileSystem implements FileSystemAPI {
   private workingDirectory: string = DEFAULT_WORKING_DIRECTORY;
   private activeWatches = new Map<string, WatchHandleImpl>();
   private watchIdCounter = 0;
+  private pathTypeCache = new Map<string, "dir" | "file">();
 
   constructor(
     sandbox: Sandbox,
@@ -75,6 +93,12 @@ export class FileSystem implements FileSystemAPI {
         isFile: () => entry.type === "file",
         isDirectory: () => entry.type === "dir",
       };
+
+      const entryAbsolutePath = `${absolutePath}/${name}`.replace(/\/+/g, "/");
+      this.pathTypeCache.set(
+        entryAbsolutePath,
+        entry.type === "dir" ? "dir" : "file",
+      );
 
       results.push(dirent);
 
@@ -195,6 +219,7 @@ export class FileSystem implements FileSystemAPI {
 
     // Write file using sandbox API
     await this.sandbox.files.write(absolutePath, content);
+    this.pathTypeCache.set(absolutePath, "file");
   }
 
   /**
@@ -225,6 +250,7 @@ export class FileSystem implements FileSystemAPI {
           );
         }
       }
+      this.pathTypeCache.set(absolutePath, "dir");
     } catch (error) {
       const err = error as { message?: string };
       if (err.message?.includes("already exists")) {
@@ -267,6 +293,7 @@ export class FileSystem implements FileSystemAPI {
 
       // E2B's remove handles both files and directories
       await this.sandbox.files.remove(absolutePath);
+      this.pathTypeCache.delete(absolutePath);
     } catch (error) {
       const err = error as { message?: string };
       if (!options?.force) {
@@ -288,6 +315,9 @@ export class FileSystem implements FileSystemAPI {
    * Renames or moves a file or directory
    */
   async rename(oldPath: string, newPath: string): Promise<void> {
+    // Auto-refresh heartbeat before operation
+    await this.manager?.keepAlive();
+
     const absoluteOldPath = this.resolvePath(oldPath);
     const absoluteNewPath = this.resolvePath(newPath);
 
@@ -303,6 +333,11 @@ export class FileSystem implements FileSystemAPI {
 
       // Use E2B's rename method
       await this.sandbox.files.rename(absoluteOldPath, absoluteNewPath);
+      const cachedType = this.pathTypeCache.get(absoluteOldPath);
+      if (cachedType) {
+        this.pathTypeCache.delete(absoluteOldPath);
+        this.pathTypeCache.set(absoluteNewPath, cachedType);
+      }
     } catch (error) {
       const err = error as { message?: string };
       if (
@@ -329,6 +364,9 @@ export class FileSystem implements FileSystemAPI {
     isDirectory(): boolean;
     isSymbolicLink(): boolean;
   }> {
+    // Auto-refresh heartbeat before operation
+    await this.manager?.keepAlive();
+
     const absolutePath = this.resolvePath(filePath);
 
     try {
@@ -371,6 +409,9 @@ export class FileSystem implements FileSystemAPI {
    * Check if a file or directory exists
    */
   async exists(path: string): Promise<boolean> {
+    // Auto-refresh heartbeat before operation
+    await this.manager?.keepAlive();
+
     const absolutePath = this.resolvePath(path);
 
     try {
@@ -393,23 +434,20 @@ export class FileSystem implements FileSystemAPI {
       withFileTypes?: boolean;
     },
   ): Promise<string[] | Dirent[]> {
+    // Auto-refresh heartbeat before operation
+    await this.manager?.keepAlive();
+
     const patterns = Array.isArray(pattern) ? pattern : [pattern];
     const cwd = options?.cwd
       ? this.resolvePath(options.cwd)
       : this.workingDirectory;
 
-    const allMatches = new Set<string>();
-
-    // Helper function to match pattern against path
-    const matchesPattern = (path: string, pat: string): boolean => {
-      // Simple glob matching
-      const regexPattern = pat
-        .replace(/\*\*/g, ".*")
-        .replace(/\*/g, "[^/]*")
-        .replace(/\?/g, "[^/]");
-      const regex = new RegExp(`^${regexPattern}$`);
-      return regex.test(path);
-    };
+    const compiledPatterns = patterns.map(globToRegex);
+    const matches = new Set<string>();
+    const metadata = new Map<
+      string,
+      { fullPath: string; type: "file" | "dir" }
+    >();
 
     // Recursive function to search directories
     const searchDirectory = async (
@@ -417,6 +455,7 @@ export class FileSystem implements FileSystemAPI {
       relativePath: string = "",
     ): Promise<void> => {
       try {
+        await this.manager?.keepAlive();
         const entries = await this.sandbox.files.list(dir);
 
         for (const entry of entries) {
@@ -424,20 +463,23 @@ export class FileSystem implements FileSystemAPI {
             ? `${relativePath}/${entry.name}`.replace(/\/+/g, "/")
             : entry.name;
           const entryFullPath = `${dir}/${entry.name}`.replace(/\/+/g, "/");
+          this.pathTypeCache.set(
+            entryFullPath,
+            entry.type === "dir" ? "dir" : "file",
+          );
+          metadata.set(entryRelativePath, {
+            fullPath: entryFullPath,
+            type: entry.type === "dir" ? "dir" : "file",
+          });
 
           // Check if this entry matches any pattern
-          for (const pat of patterns) {
-            if (matchesPattern(entryRelativePath, pat)) {
-              allMatches.add(entryRelativePath);
-            }
+          if (compiledPatterns.some((regex) => regex.test(entryRelativePath))) {
+            matches.add(entryRelativePath);
           }
 
-          // Recursively search subdirectories if pattern includes **
           if (entry.type === "dir") {
-            const hasRecursivePattern = patterns.some((p) => p.includes("**"));
-            if (hasRecursivePattern) {
-              await searchDirectory(entryFullPath, entryRelativePath);
-            }
+            await this.manager?.keepAlive();
+            await searchDirectory(entryFullPath, entryRelativePath);
           }
         }
       } catch {
@@ -448,25 +490,24 @@ export class FileSystem implements FileSystemAPI {
     // Start searching from cwd
     await searchDirectory(cwd);
 
+    const excludeOption = options?.exclude;
+    const excludeRegexes =
+      Array.isArray(excludeOption) && excludeOption.length > 0
+        ? excludeOption.map(globToRegex)
+        : [];
+    const excludeFn =
+      typeof excludeOption === "function" ? excludeOption : undefined;
+
+    const shouldExclude = (candidate: string): boolean => {
+      if (!excludeOption) return false;
+      if (excludeFn) return excludeFn(candidate);
+      return excludeRegexes.some((regex) => regex.test(candidate));
+    };
+
     // Apply exclude patterns
     const filteredMatches: string[] = [];
-    for (const match of allMatches) {
-      let shouldInclude = true;
-
-      if (options?.exclude) {
-        if (typeof options.exclude === "function") {
-          shouldInclude = !options.exclude(match);
-        } else {
-          for (const excludePattern of options.exclude) {
-            if (match.includes(excludePattern)) {
-              shouldInclude = false;
-              break;
-            }
-          }
-        }
-      }
-
-      if (shouldInclude) {
+    for (const match of matches) {
+      if (!shouldExclude(match)) {
         filteredMatches.push(match);
       }
     }
@@ -478,32 +519,33 @@ export class FileSystem implements FileSystemAPI {
       const dirents: Dirent[] = [];
 
       for (const match of sortedMatches) {
-        const fullPath = `${cwd}/${match}`.replace(/\/+/g, "/");
-        try {
-          const info = await this.sandbox.files.getInfo(fullPath);
-          const isDirectory = info.type === "dir";
-          const parentPath = fullPath.substring(0, fullPath.lastIndexOf("/"));
-          const name = match.includes("/")
-            ? match.substring(match.lastIndexOf("/") + 1)
-            : match;
-          const relativePath = fullPath.startsWith(this.workingDirectory)
-            ? fullPath.slice(this.workingDirectory.length) || "/"
-            : fullPath;
+        const meta = metadata.get(match);
+        if (!meta) continue;
 
-          dirents.push({
-            name: name.startsWith(this.workingDirectory)
-              ? name.slice(this.workingDirectory.length) || "/"
-              : name,
-            path: relativePath,
-            parentPath: parentPath.startsWith(this.workingDirectory)
-              ? parentPath.slice(this.workingDirectory.length) || "/"
-              : parentPath,
-            isFile: () => !isDirectory,
-            isDirectory: () => isDirectory,
-          });
-        } catch {
-          // Skip files that can't be accessed
-        }
+        const relativePath = meta.fullPath.startsWith(this.workingDirectory)
+          ? meta.fullPath.slice(this.workingDirectory.length) || "/"
+          : meta.fullPath;
+        const normalizedRelativeRaw = relativePath.replace(/\/+/g, "/");
+        const normalizedRelative = normalizedRelativeRaw.startsWith("/")
+          ? normalizedRelativeRaw || "/"
+          : `/${normalizedRelativeRaw}`;
+        const separatorIndex = normalizedRelative.lastIndexOf("/");
+        const parentPath =
+          separatorIndex <= 0
+            ? "/"
+            : normalizedRelative.slice(0, separatorIndex) || "/";
+        const name =
+          match.includes("/") && match.lastIndexOf("/") < match.length - 1
+            ? match.slice(match.lastIndexOf("/") + 1)
+            : match;
+
+        dirents.push({
+          name: name || normalizedRelative,
+          path: normalizedRelative,
+          parentPath,
+          isFile: () => meta.type === "file",
+          isDirectory: () => meta.type === "dir",
+        });
       }
 
       return dirents;
@@ -520,6 +562,9 @@ export class FileSystem implements FileSystemAPI {
     callback: (event: FileSystemEvent) => void,
     options?: WatchOptions,
   ): Promise<WatchHandle> {
+    // Auto-refresh heartbeat before operation
+    await this.manager?.keepAlive();
+
     const absolutePath = this.resolvePath(path);
     const watchId = `watch-${++this.watchIdCounter}`;
 
@@ -540,23 +585,18 @@ export class FileSystem implements FileSystemAPI {
       }
     };
 
+    const ignoreRegexes =
+      options?.ignore?.map((pattern) => globToRegex(pattern)) ?? [];
+
     // Check if path should be ignored
     const shouldIgnore = (filePath: string): boolean => {
-      if (!options?.ignore) return false;
+      if (ignoreRegexes.length === 0) return false;
 
       const relativePath = filePath.startsWith(absolutePath)
         ? filePath.slice(absolutePath.length).replace(/^\//, "")
         : filePath;
 
-      return options.ignore.some((pattern) => {
-        // Simple glob pattern matching
-        const regexPattern = pattern
-          .replace(/\*\*/g, ".*")
-          .replace(/\*/g, "[^/]*")
-          .replace(/\?/g, "[^/]");
-        const regex = new RegExp(`^${regexPattern}$`);
-        return regex.test(relativePath);
-      });
+      return ignoreRegexes.some((regex) => regex.test(relativePath));
     };
 
     let debounceTimer: NodeJS.Timeout | null = null;
@@ -567,6 +607,7 @@ export class FileSystem implements FileSystemAPI {
       const events = [...eventQueue];
       eventQueue.length = 0;
       for (const event of events) {
+        void this.manager?.keepAlive();
         callback(event);
       }
     };
@@ -577,6 +618,7 @@ export class FileSystem implements FileSystemAPI {
         if (debounceTimer) clearTimeout(debounceTimer);
         debounceTimer = setTimeout(flushEvents, debounceMs);
       } else {
+        void this.manager?.keepAlive();
         callback(event);
       }
     };
@@ -601,13 +643,25 @@ export class FileSystem implements FileSystemAPI {
           if (!eventType) return;
 
           // Check if it's a directory
-          let isDirectory = false;
-          try {
-            const info = await this.sandbox.files.getInfo(eventPath);
-            isDirectory = info.type === "dir";
-          } catch {
-            // File might have been deleted, assume it was a file
-            isDirectory = false;
+          let isDirectory: boolean;
+          if (typeof (e2bEvent as { isDir?: boolean }).isDir === "boolean") {
+            isDirectory = Boolean((e2bEvent as { isDir?: boolean }).isDir);
+            this.pathTypeCache.set(eventPath, isDirectory ? "dir" : "file");
+          } else {
+            const cachedType = this.pathTypeCache.get(eventPath);
+            if (cachedType) {
+              isDirectory = cachedType === "dir";
+            } else {
+              try {
+                const info = await this.sandbox.files.getInfo(eventPath);
+                isDirectory = info.type === "dir";
+                this.pathTypeCache.set(eventPath, isDirectory ? "dir" : "file");
+              } catch {
+                // File might have been deleted, assume it was a file
+                isDirectory = false;
+                this.pathTypeCache.delete(eventPath);
+              }
+            }
           }
 
           const fsEvent: FileSystemEvent = {
@@ -618,6 +672,14 @@ export class FileSystem implements FileSystemAPI {
             isDirectory: isDirectory,
             timestamp: Date.now(),
           };
+
+          if (eventType === "delete") {
+            this.pathTypeCache.delete(eventPath);
+          } else if (eventType === "move") {
+            this.pathTypeCache.delete(eventPath);
+          } else {
+            this.pathTypeCache.set(eventPath, isDirectory ? "dir" : "file");
+          }
 
           handleEvent(fsEvent);
         },
@@ -658,32 +720,42 @@ export class FileSystem implements FileSystemAPI {
    * Performs an initial scan of the directory
    */
   private async performInitialScan(
-    path: string,
+    filePath: string,
     callback: (event: FileSystemEvent) => void,
     options?: WatchOptions,
   ): Promise<void> {
+    await this.manager?.keepAlive();
+
     try {
-      const entries = await this.readdir(path, {
+      const entries = await this.readdir(filePath, {
         recursive: options?.recursive,
       });
+
+      const initialIgnoreRegexes =
+        options?.ignore?.map((pattern) => globToRegex(pattern)) ?? [];
 
       for (const entry of entries) {
         const fullPath = `${entry.parentPath}/${entry.name}`.replace(
           /\/+/g,
           "/",
         );
+        const absoluteEntryPath = path.join(
+          this.workingDirectory,
+          fullPath.replace(/^\//, ""),
+        );
+        this.pathTypeCache.set(
+          absoluteEntryPath,
+          entry.isDirectory() ? "dir" : "file",
+        );
 
         // Check if should ignore
-        if (options?.ignore) {
-          const relativePath = fullPath.slice(path.length).replace(/^\//, "");
-          const shouldIgnore = options.ignore.some((pattern) => {
-            const regexPattern = pattern
-              .replace(/\*\*/g, ".*")
-              .replace(/\*/g, "[^/]*")
-              .replace(/\?/g, "[^/]");
-            const regex = new RegExp(`^${regexPattern}$`);
-            return regex.test(relativePath);
-          });
+        if (initialIgnoreRegexes.length > 0) {
+          const relativePath = absoluteEntryPath.startsWith(filePath)
+            ? absoluteEntryPath.slice(filePath.length).replace(/^\//, "")
+            : fullPath.replace(/^\//, "");
+          const shouldIgnore = initialIgnoreRegexes.some((regex) =>
+            regex.test(relativePath),
+          );
 
           if (shouldIgnore) continue;
         }
@@ -697,7 +769,7 @@ export class FileSystem implements FileSystemAPI {
       }
     } catch (error) {
       // Directory might not exist, ignore error for initial scan
-      console.warn(`Initial scan failed for ${path}:`, error);
+      console.warn(`Initial scan failed for ${filePath}:`, error);
     }
   }
 

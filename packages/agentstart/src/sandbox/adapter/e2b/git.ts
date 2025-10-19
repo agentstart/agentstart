@@ -15,6 +15,17 @@ import type {
   GitStatus,
   GitSyncOptions,
 } from "@/sandbox/types/git";
+import {
+  buildGitAddCommand,
+  buildGitCheckoutCommand,
+  buildGitCloneCommand,
+  buildGitCommitCommand,
+  buildGitFetchCommand,
+  buildGitInitCommand,
+  buildGitSyncCommand,
+  extractCommitHash,
+  parseGitStatusPorcelain,
+} from "@/sandbox/utils/git";
 import { Bash } from "./bash";
 import { DEFAULT_WORKING_DIRECTORY } from "./constants";
 
@@ -33,6 +44,10 @@ export class Git implements GitAPI {
     manager?: { keepAlive: () => Promise<void> | void },
   ) {
     this.bash = new Bash(sandbox, manager);
+  }
+
+  private shellQuote(arg: string): string {
+    return `'${arg.replace(/'/g, "'\\''")}'`;
   }
 
   private async getGitCommandOptions(
@@ -182,32 +197,16 @@ NODE
       ? path.join(this.workingDirectory, targetPath)
       : this.workingDirectory;
 
-    let cmd = "init";
-    if (options?.initialBranch)
-      cmd += ` --initial-branch=${options.initialBranch}`;
-    if (options?.bare) cmd += " --bare";
-
-    return this.git(cmd, finalPath);
+    const command = buildGitInitCommand(options);
+    return this.git(command, finalPath);
   }
 
   /**
    * Clone repository
    */
   async clone(url: string, options?: GitCloneOptions): Promise<GitResult> {
-    // Escape quotes in URL and directory
-    const escapedUrl = url.replace(/"/g, '\\"');
-    let cmd = `clone "${escapedUrl}"`;
-
-    if (options?.directory) {
-      const escapedDir = options.directory.replace(/"/g, '\\"');
-      cmd += ` "${escapedDir}"`;
-    }
-    if (options?.branch) cmd += ` --branch ${options.branch}`;
-    if (options?.depth) cmd += ` --depth ${options.depth}`;
-    if (options?.recursive) cmd += " --recursive";
-    if (options?.bare) cmd += " --bare";
-
-    return this.git(cmd);
+    const command = buildGitCloneCommand(url, options);
+    return this.git(command);
   }
 
   /**
@@ -223,60 +222,7 @@ NODE
       finalPath,
     );
 
-    const lines = result.stdout.split("\n").filter(Boolean);
-    const status: GitStatus = {
-      branch: "unknown",
-      clean: true,
-      modified: [],
-      staged: [],
-      untracked: [],
-      deleted: [],
-      renamed: [],
-    };
-
-    for (const line of lines) {
-      if (line.startsWith("##")) {
-        // Parse branch info
-        const match = /## (.+?)(?:\.\.\.(.+))?$/.exec(line);
-        if (match?.[1]) {
-          const noCommits = /No commits yet on (.+)/.exec(match[1]);
-          status.branch = noCommits?.[1] || match[1];
-
-          if (match[2]) {
-            const aheadBehind = /\[ahead (\d+)(?:, behind (\d+))?\]/.exec(
-              match[2],
-            );
-            if (aheadBehind) {
-              status.ahead = parseInt(aheadBehind[1] ?? "0", 10) || 0;
-              status.behind = parseInt(aheadBehind[2] ?? "0", 10);
-            }
-          }
-        }
-      } else {
-        status.clean = false;
-        const code = line.substring(0, 2);
-        const filename = line.substring(3);
-
-        // Parse status codes
-        if (code[0] === "M" || code[1] === "M") status.modified.push(filename);
-        if (
-          code[0] === "A" ||
-          code[0] === "M" ||
-          code[0] === "D" ||
-          code[0] === "R"
-        ) {
-          status.staged.push(filename);
-        }
-        if (code === "??") status.untracked.push(filename);
-        if (code[0] === "D" || code[1] === "D") status.deleted.push(filename);
-        if (code[0] === "R") {
-          const [from, to] = filename.split(" -> ");
-          if (from && to) status.renamed.push({ from, to });
-        }
-      }
-    }
-
-    return status;
+    return parseGitStatusPorcelain(result.stdout);
   }
 
   /**
@@ -286,12 +232,12 @@ NODE
     files: string | string[],
     options?: { force?: boolean; update?: boolean },
   ): Promise<GitResult> {
-    const fileList = Array.isArray(files) ? files.join(" ") : files;
-    let cmd = `add ${fileList}`;
-    if (options?.force) cmd += " --force";
-    if (options?.update) cmd += " --update";
-
-    return this.git(cmd);
+    const command = buildGitAddCommand(
+      files,
+      options,
+      this.shellQuote.bind(this),
+    );
+    return this.git(command);
   }
 
   /**
@@ -300,27 +246,13 @@ NODE
   async commit(
     options: GitCommitOptions,
   ): Promise<GitResult & { hash?: string }> {
-    let cmd = "commit";
-    if (options.all) cmd += " --all";
-    if (options.amend) cmd += " --amend";
-    if (options.noVerify) cmd += " --no-verify";
-    if (options.signoff) cmd += " --signoff";
-    if (options.author) {
-      cmd += ` --author="${options.author.name} <${options.author.email}>"`;
-    }
-    cmd += ` -m "${options.message.replace(/"/g, '\\"')}"`;
-
-    const result = await this.git(cmd);
-
-    // Extract commit hash
-    const hashMatch =
-      /\[(?:[\w\s-]+\s+)?(?:\(root-commit\)\s+)?([a-f0-9]+)\]/.exec(
-        result.message || "",
-      );
+    const command = buildGitCommitCommand(options);
+    const result = await this.git(command);
+    const hash = extractCommitHash(result.message ?? "");
 
     return {
       ...result,
-      hash: hashMatch?.[1],
+      hash,
     };
   }
 
@@ -328,28 +260,16 @@ NODE
    * Push to remote
    */
   async push(options?: GitSyncOptions): Promise<GitResult> {
-    let cmd = "push";
-    if (options?.remote) cmd += ` ${options.remote}`;
-    if (options?.branch) cmd += ` ${options.branch}`;
-    if (options?.force) cmd += " --force";
-    if (options?.setUpstream) cmd += " --set-upstream";
-    if (options?.tags) cmd += " --tags";
-
-    return this.git(cmd);
+    const command = buildGitSyncCommand("push", options);
+    return this.git(command);
   }
 
   /**
    * Pull from remote
    */
   async pull(options?: GitSyncOptions): Promise<GitResult> {
-    let cmd = "pull";
-    if (options?.remote) cmd += ` ${options.remote}`;
-    if (options?.branch) cmd += ` ${options.branch}`;
-    if (options?.force) cmd += " --force";
-    if (options?.rebase) cmd += " --rebase";
-    if (options?.tags) cmd += " --tags";
-
-    return this.git(cmd);
+    const command = buildGitSyncCommand("pull", options);
+    return this.git(command);
   }
 
   /**
@@ -362,17 +282,8 @@ NODE
     prune?: boolean;
     tags?: boolean;
   }): Promise<GitResult> {
-    let cmd = "fetch";
-    if (options?.all) {
-      cmd += " --all";
-    } else if (options?.remote) {
-      cmd += ` ${options.remote}`;
-      if (options?.branch) cmd += ` ${options.branch}`;
-    }
-    if (options?.prune) cmd += " --prune";
-    if (options?.tags) cmd += " --tags";
-
-    return this.git(cmd);
+    const command = buildGitFetchCommand(options);
+    return this.git(command);
   }
 
   /**
@@ -382,13 +293,8 @@ NODE
     target: string,
     options?: { create?: boolean; force?: boolean; file?: boolean },
   ): Promise<GitResult> {
-    let cmd = "checkout";
-    if (options?.create) cmd += " -b";
-    if (options?.force) cmd += " --force";
-    if (options?.file) cmd += " --";
-    cmd += ` ${target}`;
-
-    return this.git(cmd);
+    const command = buildGitCheckoutCommand(target, options);
+    return this.git(command);
   }
 
   /**

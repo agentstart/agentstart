@@ -8,6 +8,7 @@ import type {
   ShellCommandPromise,
   ShellCommandResult,
 } from "@/sandbox/types/bash";
+import { interpolateTemplate } from "@/sandbox/utils/text";
 import { DEFAULT_WORKING_DIRECTORY } from "./constants";
 
 /**
@@ -43,11 +44,11 @@ export class Bash implements BashAPI {
       // Curried form with options
       const options = stringsOrOptions as ShellCommandOptions;
       return (strings, ...vals) =>
-        this.run(this.buildCommand(strings, vals), options);
+        this.run(interpolateTemplate(strings, vals), options);
     }
     // Direct execution
     const strings = stringsOrOptions as TemplateStringsArray;
-    return this.run(this.buildCommand(strings, values));
+    return this.run(interpolateTemplate(strings, values));
   }
 
   /**
@@ -60,15 +61,32 @@ export class Bash implements BashAPI {
     // Auto-refresh heartbeat before operation
     await this.manager?.keepAlive();
 
+    if (options.background) {
+      throw new Error(
+        "Background commands are not supported by the E2B Bash adapter",
+      );
+    }
+
     const start = Date.now();
     let stdout = "";
     let stderr = "";
 
     try {
-      const result = await this.sandbox.commands.run(command, {
+      const runOptions: Record<string, unknown> = {
         cwd: options.cwd ?? DEFAULT_WORKING_DIRECTORY,
         envs: options.env,
-        timeoutMs: options.timeout,
+      };
+
+      if (typeof options.timeout === "number") {
+        runOptions.timeoutMs = options.timeout;
+      }
+
+      if (typeof options.requestTimeoutMs === "number") {
+        runOptions.requestTimeoutMs = options.requestTimeoutMs;
+      }
+
+      const result = await this.sandbox.commands.run(command, {
+        ...runOptions,
         onStdout: (data) => {
           stdout += data;
           options.onStdout?.(data);
@@ -201,16 +219,4 @@ export class Bash implements BashAPI {
     };
   }
 
-  /**
-   * Build command from template literals
-   */
-  private buildCommand(
-    strings: TemplateStringsArray,
-    values: unknown[],
-  ): string {
-    return strings.reduce(
-      (cmd, str, i) => cmd + str + (i < values.length ? String(values[i]) : ""),
-      "",
-    );
-  }
 }

@@ -1,7 +1,6 @@
 import { Sandbox, type SandboxOpts } from "@e2b/code-interpreter";
 import type { KV } from "@/kv";
 import type { BashAPI } from "@/sandbox/types/bash";
-import type { DevAPI } from "@/sandbox/types/dev";
 import type { FileSystemAPI } from "@/sandbox/types/file-system";
 import type { GitAPI } from "@/sandbox/types/git";
 import type {
@@ -11,7 +10,6 @@ import type {
 } from "@/sandbox/types/sandbox-manager";
 import { Bash } from "./bash";
 import { DEFAULT_CONFIG } from "./constants";
-import { Dev } from "./dev";
 import { FileSystem } from "./file-system";
 import { Git } from "./git";
 
@@ -45,7 +43,6 @@ export class SandboxManager implements SandboxManagerAPI {
   fs!: FileSystemAPI;
   bash!: BashAPI;
   git!: GitAPI;
-  dev!: DevAPI;
   kv: KV;
 
   private sandbox: Sandbox | null = null;
@@ -168,7 +165,6 @@ export class SandboxManager implements SandboxManagerAPI {
     this.fs = new FileSystem(this.sandbox, this);
     this.bash = new Bash(this.sandbox, this);
     this.git = new Git(this.sandbox, this);
-    this.dev = new Dev(this.sandbox, this);
 
     // Set GitHub token if provided
     if (githubToken) {
@@ -315,7 +311,6 @@ export class SandboxManager implements SandboxManagerAPI {
       this.fs = new FileSystem(this.sandbox, this);
       this.bash = new Bash(this.sandbox, this);
       this.git = new Git(this.sandbox, this);
-      this.dev = new Dev(this.sandbox, this);
 
       // Set GitHub token if provided
       if (githubToken) {
