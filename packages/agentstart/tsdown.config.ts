@@ -18,4 +18,5 @@ export default defineConfig({
   alias: {
     "@": "./src",
   },
+  ignoreWatch: ["node_modules", "dist", ".cache", ".turbo"],
 });
