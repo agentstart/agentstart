@@ -263,7 +263,9 @@ export async function getMigrations(config: Omit<AgentStartOptions, "agent">) {
         .createTable(table.table)
         .addColumn(
           "id",
-          sql.raw(dbType === "mysql" || dbType === "mssql" ? "varchar(36)" : "text"),
+          sql.raw(
+            dbType === "mysql" || dbType === "mssql" ? "varchar(36)" : "text",
+          ),
           (col) => col.primaryKey().notNull(),
         );
 

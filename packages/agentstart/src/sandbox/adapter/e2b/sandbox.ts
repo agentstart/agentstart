@@ -5,25 +5,25 @@ import type { FileSystemAPI } from "@/sandbox/types/file-system";
 import type { GitAPI } from "@/sandbox/types/git";
 import type {
   E2BSandboxConfig,
-  SandboxManagerAPI,
+  SandboxAPI,
   SandboxStatus,
-} from "@/sandbox/types/sandbox-manager";
+} from "@/sandbox/types/sandbox";
 import { Bash } from "./bash";
 import { DEFAULT_CONFIG } from "./constants";
 import { FileSystem } from "./file-system";
 import { Git } from "./git";
 
 /**
- * E2B Sandbox implementation of SandboxManagerAPI
+ * E2B sandbox implementation of SandboxAPI
  *
  * IMPORTANT: This class manages a single project's sandbox lifecycle.
- * Each Agent/Project should maintain ONE SandboxManager instance and inject
+ * Each Agent/Project should maintain ONE E2BSandbox instance and inject
  * it into all tools that need sandbox access.
  *
  * Usage pattern:
  * ```typescript
  * // In Agent initialization
- * const sandboxManager = await SandboxManager.connectOrCreate({
+ * const sandbox = await E2BSandbox.connectOrCreate({
  *   sandboxId: cachedSandboxId, // from previous thread
  *   kv: kvClient,
  *   githubToken: token
@@ -31,15 +31,15 @@ import { Git } from "./git";
  *
  * // Inject into tools
  * const tools = [
- *   new MyTool({ sandbox: sandboxManager }),
- *   new AnotherTool({ sandbox: sandboxManager })
+ *   new MyTool({ sandbox }),
+ *   new AnotherTool({ sandbox })
  * ];
  *
  * // Clean up when Agent is done
- * await sandboxManager.dispose();
+ * await sandbox.dispose();
  * ```
  */
-export class SandboxManager implements SandboxManagerAPI {
+export class E2BSandbox implements SandboxAPI {
   fs!: FileSystemAPI;
   bash!: BashAPI;
   git!: GitAPI;
@@ -71,11 +71,11 @@ export class SandboxManager implements SandboxManagerAPI {
    * @param options.sandboxId - Optional existing sandbox ID to reconnect
    * @param options.kv - Required KV client for heartbeat tracking
    * @param options.githubToken - Optional GitHub token for git operations
-   * @returns Initialized SandboxManager instance
+   * @returns Initialized E2BSandbox instance
    *
    * @example
    * ```typescript
-   * const manager = await SandboxManager.connectOrCreate({
+   * const manager = await E2BSandbox.connectOrCreate({
    *   sandboxId: previousSandboxId,
    *   kv: kvClient,
    *   githubToken: 'ghp_...'
@@ -84,13 +84,13 @@ export class SandboxManager implements SandboxManagerAPI {
    */
   static async connectOrCreate(
     options: E2BSandboxConfig & { githubToken?: string },
-  ): Promise<SandboxManager> {
+  ): Promise<E2BSandbox> {
     if (!options?.kv) {
-      throw new Error("SandboxManager requires a kv client");
+      throw new Error("E2BSandbox requires a kv client");
     }
 
     const { sandboxId, githubToken, ...config } = options;
-    const manager = new SandboxManager({ ...config, sandboxId });
+    const manager = new E2BSandbox({ ...config, sandboxId });
 
     if (sandboxId) {
       // Check if sandbox is still alive
@@ -126,11 +126,11 @@ export class SandboxManager implements SandboxManagerAPI {
    * @param options - Configuration options
    * @param options.kv - Required KV client for heartbeat tracking
    * @param options.githubToken - Optional GitHub token for git operations
-   * @returns New SandboxManager instance
+   * @returns New E2BSandbox instance
    *
    * @example
    * ```typescript
-   * const manager = await SandboxManager.forceCreate({
+   * const manager = await E2BSandbox.forceCreate({
    *   kv: kvClient,
    *   timeout: 300000 // 5 minutes
    * });
@@ -138,13 +138,13 @@ export class SandboxManager implements SandboxManagerAPI {
    */
   static async forceCreate(
     options: E2BSandboxConfig & { githubToken?: string },
-  ): Promise<SandboxManager> {
+  ): Promise<E2BSandbox> {
     if (!options?.kv) {
-      throw new Error("SandboxManager requires a kv client");
+      throw new Error("E2BSandbox requires a kv client");
     }
 
     const { githubToken, ...config } = options;
-    const manager = new SandboxManager(config);
+    const manager = new E2BSandbox(config);
     await manager.createSandbox(githubToken);
     return manager;
   }
@@ -182,7 +182,7 @@ export class SandboxManager implements SandboxManagerAPI {
   async getSandbox(): Promise<Sandbox> {
     if (!this.sandbox) {
       throw new Error(
-        "Sandbox not initialized. Use SandboxManager.get() or SandboxManager.create() first.",
+        "Sandbox not initialized. Use E2BSandbox.get() or E2BSandbox.create() first.",
       );
     }
     return this.sandbox;

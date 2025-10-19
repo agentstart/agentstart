@@ -12,9 +12,9 @@ agent-frontmatter:end */
 
 import type { Database } from "better-sqlite3";
 import type { Dialect, Kysely } from "kysely";
-import type { Agent } from "./agent";
 import type { FieldAttribute } from "./field";
 import type { KyselyDatabaseType } from "./kysely";
+import type { AgentStartOptions } from "./options";
 
 export type Where = {
   operator?:
@@ -128,21 +128,3 @@ export type Memory =
       type: KyselyDatabaseType;
       casing?: "snake" | "camel";
     };
-
-export type AgentStartOptions = {
-  appName?: string;
-  baseURL?: string;
-  basePath?: `/${string}`;
-  memory?: Memory;
-  secondaryMemory?: SecondaryMemory;
-  agent: Agent;
-  getUserId?: (headers: Headers) => string | Promise<string>;
-  advanced?: {
-    generateId?:
-      | false
-      | ((options: { model: string; size?: number }) => string);
-  };
-  thread?: ModelOptions;
-  message?: ModelOptions;
-  todo?: ModelOptions;
-};

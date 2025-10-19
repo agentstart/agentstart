@@ -32,7 +32,7 @@ export const grep = tool({
     },
     { experimental_context: context },
   ) {
-    const { sandboxManager } = context as BaseContext;
+    const { sandbox } = context as BaseContext;
 
     yield {
       status: "pending" as const,
@@ -41,7 +41,7 @@ export const grep = tool({
 
     try {
       // Map parameters to bash grep options
-      const grepOptions: Parameters<typeof sandboxManager.bash.grep>[1] = {
+      const grepOptions: Parameters<typeof sandbox.bash.grep>[1] = {
         path,
         ignoreCase,
         showLineNumbers: outputMode === "content" ? showLineNumbers : false,
@@ -97,7 +97,7 @@ export const grep = tool({
       }
 
       // Execute grep search
-      const result = await sandboxManager.bash.grep(pattern, grepOptions);
+      const result = await sandbox.bash.grep(pattern, grepOptions);
 
       // Format output based on mode
       let output = "";

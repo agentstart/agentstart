@@ -43,11 +43,10 @@ export const buildGitCloneCommand = (
   options?: GitCloneOptions,
   escapeArg: (value: string) => string = escapeDoubleQuotes,
 ): string => {
-  const escape = (value: string) => escapeArg(value);
-  let command = `clone "${escape(url)}"`;
+  let command = `clone "${escapeArg(url)}"`;
 
   if (options?.directory) {
-    command += ` "${escape(options.directory)}"`;
+    command += ` "${escapeArg(options.directory)}"`;
   }
   if (options?.branch) {
     command += ` --branch ${options.branch}`;
@@ -84,9 +83,7 @@ export const buildGitAddCommand = (
   return command;
 };
 
-export const buildGitCommitCommand = (
-  options: GitCommitOptions,
-): string => {
+export const buildGitCommitCommand = (options: GitCommitOptions): string => {
   let command = "commit";
 
   if (options.all) {
@@ -111,8 +108,9 @@ export const buildGitCommitCommand = (
 };
 
 export const extractCommitHash = (output: string): string | undefined => {
-  const match =
-    /\[(?:[\w\s-]+\s+)?(?:\(root-commit\)\s+)?([a-f0-9]+)\]/.exec(output);
+  const match = /\[(?:[\w\s-]+\s+)?(?:\(root-commit\)\s+)?([a-f0-9]+)\]/.exec(
+    output,
+  );
   return match?.[1];
 };
 

@@ -23,7 +23,7 @@ export const bash = tool({
     { command, timeout, description },
     { experimental_context: context },
   ) {
-    const { sandboxManager } = context as BaseContext;
+    const { sandbox } = context as BaseContext;
 
     // Calculate effective timeout (not exceeding maximum)
     const effectiveTimeout = Math.min(timeout || DEFAULT_TIMEOUT, MAX_TIMEOUT);
@@ -39,14 +39,14 @@ export const bash = tool({
       // Get git status before executing command
       let statusBefore: GitStatus | null = null;
       try {
-        statusBefore = await sandboxManager.git.status();
+        statusBefore = await sandbox.git.status();
       } catch {
         // Git not available or not a git repository, skip status check
         statusBefore = null;
       }
 
       // Execute the command using the Bash adapter
-      const result = await sandboxManager.bash.$({
+      const result = await sandbox.bash.$({
         timeout: effectiveTimeout,
       })`${command}`;
 
@@ -65,7 +65,7 @@ export const bash = tool({
       // Check for file changes and commit if necessary
       if (statusBefore !== null && result.exitCode === 0) {
         try {
-          const statusAfter = await sandboxManager.git.status();
+          const statusAfter = await sandbox.git.status();
 
           // Check if there are new changes
           const hasNewChanges =
@@ -78,7 +78,7 @@ export const bash = tool({
 
           if (hasNewChanges) {
             const commitHash = await commitChanges(
-              sandboxManager,
+              sandbox,
               ".", // Use current directory as the path for bash commands
               `executed: ${command.length > 50 ? `${command.substring(0, 50)}...` : command}`,
             );

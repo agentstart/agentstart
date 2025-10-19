@@ -14,12 +14,12 @@ export const write = tool({
   inputSchema: toolInputSchema.shape.write,
   outputSchema: toolOutputSchema.shape.write,
   async *execute({ filePath, content }, { experimental_context: context }) {
-    const { sandboxManager } = context as BaseContext;
+    const { sandbox } = context as BaseContext;
 
     // Check if file exists
     let exists = false;
     try {
-      const stat = await sandboxManager.fs.stat(filePath);
+      const stat = await sandbox.fs.stat(filePath);
       exists = stat.isFile();
     } catch {
       // File doesn't exist, which is fine for write operation
@@ -44,11 +44,11 @@ export const write = tool({
       }
 
       // Ensure directory exists by using recursive option
-      await sandboxManager.fs.writeFile(filePath, content, { recursive: true });
+      await sandbox.fs.writeFile(filePath, content, { recursive: true });
 
       // Verify the file was written
       try {
-        const writtenContent = await sandboxManager.fs.readFile(filePath);
+        const writtenContent = await sandbox.fs.readFile(filePath);
         const writtenStr =
           typeof writtenContent === "string"
             ? writtenContent
@@ -65,7 +65,7 @@ export const write = tool({
       }
 
       const commitHash = await commitChanges(
-        sandboxManager,
+        sandbox,
         filePath,
         exists ? "overwritten" : "created",
       );

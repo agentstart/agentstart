@@ -2,7 +2,7 @@
 AGENT: Sandbox type exports
 PURPOSE: Re-export sandbox type definitions for downstream consumers
 USAGE: Import from this barrel to access sandbox typing contracts
-EXPORTS: bash, dev, file-system, git, sandbox-manager
+EXPORTS: bash, dev, file-system, git, sandbox
 FEATURES:
   - Aggregates sandbox type modules
   - Simplifies import paths for tooling
@@ -12,4 +12,4 @@ agent-frontmatter:end */
 export * from "./bash";
 export * from "./file-system";
 export * from "./git";
-export * from "./sandbox-manager";
+export * from "./sandbox";

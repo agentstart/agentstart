@@ -10,17 +10,18 @@ SEARCHABLE: agent interface, agent stream options, shared agent types
 agent-frontmatter:end */
 
 import type {
-  Experimental_Agent as AISDK_Agent,
   Experimental_AgentSettings as AISDK_AgentSettings,
   InferUIMessageChunk,
   ToolSet,
   UIMessage,
   UIMessageStreamOnFinishCallback,
 } from "ai";
+import type { SandboxAPI } from "@/sandbox";
 import type { Adapter } from "./adapter";
 
 export interface AgentStreamOptions {
   adapter: Adapter;
+  sandbox: SandboxAPI;
   message: UIMessage;
   threadId: string;
   onFinish?: UIMessageStreamOnFinishCallback<UIMessage>;
@@ -33,7 +34,6 @@ export interface Agent<Context = unknown> {
   context?: Context;
   messageMetadata?: (options: { part: unknown }) => unknown;
   settings: AISDK_AgentSettings<ToolSet>;
-  instance: AISDK_Agent<ToolSet>;
   stream(
     options: AgentStreamOptions,
   ): Promise<ReadableStream<InferUIMessageChunk<UIMessage>>>;

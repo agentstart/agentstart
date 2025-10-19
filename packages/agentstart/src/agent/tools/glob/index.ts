@@ -20,7 +20,7 @@ export const glob = tool({
     { pattern, path: searchPath },
     { experimental_context: context },
   ) {
-    const { sandboxManager } = context as BaseContext;
+    const { sandbox } = context as BaseContext;
 
     yield {
       status: "pending" as const,
@@ -34,7 +34,7 @@ export const glob = tool({
       // Verify the directory exists if path was provided
       if (searchPath) {
         try {
-          const stats = await sandboxManager.fs.stat(searchDir);
+          const stats = await sandbox.fs.stat(searchDir);
           if (!stats.isDirectory()) {
             const richError = getRichError({
               action: "glob search",
@@ -66,7 +66,7 @@ export const glob = tool({
       }
 
       // Execute glob search using the FileSystem adapter
-      const matches = await sandboxManager.fs.glob(pattern, {
+      const matches = await sandbox.fs.glob(pattern, {
         cwd: searchDir,
         withFileTypes: false,
       });
@@ -88,7 +88,7 @@ export const glob = tool({
           : path.join(searchDir, match);
 
         try {
-          const stats = await sandboxManager.fs.stat(fullPath);
+          const stats = await sandbox.fs.stat(fullPath);
           filesWithStats.push({
             path: match,
             fullPath,

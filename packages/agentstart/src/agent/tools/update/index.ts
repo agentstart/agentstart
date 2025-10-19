@@ -18,7 +18,7 @@ export const update = tool({
     { filePath, oldString, newString, replaceAll },
     { experimental_context: context },
   ) {
-    const { sandboxManager } = context as BaseContext;
+    const { sandbox } = context as BaseContext;
 
     yield {
       status: "pending" as const,
@@ -37,15 +37,11 @@ export const update = tool({
 
       // Handle creating new file (empty oldString)
       if (oldString === "") {
-        await sandboxManager.fs.writeFile(filePath, newString, {
+        await sandbox.fs.writeFile(filePath, newString, {
           recursive: true,
         });
 
-        const commitHash = await commitChanges(
-          sandboxManager,
-          filePath,
-          "created",
-        );
+        const commitHash = await commitChanges(sandbox, filePath, "created");
 
         yield {
           status: "done" as const,
@@ -58,7 +54,7 @@ export const update = tool({
       }
 
       // Read existing file
-      const fileContent = await sandboxManager.fs.readFile(filePath);
+      const fileContent = await sandbox.fs.readFile(filePath);
       const content =
         typeof fileContent === "string"
           ? fileContent
@@ -74,7 +70,7 @@ export const update = tool({
         );
 
         // Write the modified content back to the file
-        await sandboxManager.fs.writeFile(filePath, modifiedContent, {
+        await sandbox.fs.writeFile(filePath, modifiedContent, {
           recursive: true,
         });
 
@@ -83,7 +79,7 @@ export const update = tool({
         const replacements = replaceAll ? occurrences : 1;
 
         const commitHash = await commitChanges(
-          sandboxManager,
+          sandbox,
           filePath,
           replaceAll && occurrences > 1 ? "updated (replace all)" : "updated",
         );

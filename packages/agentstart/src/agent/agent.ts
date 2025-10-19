@@ -24,7 +24,7 @@ import {
   type UIMessageStreamWriter,
 } from "ai";
 import type { Agent as AgentContract, AgentStreamOptions } from "@/types";
-import type { AgentStartUIMessage } from "./messages";
+import type { BaseContext } from "./context";
 import {
   addProviderOptionsToMessages,
   fixEmptyModelMessages,
@@ -70,18 +70,6 @@ export class Agent<
     return this.exposedMessageMetadata;
   }
   settings: AISDK_AgentSettings<ToolSet>;
-  instance: AISDK_Agent<ToolSet>;
-
-  // writer management
-  private __writer?: UIMessageStreamWriter<AgentStartUIMessage>;
-  private get writer(): UIMessageStreamWriter<AgentStartUIMessage> | undefined {
-    return this.__writer;
-  }
-  private set writer(value:
-    | UIMessageStreamWriter<AgentStartUIMessage>
-    | undefined) {
-    this.__writer = value;
-  }
 
   constructor({
     instructions,
@@ -106,12 +94,6 @@ export class Agent<
       settings.tools = sortTools(settings.tools);
     }
     this.settings = settings;
-
-    this.instance = new AISDK_Agent({
-      experimental_context: { ...this.context, writer: this.writer },
-      stopWhen: this.settings.stopWhen ?? stepCountIs(100),
-      ...this.settings,
-    });
   }
 
   async stream(options: AgentStreamOptions) {
@@ -125,8 +107,6 @@ export class Agent<
       generateId,
       originalMessages: uiMessages,
       execute: async ({ writer }) => {
-        this.writer = writer as UIMessageStreamWriter<AgentStartUIMessage>;
-
         // Generate and send title update for the first message
         if (uiMessages.length === 1) {
           const { title, emoji } = await generateTitle({
@@ -141,7 +121,7 @@ export class Agent<
             emoji,
           });
           // Send title update through stream
-          this.writer.write({
+          writer.write({
             type: "data-agentstart-title_update",
             data: {
               title,
@@ -183,7 +163,14 @@ export class Agent<
           });
         }
 
-        const result = await this.instance.stream({
+        const instance = await this.prepareInstance({
+          threadId: options.threadId,
+          sandbox: options.sandbox,
+          adapter: options.adapter,
+          writer,
+        });
+
+        const result = await instance.stream({
           messages: modelMessages,
         });
 
@@ -216,6 +203,25 @@ export class Agent<
         return options?.onFinish?.(setting);
       },
       onError: options?.onError,
+    });
+  }
+
+  private async prepareInstance(
+    options: Pick<AgentStreamOptions, "threadId" | "sandbox" | "adapter"> & {
+      writer: UIMessageStreamWriter;
+    },
+  ) {
+    const context: BaseContext = {
+      ...this.context,
+      writer: options.writer,
+      db: options.adapter,
+      sandbox: options.sandbox,
+      threadId: options.threadId,
+    };
+    return new AISDK_Agent({
+      experimental_context: context,
+      stopWhen: this.settings.stopWhen ?? stepCountIs(100),
+      ...this.settings,
     });
   }
 }

@@ -16,6 +16,7 @@ import z from "zod";
 import { type AgentStartUIMessage, getThreads, loadThread } from "@/agent";
 import { publicProcedure } from "@/api/procedures";
 import { getAdapter } from "@/db";
+import { getSandbox } from "@/sandbox";
 
 export const threadRouter = {
   list: publicProcedure.handler(async ({ context }) => {
@@ -106,9 +107,11 @@ export const threadRouter = {
         }
 
         const adapter = await getAdapter(context);
+        const sandbox = await getSandbox(context);
 
         const result = await agent.stream({
           adapter,
+          sandbox,
           message: input.message,
           threadId: input.threadId,
         });

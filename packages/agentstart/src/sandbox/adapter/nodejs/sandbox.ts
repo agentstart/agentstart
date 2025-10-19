@@ -1,13 +1,13 @@
 /* agent-frontmatter:start
-AGENT: Node.js sandbox manager adapter
-PURPOSE: Provide an in-process sandbox manager that mirrors the shared sandbox API for local Node.js usage
+AGENT: Node.js sandbox adapter
+PURPOSE: Provide an in-process sandbox implementation that mirrors the shared sandbox API for local Node.js usage
 USAGE: Instantiate to gain access to bash, git, fs, and dev helpers without provisioning remote sandboxes
-EXPORTS: SandboxManager
+EXPORTS: NodeSandbox
 FEATURES:
   - Reuses adapters scoped to a configurable workspace directory
   - Tracks lifecycle metadata and exposes status helpers
   - Supports configuration updates with live tool reinitialization
-SEARCHABLE: nodejs sandbox manager, local sandbox implementation, adapter lifecycle
+SEARCHABLE: nodejs sandbox, local sandbox implementation, adapter lifecycle
 agent-frontmatter:end */
 
 import type { BashAPI } from "@/sandbox/types/bash";
@@ -15,46 +15,46 @@ import type { FileSystemAPI } from "@/sandbox/types/file-system";
 import type { GitAPI } from "@/sandbox/types/git";
 import type {
   NodeJSSandboxConfig,
-  SandboxManagerAPI,
+  SandboxAPI,
   SandboxStatus,
-} from "@/sandbox/types/sandbox-manager";
+} from "@/sandbox/types/sandbox";
 
 import { Bash } from "./bash";
 import { FileSystem } from "./file-system";
 import { Git } from "./git";
 
 // Store instances outside of class
-const instances = new Map<string, SandboxManager>();
+const instances = new Map<string, NodeSandbox>();
 
 /**
- * Node.js implementation of SandboxManagerAPI
+ * Node.js implementation of SandboxAPI
  *
  * IMPORTANT: This class manages a single project's sandbox lifecycle.
- * Each Agent/Project should maintain ONE SandboxManager instance and inject
+ * Each Agent/Project should maintain ONE NodeSandbox instance and inject
  * it into all tools that need sandbox access.
  *
  * Usage pattern:
  * ```typescript
  * // In Agent initialization
- * const sandboxManager = await SandboxManager.connectOrCreate(
+ * const sandbox = await NodeSandbox.connectOrCreate(
  *   projectId,
  *   { workspacePath: '/path/to/project' }
  * );
  *
  * // Inject into tools
  * const tools = [
- *   new MyTool({ sandbox: sandboxManager }),
- *   new AnotherTool({ sandbox: sandboxManager })
+ *   new MyTool({ sandbox }),
+ *   new AnotherTool({ sandbox })
  * ];
  *
  * // Clean up when Agent is done
- * await sandboxManager.dispose();
+ * await sandbox.dispose();
  * ```
  *
  * Note: In Node.js environment, we don't need actual sandboxing.
  * This implementation provides compatibility with the E2B API.
  */
-export class SandboxManager implements SandboxManagerAPI {
+export class NodeSandbox implements SandboxAPI {
   private static readonly DEFAULT_CONFIG: Partial<NodeJSSandboxConfig> = {};
 
   readonly fs: FileSystemAPI;
@@ -69,7 +69,7 @@ export class SandboxManager implements SandboxManagerAPI {
 
   constructor(sandboxId: string, config?: NodeJSSandboxConfig) {
     this.sandboxId = sandboxId;
-    this.config = { ...SandboxManager.DEFAULT_CONFIG, ...config };
+    this.config = { ...NodeSandbox.DEFAULT_CONFIG, ...config };
     this.workingDirectory = this.config.workspacePath ?? process.cwd();
 
     // Initialize tools (Node.js doesn't need a real sandbox)
@@ -89,11 +89,11 @@ export class SandboxManager implements SandboxManagerAPI {
    *
    * @param sandboxId - Optional sandbox ID (defaults to generated ID)
    * @param config - Configuration options
-   * @returns Initialized SandboxManager instance
+   * @returns Initialized NodeSandbox instance
    *
    * @example
    * ```typescript
-   * const manager = await SandboxManager.connectOrCreate('project-1', {
+   * const manager = await NodeSandbox.connectOrCreate('project-1', {
    *   workspacePath: '/path/to/project'
    * });
    * ```
@@ -101,7 +101,7 @@ export class SandboxManager implements SandboxManagerAPI {
   static async connectOrCreate(
     sandboxId?: string,
     config?: NodeJSSandboxConfig,
-  ): Promise<SandboxManager> {
+  ): Promise<NodeSandbox> {
     const id = sandboxId ?? `nodejs-${Date.now()}`;
     const existing = instances.get(id);
     if (existing) {
@@ -111,7 +111,7 @@ export class SandboxManager implements SandboxManagerAPI {
       return existing;
     }
 
-    return new SandboxManager(id, config);
+    return new NodeSandbox(id, config);
   }
 
   /**
@@ -121,20 +121,18 @@ export class SandboxManager implements SandboxManagerAPI {
    * whether a previous one exists. Most use cases should use connectOrCreate() instead.
    *
    * @param config - Configuration options
-   * @returns New SandboxManager instance
+   * @returns New NodeSandbox instance
    *
    * @example
    * ```typescript
-   * const manager = await SandboxManager.forceCreate({
+   * const manager = await NodeSandbox.forceCreate({
    *   workspacePath: '/path/to/project'
    * });
    * ```
    */
-  static async forceCreate(
-    config?: NodeJSSandboxConfig,
-  ): Promise<SandboxManager> {
+  static async forceCreate(config?: NodeJSSandboxConfig): Promise<NodeSandbox> {
     const id = config?.sandboxId ?? `nodejs-${Date.now()}`;
-    return new SandboxManager(id, config);
+    return new NodeSandbox(id, config);
   }
 
   /**
@@ -201,7 +199,7 @@ export class SandboxManager implements SandboxManagerAPI {
    */
   async stop(): Promise<void> {
     console.log(
-      `SandboxManager.stop() called for project ${this.sandboxId} (no-op in Node.js)`,
+      `NodeSandbox.stop() called for project ${this.sandboxId} (no-op in Node.js)`,
     );
     instances.delete(this.sandboxId);
   }
@@ -280,7 +278,7 @@ export class SandboxManager implements SandboxManagerAPI {
    */
   async dispose(): Promise<void> {
     console.log(
-      `SandboxManager.dispose() called for project ${this.sandboxId} (no-op in Node.js)`,
+      `NodeSandbox.dispose() called for project ${this.sandboxId} (no-op in Node.js)`,
     );
     instances.delete(this.sandboxId);
   }

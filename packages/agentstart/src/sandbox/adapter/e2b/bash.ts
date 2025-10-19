@@ -218,5 +218,4 @@ export class Bash implements BashAPI {
       totalMatches: files.reduce((sum, f) => sum + f.matchCount, 0),
     };
   }
-
 }

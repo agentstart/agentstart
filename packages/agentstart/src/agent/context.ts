@@ -9,12 +9,12 @@ SEARCHABLE: agent context, base context, writer interface
 agent-frontmatter:end */
 
 import type { UIMessageStreamWriter } from "ai";
-import type { SandboxManagerAPI } from "@/sandbox";
+import type { SandboxAPI } from "@/sandbox";
 import type { Adapter } from "@/types";
 
 export interface BaseContext {
   threadId: string;
   writer: UIMessageStreamWriter;
-  sandboxManager: SandboxManagerAPI;
+  sandbox: SandboxAPI;
   db: Adapter;
 }

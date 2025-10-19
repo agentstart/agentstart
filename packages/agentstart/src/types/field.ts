@@ -9,7 +9,7 @@ FEATURES:
 SEARCHABLE: field attribute types, schema metadata, plugin field inference
 agent-frontmatter:end */
 
-import type { AgentStartOptions } from "./adapter";
+import type { AgentStartOptions } from "./options";
 
 export type FieldType =
   | "string"
@@ -69,18 +69,18 @@ export type InferValueType<T extends FieldType> = T extends "string"
     ? number
     : T extends "boolean"
       ? boolean
-    : T extends "date"
-      ? Date
-      : T extends "json"
-        ? unknown
-        : T extends `${infer Inner}[]`
-          ? Inner extends "string"
-            ? string[]
-            : number[]
-          : // biome-ignore lint/suspicious/noExplicitAny: is fine
-            T extends Array<any>
-            ? T[number]
-            : never;
+      : T extends "date"
+        ? Date
+        : T extends "json"
+          ? unknown
+          : T extends `${infer Inner}[]`
+            ? Inner extends "string"
+              ? string[]
+              : number[]
+            : // biome-ignore lint/suspicious/noExplicitAny: is fine
+              T extends Array<any>
+              ? T[number]
+              : never;
 
 export type InferFieldsOutput<Field> = Field extends Record<
   infer Key,

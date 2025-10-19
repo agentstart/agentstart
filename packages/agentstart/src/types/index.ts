@@ -13,3 +13,4 @@ export * from "./adapter";
 export * from "./agent";
 export * from "./field";
 export * from "./kysely";
+export * from "./options";

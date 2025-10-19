@@ -68,7 +68,7 @@ export const read = tool({
   inputSchema: toolInputSchema.shape.read,
   outputSchema: toolOutputSchema.shape.read,
   async *execute(input, { experimental_context: context }) {
-    const { sandboxManager } = context as BaseContext;
+    const { sandbox } = context as BaseContext;
 
     yield {
       status: "pending" as const,
@@ -77,16 +77,16 @@ export const read = tool({
 
     try {
       // Check if file exists
-      let stat: Awaited<ReturnType<typeof sandboxManager.fs.stat>>;
+      let stat: Awaited<ReturnType<typeof sandbox.fs.stat>>;
       try {
-        stat = await sandboxManager.fs.stat(input.filePath);
+        stat = await sandbox.fs.stat(input.filePath);
       } catch {
         // File doesn't exist, provide suggestions
         const dir = path.dirname(input.filePath);
         const base = path.basename(input.filePath);
 
         try {
-          const dirEntries = await sandboxManager.fs.readdir(dir);
+          const dirEntries = await sandbox.fs.readdir(dir);
           const suggestions = dirEntries
             .filter(
               (entry) =>
@@ -130,7 +130,7 @@ export const read = tool({
       }
 
       // Read the file content
-      const fileContent = await sandboxManager.fs.readFile(input.filePath);
+      const fileContent = await sandbox.fs.readFile(input.filePath);
       let fileContentRaw: string;
 
       // Handle different content types

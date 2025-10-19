@@ -1,9 +1,9 @@
 import path from "pathe";
-import type { SandboxManagerAPI } from "@/sandbox";
+import type { SandboxAPI } from "@/sandbox";
 import { GIT_CONFIG } from "./constants";
 
 export const commitChanges = async (
-  sandboxManager: SandboxManagerAPI,
+  sandbox: SandboxAPI,
   filePath: string,
   changeDescription: string,
 ): Promise<string | undefined> => {
@@ -11,10 +11,10 @@ export const commitChanges = async (
 
   try {
     // Ensure git is configured before committing
-    await sandboxManager.git.config("user.name", GIT_CONFIG.AUTHOR.name, {
+    await sandbox.git.config("user.name", GIT_CONFIG.AUTHOR.name, {
       local: true,
     });
-    await sandboxManager.git.config("user.email", GIT_CONFIG.AUTHOR.email, {
+    await sandbox.git.config("user.email", GIT_CONFIG.AUTHOR.email, {
       local: true,
     });
 
@@ -23,19 +23,19 @@ export const commitChanges = async (
       ? filePath.substring(1)
       : filePath;
 
-    const gitAddResult = await sandboxManager.git.add(relativePath);
+    const gitAddResult = await sandbox.git.add(relativePath);
     if (!gitAddResult.success) {
       throw new Error(`Failed to add file: ${gitAddResult.error}`);
     }
 
-    const gitCommitResult = await sandboxManager.git.commit({
+    const gitCommitResult = await sandbox.git.commit({
       message: commitMessage,
     });
     if (!gitCommitResult.success) {
       throw new Error(`Failed to commit: ${gitCommitResult.error}`);
     }
 
-    const gitPushResult = await sandboxManager.git.push();
+    const gitPushResult = await sandbox.git.push();
     if (!gitPushResult.success) {
       throw new Error(`Failed to push: ${gitPushResult.error}`);
     }

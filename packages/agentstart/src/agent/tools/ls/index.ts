@@ -48,7 +48,7 @@ export const ls = tool({
     { path: targetPath, ignore },
     { experimental_context: context },
   ) {
-    const { sandboxManager } = context as BaseContext;
+    const { sandbox } = context as BaseContext;
 
     // Use current directory if no path specified
     const resolvedPath = targetPath || "/";
@@ -60,7 +60,7 @@ export const ls = tool({
 
     try {
       // Check if the path exists and is a directory
-      const stats = await sandboxManager.fs.stat(resolvedPath);
+      const stats = await sandbox.fs.stat(resolvedPath);
 
       if (!stats.isDirectory()) {
         const richError = getRichError({
@@ -80,7 +80,7 @@ export const ls = tool({
       const allIgnorePatterns = [...DEFAULT_IGNORE_PATTERNS, ...(ignore || [])];
 
       // List all files and directories with ignore patterns
-      const entries = await sandboxManager.fs.readdir(resolvedPath, {
+      const entries = await sandbox.fs.readdir(resolvedPath, {
         ignores: allIgnorePatterns,
       });
 
@@ -98,7 +98,7 @@ export const ls = tool({
         const fullPath = path.join(resolvedPath, entry.name);
 
         try {
-          const stat = await sandboxManager.fs.stat(fullPath);
+          const stat = await sandbox.fs.stat(fullPath);
 
           fileInfos.push({
             name: entry.name,

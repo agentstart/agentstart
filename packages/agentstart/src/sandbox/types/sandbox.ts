@@ -1,13 +1,13 @@
 /* agent-frontmatter:start
-AGENT: Sandbox manager typing
+AGENT: Sandbox typing
 PURPOSE: Describe lifecycle and helper APIs for managing sandbox instances
-USAGE: Import to type sandbox manager implementations across the workspace
-EXPORTS: SandboxStatus, SandboxConfig, SandboxManagerAPI
+USAGE: Import to type sandbox implementations across the workspace
+EXPORTS: SandboxStatus, SandboxConfig, SandboxAPI
 FEATURES:
   - Encapsulates sandbox lifecycle contracts
   - Exposes typed sub-APIs (fs, bash, git, dev)
   - Defines reusable configuration shapes
-SEARCHABLE: sandbox manager api, lifecycle typing, sandbox contracts
+SEARCHABLE: sandbox api, lifecycle typing, sandbox contracts
 agent-frontmatter:end */
 
 import type { KV } from "@/kv";
@@ -93,7 +93,7 @@ export interface SandboxConfig extends BaseSandboxConfig {
 /**
  * Contract for sandbox lifecycle managers bound to a single project.
  */
-export interface SandboxManagerAPI {
+export interface SandboxAPI {
   /**
    * File system interface bound to this sandbox.
    */
