@@ -20,11 +20,10 @@ export function agentStart(options: AgentStartOptions) {
   const context = { current: null as Context | null };
 
   const api = getApi(context);
+  const rpcHandler = new RPCHandler(appRouter);
 
   return {
     handler: async (request: Request) => {
-      const { handle } = new RPCHandler(appRouter);
-
       const basePath = options.basePath ?? ("/api/agent" as const);
 
       const contextOptions: CreateContextOptions = {
@@ -34,7 +33,7 @@ export function agentStart(options: AgentStartOptions) {
 
       context.current = createContext(contextOptions);
 
-      const { response } = await handle(request, {
+      const { response } = await rpcHandler.handle(request, {
         prefix: basePath,
         context: context.current,
       });

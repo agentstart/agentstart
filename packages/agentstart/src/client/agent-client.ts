@@ -50,7 +50,7 @@ export function createAgentClient(
     ? baseURL.slice(0, -1)
     : baseURL;
   const rpcLink = new RPCLink({
-    url: `${normalizedBaseURL}/rpc`,
+    url: normalizedBaseURL,
     headers: options.headers,
     fetch: options.fetch,
   });
