@@ -9,6 +9,7 @@ SEARCHABLE: api package, router exports, orpc
 agent-frontmatter:end */
 
 export * from "./context";
+export * from "./get-api";
 export * from "./procedures";
 // oRPC exports (new API)
 export * from "./router";

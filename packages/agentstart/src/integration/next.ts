@@ -10,30 +10,15 @@ FEATURES:
 SEARCHABLE: next.js handler, agent integration, rpc handler
 agent-frontmatter:end */
 
-import { RPCHandler } from "@orpc/server/fetch";
-import type { CreateContextOptions } from "@/api";
-import { appRouter, createContext } from "@/api";
-import type { AgentStartOptions } from "@/types";
-
-export function toNextJsHandler(options: AgentStartOptions) {
-  const handler = new RPCHandler(appRouter);
-
-  const basePath = options.basePath ?? ("/api/agent" as const);
-
+export function toNextJsHandler(
+  handler:
+    | {
+        handler: (request: Request) => Promise<Response>;
+      }
+    | ((request: Request) => Promise<Response>),
+) {
   const handleRequest = async (request: Request) => {
-    const contextOptions: CreateContextOptions = {
-      headers: new Headers(request.headers),
-      ...options,
-    };
-
-    const context = createContext(contextOptions);
-
-    const { response } = await handler.handle(request, {
-      prefix: basePath,
-      context,
-    });
-
-    return response ?? new Response("Not found", { status: 404 });
+    return "handler" in handler ? handler.handler(request) : handler(request);
   };
 
   return {

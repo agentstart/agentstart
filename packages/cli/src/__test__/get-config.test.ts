@@ -58,11 +58,11 @@ describe("getConfig", async () => {
     // create dummy agent.ts
     await fs.writeFile(
       path.join(agentPath, "agent.ts"),
-      `import {defineAgentConfig} from "agentstart";
+      `import {agentStart} from "agentstart";
        import {prismaAdapter} from "agentstart/db";      
        import {db} from "@server/db/db";
 
-       export const agentStart = defineAgentConfig({
+       export const start = agentStart({
           memory: prismaAdapter(db, {
               provider: 'sqlite'
           })
@@ -110,11 +110,11 @@ describe("getConfig", async () => {
     // create dummy agent.ts
     await fs.writeFile(
       path.join(agentPath, "agent.ts"),
-      `import {defineAgentConfig} from "agentstart";
+      `import {agentStart} from "agentstart";
        import {prismaAdapter} from "agentstart/db";      
        import {db} from "prismaDbClient";
 
-       export const agentStart = defineAgentConfig({
+       export const start = agentStart({
           memory: prismaAdapter(db, {
               provider: 'sqlite'
           }),
@@ -162,11 +162,11 @@ describe("getConfig", async () => {
     // create dummy agent.ts
     await fs.writeFile(
       path.join(agentPath, "agent.ts"),
-      `import {defineAgentConfig} from "agentstart";
+      `import {agentStart} from "agentstart";
        import {prismaAdapter} from "agentstart/db";      
        import {db} from "@server/db/db";
 
-       export const agentStart = defineAgentConfig({
+       export const start = agentStart({
           memory: prismaAdapter(db, {
               provider: 'sqlite'
           })
@@ -214,11 +214,11 @@ describe("getConfig", async () => {
     // create dummy agent.ts
     await fs.writeFile(
       path.join(agentPath, "agent.ts"),
-      `import {defineAgentConfig} from "agentstart";
+      `import {agentStart} from "agentstart";
        import {prismaAdapter} from "agentstart/db";      
        import {db} from "prismaDbClient";
 
-       export const agentStart = defineAgentConfig({
+       export const start = agentStart({
           memory: prismaAdapter(db, {
               provider: 'sqlite'
           })
@@ -266,11 +266,11 @@ describe("getConfig", async () => {
     // create dummy agent.ts
     await fs.writeFile(
       path.join(agentPath, "agent.ts"),
-      `import {defineAgentConfig} from "agentstart";
+      `import {agentStart} from "agentstart";
        import {prismaAdapter} from "agentstart/db";      
        import {db} from "../db/db";
 
-       export const agentStart = defineAgentConfig({
+       export const start = agentStart({
           memory: prismaAdapter(db, {
               provider: 'sqlite'
           })
@@ -318,11 +318,11 @@ describe("getConfig", async () => {
     // create dummy agent.ts
     await fs.writeFile(
       path.join(agentPath, "agent.ts"),
-      `import {defineAgentConfig} from "agentstart";
+      `import {agentStart} from "agentstart";
        import {prismaAdapter} from "agentstart/db";      
        import {db} from "@server/db/db";
 
-       export const agentStart = defineAgentConfig({
+       export const start = agentStart({
           memory: prismaAdapter(db, {
               provider: 'sqlite'
           })
@@ -357,9 +357,9 @@ describe("getConfig", async () => {
     // create dummy agent.ts
     await fs.writeFile(
       path.join(agentPath, "agent.js"),
-      `import  { defineAgentConfig } from "agentstart";
+      `import  { agentStart } from "agentstart";
 
-       export const agentStart = defineAgentConfig({
+       export const start = agentStart({
           appName: "test-name",
        })`,
     );

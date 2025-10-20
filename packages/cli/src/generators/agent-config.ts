@@ -32,8 +32,8 @@ type CommonIndexConfig = {
 };
 
 const START_OF_AGENT_START: CommonIndexConfig = {
-  regex: /defineAgentConfig\({()/m,
-  getIndex: ({ matchIndex }) => matchIndex + "defineAgentConfig({".length,
+  regex: /agentStart\({()/m,
+  getIndex: ({ matchIndex }) => matchIndex + "agentStart({".length,
 };
 
 const getErrorMessage = (error: unknown) => {

@@ -89,7 +89,7 @@ const getDefaultAgentConfig = async ({ appName }: { appName?: string }) =>
   await prettierFormat(
     [
       `import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-       import { Agent, defineAgentConfig } from "agentstart";`,
+       import { Agent, agentStart } from "agentstart";`,
       `if (!process.env.MODEL_PROVIDER_API_KEY) {
          throw new Error("Missing MODEL_PROVIDER_API_KEY");
        }
@@ -100,7 +100,7 @@ const getDefaultAgentConfig = async ({ appName }: { appName?: string }) =>
          model: openrouter("x-ai/grok-4-fast"),
          instructions: "You are a helpful assistant.",
        });`,
-      `export const agentStart = defineAgentConfig({
+      `export const start = agentStart({
          ${appName ? `appName: "${appName}",` : ""}
          agent,
        });`,

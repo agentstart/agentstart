@@ -12,7 +12,6 @@ agent-frontmatter:end */
 
 export * from "./agent";
 export * from "./context";
-export * from "./define";
 export * from "./messages";
 export * from "./persistence";
 export * from "./tools";
