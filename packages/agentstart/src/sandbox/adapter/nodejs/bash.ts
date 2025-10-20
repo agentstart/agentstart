@@ -12,7 +12,7 @@ agent-frontmatter:end */
 
 import * as fs from "node:fs/promises";
 import path from "node:path";
-import { type Options as ExecaOptions, execaCommand } from "execa";
+import { type Options as ExecaOptions, execa } from "execa";
 import glob from "fast-glob";
 
 import type {
@@ -84,13 +84,26 @@ export class Bash implements BashAPI {
       cwd: options.cwd ?? this.workingDirectory,
       env: { ...process.env, ...(options.env ?? {}) },
       timeout: options.timeout,
-      shell: true,
       windowsHide: true,
       reject: false,
       ...(options.background ? { detached: true, cleanup: false } : {}),
     };
 
-    const child = execaCommand(command, execaOptions);
+    const shellExecutable =
+      process.platform === "win32"
+        ? (process.env.ComSpec ?? "cmd.exe")
+        : (process.env.SHELL ?? "/bin/bash");
+    const shellArgs =
+      process.platform === "win32"
+        ? ["/d", "/s", "/c", command]
+        : ["-lc", command];
+
+    const child = execa(shellExecutable, shellArgs, {
+      ...execaOptions,
+      shell: false,
+      stripFinalNewline: false,
+      windowsVerbatimArguments: process.platform === "win32",
+    });
 
     if (options.background) child.unref?.();
 
@@ -137,6 +150,24 @@ export class Bash implements BashAPI {
 
     try {
       const result = await child;
+
+      // Check if the command was killed due to timeout
+      if (result.timedOut || result.isTerminated || result.isCanceled) {
+        const timeoutError = new Error(
+          abortReason ||
+            `Command timed out after ${options.timeout || options.requestTimeoutMs} milliseconds: ${command}`,
+        );
+        (timeoutError as { timedOut?: boolean }).timedOut = true;
+        throw timeoutError;
+      }
+
+      // Also check if exitCode indicates failure and we had set abortReason
+      if (abortReason && result.exitCode !== 0) {
+        const timeoutError = new Error(abortReason);
+        (timeoutError as { timedOut?: boolean }).timedOut = true;
+        throw timeoutError;
+      }
+
       return buildResult(
         chunkToString(result.stdout),
         chunkToString(result.stderr),
@@ -150,13 +181,24 @@ export class Bash implements BashAPI {
         stderr?: unknown;
         shortMessage?: string;
         message?: string;
+        isTerminated?: boolean;
+        isCanceled?: boolean;
+        timedOut?: boolean;
       };
+
+      // If this is a timeout/termination error, re-throw it
+      if (err.timedOut || err.isTerminated || err.isCanceled || abortReason) {
+        throw new Error(
+          abortReason ||
+            `Command timed out after ${options.timeout || options.requestTimeoutMs} milliseconds: ${command}`,
+        );
+      }
 
       return buildResult(
         chunkToString(err.stdout),
         chunkToString(err.stderr),
         err.exitCode ?? 1,
-        abortReason || err.shortMessage || err.message || String(error),
+        err.shortMessage || err.message || String(error),
       );
     } finally {
       if (requestTimeout) clearTimeout(requestTimeout);
@@ -184,7 +226,9 @@ export class Bash implements BashAPI {
   ): Promise<GrepResult> {
     const startTime = Date.now();
     const searchPath = options?.path
-      ? path.join(this.workingDirectory, options.path)
+      ? path.isAbsolute(options.path)
+        ? options.path
+        : path.join(this.workingDirectory, options.path)
       : this.workingDirectory;
     const recursive = options?.recursive !== false;
 

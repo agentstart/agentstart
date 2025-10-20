@@ -1,11 +1,10 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`generate > should generate drizzle schema 1`] = `
-"import { pgTable, text, integer, timestamp, boolean } from "drizzle-orm/pg-core";
+"import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 export const thread = pgTable("thread", {
   id: text('id').primaryKey(),
-  id: text('id').notNull(),
   title: text('title').notNull(),
   userId: text('user_id').notNull(),
   visibility: text('visibility').notNull(),
@@ -16,7 +15,6 @@ export const thread = pgTable("thread", {
 
 export const message = pgTable("message", {
   id: text('id').primaryKey(),
-  id: text('id').notNull(),
   threadId: text('thread_id').notNull().references(() => thread.id, { onDelete: 'cascade' }),
   role: text('role').notNull(),
   parts: text('parts').notNull(),
@@ -25,12 +23,23 @@ export const message = pgTable("message", {
   createdAt: timestamp('created_at').notNull(),
   updatedAt: timestamp('updated_at').notNull(),
 });
-"`;
+
+export const todo = pgTable("todo", {
+  id: text('id').primaryKey(),
+  threadId: text('thread_id').notNull().references(() => thread.id, { onDelete: 'cascade' }),
+  todos: text('todos').notNull(),
+  createdAt: timestamp('created_at').notNull(),
+  updatedAt: timestamp('updated_at').notNull(),
+});
+"
+`;
 
 exports[`generate > should generate kysely schema 1`] = `
 "create table "thread" ("id" text not null primary key, "title" text not null, "userId" text not null, "visibility" text not null, "lastContext" text, "createdAt" date not null, "updatedAt" date not null);
 
-create table "message" ("id" text not null primary key, "threadId" text not null references "thread" ("id"), "role" text not null, "parts" text not null, "attachments" text, "metadata" text, "createdAt" date not null, "updatedAt" date not null);"
+create table "message" ("id" text not null primary key, "threadId" text not null references "thread" ("id"), "role" text not null, "parts" text not null, "attachments" text, "metadata" text, "createdAt" date not null, "updatedAt" date not null);
+
+create table "todo" ("id" text not null primary key, "threadId" text not null references "thread" ("id"), "todos" text not null, "createdAt" date not null, "updatedAt" date not null);"
 `;
 
 exports[`generate > should generate prisma schema 1`] = `
@@ -45,7 +54,7 @@ datasource db {
 }
 
 model Thread {
-  id          String   @id
+  id          String    @id
   title       String
   userId      String
   visibility  String
@@ -53,6 +62,7 @@ model Thread {
   createdAt   DateTime
   updatedAt   DateTime
   messages    Message[]
+  todos       Todo[]
 
   @@map("thread")
 }
@@ -69,6 +79,17 @@ model Message {
   updatedAt   DateTime
 
   @@map("message")
+}
+
+model Todo {
+  id        String   @id
+  threadId  String
+  thread    Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  todos     String
+  createdAt DateTime
+  updatedAt DateTime
+
+  @@map("todo")
 }
 "
 `;
@@ -85,7 +106,7 @@ datasource db {
 }
 
 model Thread {
-  id          String   @id @map("_id")
+  id          String    @id @map("_id")
   title       String
   userId      String
   visibility  String
@@ -93,6 +114,7 @@ model Thread {
   createdAt   DateTime
   updatedAt   DateTime
   messages    Message[]
+  todos       Todo[]
 
   @@map("thread")
 }
@@ -109,6 +131,69 @@ model Message {
   updatedAt   DateTime
 
   @@map("message")
+}
+
+model Todo {
+  id        String   @id @map("_id")
+  threadId  String
+  thread    Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  todos     String
+  createdAt DateTime
+  updatedAt DateTime
+
+  @@map("todo")
+}
+"
+`;
+
+exports[`generate > should generate prisma schema for mysql 1`] = `
+"
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Thread {
+  id          String    @id
+  title       String    @db.Text
+  userId      String    @db.Text
+  visibility  String    @db.Text
+  lastContext String?   @db.Text
+  createdAt   DateTime
+  updatedAt   DateTime
+  messages    Message[]
+  todos       Todo[]
+
+  @@map("thread")
+}
+
+model Message {
+  id          String   @id
+  threadId    String
+  thread      Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  role        String   @db.Text
+  parts       String   @db.Text
+  attachments String?  @db.Text
+  metadata    String?  @db.Text
+  createdAt   DateTime
+  updatedAt   DateTime
+
+  @@map("message")
+}
+
+model Todo {
+  id        String   @id
+  threadId  String
+  thread    Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  todos     String
+  createdAt DateTime
+  updatedAt DateTime
+
+  @@map("todo")
 }
 "
 `;

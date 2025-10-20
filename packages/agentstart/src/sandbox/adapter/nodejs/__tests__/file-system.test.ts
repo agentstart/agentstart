@@ -95,7 +95,7 @@ describe("FileSystem", () => {
     });
 
     it("should read directory contents", async () => {
-      const entries = await fileSystem.readdir(".");
+      const entries = await fileSystem.readdir(".", { recursive: false });
 
       expect(entries).toHaveLength(3);
       const names = entries.map((e) => e.name).sort();

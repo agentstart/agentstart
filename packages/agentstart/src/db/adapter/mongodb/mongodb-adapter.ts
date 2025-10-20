@@ -1,9 +1,49 @@
-import { type Db, ObjectId } from "mongodb";
+import { createRequire } from "node:module";
+import type { Db } from "mongodb";
 import { getTables } from "@/db";
 import { withApplyDefault } from "@/db/adapter/utils";
 import type { Adapter, AgentStartOptions, Where } from "@/types";
 
+type MongoModule = typeof import("mongodb");
+
+const requireMongo =
+  typeof createRequire === "function"
+    ? createRequire(import.meta.url)
+    : (() => {
+        try {
+          // eslint-disable-next-line no-new-func
+          return Function("return require")();
+        } catch (_error) {
+          return undefined;
+        }
+      })();
+
+let cachedMongo: MongoModule | null = null;
+
+const loadMongo = (): MongoModule => {
+  if (cachedMongo) {
+    return cachedMongo;
+  }
+  if (!requireMongo) {
+    throw new Error(
+      "The MongoDB adapter requires the `mongodb` package, but it could not be loaded in this environment.",
+    );
+  }
+  try {
+    cachedMongo = requireMongo("mongodb") as MongoModule;
+    return cachedMongo;
+  } catch (error) {
+    throw new Error(
+      "The MongoDB adapter requires the `mongodb` package. Please install it before using this adapter.",
+      {
+        cause: error instanceof Error ? error : undefined,
+      },
+    );
+  }
+};
+
 const createTransform = (options: Omit<AgentStartOptions, "agent">) => {
+  const { ObjectId } = loadMongo();
   const schema = getTables(options);
   /**
    * if custom id gen is provided we don't want to override with object id

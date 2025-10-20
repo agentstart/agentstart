@@ -43,30 +43,25 @@ export class FileSystem implements FileSystemAPI {
    * Resolves a relative path to an absolute path
    */
   resolvePath(filePath: string): string {
-    // Treat blank or "current directory" inputs as a request for the workspace root.
     const trimmedInput = filePath.trim();
     if (!trimmedInput || trimmedInput === "." || trimmedInput === "./") {
       return this.workingDirectory;
     }
 
-    // Normalize both the workspace root and caller input so comparisons are reliable.
     const normalizedWorkspace = path.normalize(this.workingDirectory);
     const normalizedInput = path.normalize(trimmedInput);
 
-    // Treat "/" (or "\\" on Windows) as an explicit request for the workspace root.
+    if (path.isAbsolute(normalizedInput)) {
+      return path.resolve(normalizedInput);
+    }
+
     if (normalizedInput === path.sep) {
       return normalizedWorkspace;
     }
 
-    // Resolve the caller input against the workspace root (or as an absolute path if provided).
-    const candidate = path.isAbsolute(normalizedInput)
-      ? path.resolve(normalizedInput)
-      : path.resolve(normalizedWorkspace, normalizedInput);
-
-    // Normalize again so the upcoming prefix comparison uses canonical paths.
+    const candidate = path.resolve(normalizedWorkspace, normalizedInput);
     const normalizedCandidate = path.normalize(candidate);
 
-    // Reject any path that attempts to escape the sandbox's workspace boundary.
     const isWithinWorkspace =
       normalizedCandidate === normalizedWorkspace ||
       normalizedCandidate.startsWith(`${normalizedWorkspace}${path.sep}`);
@@ -75,7 +70,6 @@ export class FileSystem implements FileSystemAPI {
       throw new Error(`Path '${filePath}' escapes the sandbox workspace`);
     }
 
-    // At this point we have a safe, absolute path anchored inside the workspace.
     return normalizedCandidate;
   }
 
@@ -104,6 +98,57 @@ export class FileSystem implements FileSystemAPI {
     return normalizedTarget;
   }
 
+  private normalizeForMatch(targetPath: string): string {
+    const normalized = this.normalizeSeparator(targetPath);
+    if (normalized.startsWith("./")) {
+      return normalized.slice(2);
+    }
+    return normalized;
+  }
+
+  private globToRegExp(pattern: string): RegExp {
+    const normalized = this.normalizeForMatch(pattern);
+    let regex = "";
+    for (let index = 0; index < normalized.length; index++) {
+      const char = normalized[index];
+      const next = normalized[index + 1];
+      if (char === "*") {
+        if (next === "*") {
+          regex += ".*";
+          index += 1;
+          continue;
+        }
+        regex += "[^/]*";
+        continue;
+      }
+      if (char === "?") {
+        regex += "[^/]";
+        continue;
+      }
+      if (char && "\\.^$+()[]{}|".includes(char)) {
+        regex += `\\${char}`;
+        continue;
+      }
+      regex += char;
+    }
+    return new RegExp(`^${regex}$`);
+  }
+
+  private compileIgnoreGlobs(patterns?: string[]): RegExp[] {
+    if (!patterns?.length) {
+      return [];
+    }
+    return patterns.map((pattern) => this.globToRegExp(pattern));
+  }
+
+  private isIgnored(inputPath: string, rules: RegExp[]): boolean {
+    if (!rules.length) {
+      return false;
+    }
+    const normalized = this.normalizeForMatch(inputPath);
+    return rules.some((rule) => rule.test(normalized));
+  }
+
   /**
    * Reads the contents of a directory
    */
@@ -116,24 +161,36 @@ export class FileSystem implements FileSystemAPI {
   ): Promise<Dirent[]> {
     const absolutePath = this.resolvePath(dirPath);
     const pattern = options?.recursive === false ? "*" : "**/*";
+    const ignoreRules = this.compileIgnoreGlobs(options?.ignores);
     const entries = await fg(pattern, {
       cwd: absolutePath,
       dot: true,
       onlyFiles: false,
       unique: true,
-      ignore: options?.ignores,
       objectMode: true,
     });
 
     const results: Dirent[] = [];
+    const seenPaths = new Set<string>();
 
     for (const entry of entries as Entry[]) {
       const entryAbsolutePath = path.join(absolutePath, entry.path);
       const relativePath = this.toWorkspacePath(entryAbsolutePath);
       const parentPath = this.toWorkspacePath(path.dirname(entryAbsolutePath));
 
+      if (this.isIgnored(relativePath, ignoreRules)) {
+        continue;
+      }
+
+      if (seenPaths.has(relativePath)) {
+        continue;
+      }
+      seenPaths.add(relativePath);
+
+      const entryName = this.normalizeForMatch(entry.path) || entry.name;
+
       results.push({
-        name: entry.name,
+        name: entryName,
         path: relativePath,
         parentPath,
         isFile: () => entry.dirent.isFile(),
@@ -338,9 +395,10 @@ export class FileSystem implements FileSystemAPI {
       const found = await fg(pat, {
         cwd,
         dot: true,
-        onlyFiles: false,
+        onlyFiles: true,
         unique: true,
         ignore,
+        absolute: false,
       });
 
       for (const match of found) {
@@ -351,8 +409,7 @@ export class FileSystem implements FileSystemAPI {
           }
         }
 
-        const absoluteMatch = path.join(cwd, normalizedMatch);
-        matches.add(this.toWorkspacePath(absoluteMatch));
+        matches.add(normalizedMatch);
       }
     }
 
@@ -361,15 +418,15 @@ export class FileSystem implements FileSystemAPI {
     if (options?.withFileTypes) {
       const dirents: Dirent[] = [];
       for (const relative of sortedMatches) {
-        const absolutePath = this.resolvePath(relative);
+        const absolutePath = path.join(cwd, relative);
         try {
           const stat = await fs.stat(absolutePath);
-          const parentPath = this.toWorkspacePath(path.dirname(absolutePath));
+          const parentDir = path.dirname(relative);
 
           dirents.push({
             name: path.basename(relative),
             path: relative,
-            parentPath,
+            parentPath: parentDir === "." ? "" : parentDir,
             isFile: () => stat.isFile(),
             isDirectory: () => stat.isDirectory(),
           });
