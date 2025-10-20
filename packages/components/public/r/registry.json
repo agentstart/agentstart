@@ -1,0 +1,47 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "agentstart-ui",
+  "homepage": "https://agentstart.ai",
+  "items": [
+    {
+      "name": "provider",
+      "type": "registry:component",
+      "title": "AgentStart Provider",
+      "description": "React context provider for sharing the AgentStart client instance across components. Eliminates prop drilling and provides hooks for accessing the client.",
+      "files": [
+        {
+          "path": "src/registry/agentstart/provider.tsx",
+          "type": "registry:component",
+          "target": "components/agent/provider.tsx"
+        }
+      ],
+      "dependencies": ["agentstart", "react"]
+    },
+    {
+      "name": "sidebar",
+      "type": "registry:component",
+      "title": "AgentStart Sidebar",
+      "description": "A shadcn-based sidebar component that displays AgentStart threads with TanStack Query for data fetching, infinite scroll pagination, and thread management capabilities.",
+      "files": [
+        {
+          "path": "src/registry/agentstart/sidebar/sidebar.tsx",
+          "type": "registry:component",
+          "target": "components/agent/sidebar/sidebar.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/sidebar/sidebar-item.tsx",
+          "type": "registry:component",
+          "target": "components/agent/sidebar/sidebar-item.tsx"
+        }
+      ],
+      "dependencies": [
+        "@tanstack/react-query",
+        "@agentstart/utils",
+        "agentstart",
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": ["button", "scroll-area", "sidebar"]
+    }
+  ]
+}

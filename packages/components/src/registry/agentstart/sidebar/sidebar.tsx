@@ -1,0 +1,448 @@
+/* agent-frontmatter:start
+AGENT: Sidebar layout
+PURPOSE: Compose a shadcn sidebar that lists AgentStart threads using TanStack Query
+USAGE: <Sidebar>{mainContent}</Sidebar>
+EXPORTS: Sidebar, SidebarProps
+FEATURES:
+  - Fetches threads via TanStack Query with automatic caching and refetching
+  - Supports infinite scroll pagination, thread creation, and selection callbacks
+  - Wraps children inside <SidebarInset> for a ready-to-use layout
+SEARCHABLE: agent layout, sidebar, agent threads list, tanstack query
+agent-frontmatter:end */
+
+"use client";
+
+import {
+  DotsThreeIcon,
+  PencilSimpleIcon,
+  TrashIcon,
+} from "@phosphor-icons/react";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import type { DBThread } from "agentstart/db";
+import { AlertCircleIcon, InboxIcon } from "lucide-react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Sidebar as ShadcnSidebar,
+  SidebarInset,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSkeleton,
+  SidebarProvider,
+  SidebarRail,
+} from "@/components/ui/sidebar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+import { useAgentStartContext } from "../provider";
+import { SidebarContent } from "./sidebar-content";
+import { SidebarFooter } from "./sidebar-footer";
+import { SidebarHeader } from "./sidebar-header";
+import { SidebarItem } from "./sidebar-item";
+
+export type SidebarProps = {
+  children?: ReactNode;
+  className?: string;
+  // Thread selection
+  selectedThreadId?: string;
+  defaultSelectedThreadId?: string;
+  autoSelectFirst?: boolean;
+  onSelectThread?: (thread: DBThread) => void;
+  // Query configuration
+  pageSize?: number;
+  // UI customization
+  header?: {
+    title?: string;
+  };
+  footer?: ReactNode;
+  emptyState?: ReactNode;
+  errorState?: (error: Error, retry: () => void) => ReactNode;
+  // Sidebar configuration
+  sidebar?: {
+    variant?: "sidebar" | "floating" | "inset";
+    side?: "left" | "right";
+    collapsible?: "offcanvas" | "icon" | "none";
+    className?: string;
+    defaultOpen?: boolean;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+  };
+};
+
+export function Sidebar({
+  children,
+  className,
+  selectedThreadId,
+  defaultSelectedThreadId,
+  autoSelectFirst = true,
+  onSelectThread,
+  pageSize = 20,
+  header,
+  footer,
+  emptyState,
+  errorState,
+  sidebar,
+}: SidebarProps) {
+  const { orpc } = useAgentStartContext();
+  const queryClient = useQueryClient();
+
+  const [internalSelectedId, setInternalSelectedId] = useState<string | null>(
+    defaultSelectedThreadId ?? null,
+  );
+
+  // Infinite query for thread list with pagination
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+    refetch,
+  } = useInfiniteQuery(
+    orpc.thread.list.infiniteOptions({
+      input: (page) => ({
+        page,
+        pageSize,
+      }),
+      initialPageParam: 1,
+      getNextPageParam: (lastPage) => {
+        if (lastPage.pageInfo.hasNextPage) {
+          return lastPage.pageInfo.page + 1;
+        }
+        return undefined;
+      },
+    }),
+  );
+
+  // Rename mutation
+  const renameMutation = useMutation(
+    orpc.thread.rename.mutationOptions({
+      onSuccess: () => {
+        refetch();
+      },
+    }),
+  );
+
+  // Delete mutation
+  const deleteMutation = useMutation(
+    orpc.thread.delete.mutationOptions({
+      onSuccess: (_, deletedThreadId) => {
+        // If the deleted thread was selected, clear the selection
+        const currentActiveId = selectedThreadId ?? internalSelectedId;
+        if (currentActiveId === deletedThreadId.threadId) {
+          setInternalSelectedId(null);
+        }
+        // Invalidate and refetch the thread list
+        refetch();
+      },
+    }),
+  );
+
+  // Flatten all pages into a single array of threads
+  const threads = useMemo(() => {
+    if (!data) return [];
+    return data.pages.flatMap((page) =>
+      page.threads.map((thread) => normalizeThread(thread)),
+    );
+  }, [data]);
+
+  // Auto-select first thread
+  useEffect(() => {
+    if (selectedThreadId !== undefined) {
+      setInternalSelectedId(selectedThreadId);
+    }
+  }, [selectedThreadId]);
+
+  useEffect(() => {
+    if (
+      autoSelectFirst &&
+      selectedThreadId === undefined &&
+      !internalSelectedId &&
+      threads.length > 0
+    ) {
+      const firstThread = threads[0];
+      if (!firstThread) {
+        return;
+      }
+      setInternalSelectedId(firstThread.id);
+      onSelectThread?.(firstThread);
+    }
+  }, [
+    autoSelectFirst,
+    internalSelectedId,
+    onSelectThread,
+    selectedThreadId,
+    threads,
+  ]);
+
+  // Clear selection if thread no longer exists
+  useEffect(() => {
+    if (
+      internalSelectedId &&
+      threads.length > 0 &&
+      !threads.some((thread) => thread.id === internalSelectedId)
+    ) {
+      setInternalSelectedId(null);
+    }
+  }, [internalSelectedId, threads]);
+
+  const activeThreadId = selectedThreadId ?? internalSelectedId ?? null;
+
+  const handleSelectThread = useCallback(
+    (thread: DBThread) => {
+      if (selectedThreadId === undefined) {
+        setInternalSelectedId(thread.id);
+      }
+      onSelectThread?.(thread);
+    },
+    [onSelectThread, selectedThreadId],
+  );
+
+  const renderThreads = useMemo(() => {
+    if (isLoading && threads.length === 0) {
+      return Array.from({ length: 6 }).map((_, index) => (
+        <SidebarMenuSkeleton key={`thread-skeleton-${index}`} showIcon />
+      ));
+    }
+
+    if (isError && error) {
+      if (errorState) {
+        return errorState(error, refetch);
+      }
+      return (
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            type="button"
+            variant="outline"
+            className="items-start gap-3 text-left"
+            onClick={() => refetch()}
+          >
+            <AlertCircleIcon className="mt-0.5 size-4 text-destructive" />
+            <div className="space-y-1">
+              <p className="font-medium text-destructive text-sm">
+                Failed to load threads
+              </p>
+              <p className="text-muted-foreground text-xs">{error.message}</p>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 justify-start px-0 text-xs"
+                onClick={() => refetch()}
+              >
+                Retry
+              </Button>
+            </div>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      );
+    }
+
+    if (threads.length === 0) {
+      if (emptyState) {
+        return emptyState;
+      }
+      return (
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            type="button"
+            disabled
+            className="items-start gap-3 text-left"
+          >
+            <InboxIcon className="mt-0.5 size-4 text-muted-foreground" />
+            <div className="space-y-1">
+              <p className="font-medium text-sm">No threads yet</p>
+              <p className="text-muted-foreground text-xs">
+                Start chatting with the agent to see conversations here.
+              </p>
+            </div>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      );
+    }
+
+    const items = threads.map((thread) => (
+      <SidebarItem
+        key={thread.id}
+        thread={thread}
+        isActive={thread.id === activeThreadId}
+        onSelect={handleSelectThread}
+        leading={<ThreadAvatar title={thread.title} />}
+        trailing={
+          <MoreOptions
+            threadTitle={thread.title ?? "Thread"}
+            onRename={(title) =>
+              renameMutation.mutate({ threadId: thread.id, title })
+            }
+            onDelete={() => deleteMutation.mutate({ threadId: thread.id })}
+          />
+        }
+      />
+    ));
+
+    if (isFetching && threads.length > 0) {
+      items.push(
+        ...Array.from({ length: 3 }).map((_, index) => (
+          <SidebarMenuSkeleton
+            key={`thread-refresh-skeleton-${index}`}
+            showIcon
+          />
+        )),
+      );
+    }
+
+    return items;
+  }, [
+    activeThreadId,
+    emptyState,
+    error,
+    errorState,
+    refetch,
+    handleSelectThread,
+    isError,
+    isFetching,
+    isLoading,
+    threads,
+  ]);
+
+  return (
+    <SidebarProvider
+      defaultOpen={sidebar?.defaultOpen}
+      open={sidebar?.open}
+      onOpenChange={sidebar?.onOpenChange}
+      className={className}
+    >
+      <ShadcnSidebar
+        variant={sidebar?.variant ?? "sidebar"}
+        side={sidebar?.side ?? "left"}
+        collapsible={sidebar?.collapsible ?? "icon"}
+        className={cn(
+          sidebar?.side === "right" ? "border-l" : "border-r",
+          "border-sidebar-border/60",
+          sidebar?.className,
+        )}
+      >
+        <SidebarHeader title={header?.title} />
+        <SidebarContent
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          onLoadMore={fetchNextPage}
+        >
+          {renderThreads}
+        </SidebarContent>
+        <SidebarFooter footer={footer} />
+        <SidebarRail />
+      </ShadcnSidebar>
+      <SidebarInset>{children}</SidebarInset>
+    </SidebarProvider>
+  );
+}
+
+function normalizeThread(thread: DBThread): DBThread {
+  const createdAt =
+    thread.createdAt instanceof Date
+      ? thread.createdAt
+      : new Date(thread.createdAt);
+  const updatedAt =
+    thread.updatedAt instanceof Date
+      ? thread.updatedAt
+      : new Date(thread.updatedAt);
+
+  return {
+    ...thread,
+    createdAt,
+    updatedAt,
+  };
+}
+
+function ThreadAvatar({ title }: { title?: string | null }) {
+  const initials = (title ?? "Thread")
+    .split(" ")
+    .filter(Boolean)
+    .map((segment) => segment[0]?.toUpperCase())
+    .join("")
+    .slice(0, 2);
+
+  return (
+    <div className="flex size-6 items-center justify-center rounded-md border border-sidebar-border bg-sidebar-accent/40 font-semibold text-[11px] text-sidebar-foreground uppercase">
+      {initials || "AI"}
+    </div>
+  );
+}
+
+function MoreOptions({
+  threadTitle,
+  onRename,
+  onDelete,
+}: {
+  threadTitle: string;
+  onRename: (title: string) => void;
+  onDelete: () => void;
+}) {
+  const handleRename = () => {
+    const newTitle = window.prompt("Enter new thread title:", threadTitle);
+    if (newTitle && newTitle.trim() !== "" && newTitle !== threadTitle) {
+      onRename(newTitle.trim());
+    }
+  };
+
+  const handleDelete = () => {
+    if (window.confirm(`Are you sure you want to delete "${threadTitle}"?`)) {
+      onDelete();
+    }
+  };
+
+  return (
+    <DropdownMenu>
+      <Tooltip>
+        <DropdownMenuTrigger asChild>
+          <TooltipTrigger asChild>
+            <div className="flex size-5 cursor-pointer items-center justify-center rounded-md hover:bg-gray-200">
+              <DotsThreeIcon className="size-4" />
+            </div>
+          </TooltipTrigger>
+        </DropdownMenuTrigger>
+        <TooltipContent>
+          <span>More options</span>
+        </TooltipContent>
+      </Tooltip>
+
+      <DropdownMenuContent>
+        <DropdownMenuItem onClick={handleRename}>
+          <PencilSimpleIcon weight="duotone" className="size-4.5" />{" "}
+          <span>Rename</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleDelete}>
+          <TrashIcon
+            weight="duotone"
+            className="size-4.5 text-destructive"
+            color="currentColor"
+          />{" "}
+          <span className="text-destructive">Delete</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}

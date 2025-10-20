@@ -15,10 +15,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "uuid": "catalog:",
     "nanoid": "catalog:",
     "shiki": "catalog:",
-    "std-env": "catalog:"
+    "std-env": "catalog:",
+    "uuid": "catalog:"
   },
   "devDependencies": {
     "@agentstart/biome-config": "workspace:*",

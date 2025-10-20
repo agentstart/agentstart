@@ -19,4 +19,6 @@ export const publicProcedure = os.$context<Context>().errors({
   UNAUTHORIZED: {},
   UNKNOWN: {},
   INTERNAL_SERVER_ERROR: {},
+  NOT_FOUND: {},
+  FORBIDDEN: {},
 });

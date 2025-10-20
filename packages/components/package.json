@@ -1,5 +1,5 @@
 {
-  "name": "@agentstart/react-components",
+  "name": "@agentstart/components",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -8,6 +8,8 @@
     "./styles/*": "./src/components/*"
   },
   "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "shadcn build",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "lint": "bunx biome check --write ./src",
     "typecheck": "tsc --noEmit"
@@ -15,6 +17,9 @@
   "dependencies": {
     "@agentstart/utils": "workspace:*",
     "@hookform/resolvers": "catalog:",
+    "@orpc/server": "catalog:",
+    "@orpc/tanstack-query": "catalog:",
+    "@phosphor-icons/react": "catalog:",
     "@radix-ui/react-accordion": "catalog:",
     "@radix-ui/react-alert-dialog": "catalog:",
     "@radix-ui/react-aspect-ratio": "catalog:",
@@ -42,6 +47,7 @@
     "@radix-ui/react-toggle-group": "catalog:",
     "@radix-ui/react-tooltip": "catalog:",
     "@radix-ui/react-use-controllable-state": "catalog:",
+    "@tanstack/react-query": "catalog:",
     "agentstart": "workspace:*",
     "ai": "catalog:",
     "class-variance-authority": "catalog:",
@@ -52,11 +58,15 @@
     "lucide-react": "catalog:",
     "motion": "catalog:",
     "nanoid": "catalog:",
+    "next": "catalog:",
     "next-themes": "catalog:",
+    "react": "catalog:",
     "react-day-picker": "catalog:",
+    "react-dom": "catalog:",
     "react-hook-form": "catalog:",
     "react-resizable-panels": "catalog:",
     "react-syntax-highlighter": "catalog:",
+    "shadcn": "catalog:",
     "sonner": "catalog:",
     "streamdown": "catalog:",
     "tailwind-merge": "catalog:",
@@ -70,13 +80,12 @@
     "@agentstart/biome-config": "workspace:*",
     "@agentstart/tsconfig": "workspace:*",
     "@biomejs/biome": "catalog:",
+    "@tailwindcss/postcss": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@types/react-syntax-highlighter": "catalog:",
-    "next": "catalog:",
-    "react": "catalog:",
-    "react-dom": "catalog:",
+    "tailwindcss": "catalog:",
     "typescript": "catalog:"
   }
 }

@@ -39,3 +39,57 @@ export function formatDate(timestamp: number): string {
     return `${month} ${day}  ${year}`;
   }
 }
+
+const RELATIVE_TIME_FORMAT = new Intl.RelativeTimeFormat(undefined, {
+  numeric: "auto",
+  style: "short",
+});
+
+const RELATIVE_TIME_UNITS: Array<{
+  unit: Intl.RelativeTimeFormatUnit;
+  seconds: number;
+}> = [
+  { unit: "year", seconds: 60 * 60 * 24 * 365 },
+  { unit: "month", seconds: 60 * 60 * 24 * 30 },
+  { unit: "week", seconds: 60 * 60 * 24 * 7 },
+  { unit: "day", seconds: 60 * 60 * 24 },
+  { unit: "hour", seconds: 60 * 60 },
+  { unit: "minute", seconds: 60 },
+  { unit: "second", seconds: 1 },
+];
+
+const DEFAULT_RELATIVE_FALLBACK = "Just now";
+
+/**
+ * Format a Date-like input into a human-friendly relative time string
+ * @param input - A date, ISO string, unix timestamp, or falsy value
+ * @param fallbackText - Text to display when the input cannot be parsed
+ */
+export function formatRelativeFromNow(
+  input: Date | string | number | null | undefined,
+  fallbackText: string = DEFAULT_RELATIVE_FALLBACK,
+): string {
+  if (!input) {
+    return fallbackText;
+  }
+
+  const date =
+    input instanceof Date
+      ? input
+      : new Date(typeof input === "number" ? input : Date.parse(input));
+
+  if (Number.isNaN(date.getTime())) {
+    return fallbackText;
+  }
+
+  const diffInSeconds = Math.round((date.getTime() - Date.now()) / 1000);
+
+  for (const { unit, seconds } of RELATIVE_TIME_UNITS) {
+    if (Math.abs(diffInSeconds) >= seconds || unit === "second") {
+      const value = Math.round(diffInSeconds / seconds);
+      return RELATIVE_TIME_FORMAT.format(value, unit);
+    }
+  }
+
+  return fallbackText;
+}
