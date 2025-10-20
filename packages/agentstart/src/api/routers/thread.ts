@@ -19,32 +19,60 @@ import { getAdapter } from "@/db";
 import { getSandbox } from "@/sandbox";
 
 export const threadRouter = {
-  list: publicProcedure.handler(async ({ context, errors }) => {
-    try {
-      const db = await getAdapter(context);
-      const userId = context.getUserId
-        ? await context.getUserId(context.headers)
-        : undefined;
+  list: publicProcedure
+    .input(
+      z
+        .object({
+          page: z.number().int().min(1).optional(),
+          pageSize: z.number().int().min(1).max(20).optional(),
+        })
+        .optional(),
+    )
+    .handler(async ({ input, context, errors }) => {
+      try {
+        const db = await getAdapter(context);
+        const userId = context.getUserId
+          ? await context.getUserId(context.headers)
+          : undefined;
 
-      const threads = await getThreads({
-        db,
-        userId,
-      });
+        const page = input?.page ?? 1;
+        const pageSize = input?.pageSize ?? 20;
+        const offset = (page - 1) * pageSize;
 
-      // First thread is the most recent (already sorted by updatedAt desc)
-      const activeThread = threads[0] || null;
+        const [threads, total] = await Promise.all([
+          getThreads({
+            db,
+            userId,
+            limit: pageSize,
+            offset,
+          }),
+          db.count({
+            model: "thread",
+            where: userId ? [{ field: "userId", value: userId }] : undefined,
+          }),
+        ]);
 
-      return {
-        threads,
-        activeThreadId: activeThread?.id || null,
-      };
-    } catch (error) {
-      console.error("Failed to list threads:", error);
-      throw errors.INTERNAL_SERVER_ERROR({
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-    }
-  }),
+        const totalPages = Math.ceil(total / pageSize);
+        const hasNextPage = offset + threads.length < total;
+
+        return {
+          threads,
+          pageInfo: {
+            page,
+            pageSize,
+            total,
+            totalPages,
+            hasNextPage,
+            hasPreviousPage: page > 1,
+          },
+        };
+      } catch (error) {
+        console.error("Failed to list threads:", error);
+        throw errors.INTERNAL_SERVER_ERROR({
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
+      }
+    }),
 
   create: publicProcedure
     .input(

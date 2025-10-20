@@ -1,6 +1,5 @@
 "use client";
 
-import type { AgentStartUIMessage } from "agentstart";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -19,36 +18,26 @@ export default function Page() {
   const setMessages = useAgentStore((state) => state.setMessages);
   const sendMessage = useAgentStore((state) => state.sendMessage);
   const setThreads = useThreadStore((state) => state.setThreads);
-  const setThreadActive = useThreadStore((state) => state.setActiveThread);
-  const activeThreadId = useThreadStore((state) => state.activeThreadId);
 
-  useEffect(() => {
-    if (threadId) {
-      setThreadActive(threadId);
-    }
-  }, [threadId, setThreadActive]);
-
-  // Load initial messages
+  // Load initial threads
   useEffect(() => {
     async function fetchThreads() {
-      const { threads, activeThreadId } = await client.thread.list();
+      const { threads } = await client.thread.list();
       setThreads(threads);
-      setThreadActive(threadId ?? activeThreadId ?? threads[0]?.id);
     }
     fetchThreads();
-  }, [threadId, setThreads, setThreadActive]);
+  }, [setThreads]);
 
+  // Load messages for the current thread
   useEffect(() => {
-    if (!activeThreadId) {
+    if (!threadId) {
       return;
     }
 
-    client.message
-      .get({ threadId: activeThreadId })
-      .then((messages: AgentStartUIMessage[]) => {
-        setMessages(messages);
-      });
-  }, [activeThreadId, setMessages]);
+    client.message.get({ threadId }).then((messages) => {
+      setMessages(messages);
+    });
+  }, [threadId, setMessages]);
 
   return (
     <div className="stretch mx-auto flex w-full max-w-md flex-col py-24">
@@ -73,7 +62,7 @@ export default function Page() {
             { text: input },
             {
               body: {
-                threadId: activeThreadId,
+                threadId,
               },
             },
           );

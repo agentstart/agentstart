@@ -227,11 +227,15 @@ export async function loadThread<Message extends UIMessage>({
 
 export interface GetThreadsOptions extends AdapterContextOptions {
   userId?: string;
+  limit?: number;
+  offset?: number;
 }
 
 export const getThreads = async ({
   db,
   userId,
+  limit,
+  offset,
 }: GetThreadsOptions): Promise<DBThread[]> => {
   const where = userId
     ? ([{ field: "userId", value: userId }] as AdapterWhere[])
@@ -241,6 +245,8 @@ export const getThreads = async ({
     model: "thread",
     where,
     sortBy: { field: "updatedAt", direction: "desc" },
+    limit,
+    offset,
   });
 
   return records;
