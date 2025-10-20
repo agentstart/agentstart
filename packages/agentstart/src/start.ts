@@ -48,3 +48,5 @@ export function agentStart(options: AgentStartOptions) {
     },
   };
 }
+
+export type AgentStart = ReturnType<typeof agentStart>;

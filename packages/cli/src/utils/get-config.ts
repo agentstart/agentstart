@@ -16,7 +16,7 @@ import { logger } from "@agentstart/utils";
 import babelPresetReact from "@babel/preset-react";
 // @ts-expect-error
 import babelPresetTypescript from "@babel/preset-typescript";
-import type { AgentStartOptions } from "agentstart";
+import type { AgentStart, AgentStartOptions } from "agentstart";
 import { loadConfig } from "c12";
 import fs from "fs-extra";
 import { addSvelteKitEnvModules } from "./add-svelte-kit-env-modules";
@@ -137,15 +137,14 @@ export async function getConfig({
       for (const possiblePath of possiblePaths) {
         try {
           const { config } = await loadConfig<{
-            agentStart?: AgentStartOptions;
-            default?: AgentStartOptions;
+            start?: AgentStart;
           }>({
             configFile: possiblePath,
             jitiOptions: jitiOptions(cwd),
           });
           const hasConfig = Object.keys(config).length > 0;
           if (hasConfig) {
-            configFile = config.agentStart || config.default || null;
+            configFile = config.start?.options || null;
             if (!configFile) {
               if (shouldThrowOnError) {
                 throw new Error(

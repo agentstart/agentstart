@@ -19,24 +19,31 @@ import { getAdapter } from "@/db";
 import { getSandbox } from "@/sandbox";
 
 export const threadRouter = {
-  list: publicProcedure.handler(async ({ context }) => {
-    const db = await getAdapter(context);
-    const userId = context.getUserId
-      ? await context.getUserId(context.headers)
-      : undefined;
+  list: publicProcedure.handler(async ({ context, errors }) => {
+    try {
+      const db = await getAdapter(context);
+      const userId = context.getUserId
+        ? await context.getUserId(context.headers)
+        : undefined;
 
-    const threads = await getThreads({
-      db,
-      userId,
-    });
+      const threads = await getThreads({
+        db,
+        userId,
+      });
 
-    // First thread is the most recent (already sorted by updatedAt desc)
-    const activeThread = threads[0] || null;
+      // First thread is the most recent (already sorted by updatedAt desc)
+      const activeThread = threads[0] || null;
 
-    return {
-      threads,
-      activeThreadId: activeThread?.id || null,
-    };
+      return {
+        threads,
+        activeThreadId: activeThread?.id || null,
+      };
+    } catch (error) {
+      console.error("Failed to list threads:", error);
+      throw errors.INTERNAL_SERVER_ERROR({
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
   }),
 
   create: publicProcedure
@@ -70,22 +77,29 @@ export const threadRouter = {
         return { threadId: thread.id.toString(), thread };
       } catch (error) {
         console.error("Failed to create thread:", error);
-        throw errors.UNKNOWN({
-          message: "Failed to create thread",
+        throw errors.INTERNAL_SERVER_ERROR({
+          message: error instanceof Error ? error.message : "Unknown error",
         });
       }
     }),
 
   loadMessages: publicProcedure
     .input(z.object({ threadId: z.string() }))
-    .handler(async ({ input, context }) => {
-      const db = await getAdapter(context);
+    .handler(async ({ input, context, errors }) => {
+      try {
+        const db = await getAdapter(context);
 
-      const messages = await loadThread({
-        db,
-        threadId: input.threadId,
-      });
-      return messages;
+        const messages = await loadThread({
+          db,
+          threadId: input.threadId,
+        });
+        return messages;
+      } catch (error) {
+        console.error("Failed to load messages:", error);
+        throw errors.INTERNAL_SERVER_ERROR({
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
+      }
     }),
 
   stream: publicProcedure
@@ -119,8 +133,8 @@ export const threadRouter = {
         return streamToEventIterator(result);
       } catch (error) {
         console.error("Failed to stream thread response:", error);
-        throw errors.UNKNOWN({
-          message: "Failed to stream thread response",
+        throw errors.INTERNAL_SERVER_ERROR({
+          message: error instanceof Error ? error.message : "Unknown error",
         });
       }
     }),

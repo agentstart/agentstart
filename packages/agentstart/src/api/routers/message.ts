@@ -32,8 +32,8 @@ export const messageRouter = {
         return messages;
       } catch (error) {
         console.error("Error loading thread messages:", error);
-        throw errors.UNKNOWN({
-          message: "Failed to load thread messages",
+        throw errors.INTERNAL_SERVER_ERROR({
+          message: error instanceof Error ? error.message : "Unknown error",
         });
       }
     }),
