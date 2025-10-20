@@ -15,7 +15,12 @@
           "target": "components/agent/provider.tsx"
         }
       ],
-      "dependencies": ["agentstart", "react"],
+      "dependencies": [
+        "@orpc/tanstack-query",
+        "@tanstack/react-query",
+        "agentstart",
+        "react"
+      ],
       "registryDependencies": ["tooltip"]
     },
     {
@@ -42,7 +47,14 @@
         "agentstart",
         "react"
       ],
-      "registryDependencies": ["button", "scroll-area", "sidebar"]
+      "registryDependencies": [
+        "button",
+        "dropdown-menu",
+        "empty",
+        "scroll-area",
+        "sidebar",
+        "tooltip"
+      ]
     }
   ]
 }

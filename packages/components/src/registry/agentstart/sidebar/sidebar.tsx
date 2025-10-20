@@ -14,16 +14,13 @@ agent-frontmatter:end */
 
 import {
   DotsThreeIcon,
+  EmptyIcon,
   PencilSimpleIcon,
   TrashIcon,
+  WarningCircleIcon,
 } from "@phosphor-icons/react";
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import type { DBThread } from "agentstart/db";
-import { AlertCircleIcon, InboxIcon } from "lucide-react";
 import {
   type ReactNode,
   useCallback,
@@ -39,10 +36,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import {
   Sidebar as ShadcnSidebar,
   SidebarInset,
-  SidebarMenuButton,
-  SidebarMenuItem,
   SidebarMenuSkeleton,
   SidebarProvider,
   SidebarRail,
@@ -103,7 +106,6 @@ export function Sidebar({
   sidebar,
 }: SidebarProps) {
   const { orpc } = useAgentStartContext();
-  const queryClient = useQueryClient();
 
   const [internalSelectedId, setInternalSelectedId] = useState<string | null>(
     defaultSelectedThreadId ?? null,
@@ -232,31 +234,30 @@ export function Sidebar({
         return errorState(error, refetch);
       }
       return (
-        <SidebarMenuItem>
-          <SidebarMenuButton
-            type="button"
-            variant="outline"
-            className="items-start gap-3 text-left"
-            onClick={() => refetch()}
-          >
-            <AlertCircleIcon className="mt-0.5 size-4 text-destructive" />
-            <div className="space-y-1">
-              <p className="font-medium text-destructive text-sm">
-                Failed to load threads
-              </p>
-              <p className="text-muted-foreground text-xs">{error.message}</p>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <WarningCircleIcon
+                weight="duotone"
+                className="size-5 text-destructive"
+              />
+            </EmptyMedia>
+            <EmptyTitle>Failed to load threads</EmptyTitle>
+            <EmptyDescription>{error.message}</EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <div className="flex gap-2">
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-7 justify-start px-0 text-xs"
                 onClick={() => refetch()}
               >
                 Retry
               </Button>
             </div>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
+          </EmptyContent>
+        </Empty>
       );
     }
 
@@ -265,21 +266,20 @@ export function Sidebar({
         return emptyState;
       }
       return (
-        <SidebarMenuItem>
-          <SidebarMenuButton
-            type="button"
-            disabled
-            className="items-start gap-3 text-left"
-          >
-            <InboxIcon className="mt-0.5 size-4 text-muted-foreground" />
-            <div className="space-y-1">
-              <p className="font-medium text-sm">No threads yet</p>
-              <p className="text-muted-foreground text-xs">
-                Start chatting with the agent to see conversations here.
-              </p>
-            </div>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <EmptyIcon
+                weight="duotone"
+                className="size-5 text-muted-foreground"
+              />
+            </EmptyMedia>
+            <EmptyTitle>No threads</EmptyTitle>
+            <EmptyDescription>
+              Start chatting with the agent to see conversations here.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       );
     }
 
@@ -301,17 +301,6 @@ export function Sidebar({
         }
       />
     ));
-
-    if (isFetching && threads.length > 0) {
-      items.push(
-        ...Array.from({ length: 3 }).map((_, index) => (
-          <SidebarMenuSkeleton
-            key={`thread-refresh-skeleton-${index}`}
-            showIcon
-          />
-        )),
-      );
-    }
 
     return items;
   }, [

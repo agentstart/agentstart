@@ -13,7 +13,6 @@ agent-frontmatter:end */
 
 import { NotePencilIcon, SidebarIcon } from "@phosphor-icons/react";
 import type React from "react";
-import { Button } from "@/components/ui/button";
 import {
   SidebarHeader as ShadcnSidebarHeader,
   SidebarMenu,
@@ -39,12 +38,10 @@ export function SidebarHeader({ title }: SidebarHeaderProps) {
         })}
       >
         {open && (
-          <div className="flex items-center gap-2">
-            <div className="flex min-w-0 flex-col">
-              <span className="truncate font-semibold text-sm">
-                {title ?? "LOGO"}
-              </span>
-            </div>
+          <div className="flex items-center pl-2.5">
+            <span className="truncate font-semibold text-sm">
+              {title ?? "LOGO"}
+            </span>
           </div>
         )}
 

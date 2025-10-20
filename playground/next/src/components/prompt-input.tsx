@@ -14,7 +14,6 @@ import {
   type PromptInputMessage,
   PromptInputSubmit,
   PromptInputTextarea,
-  PromptInputToolbar,
   PromptInputTools,
 } from "@/components/ai-elements/prompt-input";
 import { client } from "@/lib/agent-client";
@@ -73,17 +72,15 @@ export function PromptInput() {
           disabled={isCreating}
         />
       </PromptInputBody>
-      <PromptInputToolbar>
-        <PromptInputTools>
-          <PromptInputActionMenu>
-            <PromptInputActionMenuTrigger />
-            <PromptInputActionMenuContent>
-              <PromptInputActionAddAttachments />
-            </PromptInputActionMenuContent>
-          </PromptInputActionMenu>
-        </PromptInputTools>
-        <PromptInputSubmit disabled={!input || isCreating} status={status} />
-      </PromptInputToolbar>
+      <PromptInputTools>
+        <PromptInputActionMenu>
+          <PromptInputActionMenuTrigger />
+          <PromptInputActionMenuContent>
+            <PromptInputActionAddAttachments />
+          </PromptInputActionMenuContent>
+        </PromptInputActionMenu>
+      </PromptInputTools>
+      <PromptInputSubmit disabled={!input || isCreating} status={status} />
     </BasePromptInput>
   );
 }
