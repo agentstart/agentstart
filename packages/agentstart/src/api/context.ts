@@ -25,7 +25,7 @@ export interface CreateContextOptions extends Omit<Context, "getUserId"> {
 export function createContext(opts: CreateContextOptions): Context {
   return {
     ...opts,
-    getUserId: opts.getUserId ?? (() => "test-user-id"),
+    getUserId: opts.getUserId ?? (() => "anonymous"),
     memory: opts.memory ?? memoryAdapter(),
   };
 }
