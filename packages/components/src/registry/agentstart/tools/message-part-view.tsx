@@ -11,8 +11,7 @@ FEATURES:
 SEARCHABLE: message view, tool renderer, part dispatcher, ui orchestrator
 agent-frontmatter:end */
 
-import type { AgentStartUIMessage, Tools } from "agentstart/agent";
-import type { InferUITools, ToolUIPart } from "ai";
+import type { AgentStartUIMessage } from "agentstart/agent";
 import { memo } from "react";
 import {
   Reasoning,
@@ -29,8 +28,6 @@ import { Todo } from "./todo";
 import { UpdateFile } from "./update";
 import { WriteFile } from "./write";
 
-type ToolPart<K extends keyof Tools> = ToolUIPart<InferUITools<Pick<Tools, K>>>;
-
 interface Props {
   part: AgentStartUIMessage["parts"][number];
   isStreaming: boolean;
@@ -42,24 +39,22 @@ export const MessagePart = memo(function MessagePart({
 }: Props) {
   switch (part.type) {
     case "tool-read":
-      return <ReadFile part={part as ToolPart<"read">} />;
+      return <ReadFile part={part} />;
     case "tool-write":
-      return <WriteFile part={part as ToolPart<"write">} />;
+      return <WriteFile part={part} />;
     case "tool-update":
-      return <UpdateFile part={part as ToolPart<"update">} />;
+      return <UpdateFile part={part} />;
     case "tool-bash":
-      return <Bash part={part as ToolPart<"bash">} />;
+      return <Bash part={part} />;
     case "tool-glob":
-      return <Glob part={part as ToolPart<"glob">} />;
+      return <Glob part={part} />;
     case "tool-grep":
-      return <Grep part={part as ToolPart<"grep">} />;
+      return <Grep part={part} />;
     case "tool-ls":
-      return <Ls part={part as ToolPart<"ls">} />;
+      return <Ls part={part} />;
     case "tool-todoRead":
     case "tool-todoWrite":
-      return (
-        <Todo part={part as ToolPart<"todoWrite"> | ToolPart<"todoRead">} />
-      );
+      return <Todo part={part} />;
 
     case "reasoning":
       return (

@@ -68,6 +68,7 @@ export function createUseThread(client: AgentStartAPI) {
 
     return useThread({
       chat: thread,
+      experimental_throttle: 50,
     });
   };
 

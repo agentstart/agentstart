@@ -71,21 +71,28 @@ export function PromptInput({
   const [input, setInput] = useState("");
   const status = useAgentStore((state) => state.status);
   const id = useAgentStore((state) => state.id);
+  const stop = useAgentStore((state) => state.stop);
 
   const createThreadMutation = useMutation(
     orpc.thread.create.mutationOptions(),
   );
 
   const handleSubmit = async (message: PromptInputMessage) => {
+    // If currently streaming or submitted, stop instead of submitting
+    if (status === "streaming" || status === "submitted") {
+      stop();
+      return;
+    }
+
     if (!message.text?.trim()) return;
 
     if (threadId && onMessageSubmit) {
       // Thread page: delegate to parent component
+      setInput("");
       await onMessageSubmit({
         text: message.text ?? "",
         files: message.files,
       });
-      setInput("");
     } else {
       // Home page: create new thread and navigate
       const trimmedText = message.text?.trim() ?? "";
@@ -93,11 +100,11 @@ export function PromptInput({
       newThreadInput.files = message.files;
 
       try {
+        setInput("");
         const { threadId: newThreadId } =
           await createThreadMutation.mutateAsync({
             visibility: "public",
           });
-        setInput("");
         navigate(`/thread/${newThreadId}`);
         queryClient.invalidateQueries(
           orpc.thread.list.queryOptions({ input: {} }),
