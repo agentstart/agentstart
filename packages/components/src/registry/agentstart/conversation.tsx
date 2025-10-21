@@ -15,9 +15,9 @@ agent-frontmatter:end */
 import { useQuery } from "@tanstack/react-query";
 import type { AgentStartUIMessage } from "agentstart/agent";
 import { type AgentStore, useAgentStore } from "agentstart/client";
-import { ChevronDownIcon, MessageSquare } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import type { ReactNode } from "react";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import {
   Conversation as BaseConversation,
   type ConversationProps as BaseConversationProps,
@@ -27,12 +27,7 @@ import {
 } from "@/components/ai-elements/conversation";
 import { Message, MessageContent } from "@/components/ai-elements/message";
 import { Response } from "@/components/ai-elements/response";
-import {
-  Task,
-  TaskContent,
-  TaskItem,
-  TaskTrigger,
-} from "@/components/ai-elements/task";
+import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
@@ -138,60 +133,21 @@ export function Conversation({
   const renderAssistantMessage = useCallback(
     (message: AgentStartUIMessage, isLastMessage: boolean) => {
       const parts = message.parts ?? [];
-      const textParts = parts.filter((part) => part.type === "text");
-      const toolParts = parts.filter((part) => part.type !== "text");
-      const showSpinner =
-        isLastMessage && (status === "streaming" || status === "submitted");
-      const statusLabel = isLastMessage
-        ? status === "streaming"
-          ? "Working..."
-          : status === "submitted"
-            ? "Thinking..."
-            : status === "error"
-              ? "Error occurred"
-              : "Finished working"
-        : "Finished working";
 
       return (
         <>
-          {toolParts.length > 0 && (
-            <Task
-              className="w-full"
-              defaultOpen={
-                isLastMessage &&
-                (status === "streaming" ||
-                  status === "submitted" ||
-                  status === "error")
-              }
-            >
-              <TaskTrigger className="w-full" title={statusLabel}>
-                <div className="flex w-full items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground">
-                  {showSpinner ? <Spinner className="size-4" /> : null}
-                  <span>{statusLabel}</span>
-                  <ChevronDownIcon className="size-4 transition-transform group-data-[state=open]:rotate-180" />
-                </div>
-              </TaskTrigger>
-              <TaskContent>
-                {toolParts.map((part, index) => (
-                  <TaskItem key={`${message.id}-tool-${index}`}>
-                    <MessagePart
-                      part={part}
-                      isStreaming={
-                        isLastMessage &&
-                        status === "streaming" &&
-                        index === toolParts.length - 1
-                      }
-                    />
-                  </TaskItem>
-                ))}
-              </TaskContent>
-            </Task>
-          )}
-          {textParts.map((part, index) => (
-            <Response key={`${message.id}-text-${index}`}>
-              {part.type === "text" ? part.text : null}
-            </Response>
-          ))}
+          {parts.length > 0 &&
+            parts.map((part, index) => (
+              <MessagePart
+                key={`${message.id}-tool-${index}`}
+                part={part}
+                isStreaming={
+                  isLastMessage &&
+                  status === "streaming" &&
+                  index === parts.length - 1
+                }
+              />
+            ))}
         </>
       );
     },
@@ -288,10 +244,11 @@ export function Conversation({
               );
             })}
             {status === "streaming" && (
-              <div className="flex items-center gap-2 px-4 py-2 text-muted-foreground text-sm">
-                <Spinner />
-                <span>Assistant is responding…</span>
-              </div>
+              <Message from="assistant">
+                <MessageContent variant="flat">
+                  <Loader />
+                </MessageContent>
+              </Message>
             )}
             {storeError && (
               <div className="rounded-lg bg-destructive/10 px-3 py-2 text-destructive text-sm">
@@ -306,4 +263,99 @@ export function Conversation({
       <ConversationScrollButton />
     </BaseConversation>
   );
+}
+
+const words = [
+  "Accomplishing",
+  "Actioning",
+  "Actualizing",
+  "Baking",
+  "Booping",
+  "Brewing",
+  "Calculating",
+  "Cerebrating",
+  "Channelling",
+  "Churning",
+  "Clauding",
+  "Coalescing",
+  "Cogitating",
+  "Computing",
+  "Combobulating",
+  "Concocting",
+  "Considering",
+  "Contemplating",
+  "Cooking",
+  "Crafting",
+  "Creating",
+  "Crunching",
+  "Deciphering",
+  "Deliberating",
+  "Determining",
+  "Discombobulating",
+  "Doing",
+  "Effecting",
+  "Elucidating",
+  "Enchanting",
+  "Envisioning",
+  "Finagling",
+  "Flibbertigibbeting",
+  "Forging",
+  "Forming",
+  "Frolicking",
+  "Generating",
+  "Germinating",
+  "Hatching",
+  "Herding",
+  "Honking",
+  "Ideating",
+  "Imagining",
+  "Incubating",
+  "Inferring",
+  "Manifesting",
+  "Marinating",
+  "Meandering",
+  "Moseying",
+  "Mulling",
+  "Mustering",
+  "Musing",
+  "Noodling",
+  "Percolating",
+  "Perusing",
+  "Philosophising",
+  "Pontificating",
+  "Pondering",
+  "Processing",
+  "Puttering",
+  "Puzzling",
+  "Reticulating",
+  "Ruminating",
+  "Scheming",
+  "Schlepping",
+  "Shimmying",
+  "Simmering",
+  "Smooshing",
+  "Spelunking",
+  "Spinning",
+  "Stewing",
+  "Sussing",
+  "Synthesizing",
+  "Thinking",
+  "Tinkering",
+  "Transmuting",
+  "Unfurling",
+  "Unravelling",
+  "Vibing",
+  "Wandering",
+  "Whirring",
+  "Wibbling",
+  "Working",
+  "Wrangling",
+];
+function Loader() {
+  const randomWord = useMemo(() => {
+    const index = Math.floor(Math.random() * words.length);
+    return words[index];
+  }, []);
+
+  return <Shimmer>{`${randomWord}...`}</Shimmer>;
 }

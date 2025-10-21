@@ -201,6 +201,7 @@ export function PromptInput({
             placeholder="Ask anything"
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            autoFocus
           />
         </PromptInputBody>
         <PromptInputFooter>

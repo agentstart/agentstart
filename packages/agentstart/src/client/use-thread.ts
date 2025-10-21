@@ -18,8 +18,8 @@ import {
   type UseChatOptions,
   useChat as useOriginalChat,
 } from "@ai-sdk/react";
-import { eventIteratorToStream } from "@orpc/client";
-import type { ChatTransport, UIDataTypes, UIMessageChunk } from "ai";
+import { eventIteratorToUnproxiedDataStream } from "@orpc/client";
+import type { ChatTransport } from "ai";
 import { useEffect, useMemo, useRef } from "react";
 import type { StoreApi, UseBoundStore } from "zustand";
 import type { AgentStartUIMessage } from "@/agent";
@@ -44,7 +44,7 @@ export function createUseThread(client: AgentStartAPI) {
               const body = options.body as {
                 threadId: string;
               };
-              return eventIteratorToStream(
+              return eventIteratorToUnproxiedDataStream(
                 await client.thread.stream(
                   {
                     ...body,
@@ -52,7 +52,7 @@ export function createUseThread(client: AgentStartAPI) {
                   },
                   { signal: options.abortSignal },
                 ),
-              ) as ReadableStream<UIMessageChunk<unknown, UIDataTypes>>;
+              );
             },
             reconnectToStream() {
               throw new Error("Reconnection not supported");
