@@ -255,7 +255,7 @@ export function Conversation({
       className={cn("relative flex w-full flex-col", className)}
       {...props}
     >
-      <ConversationContent className="flex flex-1 flex-col gap-4 p-0">
+      <ConversationContent className="mx-auto flex flex-1 flex-col gap-4 p-0 sm:min-w-[390px] sm:max-w-[768px]">
         {fetchError ? (
           (errorState?.(fetchError, handleRetry) ?? defaultErrorState)
         ) : showInitialLoading ? (

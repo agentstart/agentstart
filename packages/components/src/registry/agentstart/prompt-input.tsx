@@ -40,9 +40,11 @@ import {
   PromptInputTools,
 } from "@/components/ai-elements/prompt-input";
 import { Spinner } from "@/components/ui/spinner";
+import { cn } from "@/lib/utils";
 import { useAgentStartContext } from "./provider";
 
 export interface PromptInputProps {
+  className?: string;
   /**
    * Thread ID for chat page usage
    * - If provided: delegates message submission to onMessageSubmit
@@ -60,6 +62,7 @@ export interface PromptInputProps {
 }
 
 export function PromptInput({
+  className,
   threadId,
   onMessageSubmit,
 }: PromptInputProps = {}) {
@@ -173,49 +176,50 @@ export function PromptInput({
 
   return (
     <PromptInputProvider>
-      <div className="mx-auto w-full max-w-full sm:min-w-[390px] sm:max-w-[768px]">
-        <BasePromptInput
-          globalDrop
-          multiple
-          onSubmit={handleSubmit}
-          className="rounded-[22px] bg-background [&>[data-slot=input-group]]:rounded-[22px]"
-        >
-          <PromptInputBody>
-            <PromptInputAttachments>
-              {(attachment) => <PromptInputAttachment data={attachment} />}
-            </PromptInputAttachments>
-            <PromptInputTextarea
-              className="pl-4"
-              placeholder="Ask anything"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-            />
-          </PromptInputBody>
-          <PromptInputFooter>
-            <PromptInputTools>
-              <PromptInputActionMenu>
-                <PromptInputActionMenuTrigger
-                  className="cursor-pointer rounded-full"
-                  variant="outline"
-                >
-                  <PlusIcon className="size-4" weight="bold" />
-                </PromptInputActionMenuTrigger>
-                <PromptInputActionMenuContent>
-                  <PromptInputActionAddAttachments />
-                </PromptInputActionMenuContent>
-              </PromptInputActionMenu>
-            </PromptInputTools>
-            <div className="flex items-center gap-2">
-              <PromptInputSubmit
+      <BasePromptInput
+        globalDrop
+        multiple
+        onSubmit={handleSubmit}
+        className={cn(
+          "mx-auto w-full max-w-full rounded-[22px] bg-background sm:min-w-[390px] sm:max-w-[768px] [&>[data-slot=input-group]]:rounded-[22px]",
+          className,
+        )}
+      >
+        <PromptInputBody>
+          <PromptInputAttachments>
+            {(attachment) => <PromptInputAttachment data={attachment} />}
+          </PromptInputAttachments>
+          <PromptInputTextarea
+            className="pl-4"
+            placeholder="Ask anything"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+          />
+        </PromptInputBody>
+        <PromptInputFooter>
+          <PromptInputTools>
+            <PromptInputActionMenu>
+              <PromptInputActionMenuTrigger
                 className="cursor-pointer rounded-full"
-                disabled={!input.trim()}
+                variant="outline"
               >
-                {sendIcon}
-              </PromptInputSubmit>
-            </div>
-          </PromptInputFooter>
-        </BasePromptInput>
-      </div>
+                <PlusIcon className="size-4" weight="bold" />
+              </PromptInputActionMenuTrigger>
+              <PromptInputActionMenuContent>
+                <PromptInputActionAddAttachments />
+              </PromptInputActionMenuContent>
+            </PromptInputActionMenu>
+          </PromptInputTools>
+          <div className="flex items-center gap-2">
+            <PromptInputSubmit
+              className="cursor-pointer rounded-full"
+              disabled={!input.trim() && !isStreaming}
+            >
+              {sendIcon}
+            </PromptInputSubmit>
+          </div>
+        </PromptInputFooter>
+      </BasePromptInput>
     </PromptInputProvider>
   );
 }

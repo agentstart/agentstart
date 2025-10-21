@@ -12,22 +12,24 @@ export default function Page() {
   const sendMessage = useAgentStore((state) => state.sendMessage);
 
   return (
-    <div className="mx-auto flex w-full max-w-full flex-1 flex-col px-5 py-3 sm:min-w-[390px] sm:max-w-[768px]">
+    <div className="mx-auto flex h-full w-full max-w-full flex-1 flex-col">
       <Conversation threadId={threadId} />
 
-      <PromptInput
-        threadId={threadId}
-        onMessageSubmit={(message) => {
-          return sendMessage(
-            { text: message?.text ?? "", files: message?.files },
-            {
-              body: {
-                threadId,
+      <div className="pb-3">
+        <PromptInput
+          threadId={threadId}
+          onMessageSubmit={(message) => {
+            return sendMessage(
+              { text: message?.text ?? "", files: message?.files },
+              {
+                body: {
+                  threadId,
+                },
               },
-            },
-          );
-        }}
-      />
+            );
+          }}
+        />
+      </div>
     </div>
   );
 }

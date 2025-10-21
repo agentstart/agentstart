@@ -246,7 +246,7 @@ export function Sidebar({
         <SidebarFooter footer={footer} />
         <SidebarRail />
       </ShadcnSidebar>
-      <SidebarInset className="bg-accent/80">{children}</SidebarInset>
+      <SidebarInset className="h-screen bg-accent/80">{children}</SidebarInset>
     </SidebarProvider>
   );
 }
