@@ -53,6 +53,8 @@
     "@e2b/code-interpreter": "catalog:",
     "@orpc/client": "catalog:",
     "@orpc/server": "catalog:",
+    "@orpc/tanstack-query": "catalog:",
+    "@tanstack/react-query": "catalog:",
     "chokidar": "catalog:",
     "fast-glob": "catalog:",
     "nanoid": "catalog:",

@@ -19,43 +19,53 @@ import {
   useChat as useOriginalChat,
 } from "@ai-sdk/react";
 import { eventIteratorToStream } from "@orpc/client";
-import type { RouterClient } from "@orpc/server";
 import type { ChatTransport, UIDataTypes, UIMessageChunk } from "ai";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type { StoreApi, UseBoundStore } from "zustand";
 import type { AgentStartUIMessage } from "@/agent";
-import type { AppRouter } from "@/api";
+import type { AgentStartAPI } from "@/api";
+import { useDataStateMapper } from "./data-state-mapper";
 import { type AgentStoreWithSync, getAgentStore } from "./store/agent";
 
-export function createUseThread(client: RouterClient<AppRouter>) {
-  const thread = new Chat<AgentStartUIMessage>({
-    generateId,
-    transport: {
-      async sendMessages(options) {
-        const lastMessage = options.messages.at(-1)!;
-        const body = options.body as {
-          threadId: string;
-        };
-        return eventIteratorToStream(
-          await client.thread.stream(
-            {
-              ...body,
-              message: lastMessage,
-            },
-            { signal: options.abortSignal },
-          ),
-        ) as ReadableStream<UIMessageChunk<unknown, UIDataTypes>>;
-      },
-      reconnectToStream() {
-        throw new Error("Reconnection not supported");
-      },
-    } satisfies ChatTransport<AgentStartUIMessage>,
-    onError: (error) => {
-      console.error("Error sending message:", error);
-    },
-  });
-
+export function createUseThread(client: AgentStartAPI) {
   const hook = () => {
+    const mapDataToState = useDataStateMapper(client);
+    const mapDataToStateRef = useRef(mapDataToState);
+    mapDataToStateRef.current = mapDataToState;
+
+    // biome-ignore lint/correctness/useExhaustiveDependencies: is fine
+    const thread = useMemo(
+      () =>
+        new Chat<AgentStartUIMessage>({
+          generateId,
+          transport: {
+            async sendMessages(options) {
+              const lastMessage = options.messages.at(-1)!;
+              const body = options.body as {
+                threadId: string;
+              };
+              return eventIteratorToStream(
+                await client.thread.stream(
+                  {
+                    ...body,
+                    message: lastMessage,
+                  },
+                  { signal: options.abortSignal },
+                ),
+              ) as ReadableStream<UIMessageChunk<unknown, UIDataTypes>>;
+            },
+            reconnectToStream() {
+              throw new Error("Reconnection not supported");
+            },
+          } satisfies ChatTransport<AgentStartUIMessage>,
+          onData: (data) => mapDataToStateRef.current(data),
+          onError: (error) => {
+            console.error("Error sending message:", error);
+          },
+        }),
+      [],
+    );
+
     return useThread({
       chat: thread,
     });
