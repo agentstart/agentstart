@@ -11,7 +11,6 @@ agent-frontmatter:end */
 
 "use client";
 
-import { Loader2Icon } from "lucide-react";
 import type { ReactNode } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -20,25 +19,14 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarSeparator,
   useSidebar,
 } from "@/components/ui/sidebar";
 
 export type SidebarContentProps = {
   children: ReactNode;
-  hasNextPage?: boolean;
-  isFetchingNextPage: boolean;
-  onLoadMore?: () => void;
 };
 
-export function SidebarContent({
-  children,
-  hasNextPage,
-  isFetchingNextPage,
-  onLoadMore,
-}: SidebarContentProps) {
+export function SidebarContent({ children }: SidebarContentProps) {
   const { open } = useSidebar();
   if (!open) return null;
 
@@ -54,38 +42,6 @@ export function SidebarContent({
           </ScrollArea>
         </SidebarGroupContent>
       </SidebarGroup>
-      {hasNextPage ? (
-        <>
-          <SidebarSeparator />
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    type="button"
-                    variant="outline"
-                    disabled={isFetchingNextPage}
-                    onClick={() => {
-                      if (hasNextPage && !isFetchingNextPage) {
-                        onLoadMore?.();
-                      }
-                    }}
-                  >
-                    {isFetchingNextPage ? (
-                      <>
-                        <Loader2Icon className="mr-2 size-4 animate-spin" />
-                        Loading more…
-                      </>
-                    ) : (
-                      "Load more"
-                    )}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </>
-      ) : null}
     </ShadcnSidebarContent>
   );
 }

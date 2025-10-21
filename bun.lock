@@ -103,6 +103,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@agentstart/utils": "workspace:*",
+        "@ai-sdk/react": "catalog:",
         "@hookform/resolvers": "catalog:",
         "@orpc/server": "catalog:",
         "@orpc/tanstack-query": "catalog:",
@@ -199,8 +200,11 @@
       "version": "0.1.0",
       "dependencies": {
         "@agentstart/utils": "workspace:*",
+        "@ai-sdk/react": "^2.0.76",
         "@neondatabase/serverless": "^1.0.2",
         "@openrouter/ai-sdk-provider": "^1.2.0",
+        "@orpc/tanstack-query": "^1.10.0",
+        "@phosphor-icons/react": "^2.1.10",
         "@radix-ui/react-dialog": "^1.1.15",
         "@radix-ui/react-dropdown-menu": "^2.1.16",
         "@radix-ui/react-scroll-area": "^1.2.10",
@@ -774,7 +778,7 @@
 
     "@orpc/standard-server-peer": ["@orpc/standard-server-peer@1.9.4", "", { "dependencies": { "@orpc/shared": "1.9.4", "@orpc/standard-server": "1.9.4" } }, "sha512-5dwCzA2ARpvHkuqBL45hYS80vHQGigR4DShH7Cr5/tLr1OxJ3ipAqx2v+SdRJ1SbMBtIbaR97PX4Y0LN5aPVHA=="],
 
-    "@orpc/tanstack-query": ["@orpc/tanstack-query@1.9.4", "", { "dependencies": { "@orpc/shared": "1.9.4" }, "peerDependencies": { "@orpc/client": "1.9.4", "@tanstack/query-core": ">=5.80.2" } }, "sha512-s869zz2o7RNIKW9p1zVDUX966soXmzwY95AUB6EU0OPNLyRsFf2k8OUQnAqlYGh4uVkbx++qxK3OPbjPft5uiA=="],
+    "@orpc/tanstack-query": ["@orpc/tanstack-query@1.10.0", "", { "dependencies": { "@orpc/shared": "1.10.0" }, "peerDependencies": { "@orpc/client": "1.10.0", "@tanstack/query-core": ">=5.80.2" } }, "sha512-M54OhO3vOxTeZxnKJNVAHfSpvdOc2M9izrHD1gSmWSGbABkni39UZYo28qhZWndyyc75l64EEBOOPxtq55vGnw=="],
 
     "@oxc-project/types": ["@oxc-project/types@0.94.0", "", {}, "sha512-+UgQT/4o59cZfH6Cp7G0hwmqEQ0wE+AdIwhikdwnhWI9Dp8CgSY081+Q3O67/wq3VJu8mgUEB93J9EHHn70fOw=="],
 
@@ -2579,6 +2583,8 @@
     "@neondatabase/serverless/@types/node": ["@types/node@22.18.9", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-5yBtK0k/q8PjkMXbTfeIEP/XVYnz1R9qZJ3yUicdEW7ppdDJfe+MqXEhpqDL3mtn4Wvs1u0KLEG0RXzCgNpsSg=="],
 
     "@neondatabase/serverless/@types/pg": ["@types/pg@8.11.6", "", { "dependencies": { "@types/node": "*", "pg-protocol": "*", "pg-types": "^4.0.1" } }, "sha512-/2WmmBXHLsfRqzfHW7BNZ8SbYzE8OSk7i3WjFYvfgRHj7S1xj+16Je5fUKv3lVdVzk/zn9TXOqf+avFCFIE0yQ=="],
+
+    "@orpc/tanstack-query/@orpc/shared": ["@orpc/shared@1.10.0", "", { "dependencies": { "radash": "^12.1.1", "type-fest": "^5.1.0" }, "peerDependencies": { "@opentelemetry/api": ">=1.9.0" }, "optionalPeers": ["@opentelemetry/api"] }, "sha512-YzTcoM3fImeIqx+uelNrZGhQX88t+YHvaZSe3p05t4ZRkOOjxvfrx9gv9ivHPpZ3RI12Qc/GXWzcst99fD0/AQ=="],
 
     "@prisma/config/c12": ["c12@3.1.0", "", { "dependencies": { "chokidar": "^4.0.3", "confbox": "^0.2.2", "defu": "^6.1.4", "dotenv": "^16.6.1", "exsolve": "^1.0.7", "giget": "^2.0.0", "jiti": "^2.4.2", "ohash": "^2.0.11", "pathe": "^2.0.3", "perfect-debounce": "^1.0.0", "pkg-types": "^2.2.0", "rc9": "^2.1.2" }, "peerDependencies": { "magicast": "^0.3.5" }, "optionalPeers": ["magicast"] }, "sha512-uWoS8OU1MEIsOv8p/5a82c3H31LsWVR5qiyXVfBNOzfffjUWtPnhAb4BYI2uG2HfGmZmFjCtui5XNWaps+iFuw=="],
 

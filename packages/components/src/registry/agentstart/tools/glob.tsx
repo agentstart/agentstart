@@ -1,3 +1,16 @@
+/* agent-frontmatter:start
+AGENT: Glob tool UI component
+PURPOSE: Display file pattern matching results from glob tool
+USAGE: <Glob part={toolPart} />
+EXPORTS: Glob, GlobProps
+FEATURES:
+  - Renders matched file and directory paths
+  - Color-coded icons for files vs directories
+  - Shows pattern used and match count
+  - Highlights filename vs directory path distinction
+SEARCHABLE: glob tool, file pattern match ui, file search results
+agent-frontmatter:end */
+
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
 import { FileIcon, FolderIcon } from "lucide-react";

@@ -65,7 +65,7 @@ export const SidebarItem = memo(function SidebarItem({
             onSelect?.(thread);
           }
         }}
-        className="group/sidebar-item"
+        className="group/sidebar-item cursor-pointer"
       >
         <div className="flex w-full items-center gap-3 overflow-hidden">
           {leading ? <div className="shrink-0">{leading}</div> : null}

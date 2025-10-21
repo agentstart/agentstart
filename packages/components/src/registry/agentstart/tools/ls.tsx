@@ -1,3 +1,16 @@
+/* agent-frontmatter:start
+AGENT: Ls tool UI component
+PURPOSE: Display directory listings from the ls tool with file metadata
+USAGE: <Ls part={toolPart} />
+EXPORTS: Ls, LsProps
+FEATURES:
+  - Renders file/directory/symlink entries with appropriate icons
+  - Shows file sizes and modification dates
+  - Distinguishes file types with color-coded icons
+  - Displays tool execution state (pending/success/error)
+SEARCHABLE: ls tool, directory listing, file browser ui
+agent-frontmatter:end */
+
 import { formatDate, formatSize } from "@agentstart/utils";
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";

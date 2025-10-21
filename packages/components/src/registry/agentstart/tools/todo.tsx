@@ -1,3 +1,16 @@
+/* agent-frontmatter:start
+AGENT: Todo tool UI component
+PURPOSE: Display task list from todo tool with status indicators
+USAGE: <Todo part={toolPart} />
+EXPORTS: Todo, TodoProps
+FEATURES:
+  - Shows todos grouped by status (inProgress, pending, completed)
+  - Color-coded status icons (blue pulse, gray circle, green check)
+  - Displays active/pending forms for each task
+  - Error state visualization for failed operations
+SEARCHABLE: todo tool, task list ui, progress tracker
+agent-frontmatter:end */
+
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
 import {

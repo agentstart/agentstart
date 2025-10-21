@@ -1,3 +1,16 @@
+/* agent-frontmatter:start
+AGENT: Read file tool UI component
+PURPOSE: Display file reading operations with syntax-highlighted content
+USAGE: <ReadFile part={toolPart} />
+EXPORTS: ReadFile, ReadFileProps
+FEATURES:
+  - Shows file path and reading range (offset/limit)
+  - Syntax highlighting based on file extension
+  - Displays file content with line numbers
+  - Handles partial file reads with range indicators
+SEARCHABLE: read tool, file view ui, code viewer
+agent-frontmatter:end */
+
 import { getLanguageFromFilePath } from "@agentstart/utils";
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";

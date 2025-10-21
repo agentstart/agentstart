@@ -24,19 +24,22 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 interface AgentStartClientContextState {
   client: AgentStartAPI;
   orpc: RouterUtils<AgentStartAPI>;
+  navigate: (path: string) => void;
 }
 const AgentStartClientContext =
   createContext<AgentStartClientContextState | null>(null);
 
-export type AgentStartProviderProps = {
+export interface AgentStartProviderProps {
   client: AgentStartAPI;
+  navigate: (path: string) => void;
   children: ReactNode;
-};
+}
 
 const queryClient = new QueryClient();
 
 export function AgentStartProvider({
   client,
+  navigate,
   children,
 }: AgentStartProviderProps) {
   const state = useMemo(() => {
@@ -45,8 +48,9 @@ export function AgentStartProvider({
     return {
       client,
       orpc,
+      navigate,
     };
-  }, [client]);
+  }, [client, navigate]);
 
   return (
     <AgentStartClientContext.Provider value={state}>

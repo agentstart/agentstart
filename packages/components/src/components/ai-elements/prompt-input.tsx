@@ -354,6 +354,7 @@ export function PromptInputAttachments({
     return () => ro.disconnect();
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Force height measurement when attachments change
   useLayoutEffect(() => {
     const el = contentRef.current;
     if (!el) {
@@ -708,7 +709,7 @@ export const PromptInput = ({
     // Convert blob URLs to data URLs asynchronously
     Promise.all(
       files.map(async ({ id, ...item }) => {
-        if (item.url?.startsWith("blob:")) {
+        if (item.url && item.url.startsWith("blob:")) {
           return {
             ...item,
             url: await convertBlobUrlToDataUrl(item.url),
@@ -739,7 +740,7 @@ export const PromptInput = ({
             controller.textInput.clear();
           }
         }
-      } catch (_error) {
+      } catch (error) {
         // Don't clear on error - user may want to retry
       }
     });
@@ -1026,13 +1027,13 @@ interface SpeechRecognition extends EventTarget {
   lang: string;
   start(): void;
   stop(): void;
-  onstart: ((this: SpeechRecognition, ev: Event) => void) | null;
-  onend: ((this: SpeechRecognition, ev: Event) => void) | null;
+  onstart: ((this: SpeechRecognition, ev: Event) => any) | null;
+  onend: ((this: SpeechRecognition, ev: Event) => any) | null;
   onresult:
-    | ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => void)
+    | ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => any)
     | null;
   onerror:
-    | ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => void)
+    | ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => any)
     | null;
 }
 

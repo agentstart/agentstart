@@ -50,6 +50,7 @@
     "@tanstack/react-query": "catalog:",
     "agentstart": "workspace:*",
     "ai": "catalog:",
+    "@ai-sdk/react": "catalog:",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
     "cmdk": "catalog:",

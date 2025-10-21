@@ -1,3 +1,16 @@
+/* agent-frontmatter:start
+AGENT: Update file tool UI component
+PURPOSE: Visualize file edit operations with before/after code snippets
+USAGE: <UpdateFile part={toolPart} />
+EXPORTS: UpdateFile, UpdateFileProps
+FEATURES:
+  - Shows old and new string replacements with syntax highlighting
+  - Displays file path and operation type (replace/replaceAll)
+  - Conditionally renders code blocks for multiline changes
+  - Supports replace_all flag visualization
+SEARCHABLE: update tool, file edit ui, code replacement view
+agent-frontmatter:end */
+
 import { getLanguageFromFilePath } from "@agentstart/utils";
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";

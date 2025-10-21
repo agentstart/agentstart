@@ -19,15 +19,9 @@ import {
   TrashIcon,
   WarningCircleIcon,
 } from "@phosphor-icons/react";
-import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type { DBThread } from "agentstart/db";
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { type ReactNode, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -67,8 +61,6 @@ export type SidebarProps = {
   className?: string;
   // Thread selection
   selectedThreadId?: string;
-  defaultSelectedThreadId?: string;
-  autoSelectFirst?: boolean;
   onSelectThread?: (thread: DBThread) => void;
   // Query configuration
   pageSize?: number;
@@ -95,8 +87,6 @@ export function Sidebar({
   children,
   className,
   selectedThreadId,
-  defaultSelectedThreadId,
-  autoSelectFirst = true,
   onSelectThread,
   pageSize = 20,
   header,
@@ -107,34 +97,10 @@ export function Sidebar({
 }: SidebarProps) {
   const { orpc } = useAgentStartContext();
 
-  const [internalSelectedId, setInternalSelectedId] = useState<string | null>(
-    defaultSelectedThreadId ?? null,
-  );
-
   // Infinite query for thread list with pagination
-  const {
-    data,
-    error,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    isLoading,
-    isError,
-    refetch,
-  } = useInfiniteQuery(
-    orpc.thread.list.infiniteOptions({
-      input: (page) => ({
-        page,
-        pageSize,
-      }),
-      initialPageParam: 1,
-      getNextPageParam: (lastPage) => {
-        if (lastPage.pageInfo.hasNextPage) {
-          return lastPage.pageInfo.page + 1;
-        }
-        return undefined;
-      },
+  const { data, error, isLoading, isError, refetch } = useQuery(
+    orpc.thread.list.queryOptions({
+      input: { pageSize },
     }),
   );
 
@@ -150,12 +116,7 @@ export function Sidebar({
   // Delete mutation
   const deleteMutation = useMutation(
     orpc.thread.delete.mutationOptions({
-      onSuccess: (_, deletedThreadId) => {
-        // If the deleted thread was selected, clear the selection
-        const currentActiveId = selectedThreadId ?? internalSelectedId;
-        if (currentActiveId === deletedThreadId.threadId) {
-          setInternalSelectedId(null);
-        }
+      onSuccess: () => {
         // Invalidate and refetch the thread list
         refetch();
       },
@@ -165,62 +126,8 @@ export function Sidebar({
   // Flatten all pages into a single array of threads
   const threads = useMemo(() => {
     if (!data) return [];
-    return data.pages.flatMap((page) =>
-      page.threads.map((thread) => normalizeThread(thread)),
-    );
+    return data.threads.map((thread) => normalizeThread(thread));
   }, [data]);
-
-  // Auto-select first thread
-  useEffect(() => {
-    if (selectedThreadId !== undefined) {
-      setInternalSelectedId(selectedThreadId);
-    }
-  }, [selectedThreadId]);
-
-  useEffect(() => {
-    if (
-      autoSelectFirst &&
-      selectedThreadId === undefined &&
-      !internalSelectedId &&
-      threads.length > 0
-    ) {
-      const firstThread = threads[0];
-      if (!firstThread) {
-        return;
-      }
-      setInternalSelectedId(firstThread.id);
-      onSelectThread?.(firstThread);
-    }
-  }, [
-    autoSelectFirst,
-    internalSelectedId,
-    onSelectThread,
-    selectedThreadId,
-    threads,
-  ]);
-
-  // Clear selection if thread no longer exists
-  useEffect(() => {
-    if (
-      internalSelectedId &&
-      threads.length > 0 &&
-      !threads.some((thread) => thread.id === internalSelectedId)
-    ) {
-      setInternalSelectedId(null);
-    }
-  }, [internalSelectedId, threads]);
-
-  const activeThreadId = selectedThreadId ?? internalSelectedId ?? null;
-
-  const handleSelectThread = useCallback(
-    (thread: DBThread) => {
-      if (selectedThreadId === undefined) {
-        setInternalSelectedId(thread.id);
-      }
-      onSelectThread?.(thread);
-    },
-    [onSelectThread, selectedThreadId],
-  );
 
   const renderThreads = useMemo(() => {
     if (isLoading && threads.length === 0) {
@@ -287,8 +194,8 @@ export function Sidebar({
       <SidebarItem
         key={thread.id}
         thread={thread}
-        isActive={thread.id === activeThreadId}
-        onSelect={handleSelectThread}
+        isActive={thread.id === selectedThreadId}
+        onSelect={onSelectThread}
         leading={<ThreadAvatar title={thread.title} />}
         trailing={
           <MoreOptions
@@ -304,16 +211,17 @@ export function Sidebar({
 
     return items;
   }, [
-    activeThreadId,
+    selectedThreadId,
     emptyState,
     error,
     errorState,
     refetch,
-    handleSelectThread,
+    onSelectThread,
     isError,
-    isFetching,
     isLoading,
     threads,
+    deleteMutation,
+    renameMutation,
   ]);
 
   return (
@@ -334,17 +242,11 @@ export function Sidebar({
         )}
       >
         <SidebarHeader title={header?.title} />
-        <SidebarContent
-          hasNextPage={hasNextPage}
-          isFetchingNextPage={isFetchingNextPage}
-          onLoadMore={fetchNextPage}
-        >
-          {renderThreads}
-        </SidebarContent>
+        <SidebarContent>{renderThreads}</SidebarContent>
         <SidebarFooter footer={footer} />
         <SidebarRail />
       </ShadcnSidebar>
-      <SidebarInset>{children}</SidebarInset>
+      <SidebarInset className="bg-accent/80">{children}</SidebarInset>
     </SidebarProvider>
   );
 }

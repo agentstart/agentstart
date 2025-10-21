@@ -1,13 +1,7 @@
 "use client";
 
-import {
-  ChevronDownIcon,
-  DotIcon,
-  type LucideIcon,
-  SearchIcon,
-} from "lucide-react";
+import { ChevronDownIcon, SearchIcon } from "lucide-react";
 import type { ComponentProps } from "react";
-
 import {
   Collapsible,
   CollapsibleContent,
@@ -33,29 +27,11 @@ export const TaskItemFile = ({
   </div>
 );
 
-export type TaskItemProps = ComponentProps<"div"> & {
-  icon?: LucideIcon;
-  isLast?: boolean;
-};
+export type TaskItemProps = ComponentProps<"div">;
 
-export const TaskItem = ({
-  children,
-  className,
-  icon: Icon = DotIcon,
-  isLast = false,
-  ...props
-}: TaskItemProps) => (
-  <div
-    className={cn("flex gap-2 text-muted-foreground text-sm", className)}
-    {...props}
-  >
-    <div className="relative mt-0.5">
-      <Icon className="size-4" />
-      {!isLast && (
-        <div className="-mx-px absolute top-6 bottom-0 left-1/2 w-px bg-border" />
-      )}
-    </div>
-    <div className="flex-1 space-y-2">{children}</div>
+export const TaskItem = ({ children, className, ...props }: TaskItemProps) => (
+  <div className={cn("text-muted-foreground text-sm", className)} {...props}>
+    {children}
   </div>
 );
 
@@ -66,18 +42,11 @@ export const Task = ({
   className,
   ...props
 }: TaskProps) => (
-  <Collapsible
-    className={cn(
-      "data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 data-[state=closed]:animate-out data-[state=open]:animate-in",
-      className,
-    )}
-    defaultOpen={defaultOpen}
-    {...props}
-  />
+  <Collapsible className={cn(className)} defaultOpen={defaultOpen} {...props} />
 );
 
 export type TaskTriggerProps = ComponentProps<typeof CollapsibleTrigger> & {
-  title?: string;
+  title: string;
 };
 
 export const TaskTrigger = ({
@@ -111,6 +80,8 @@ export const TaskContent = ({
     )}
     {...props}
   >
-    <div className="mt-4 space-y-2 border-muted">{children}</div>
+    <div className="mt-4 space-y-2 border-muted border-l-2 pl-4">
+      {children}
+    </div>
   </CollapsibleContent>
 );

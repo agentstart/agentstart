@@ -1,3 +1,16 @@
+/* agent-frontmatter:start
+AGENT: Write file tool UI component
+PURPOSE: Display file writing operations with content preview
+USAGE: <WriteFile part={toolPart} />
+EXPORTS: WriteFile, WriteFileProps
+FEATURES:
+  - Shows file path and write operation
+  - Preview first 10 lines of content with syntax highlighting
+  - Indicates when content is truncated
+  - Language detection based on file extension
+SEARCHABLE: write tool, file creation ui, save file view
+agent-frontmatter:end */
+
 import { getLanguageFromFilePath } from "@agentstart/utils";
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";

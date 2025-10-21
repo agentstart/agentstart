@@ -1,7 +1,13 @@
 import type { UIMessage, UseChatHelpers } from "@ai-sdk/react";
+import type { FileUIPart } from "ai";
 import { create, type StoreApi, type UseBoundStore } from "zustand";
 import { devtools } from "zustand/middleware";
 import { useShallow } from "zustand/shallow";
+
+export const newThreadInput: {
+  text?: string;
+  files?: FileList | FileUIPart[];
+} = {};
 
 export interface AgentStore<TMessage extends UIMessage = UIMessage>
   extends UseChatHelpers<TMessage> {}

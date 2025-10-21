@@ -1,3 +1,16 @@
+/* agent-frontmatter:start
+AGENT: Bash tool UI component
+PURPOSE: Display shell command execution results with stdout/stderr output
+USAGE: <Bash part={toolPart} />
+EXPORTS: Bash, BashProps
+FEATURES:
+  - Shows executed command with description
+  - Renders stdout and stderr with syntax highlighting
+  - Displays execution duration and exit code
+  - Distinguishes between success and error states
+SEARCHABLE: bash tool, shell command ui, terminal output view
+agent-frontmatter:end */
+
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
 import { ClockIcon } from "lucide-react";

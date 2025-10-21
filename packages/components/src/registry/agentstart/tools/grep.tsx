@@ -1,3 +1,16 @@
+/* agent-frontmatter:start
+AGENT: Grep tool UI component
+PURPOSE: Display code search results from grep tool with syntax highlighting
+USAGE: <Grep part={toolPart} />
+EXPORTS: Grep, GrepProps
+FEATURES:
+  - Shows search pattern and matched content
+  - Supports multiple output modes (content/files/count)
+  - Syntax highlighting for matched code lines
+  - Displays file paths and line numbers with matches
+SEARCHABLE: grep tool, code search ui, content search results
+agent-frontmatter:end */
+
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
 import { FileIcon, HashIcon } from "lucide-react";

@@ -21,12 +21,14 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { useAgentStartContext } from "../provider";
 
 export type SidebarHeaderProps = {
   title: React.ReactNode;
 };
 
 export function SidebarHeader({ title }: SidebarHeaderProps) {
+  const { navigate } = useAgentStartContext();
   const { open, toggleSidebar } = useSidebar();
 
   return (
@@ -48,7 +50,10 @@ export function SidebarHeader({ title }: SidebarHeaderProps) {
         <div className="flex items-center gap-1">
           {/* trigger sidebar */}
           <SidebarMenuButton onClick={toggleSidebar}>
-            <SidebarIcon weight="duotone" className="!size-4.5" />
+            <SidebarIcon
+              weight="duotone"
+              className="!size-4.5 cursor-pointer"
+            />
             <span className="sr-only">Toggle sidebar</span>
           </SidebarMenuButton>
         </div>
@@ -56,12 +61,13 @@ export function SidebarHeader({ title }: SidebarHeaderProps) {
 
       <SidebarMenu>
         <SidebarMenuItem>
-          <a href="/">
-            <SidebarMenuButton>
-              <NotePencilIcon weight="duotone" className="!size-4.5" />
-              <span>New Thread</span>
-            </SidebarMenuButton>
-          </a>
+          <SidebarMenuButton
+            className="cursor-pointer"
+            onClick={() => navigate("/")}
+          >
+            <NotePencilIcon weight="duotone" className="!size-4.5" />
+            <span>New Thread</span>
+          </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
     </ShadcnSidebarHeader>
