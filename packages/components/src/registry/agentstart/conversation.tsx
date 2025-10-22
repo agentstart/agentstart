@@ -12,12 +12,14 @@ agent-frontmatter:end */
 
 "use client";
 
+import { ArrowsClockwiseIcon, CopyIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import type { AgentStartUIMessage } from "agentstart/agent";
 import { type AgentStore, useAgentStore } from "agentstart/client";
 import { MessageSquare } from "lucide-react";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo } from "react";
+import { Action, Actions } from "@/components/ai-elements/actions";
 import {
   Conversation as BaseConversation,
   type ConversationProps as BaseConversationProps,
@@ -29,6 +31,13 @@ import { Message, MessageContent } from "@/components/ai-elements/message";
 import { Response } from "@/components/ai-elements/response";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Button } from "@/components/ui/button";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { useAgentStartContext } from "./provider";
@@ -40,10 +49,6 @@ export interface ConversationProps
    * Thread identifier to hydrate the conversation.
    */
   threadId?: string;
-  /**
-   * Optional store identifier when using multiple concurrent conversations.
-   */
-  storeId?: string;
   /**
    * Custom empty state element when no messages are present.
    */
@@ -60,7 +65,6 @@ export interface ConversationProps
 
 export function Conversation({
   threadId,
-  storeId = "default",
   className,
   emptyState,
   loadingState,
@@ -69,28 +73,54 @@ export function Conversation({
 }: ConversationProps) {
   const { orpc } = useAgentStartContext();
 
+  type UIAgentStore = AgentStore<AgentStartUIMessage>;
+  const resolvedStoreId = threadId ?? "default";
+
   const messages = useAgentStore<AgentStartUIMessage, AgentStartUIMessage[]>(
     (state) => state.messages,
-    storeId,
+    resolvedStoreId,
   );
-  const status = useAgentStore<
-    AgentStartUIMessage,
-    AgentStore<AgentStartUIMessage>["status"]
-  >((state) => state.status, storeId);
-  const storeError = useAgentStore<
-    AgentStartUIMessage,
-    AgentStore<AgentStartUIMessage>["error"]
-  >((state) => state.error, storeId);
+  const status = useAgentStore<AgentStartUIMessage, UIAgentStore["status"]>(
+    (state) => state.status,
+    resolvedStoreId,
+  );
+  const storeError = useAgentStore<AgentStartUIMessage, UIAgentStore["error"]>(
+    (state) => state.error,
+    resolvedStoreId,
+  );
   const setMessages = useAgentStore<
     AgentStartUIMessage,
-    AgentStore<AgentStartUIMessage>["setMessages"]
-  >((state) => state.setMessages, storeId);
+    UIAgentStore["setMessages"]
+  >((state) => state.setMessages, resolvedStoreId);
+  const regenerate = useAgentStore<
+    AgentStartUIMessage,
+    UIAgentStore["regenerate"]
+  >((state) => state.regenerate, resolvedStoreId);
+  const pendingNewThreadInput = useAgentStore<
+    AgentStartUIMessage,
+    UIAgentStore["pendingNewThreadInput"]
+  >((state) => state.pendingNewThreadInput);
+
+  const hasPendingNewThreadInput = useMemo(() => {
+    if (!pendingNewThreadInput) return false;
+
+    const hasText = (pendingNewThreadInput.text?.trim() ?? "").length > 0;
+    const files = pendingNewThreadInput.files;
+    const fileCount =
+      files instanceof FileList
+        ? files.length
+        : Array.isArray(files)
+          ? files.length
+          : 0;
+
+    return hasText || fileCount > 0;
+  }, [pendingNewThreadInput]);
 
   const queryResult = useQuery({
     ...orpc.message.get.queryOptions({
       input: { threadId: threadId ?? "" },
     }),
-    enabled: Boolean(threadId),
+    enabled: Boolean(threadId) && !hasPendingNewThreadInput,
   });
 
   const {
@@ -110,22 +140,17 @@ export function Conversation({
       return;
     }
 
-    if (!fetchedMessages) {
+    if (!fetchedMessages?.length) {
       return;
     }
 
-    if (fetchedMessages.length === 0) {
-      return;
-    }
-
-    const shouldUpdate =
-      messages.length === 0 ||
-      fetchedMessages.length > messages.length ||
-      !messages.every(
-        (message, index) => message.id === fetchedMessages[index]?.id,
+    const messagesChanged =
+      messages.length !== fetchedMessages.length ||
+      messages.some(
+        (message, index) => message.id !== fetchedMessages[index]?.id,
       );
 
-    if (shouldUpdate) {
+    if (messagesChanged) {
       setMessages(fetchedMessages);
     }
   }, [fetchedMessages, messages, setMessages, threadId]);
@@ -134,22 +159,17 @@ export function Conversation({
     (message: AgentStartUIMessage, isLastMessage: boolean) => {
       const parts = message.parts ?? [];
 
-      return (
-        <>
-          {parts.length > 0 &&
-            parts.map((part, index) => (
-              <MessagePart
-                key={`${message.id}-tool-${index}`}
-                part={part}
-                isStreaming={
-                  isLastMessage &&
-                  status === "streaming" &&
-                  index === parts.length - 1
-                }
-              />
-            ))}
-        </>
-      );
+      return parts.map((part, index) => (
+        <MessagePart
+          key={`${message.id}-tool-${index}`}
+          part={part}
+          isStreaming={
+            isLastMessage &&
+            status === "streaming" &&
+            index === parts.length - 1
+          }
+        />
+      ));
     },
     [status],
   );
@@ -158,25 +178,48 @@ export function Conversation({
     const parts = message.parts ?? [];
     const textParts = parts.filter((part) => part.type === "text");
 
-    if (textParts.length > 0) {
-      return textParts.map((part, index) => (
-        <Response key={`${message.id}-text-${index}`}>{part.text}</Response>
-      ));
-    }
-
-    return null;
+    return textParts.map((part, index) => (
+      <Response key={`${message.id}-text-${index}`}>{part.text}</Response>
+    ));
   }, []);
 
-  const handleRetry = useCallback(() => {
-    void refetch();
-  }, [refetch]);
+  const handleCopy = useCallback((message: AgentStartUIMessage) => {
+    const parts = message.parts ?? [];
+    const text = parts.find((part) => part.type === "text")?.text ?? "";
+    void navigator.clipboard.writeText(text);
+  }, []);
+
+  const renderUserActions = useCallback(
+    (message: AgentStartUIMessage) => (
+      <Actions className="opacity-0 group-hover:opacity-100">
+        <Action onClick={() => handleCopy(message)} label="Copy" tooltip="Copy">
+          <CopyIcon className="size-4" />
+        </Action>
+      </Actions>
+    ),
+    [handleCopy],
+  );
+
+  const renderAssistantActions = useCallback(
+    (message: AgentStartUIMessage) => (
+      <Actions className="mt-2 w-full justify-start opacity-0 group-hover:opacity-100">
+        <Action onClick={() => regenerate()} label="Retry" tooltip="Retry">
+          <ArrowsClockwiseIcon className="size-4" />
+        </Action>
+        <Action onClick={() => handleCopy(message)} label="Copy" tooltip="Copy">
+          <CopyIcon className="size-4" />
+        </Action>
+      </Actions>
+    ),
+    [handleCopy, regenerate],
+  );
 
   const fetchError = isError ? (queryError as Error) : null;
   const hasMessages = messages.length > 0;
   const showInitialLoading =
     Boolean(threadId) &&
     !hasMessages &&
-    (isLoading || (isFetching && !fetchedMessages));
+    (hasPendingNewThreadInput || isLoading || (isFetching && !fetchedMessages));
 
   const defaultEmptyState = (
     <ConversationEmptyState
@@ -194,17 +237,17 @@ export function Conversation({
     />
   );
 
-  const defaultErrorState = fetchError ? (
+  const defaultErrorState = fetchError && (
     <ConversationEmptyState
       icon={<MessageSquare className="size-12 text-destructive" />}
       title="Unable to load messages"
       description={fetchError.message ?? "Please try again."}
     >
-      <Button onClick={handleRetry} type="button" variant="outline">
+      <Button onClick={() => refetch()} type="button" variant="outline">
         Retry
       </Button>
     </ConversationEmptyState>
-  ) : null;
+  );
 
   return (
     <BaseConversation
@@ -213,10 +256,8 @@ export function Conversation({
     >
       <ConversationContent className="mx-auto flex flex-1 flex-col gap-4 p-0 sm:min-w-[390px] sm:max-w-[768px]">
         {fetchError ? (
-          (errorState?.(fetchError, handleRetry) ?? defaultErrorState)
-        ) : showInitialLoading ? (
-          (loadingState ?? defaultLoadingState)
-        ) : messages.length > 0 ? (
+          (errorState?.(fetchError, refetch) ?? defaultErrorState)
+        ) : hasMessages ? (
           <div className="flex flex-col gap-4">
             {messages.map((message, index) => {
               if (message.role === "system") {
@@ -225,11 +266,20 @@ export function Conversation({
 
               const isLastMessage = index === messages.length - 1;
               return (
-                <Message from={message.role} key={message.id}>
+                <Message
+                  from={message.role}
+                  key={message.id}
+                  className={cn("flex-col", {
+                    "items-start": message.role === "assistant",
+                    "items-end": message.role === "user",
+                  })}
+                >
+                  {message.role === "user" && renderUserActions(message)}
+
                   <MessageContent
-                    className={cn("", {
+                    className={cn({
                       "space-y-3": message.role === "assistant",
-                      "!bg-background !text-foreground relative flex items-center overflow-hidden rounded-[12px] border p-3 text-base ltr:rounded-br-none rtl:rounded-bl-none dark:border-0":
+                      "relative flex items-center overflow-hidden rounded-[12px] border bg-background! p-3 text-base text-foreground! ltr:rounded-br-none rtl:rounded-bl-none dark:border-0":
                         message.role === "user",
                     })}
                     variant={
@@ -240,10 +290,13 @@ export function Conversation({
                       ? renderAssistantMessage(message, isLastMessage)
                       : renderUserMessage(message)}
                   </MessageContent>
+
+                  {message.role === "assistant" &&
+                    renderAssistantActions(message)}
                 </Message>
               );
             })}
-            {status === "streaming" && (
+            {["streaming", "submitted"].includes(status) && (
               <Message from="assistant">
                 <MessageContent variant="flat">
                   <Loader />
@@ -251,11 +304,26 @@ export function Conversation({
               </Message>
             )}
             {storeError && (
-              <div className="rounded-lg bg-destructive/10 px-3 py-2 text-destructive text-sm">
-                {storeError.message ?? "Unexpected error"}
-              </div>
+              <Empty>
+                <EmptyHeader>
+                  <EmptyTitle className="text-destructive">
+                    Error Occurred
+                  </EmptyTitle>
+                  <EmptyDescription className="overflow-hidden sm:min-w-[390px] sm:max-w-[768px]">
+                    {storeError.message ?? "Unexpected error"}
+                  </EmptyDescription>
+                </EmptyHeader>
+                <EmptyContent>
+                  <Button variant="outline" size="sm">
+                    <ArrowsClockwiseIcon className="size-4" />
+                    Retry
+                  </Button>
+                </EmptyContent>
+              </Empty>
             )}
           </div>
+        ) : showInitialLoading ? (
+          (loadingState ?? defaultLoadingState)
         ) : (
           (emptyState ?? defaultEmptyState)
         )}

@@ -34,12 +34,12 @@ export function ReadFile({
   const fileName = input?.filePath?.split("/").pop() || input?.filePath;
 
   const readingRange = useMemo(() => {
-    if (input?.offset !== undefined || input?.limit !== undefined) {
-      const start = input.offset || 0;
-      const end = input.limit ? start + input.limit : "end";
-      return `Lines ${start + 1} - ${end}`;
+    if (input?.offset === undefined && input?.limit === undefined) {
+      return null;
     }
-    return null;
+    const start = input.offset ?? 0;
+    const end = input.limit ? start + input.limit : "end";
+    return `Lines ${start + 1} - ${end}`;
   }, [input]);
 
   const previewContent = () => {

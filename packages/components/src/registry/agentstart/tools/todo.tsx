@@ -19,6 +19,7 @@ import {
   CircleIcon,
   ClockIcon,
 } from "lucide-react";
+import type React from "react";
 import {
   Tool,
   ToolContent,
@@ -29,42 +30,34 @@ import { cn } from "@/lib/utils";
 
 const statusOrder = ["inProgress", "pending", "completed"];
 
-const getStatusIcon = (status: string) => {
-  switch (status) {
-    case "completed":
-      return <CheckCircle2Icon className="h-3.5 w-3.5 text-green-600" />;
-    case "inProgress":
-      return <ClockIcon className="h-3.5 w-3.5 animate-pulse text-blue-600" />;
-    case "pending":
-      return <CircleIcon className="h-3.5 w-3.5 text-muted-foreground" />;
-    default:
-      return null;
-  }
+const statusIcons: Record<string, React.ReactNode> = {
+  completed: <CheckCircle2Icon className="h-3.5 w-3.5 text-green-600" />,
+  inProgress: <ClockIcon className="h-3.5 w-3.5 animate-pulse text-blue-600" />,
+  pending: <CircleIcon className="h-3.5 w-3.5 text-muted-foreground" />,
 };
 
-const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case "high":
-      return "text-red-600";
-    case "medium":
-      return "text-yellow-600";
-    case "low":
-      return "text-muted-foreground";
-    default:
-      return "text-muted-foreground";
-  }
+const getStatusIcon = (status: string) => statusIcons[status] ?? null;
+
+const priorityColors: Record<string, string> = {
+  high: "text-red-600",
+  medium: "text-yellow-600",
+  low: "text-muted-foreground",
 };
 
-const getPriorityBadge = (priority: string) => {
-  const color = getPriorityColor(priority);
-  return (
-    <span className={cn("text-xs", color)}>
-      {priority === "high" && "⚡"}
-      {priority === "medium" && "•"}
-      {priority === "low" && "○"}
-    </span>
-  );
+const getPriorityColor = (priority: string) =>
+  priorityColors[priority] ?? "text-muted-foreground";
+
+const priorityBadges: Record<string, string> = {
+  high: "⚡",
+  medium: "•",
+  low: "○",
 };
+
+const getPriorityBadge = (priority: string) => (
+  <span className={cn("text-xs", getPriorityColor(priority))}>
+    {priorityBadges[priority] ?? ""}
+  </span>
+);
 
 export interface TodoProps {
   part:

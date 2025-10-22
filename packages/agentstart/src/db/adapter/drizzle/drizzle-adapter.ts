@@ -9,6 +9,18 @@ FEATURES:
 SEARCHABLE: packages, agentstart, src, db, adapter, drizzle, persistence
 agent-frontmatter:end */
 
+/**
+ * Drizzle ORM exposes database tables through dynamic helpers that vary by provider
+ * and schema configuration. The structure is determined at runtime based on your
+ * drizzle configuration and cannot be statically typed without complex conditional types.
+ *
+ * This is a justified use of `any` because:
+ * - Drizzle's type system relies on schema inference at the usage site
+ * - The DB interface provides a consistent access pattern across different providers
+ * - Type safety is maintained through our adapter layer's schema validation
+ */
+/** biome-ignore-all lint/suspicious/noExplicitAny: Drizzle database exposes dynamic helpers without stable TypeScript types. See JSDoc above for details. */
+
 import { AgentStartError, generateId } from "@agentstart/utils";
 import {
   and,
@@ -24,6 +36,7 @@ import {
   type SQL,
 } from "drizzle-orm";
 import { type FieldAttribute, getTables } from "@/db";
+import { createGetFieldFunction, validateTable } from "@/db/adapter/shared";
 import { withApplyDefault } from "@/db/adapter/utils";
 import type { Adapter, AgentStartOptions, Where } from "@/types";
 
@@ -39,19 +52,23 @@ const createTransform = (
 ) => {
   const schema = getTables(options);
   const isSqliteProvider = config.provider === "sqlite";
+  const getField = createGetFieldFunction(schema, "drizzle");
 
   const getFieldAttribute = (model: string, field: string) => {
     if (field === "id") {
       return undefined;
     }
-    const table = schema[model];
-    if (!table) {
-      throw new AgentStartError(
-        "DRIZZLE_TABLE_MISSING",
-        `Table ${model} not found in schema`,
-      );
-    }
+    const table = validateTable(schema, model, "drizzle");
     return table.fields[field];
+  };
+
+  const getModelName = (model: string) => {
+    const table = validateTable(schema, model, "drizzle");
+    return table.modelName !== model
+      ? table.modelName
+      : config.usePlural
+        ? `${model}s`
+        : model;
   };
 
   const normalizeDateForWrite = (
@@ -122,27 +139,6 @@ const createTransform = (
     return value;
   };
 
-  function getField(model: string, field: string) {
-    if (field === "id") {
-      return field;
-    }
-    const table = schema[model];
-    if (!table) {
-      throw new AgentStartError(
-        "DRIZZLE_TABLE_MISSING",
-        `Table ${model} not found in schema`,
-      );
-    }
-    const f = table.fields[field];
-    if (!f) {
-      throw new AgentStartError(
-        "DRIZZLE_FIELD_MISSING",
-        `Field ${field} not found in table ${model}`,
-      );
-    }
-    return f.fieldName || field;
-  }
-
   function getSchema(modelName: string) {
     const schema = config.schema || db._.fullSchema;
     if (!schema) {
@@ -161,21 +157,6 @@ const createTransform = (
     }
     return schemaModel;
   }
-
-  const getModelName = (model: string) => {
-    const table = schema[model];
-    if (!table) {
-      throw new AgentStartError(
-        "DRIZZLE_TABLE_MISSING",
-        `Table ${model} not found in schema`,
-      );
-    }
-    return table.modelName !== model
-      ? table.modelName
-      : config.usePlural
-        ? `${model}s`
-        : model;
-  };
 
   function convertWhereClause(where: Where[], model: string) {
     const schemaModel = getSchema(model);

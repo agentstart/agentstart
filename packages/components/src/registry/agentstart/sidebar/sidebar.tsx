@@ -153,16 +153,14 @@ export function Sidebar({
             <EmptyDescription>{error.message}</EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => refetch()}
-              >
-                Retry
-              </Button>
-            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => refetch()}
+            >
+              Retry
+            </Button>
           </EmptyContent>
         </Empty>
       );
@@ -220,8 +218,8 @@ export function Sidebar({
     isError,
     isLoading,
     threads,
-    deleteMutation,
-    renameMutation,
+    deleteMutation.mutate,
+    renameMutation.mutate,
   ]);
 
   return (
@@ -252,27 +250,25 @@ export function Sidebar({
 }
 
 function normalizeThread(thread: DBThread): DBThread {
-  const createdAt =
-    thread.createdAt instanceof Date
-      ? thread.createdAt
-      : new Date(thread.createdAt);
-  const updatedAt =
-    thread.updatedAt instanceof Date
-      ? thread.updatedAt
-      : new Date(thread.updatedAt);
-
   return {
     ...thread,
-    createdAt,
-    updatedAt,
+    createdAt:
+      thread.createdAt instanceof Date
+        ? thread.createdAt
+        : new Date(thread.createdAt),
+    updatedAt:
+      thread.updatedAt instanceof Date
+        ? thread.updatedAt
+        : new Date(thread.updatedAt),
   };
 }
 
 function ThreadAvatar({ title }: { title?: string | null }) {
-  const initials = (title ?? "Thread")
+  const displayTitle = title || "Thread";
+  const initials = displayTitle
     .split(" ")
     .filter(Boolean)
-    .map((segment) => segment[0]?.toUpperCase())
+    .map((word) => word[0]?.toUpperCase())
     .join("")
     .slice(0, 2);
 
@@ -294,7 +290,7 @@ function MoreOptions({
 }) {
   const handleRename = () => {
     const newTitle = window.prompt("Enter new thread title:", threadTitle);
-    if (newTitle && newTitle.trim() !== "" && newTitle !== threadTitle) {
+    if (newTitle?.trim() && newTitle !== threadTitle) {
       onRename(newTitle.trim());
     }
   };

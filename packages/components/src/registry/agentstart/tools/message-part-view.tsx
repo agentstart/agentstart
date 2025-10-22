@@ -1,8 +1,8 @@
 /* agent-frontmatter:start
 AGENT: Message part view orchestrator
 PURPOSE: Route different tool and content types to their specific UI components
-USAGE: <MessagePartView message={message} />
-EXPORTS: MessagePartView, MessagePartViewProps
+USAGE: <MessagePart part={part} isStreaming={isStreaming} />
+EXPORTS: MessagePart
 FEATURES:
   - Dispatches tool parts to specialized renderers (bash, read, write, etc.)
   - Renders text content with markdown support
@@ -86,10 +86,11 @@ function Reasoning({
     if (isStreaming || duration === 0) {
       return <Shimmer duration={1}>Thinking...</Shimmer>;
     }
-    if (duration === undefined) {
-      return <p>Thought for a few seconds</p>;
-    }
-    return <p>Thought for {duration} seconds</p>;
+    return duration === undefined ? (
+      <p>Thought for a few seconds</p>
+    ) : (
+      <p>Thought for {duration} seconds</p>
+    );
   };
 
   return (

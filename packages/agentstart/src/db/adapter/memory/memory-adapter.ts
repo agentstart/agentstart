@@ -11,44 +11,15 @@ agent-frontmatter:end */
 
 import { generateId } from "@agentstart/utils";
 import { getTables } from "@/db";
+import { createGetFieldFunction, toComparable } from "@/db/adapter/shared";
 import { withApplyDefault } from "@/db/adapter/utils";
 import type { Adapter, AgentStartOptions, Where } from "@/types";
 
 export type MemoryDB = Record<string, Array<Record<string, unknown>>>;
 
-const toComparable = (value: unknown): string | number => {
-  if (value instanceof Date) {
-    return value.getTime();
-  }
-  if (typeof value === "number") {
-    return value;
-  }
-  if (typeof value === "boolean") {
-    return value ? 1 : 0;
-  }
-  if (typeof value === "string") {
-    return value;
-  }
-  return value === null || value === undefined ? "" : String(value);
-};
-
 const createTransform = (options: Omit<AgentStartOptions, "agent">) => {
   const schema = getTables(options);
-
-  function getField(model: string, field: string): string {
-    if (field === "id") {
-      return field;
-    }
-    const table = schema[model];
-    if (!table) {
-      throw new Error(`Table ${model} not found in schema`);
-    }
-    const f = table.fields[field];
-    if (!f) {
-      throw new Error(`Field ${field} not found in table ${model}`);
-    }
-    return f.fieldName || field;
-  }
+  const getField = createGetFieldFunction(schema, "memory");
   return {
     transformInput(
       data: Record<string, unknown>,

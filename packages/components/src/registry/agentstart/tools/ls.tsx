@@ -54,7 +54,7 @@ export function Ls({
       <div className="mt-1">
         <div className="mb-1 text-muted-foreground text-xs">
           {output.metadata?.count || 0} item
-          {(output.metadata?.count || 0) !== 1 ? "s" : ""}
+          {(output.metadata?.count || 0) !== 1 && "s"}
         </div>
         {entries.length > 0 ? (
           <div className="max-h-[400px] space-y-0.5 overflow-y-auto font-mono text-xs">

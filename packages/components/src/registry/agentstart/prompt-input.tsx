@@ -20,7 +20,7 @@ import {
   StopIcon,
 } from "@phosphor-icons/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { newThreadInput, useAgentStore } from "agentstart/client";
+import { useAgentStore } from "agentstart/client";
 import type { FileUIPart } from "ai";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -69,9 +69,16 @@ export function PromptInput({
   const { orpc, navigate } = useAgentStartContext();
   const queryClient = useQueryClient();
   const [input, setInput] = useState("");
-  const status = useAgentStore((state) => state.status);
-  const id = useAgentStore((state) => state.id);
-  const stop = useAgentStore((state) => state.stop);
+  const storeKey = threadId ?? "default";
+  const status = useAgentStore((state) => state.status, storeKey);
+  const id = useAgentStore((state) => state.id, storeKey);
+  const stop = useAgentStore((state) => state.stop, storeKey);
+  const pendingNewThreadInput = useAgentStore(
+    (state) => state.pendingNewThreadInput,
+  );
+  const setPendingNewThreadInput = useAgentStore(
+    (state) => state.setPendingNewThreadInput,
+  );
 
   const createThreadMutation = useMutation(
     orpc.thread.create.mutationOptions(),
@@ -79,7 +86,7 @@ export function PromptInput({
 
   const handleSubmit = async (message: PromptInputMessage) => {
     // If currently streaming or submitted, stop instead of submitting
-    if (status === "streaming" || status === "submitted") {
+    if (["streaming", "submitted"].includes(status)) {
       stop();
       return;
     }
@@ -96,8 +103,10 @@ export function PromptInput({
     } else {
       // Home page: create new thread and navigate
       const trimmedText = message.text?.trim() ?? "";
-      newThreadInput.text = trimmedText;
-      newThreadInput.files = message.files;
+      setPendingNewThreadInput({
+        text: trimmedText,
+        files: message.files,
+      });
 
       try {
         setInput("");
@@ -110,8 +119,7 @@ export function PromptInput({
           orpc.thread.list.queryOptions({ input: {} }),
         );
       } catch (error) {
-        delete newThreadInput.text;
-        delete newThreadInput.files;
+        setPendingNewThreadInput(null);
         setInput(message.text ?? "");
         throw error;
       }
@@ -125,61 +133,46 @@ export function PromptInput({
   const hasError = threadId ? false : createThreadMutation.isError;
 
   const sendIcon = useMemo(() => {
-    let Icon = <ArrowUpIcon className="size-4.5" weight="bold" />;
-
-    if (isPending) {
-      Icon = <Spinner className="size-4.5" />;
-    } else if (isStreaming) {
-      Icon = <StopIcon className="size-4.5" weight="bold" />;
-    } else if (hasError) {
-      Icon = <BugIcon className="size-4.5" weight="duotone" />;
-    }
-    return Icon;
+    if (hasError) return <BugIcon className="size-4.5" weight="duotone" />;
+    if (isStreaming) return <StopIcon className="size-4.5" weight="bold" />;
+    if (isPending) return <Spinner className="size-4.5" />;
+    return <ArrowUpIcon className="size-4.5" weight="bold" />;
   }, [isPending, isStreaming, hasError]);
 
   useEffect(() => {
-    if (!threadId || !onMessageSubmit || !id) {
+    if (!threadId || !onMessageSubmit || !id || !pendingNewThreadInput) {
       return;
     }
 
-    const storedFiles = newThreadInput.files;
-    const filesLength =
-      typeof FileList !== "undefined" && storedFiles instanceof FileList
-        ? storedFiles.length
-        : Array.isArray(storedFiles)
-          ? storedFiles.length
+    const { text, files } = pendingNewThreadInput;
+    const storedText = text?.trim() ?? "";
+    const fileCount =
+      files instanceof FileList
+        ? files.length
+        : Array.isArray(files)
+          ? files.length
           : 0;
-    const storedText = newThreadInput.text?.trim() ?? "";
 
-    if (!storedText && filesLength === 0) {
+    if (!storedText && fileCount === 0) {
       return;
     }
 
-    const textToSubmit = storedText;
-    const filesToSubmit = storedFiles;
-    delete newThreadInput.text;
-    delete newThreadInput.files;
+    setPendingNewThreadInput(null);
 
-    const submitStoredMessage = async () => {
-      let succeeded = false;
+    void (async () => {
       try {
-        await onMessageSubmit({
-          text: textToSubmit,
-          files: filesToSubmit,
-        });
-        succeeded = true;
-      } finally {
-        if (!succeeded) {
-          newThreadInput.text = textToSubmit;
-          if (filesToSubmit) {
-            newThreadInput.files = filesToSubmit;
-          }
-        }
+        await onMessageSubmit({ text: storedText, files });
+      } catch {
+        setPendingNewThreadInput({ text: storedText, files });
       }
-    };
-
-    void submitStoredMessage();
-  }, [id, onMessageSubmit, threadId]);
+    })();
+  }, [
+    id,
+    onMessageSubmit,
+    pendingNewThreadInput,
+    setPendingNewThreadInput,
+    threadId,
+  ]);
 
   return (
     <PromptInputProvider>
@@ -188,7 +181,7 @@ export function PromptInput({
         multiple
         onSubmit={handleSubmit}
         className={cn(
-          "mx-auto w-full max-w-full rounded-[22px] bg-background sm:min-w-[390px] sm:max-w-[768px] [&>[data-slot=input-group]]:rounded-[22px]",
+          "mx-auto w-full max-w-full rounded-[22px] bg-background *:data-[slot=input-group]:rounded-[22px] sm:min-w-[390px] sm:max-w-[768px]",
           className,
         )}
       >

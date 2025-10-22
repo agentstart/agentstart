@@ -17,10 +17,10 @@ import { PromptInput } from "@/components/agent/prompt-input";
 import { useAgentStore, useThread } from "@/lib/agent-client";
 
 export default function Page() {
-  useThread();
   const { threadId } = useParams<{ threadId: string }>();
+  useThread(threadId);
 
-  const sendMessage = useAgentStore((state) => state.sendMessage);
+  const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
 
   return (
     <div className="mx-auto flex h-full w-full max-w-full flex-1 flex-col">

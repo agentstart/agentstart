@@ -1,12 +1,13 @@
 /* agent-frontmatter:start
 AGENT: Sidebar content
-PURPOSE: Render the agent sidebar thread list and pagination controls
-USAGE: <SidebarContent hasNextPage={hasNextPage} ...>{threads}</SidebarContent>
-EXPORTS: SidebarContent, SidebarContentSectionProps
+PURPOSE: Render the agent sidebar thread list with scrollable layout
+USAGE: <SidebarContent>{threadList}</SidebarContent>
+EXPORTS: SidebarContent, SidebarContentProps
 FEATURES:
-  - Displays recent conversations with scrollable layout
-  - Provides a “Load more” control for paginated results
-SEARCHABLE: agent sidebar, thread list, pagination controls
+  - Displays thread list with scrollable layout
+  - Wraps children in SidebarMenu component
+  - Provides consistent spacing and styling
+SEARCHABLE: agent sidebar, thread list, sidebar content
 agent-frontmatter:end */
 
 "use client";

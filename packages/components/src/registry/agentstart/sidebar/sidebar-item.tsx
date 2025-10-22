@@ -68,14 +68,14 @@ export const SidebarItem = memo(function SidebarItem({
         className="group/sidebar-item cursor-pointer"
       >
         <div className="flex w-full items-center gap-3 overflow-hidden">
-          {leading ? <div className="shrink-0">{leading}</div> : null}
+          {leading && <div className="shrink-0">{leading}</div>}
           <Tooltip>
             <TooltipTrigger asChild>
               <span className="flex-1 truncate font-medium text-sm">
                 {thread.title || "Untitled thread"}
               </span>
             </TooltipTrigger>
-            {computedSecondaryText ? (
+            {computedSecondaryText && (
               <TooltipContent>
                 <span className="space-x-1">
                   <span>{thread.title || "Untitled thread"}</span>
@@ -84,13 +84,13 @@ export const SidebarItem = memo(function SidebarItem({
                   </span>
                 </span>
               </TooltipContent>
-            ) : null}
+            )}
           </Tooltip>
-          {trailing ? (
+          {trailing && (
             <div className="invisible shrink-0 group-hover/sidebar-item:visible">
               {trailing}
             </div>
-          ) : null}
+          )}
         </div>
       </SidebarMenuButton>
     </SidebarMenuItem>

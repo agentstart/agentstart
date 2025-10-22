@@ -34,10 +34,8 @@ export function UpdateFile({
 
   const language = getLanguageFromFilePath(input?.filePath || "");
 
-  const shouldShowCodeBlock = (str: string | undefined) => {
-    if (!str) return false;
-    return str.includes("\n") || str.length > 50;
-  };
+  const shouldShowCodeBlock = (str: string | undefined) =>
+    Boolean(str && (str.includes("\n") || str.length > 50));
 
   const renderChanges = () => {
     if (!input) return null;

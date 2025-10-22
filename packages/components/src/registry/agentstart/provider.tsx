@@ -1,13 +1,14 @@
 /* agent-frontmatter:start
 AGENT: AgentStart provider
 PURPOSE: Supply the shared AgentStart client instance through React context
-USAGE: <AgentStartProvider client={client}>{children}</AgentStartProvider>
-EXPORTS: AgentStartProvider, AgentStartProviderProps, useAgentStartClient, useOptionalAgentStartClient
+USAGE: <AgentStartProvider client={client} navigate={navigate}>{children}</AgentStartProvider>
+EXPORTS: AgentStartProvider, AgentStartProviderProps, useAgentStartContext
 FEATURES:
   - Shares the thread-capable AgentStart client with all descendant components
-  - Provides safe and optional hooks for consuming the client instance
-  - Eliminates prop drilling for sidebar and tool-aware components
-SEARCHABLE: agent layout, agentstart provider, agent context
+  - Provides TanStack Query client for server state management
+  - Supplies navigation function for thread routing
+  - Wraps children with TooltipProvider for consistent UI
+SEARCHABLE: agent provider, context, client, navigation, agentstart
 agent-frontmatter:end */
 
 "use client";
@@ -60,6 +61,8 @@ export function AgentStartProvider({
     </AgentStartClientContext.Provider>
   );
 }
+
+AgentStartProvider.displayName = "AgentStartProvider";
 
 export function useAgentStartContext(): AgentStartClientContextState {
   const context = useContext(AgentStartClientContext);

@@ -33,91 +33,86 @@ export function Bash({
 
   const formatDuration = (ms?: number) => {
     if (!ms) return "";
-    if (ms < 1000) return `${ms}ms`;
-    return `${(ms / 1000).toFixed(2)}s`;
+    return ms < 1000 ? `${ms}ms` : `${(ms / 1000).toFixed(2)}s`;
   };
 
-  const renderOutput = () => {
-    return (
-      <div className="flex flex-col gap-2">
-        {/* Command and description */}
-        <div className="flex flex-col gap-1">
-          <div className="rounded bg-muted/50 p-2 font-mono text-xs">
-            $ {input?.command}
-          </div>
-          {input?.description && (
-            <span className="text-muted-foreground text-xs">
-              {input.description}
-            </span>
-          )}
+  const renderOutput = () => (
+    <div className="flex flex-col gap-2">
+      {/* Command and description */}
+      <div className="flex flex-col gap-1">
+        <div className="rounded bg-muted/50 p-2 font-mono text-xs">
+          $ {input?.command}
         </div>
-
-        {/* Status indicators */}
-        {(state === "input-streaming" || state === "input-available") && (
-          <div className="flex items-center gap-2 text-muted-foreground text-xs">
-            <ClockIcon className="h-3 w-3 animate-spin" />
-            <span>Executing command...</span>
-          </div>
-        )}
-
-        {/* Exit code and duration */}
-        {state === "output-available" && output && (
-          <div className="flex items-center gap-4 text-muted-foreground text-xs">
-            {output.metadata?.exitCode !== undefined && (
-              <span
-                className={
-                  output.metadata.exitCode === 0 ? "" : "text-yellow-600"
-                }
-              >
-                Exit code: {output.metadata.exitCode}
-              </span>
-            )}
-            {output.metadata?.duration && (
-              <span>Duration: {formatDuration(output.metadata.duration)}</span>
-            )}
-            {/* {output.metadata?.commitHash && (
-              <CommitHash hash={output.metadata.commitHash} />
-            )} */}
-          </div>
-        )}
-
-        {/* Standard output */}
-        {output?.metadata?.stdout && (
-          <div className="mt-2">
-            <span className="mb-1 block text-muted-foreground text-xs">
-              Output:
-            </span>
-            <CodeBlock
-              code={output.metadata.stdout}
-              language="bash"
-              className="max-h-[400px] overflow-auto text-xs"
-            />
-          </div>
-        )}
-
-        {/* Standard error */}
-        {output?.metadata?.stderr && (
-          <div className="mt-2">
-            <span className="mb-1 block text-red-600 text-xs">
-              Error output:
-            </span>
-            <CodeBlock
-              code={output.metadata.stderr}
-              language="bash"
-              className="max-h-[200px] overflow-auto border-red-200 text-xs dark:border-red-900"
-            />
-          </div>
-        )}
-
-        {/* No output message */}
-        {state === "output-available" && output && !hasOutput && (
-          <span className="text-muted-foreground text-xs italic">
-            Command executed successfully (no output)
+        {input?.description && (
+          <span className="text-muted-foreground text-xs">
+            {input.description}
           </span>
         )}
       </div>
-    );
-  };
+
+      {/* Status indicators */}
+      {["input-streaming", "input-available"].includes(state) && (
+        <div className="flex items-center gap-2 text-muted-foreground text-xs">
+          <ClockIcon className="h-3 w-3 animate-spin" />
+          <span>Executing command...</span>
+        </div>
+      )}
+
+      {/* Exit code and duration */}
+      {state === "output-available" && output && (
+        <div className="flex items-center gap-4 text-muted-foreground text-xs">
+          {output.metadata?.exitCode !== undefined && (
+            <span
+              className={
+                output.metadata.exitCode === 0 ? undefined : "text-yellow-600"
+              }
+            >
+              Exit code: {output.metadata.exitCode}
+            </span>
+          )}
+          {output.metadata?.duration && (
+            <span>Duration: {formatDuration(output.metadata.duration)}</span>
+          )}
+          {/* {output.metadata?.commitHash && (
+            <CommitHash hash={output.metadata.commitHash} />
+          )} */}
+        </div>
+      )}
+
+      {/* Standard output */}
+      {output?.metadata?.stdout && (
+        <div className="mt-2">
+          <span className="mb-1 block text-muted-foreground text-xs">
+            Output:
+          </span>
+          <CodeBlock
+            code={output.metadata.stdout}
+            language="bash"
+            className="max-h-[400px] overflow-auto text-xs"
+          />
+        </div>
+      )}
+
+      {/* Standard error */}
+      {output?.metadata?.stderr && (
+        <div className="mt-2">
+          <span className="mb-1 block text-red-600 text-xs">Error output:</span>
+          <CodeBlock
+            code={output.metadata.stderr}
+            language="bash"
+            className="max-h-[200px] overflow-auto border-red-200 text-xs dark:border-red-900"
+          />
+        </div>
+      )}
+
+      {/* No output message */}
+      {state === "output-available" && output && !hasOutput && (
+        <span className="text-muted-foreground text-xs italic">
+          Command executed successfully (no output)
+        </span>
+      )}
+    </div>
+  );
 
   return (
     <Tool>

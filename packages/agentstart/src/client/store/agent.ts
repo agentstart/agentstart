@@ -2,7 +2,7 @@
 AGENT: Agent client store module
 PURPOSE: Creates the Zustand store slice that manages agent-level chat state.
 USAGE: Use via useAgentStore to read and mutate agent conversation data.
-EXPORTS: newThreadInput, AgentStore, AgentStoreWithSync, getAgentStore, useAgentStore
+EXPORTS: PendingNewThreadInput, AgentStore, AgentStoreWithSync, getAgentStore, useAgentStore
 FEATURES:
   - Initializes per-thread agent store instances on demand
   - Provides typed selectors compatible with AI SDK message helpers
@@ -15,13 +15,16 @@ import { create, type StoreApi, type UseBoundStore } from "zustand";
 import { devtools } from "zustand/middleware";
 import { useShallow } from "zustand/shallow";
 
-export const newThreadInput: {
+export type PendingNewThreadInput = {
   text?: string;
   files?: FileList | FileUIPart[];
-} = {};
+} | null;
 
 export interface AgentStore<TMessage extends UIMessage = UIMessage>
-  extends UseChatHelpers<TMessage> {}
+  extends UseChatHelpers<TMessage> {
+  pendingNewThreadInput: PendingNewThreadInput;
+  setPendingNewThreadInput: (input: PendingNewThreadInput) => void;
+}
 
 // Internal sync method for connecting with useThread
 export interface AgentStoreWithSync<TMessage extends UIMessage = UIMessage>
@@ -54,6 +57,16 @@ function createAgentStore<TMessage extends UIMessage = UIMessage>() {
         addToolResult: async () => {},
         setMessages: () => {},
         clearError: () => {},
+        pendingNewThreadInput: null,
+        setPendingNewThreadInput: (input) => {
+          set(
+            {
+              pendingNewThreadInput: input ? { ...input } : null,
+            },
+            false,
+            "setPendingNewThreadInput",
+          );
+        },
 
         // Internal sync method for useThread integration
         _syncState: (newState: Partial<AgentStore<TMessage>>) => {

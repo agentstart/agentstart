@@ -57,7 +57,7 @@ export function Grep({
       <div className="mt-2">
         <div className="mb-1 text-muted-foreground text-xs">
           Found in {output?.metadata?.fileCount ?? files.length} file
-          {(output?.metadata?.fileCount ?? files.length) !== 1 ? "s" : ""}
+          {(output?.metadata?.fileCount ?? files.length) !== 1 && "s"}
         </div>
         <div className="max-h-[300px] overflow-y-auto border-muted border-l-2 pl-2">
           {files.slice(0, 100).map((file, index) => (
@@ -95,9 +95,8 @@ export function Grep({
       <div className="mt-2">
         <div className="mb-1 text-muted-foreground text-xs">
           Total: {output?.metadata?.totalMatches || 0} match
-          {(output?.metadata?.totalMatches || 0) !== 1 ? "es" : ""} in{" "}
-          {counts.length} file
-          {counts.length !== 1 ? "s" : ""}
+          {(output?.metadata?.totalMatches || 0) !== 1 && "es"} in{" "}
+          {counts.length} file{counts.length !== 1 && "s"}
         </div>
         <div className="max-h-[300px] space-y-0.5 overflow-y-auto font-mono text-xs">
           {counts.map((item, index) => (
@@ -136,9 +135,9 @@ export function Grep({
       <div className="mt-2">
         <div className="mb-1 text-muted-foreground text-xs">
           Found {output?.metadata?.matchCount || 0} match
-          {(output?.metadata?.matchCount || 0) !== 1 ? "es" : ""} in{" "}
+          {(output?.metadata?.matchCount || 0) !== 1 && "es"} in{" "}
           {output?.metadata?.fileCount || 0} file
-          {(output?.metadata?.fileCount || 0) !== 1 ? "s" : ""}
+          {(output?.metadata?.fileCount || 0) !== 1 && "s"}
         </div>
         <CodeBlock
           code={content}

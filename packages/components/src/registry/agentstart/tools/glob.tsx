@@ -80,8 +80,7 @@ export function Glob({
         {/* Results */}
         <div className="mt-1">
           <div className="mb-1 text-muted-foreground text-xs">
-            Found {totalMatches} match
-            {totalMatches !== 1 ? "es" : ""}
+            Found {totalMatches} match{totalMatches !== 1 ? "es" : ""}
           </div>
           {matches.length > 0 ? (
             <div className="max-h-[300px] overflow-y-auto border-muted border-l-2 pl-2">

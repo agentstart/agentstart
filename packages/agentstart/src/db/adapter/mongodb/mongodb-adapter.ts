@@ -12,6 +12,7 @@ agent-frontmatter:end */
 import { createRequire } from "node:module";
 import type { Db } from "mongodb";
 import { getTables } from "@/db";
+import { validateTable } from "@/db/adapter/shared";
 import { withApplyDefault } from "@/db/adapter/utils";
 import type { Adapter, AgentStartOptions, Where } from "@/types";
 
@@ -65,10 +66,7 @@ const createTransform = (options: Omit<AgentStartOptions, "agent">) => {
     if (customIdGen) {
       return value;
     }
-    const table = schema[model];
-    if (!table) {
-      throw new Error(`Table ${model} not found in schema`);
-    }
+    const table = validateTable(schema, model, "mongodb");
     const fieldAttr = table.fields[field];
     if (
       field === "id" ||
@@ -101,10 +99,7 @@ const createTransform = (options: Omit<AgentStartOptions, "agent">) => {
     if (customIdGen) {
       return value;
     }
-    const table = schema[model];
-    if (!table) {
-      throw new Error(`Table ${model} not found in schema`);
-    }
+    const table = validateTable(schema, model, "mongodb");
     const fieldAttr = table.fields[field];
     if (field === "id" || (fieldAttr && fieldAttr.references?.field === "id")) {
       if (value instanceof ObjectId) {
@@ -123,17 +118,14 @@ const createTransform = (options: Omit<AgentStartOptions, "agent">) => {
     return value;
   }
 
-  function getField(field: string, model: string): string {
+  function getFieldWithIdMapping(field: string, model: string): string {
     if (field === "id") {
       if (customIdGen) {
         return "id";
       }
       return "_id";
     }
-    const table = schema[model];
-    if (!table) {
-      throw new Error(`Table ${model} not found in schema`);
-    }
+    const table = validateTable(schema, model, "mongodb");
     const f = table.fields[field];
     if (!f) {
       throw new Error(`Field ${field} not found in table ${model}`);
@@ -157,10 +149,7 @@ const createTransform = (options: Omit<AgentStartOptions, "agent">) => {
             : {
                 _id: new ObjectId(),
               };
-      const table = schema[model];
-      if (!table) {
-        throw new Error(`Table ${model} not found in schema`);
-      }
+      const table = validateTable(schema, model, "mongodb");
       const fields = table.fields;
       for (const field in fields) {
         const value = data[field];
@@ -218,10 +207,7 @@ const createTransform = (options: Omit<AgentStartOptions, "agent">) => {
           : {}
         : {};
 
-      const table = schema[model];
-      if (!table) {
-        throw new Error(`Table ${model} not found in schema`);
-      }
+      const table = validateTable(schema, model, "mongodb");
       const tableSchema = table.fields;
       for (const key in tableSchema) {
         if (select.length && !select.includes(key)) {
@@ -243,7 +229,7 @@ const createTransform = (options: Omit<AgentStartOptions, "agent">) => {
       if (!where.length) return {};
       const conditions = where.map((w) => {
         const { field: _field, value, operator = "eq", connector = "AND" } = w;
-        const field = getField(_field, model);
+        const field = getFieldWithIdMapping(_field, model);
         const condition: Record<string, unknown> = {};
 
         switch (operator.toLowerCase()) {
@@ -314,13 +300,10 @@ const createTransform = (options: Omit<AgentStartOptions, "agent">) => {
       return clause;
     },
     getModelName: (model: string): string => {
-      const table = schema[model];
-      if (!table) {
-        throw new Error(`Table ${model} not found in schema`);
-      }
+      const table = validateTable(schema, model, "mongodb");
       return table.modelName;
     },
-    getField,
+    getField: getFieldWithIdMapping,
   };
 };
 

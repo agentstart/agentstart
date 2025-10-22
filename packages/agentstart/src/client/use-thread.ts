@@ -28,7 +28,7 @@ import { useDataStateMapper } from "./data-state-mapper";
 import { type AgentStoreWithSync, getAgentStore } from "./store/agent";
 
 export function createUseThread(client: AgentStartAPI) {
-  const hook = () => {
+  const hook = (storeId: string = "default") => {
     const mapDataToState = useDataStateMapper(client);
     const mapDataToStateRef = useRef(mapDataToState);
     mapDataToStateRef.current = mapDataToState;
@@ -66,7 +66,8 @@ export function createUseThread(client: AgentStartAPI) {
       [],
     );
 
-    return useThread({
+    return useCreateThread({
+      storeId,
       chat: thread,
       experimental_throttle: 50,
     });
@@ -81,7 +82,7 @@ type UseThreadOptionsWithStore<TMessage extends UIMessage = UIMessage> =
     store?: UseBoundStore<StoreApi<AgentStoreWithSync<TMessage>>>;
   };
 
-function useThread<TMessage extends UIMessage = UIMessage>(
+function useCreateThread<TMessage extends UIMessage = UIMessage>(
   options: UseThreadOptionsWithStore<TMessage> = {} as UseThreadOptionsWithStore<TMessage>,
 ): UseChatHelpers<TMessage> {
   const {

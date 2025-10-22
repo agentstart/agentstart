@@ -8,11 +8,30 @@ FEATURES:
   - Handles pagination and ordering for memory retrieval
 SEARCHABLE: packages, agentstart, src, db, adapter, prisma, persistence
 agent-frontmatter:end */
+/** biome-ignore-all lint/suspicious/noExplicitAny: warnings for `any` in this file can be safely ignored */
 
-/** biome-ignore-all lint/suspicious/noExplicitAny: is fine */
+/**
+ * IMPORTANT: Type Safety Note for Prisma Adapter
+ *
+ * The Prisma client exposes dynamically generated methods for each model in your schema.
+ * Since these methods are created at runtime based on your Prisma schema, they cannot
+ * be statically typed. We use explicit `any` here to allow dynamic model access while
+ * maintaining type safety at the AgentStart adapter level through transformInput/transformOutput.
+ *
+ * This is a justified use of `any` because:
+ * - Prisma models are generated dynamically from schema.prisma
+ * - The actual type safety is provided by our transformation layer
+ * - Alternative approaches (conditional types, mapped types) would be more complex and fragile
+ * - The AgentStart public API remains fully type-safe despite internal any usage
+ */
 
 import { AgentStartError, generateId } from "@agentstart/utils";
 import { getTables } from "@/db";
+import {
+  compareValues,
+  createGetFieldFunction,
+  validateTable,
+} from "@/db/adapter/shared";
 import { withApplyDefault } from "@/db/adapter/utils";
 import type { Adapter, AgentStartOptions, Where } from "@/types";
 
@@ -48,27 +67,7 @@ const createTransform = (
   options: Omit<AgentStartOptions, "agent">,
 ) => {
   const schema = getTables(options);
-
-  function getField(model: string, field: string) {
-    if (field === "id") {
-      return field;
-    }
-    const table = schema[model];
-    if (!table) {
-      throw new AgentStartError(
-        "PRISMA_TABLE_MISSING",
-        `Table ${model} not found in schema`,
-      );
-    }
-    const f = table.fields[field];
-    if (!f) {
-      throw new AgentStartError(
-        "PRISMA_FIELD_MISSING",
-        `Field ${field} not found in table ${model}`,
-      );
-    }
-    return f.fieldName || field;
-  }
+  const getField = createGetFieldFunction(schema, "prisma");
 
   function operatorToPrismaOperator(operator: string) {
     switch (operator) {
@@ -82,13 +81,7 @@ const createTransform = (
   }
 
   function getModelName(model: string) {
-    const table = schema[model];
-    if (!table) {
-      throw new AgentStartError(
-        "PRISMA_TABLE_MISSING",
-        `Table ${model} not found in schema`,
-      );
-    }
+    const table = validateTable(schema, model, "prisma");
     return table.modelName;
   }
 
@@ -228,44 +221,6 @@ const createTransform = (
   };
 };
 
-const toComparable = (value: unknown): string | number => {
-  if (value instanceof Date) {
-    return value.getTime();
-  }
-  if (typeof value === "number") {
-    return value;
-  }
-  if (typeof value === "boolean") {
-    return value ? 1 : 0;
-  }
-  if (typeof value === "string") {
-    return value.toLowerCase();
-  }
-  return value === null || value === undefined
-    ? ""
-    : String(value).toLowerCase();
-};
-
-const compareValues = (left: unknown, right: unknown): number => {
-  const leftComparable = toComparable(left);
-  const rightComparable = toComparable(right);
-  if (
-    typeof leftComparable === "string" &&
-    typeof rightComparable === "string"
-  ) {
-    return leftComparable.localeCompare(rightComparable);
-  }
-  const leftNumber =
-    typeof leftComparable === "number"
-      ? leftComparable
-      : Number(leftComparable);
-  const rightNumber =
-    typeof rightComparable === "number"
-      ? rightComparable
-      : Number(rightComparable);
-  return leftNumber - rightNumber;
-};
-
 export const prismaAdapter =
   (prisma: PrismaClient, config: PrismaConfig) =>
   (options: Omit<AgentStartOptions, "agent">) => {
@@ -344,7 +299,9 @@ export const prismaAdapter =
           sortBy?.field && result.length
             ? [...result].sort((a, b) => {
                 const fieldName = getField(model, sortBy.field);
-                const comparison = compareValues(a[fieldName], b[fieldName]);
+                const comparison = compareValues(a[fieldName], b[fieldName], {
+                  caseInsensitive: true,
+                });
                 return sortBy.direction === "desc" ? -comparison : comparison;
               })
             : result;

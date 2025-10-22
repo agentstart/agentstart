@@ -9,7 +9,18 @@ FEATURES:
 SEARCHABLE: packages, agentstart, src, db, adapter, kysely, persistence
 agent-frontmatter:end */
 
-/** biome-ignore-all lint/suspicious/noExplicitAny: is fine */
+/**
+ * Kysely is a type-safe SQL query builder that works with various database drivers.
+ * The Kysely<any> type parameter represents the database schema, which varies based on
+ * the user's configuration and cannot be known at compile time in our adapter layer.
+ *
+ * This is a justified use of `any` because:
+ * - Kysely's type system requires schema types that are user-defined
+ * - Our adapter provides a generic interface that works with any Kysely instance
+ * - Type safety is enforced through our transformation layer and schema validation
+ * - The transform functions (transformValueToDB, transformValueFromDB) handle runtime type checking
+ */
+/** biome-ignore-all lint/suspicious/noExplicitAny: Kysely database schema is user-defined and cannot be statically typed in the adapter layer. See JSDoc above for details. */
 
 import { generateId } from "@agentstart/utils";
 import {
@@ -19,6 +30,7 @@ import {
   type UpdateQueryBuilder,
 } from "kysely";
 import { getTables } from "@/db";
+import { createGetFieldFunction, validateTable } from "@/db/adapter/shared";
 import { withApplyDefault } from "@/db/adapter/utils";
 import type {
   Adapter,
@@ -40,32 +52,14 @@ const createTransform = (
   config?: KyselyAdapterConfig,
 ) => {
   const schema = getTables(options);
-
-  function getField(model: string, field: string) {
-    if (field === "id") {
-      return field;
-    }
-    const table = schema[model];
-    if (!table) {
-      throw new Error(`Table ${model} not found in schema`);
-    }
-    const f = table.fields[field];
-    if (!f) {
-      console.log("Field not found", model, field);
-      throw new Error(`Field ${field} not found in table ${model}`);
-    }
-    return f.fieldName || field;
-  }
+  const getField = createGetFieldFunction(schema, "kysely");
 
   function transformValueToDB(value: any, model: string, field: string) {
     if (field === "id") {
       return value;
     }
     const { type = "sqlite" } = config || {};
-    const table = schema[model];
-    if (!table) {
-      throw new Error(`Table ${model} not found in schema`);
-    }
+    const table = validateTable(schema, model, "kysely");
     const f = table.fields[field];
     if (!f) {
       throw new Error(`Field ${field} not found in table ${model}`);
@@ -105,10 +99,7 @@ const createTransform = (
   function transformValueFromDB(value: any, model: string, field: string) {
     const { type = "sqlite" } = config || {};
 
-    const table = schema[model];
-    if (!table) {
-      throw new Error(`Table ${model} not found in schema`);
-    }
+    const table = validateTable(schema, model, "kysely");
     const f = table.fields[field];
     if (!f) {
       throw new Error(`Field ${field} not found in table ${model}`);
@@ -150,10 +141,7 @@ const createTransform = (
   }
 
   function getModelName(model: string) {
-    const table = schema[model];
-    if (!table) {
-      throw new Error(`Table ${model} not found in schema`);
-    }
+    const table = validateTable(schema, model, "kysely");
     return table.modelName;
   }
 

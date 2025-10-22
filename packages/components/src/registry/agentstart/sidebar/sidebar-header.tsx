@@ -1,11 +1,12 @@
 /* agent-frontmatter:start
 AGENT: Sidebar header
 PURPOSE: Render the agent sidebar header with controls and actions
-USAGE: <SidebarHeader header={header} sidebar={sidebar} />
-EXPORTS: SidebarHeader, SidebarHeaderSectionProps
+USAGE: <SidebarHeader title={title} />
+EXPORTS: SidebarHeader, SidebarHeaderProps
 FEATURES:
-  - Displays title, description, and optional custom actions
-  - Provides responsive toggle controls for the sidebar
+  - Displays title and sidebar toggle control
+  - Provides "New Thread" action button with navigation
+  - Responsive layout with conditional title visibility
 SEARCHABLE: agent sidebar, header layout, sidebar controls
 agent-frontmatter:end */
 
@@ -34,10 +35,10 @@ export function SidebarHeader({ title }: SidebarHeaderProps) {
   return (
     <ShadcnSidebarHeader>
       <div
-        className={cn("flex items-center gap-2", {
-          "justify-between": open,
-          "justify-center": !open,
-        })}
+        className={cn(
+          "flex items-center gap-2",
+          open ? "justify-between" : "justify-center",
+        )}
       >
         {open && (
           <div className="flex items-center pl-2.5">
@@ -52,7 +53,7 @@ export function SidebarHeader({ title }: SidebarHeaderProps) {
           <SidebarMenuButton onClick={toggleSidebar}>
             <SidebarIcon
               weight="duotone"
-              className="!size-4.5 cursor-pointer"
+              className="size-4.5! cursor-pointer"
             />
             <span className="sr-only">Toggle sidebar</span>
           </SidebarMenuButton>
@@ -65,7 +66,7 @@ export function SidebarHeader({ title }: SidebarHeaderProps) {
             className="cursor-pointer"
             onClick={() => navigate("/")}
           >
-            <NotePencilIcon weight="duotone" className="!size-4.5" />
+            <NotePencilIcon weight="duotone" className="size-4.5!" />
             <span>New Thread</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
