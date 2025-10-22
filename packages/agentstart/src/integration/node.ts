@@ -26,11 +26,15 @@ export function toNodeHandler(
 
   return async (req: IncomingMessage, res: ServerResponse) => {
     try {
-      // Construct the full URL from the request
-      const protocol = (req.socket as unknown as { encrypted?: boolean })
-        .encrypted
-        ? "https"
-        : "http";
+      // Determine protocol: check x-forwarded-proto header first (for proxies), then socket
+      const forwardedProto = req.headers["x-forwarded-proto"];
+      const protocol =
+        typeof forwardedProto === "string" && forwardedProto === "https"
+          ? "https"
+          : (req.socket as unknown as { encrypted?: boolean }).encrypted
+            ? "https"
+            : "http";
+
       const host = req.headers.host || "localhost";
       const url = new URL(req.url || "/", `${protocol}://${host}`);
 
@@ -41,15 +45,27 @@ export function toNodeHandler(
       }
       const body = chunks.length > 0 ? Buffer.concat(chunks) : undefined;
 
+      // Convert Node.js headers to HeadersInit format
+      // Node.js headers can be string | string[] | undefined
+      const headers = new Headers();
+      for (const [key, value] of Object.entries(req.headers)) {
+        if (value === undefined) continue;
+        if (Array.isArray(value)) {
+          // For multiple values, set the first one or join them
+          for (const v of value) {
+            headers.append(key, v);
+          }
+        } else {
+          headers.set(key, value);
+        }
+      }
+
       // Convert Node.js request to Web Request
       const webRequest = new Request(url, {
         method: req.method || "GET",
-        headers: req.headers as HeadersInit,
+        headers,
         body:
-          body &&
-          req.method !== "GET" &&
-          req.method !== "HEAD" &&
-          req.method !== "OPTIONS"
+          body && req.method !== "GET" && req.method !== "HEAD"
             ? body
             : undefined,
       });
@@ -69,10 +85,14 @@ export function toNodeHandler(
       // Stream the response body
       if (webResponse.body) {
         const reader = webResponse.body.getReader();
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          res.write(value);
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            res.write(value);
+          }
+        } finally {
+          reader.releaseLock();
         }
       }
 
@@ -83,6 +103,9 @@ export function toNodeHandler(
         res.statusCode = 500;
         res.setHeader("Content-Type", "application/json");
         res.end(JSON.stringify({ error: "Internal Server Error" }));
+      } else {
+        // If headers are already sent, just end the response
+        res.end();
       }
     }
   };
