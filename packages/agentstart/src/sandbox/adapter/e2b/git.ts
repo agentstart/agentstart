@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent sandbox adapter
+PURPOSE: Exposes git operations for repositories hosted inside the E2B sandbox.
+USAGE: Called by tools needing git status, commits, and pushes from the sandbox.
+EXPORTS: Git
+FEATURES:
+  - Proxies git commands through the sandbox manager
+  - Handles authentication tokens for remote operations when provided
+SEARCHABLE: packages, agentstart, src, sandbox, adapter, e2b, git
+agent-frontmatter:end */
+
 import type { Sandbox } from "@e2b/code-interpreter";
 import path from "pathe";
 import type {

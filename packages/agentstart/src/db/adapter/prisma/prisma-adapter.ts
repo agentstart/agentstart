@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent persistence adapter
+PURPOSE: Implements the Prisma adapter translating AgentStart operations into Prisma queries.
+USAGE: Provide a Prisma client to persist agent data through Prisma ORM.
+EXPORTS: PrismaConfig, prismaAdapter
+FEATURES:
+  - Transforms agent filters into Prisma where clauses
+  - Handles pagination and ordering for memory retrieval
+SEARCHABLE: packages, agentstart, src, db, adapter, prisma, persistence
+agent-frontmatter:end */
+
 /** biome-ignore-all lint/suspicious/noExplicitAny: is fine */
 
 import { AgentStartError, generateId } from "@agentstart/utils";

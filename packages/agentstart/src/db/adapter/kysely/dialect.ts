@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent persistence adapter helper
+PURPOSE: Detects available Kysely database drivers and creates matching dialect instances.
+USAGE: Called when initializing the Kysely adapter to derive dialect and connection metadata.
+EXPORTS: createKyselyAdapter
+FEATURES:
+  - Inspects provided Kysely driver to infer database type
+  - Constructs a Kysely instance when only a dialect is supplied
+SEARCHABLE: packages, agentstart, src, db, adapter, kysely, dialect, database
+agent-frontmatter:end */
+
 /** biome-ignore-all lint/suspicious/noExplicitAny: is fine */
 
 import {

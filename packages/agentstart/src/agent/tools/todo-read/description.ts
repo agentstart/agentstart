@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent runtime tool metadata
+PURPOSE: Provides prompt guidance and guardrails for the Todo Read tool.
+USAGE: Referenced by the "todo-read" tool definition to describe expected behavior.
+EXPORTS: default
+FEATURES:
+  - Summarizes capabilities, inputs, and cautions for Todo Read
+  - Feeds documentation into adapter surfaces when exposing the tool
+SEARCHABLE: packages, agentstart, src, agent, tools, todo, read, description, tool, runtime
+agent-frontmatter:end */
+
 export default `Use this tool to read the current to-do list for the session. This tool should be used proactively and frequently to ensure that you are aware of
 the status of the current task list. You should make use of this tool as often as possible, especially in the following situations:
 - At the beginning of conversations to see what's pending

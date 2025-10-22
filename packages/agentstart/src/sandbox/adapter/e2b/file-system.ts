@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent sandbox adapter
+PURPOSE: Implements filesystem access against the E2B sandbox environment.
+USAGE: Used by tools to read, write, and manage files in the remote sandbox.
+EXPORTS: FileSystem
+FEATURES:
+  - Provides helpers for reading and writing sandbox files
+  - Supports directory creation and metadata queries
+SEARCHABLE: packages, agentstart, src, sandbox, adapter, e2b, file, system
+agent-frontmatter:end */
+
 import type { Sandbox } from "@e2b/code-interpreter";
 import path from "pathe";
 import type {

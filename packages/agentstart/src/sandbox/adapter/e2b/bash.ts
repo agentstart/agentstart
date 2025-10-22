@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent sandbox adapter
+PURPOSE: Wraps the E2B interpreter to execute bash commands with heartbeat management.
+USAGE: Instantiated inside the E2B sandbox to provide BashAPI implementations.
+EXPORTS: Bash
+FEATURES:
+  - Executes templated shell commands within the remote sandbox
+  - Streams stdout/stderr while preserving command metadata
+SEARCHABLE: packages, agentstart, src, sandbox, adapter, e2b, bash
+agent-frontmatter:end */
+
 import type { Sandbox } from "@e2b/code-interpreter";
 import type {
   BashAPI,

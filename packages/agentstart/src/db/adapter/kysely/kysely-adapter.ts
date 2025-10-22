@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent persistence adapter
+PURPOSE: Maps AgentStart CRUD operations onto Kysely query builders.
+USAGE: Use when persisting agent data through Kysely with various SQL backends.
+EXPORTS: kyselyAdapter
+FEATURES:
+  - Serializes values according to the configured SQL dialect
+  - Hydrates query results back into AgentStart models
+SEARCHABLE: packages, agentstart, src, db, adapter, kysely, persistence
+agent-frontmatter:end */
+
 /** biome-ignore-all lint/suspicious/noExplicitAny: is fine */
 
 import { generateId } from "@agentstart/utils";

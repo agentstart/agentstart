@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Utility module
+PURPOSE: Formats sizes, timestamps, and relative times for UI display.
+USAGE: Use across dashboards or logs when presenting human-readable values.
+EXPORTS: formatSize, formatDate, formatRelativeFromNow
+FEATURES:
+  - Converts bytes into human-friendly units
+  - Formats relative times using Intl.RelativeTimeFormat
+SEARCHABLE: packages, utils, src, format, date, size
+agent-frontmatter:end */
+
 /**
  * Format bytes into a human-readable string with appropriate units
  * @param bytes - The number of bytes to format

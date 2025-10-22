@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent module
+PURPOSE: Implements utils logic within packages/agentstart/src/db/adapter.
+USAGE: Import where utils functionality is required.
+EXPORTS: withApplyDefault
+FEATURES:
+  - Belongs to packages/agentstart/src/db/adapter in the AgentStart workspace
+  - Provides utils utilities for consumers
+SEARCHABLE: packages, agentstart, src, db, adapter, utils
+agent-frontmatter:end */
+
 import type { FieldAttribute } from "@/db";
 
 export function withApplyDefault(

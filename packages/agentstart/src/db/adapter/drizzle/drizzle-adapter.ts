@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent persistence adapter
+PURPOSE: Implements Drizzle ORM persistence for AgentStart memory stores.
+USAGE: Instantiate with a Drizzle database instance when persisting agent data.
+EXPORTS: DB, DrizzleAdapterConfig, drizzleAdapter
+FEATURES:
+  - Translates AgentStart filters into Drizzle query builders
+  - Normalizes date handling across Postgres and SQLite providers
+SEARCHABLE: packages, agentstart, src, db, adapter, drizzle, persistence
+agent-frontmatter:end */
+
 import { AgentStartError, generateId } from "@agentstart/utils";
 import {
   and,

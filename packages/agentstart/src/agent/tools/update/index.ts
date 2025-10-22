@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent runtime tool module
+PURPOSE: Implements Update tool execution within the AgentStart runtime.
+USAGE: Register the "update" tool when composing the agent configuration to expose this capability.
+EXPORTS: update
+FEATURES:
+  - Bridges sandbox APIs into the Update workflow
+  - Streams structured progress updates and normalizes tool output
+SEARCHABLE: packages, agentstart, src, agent, tools, update, index, tool, runtime
+agent-frontmatter:end */
+
 import { tool } from "ai";
 import type { BaseContext } from "@/agent/context";
 import {

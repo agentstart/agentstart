@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent persistence adapter
+PURPOSE: Bridges MongoDB collections to the AgentStart memory API.
+USAGE: Instantiate with a MongoDB client to persist agent threads and messages.
+EXPORTS: mongodbAdapter
+FEATURES:
+  - Maps agent schema into MongoDB collections
+  - Handles serialization quirks for document storage
+SEARCHABLE: packages, agentstart, src, db, adapter, mongodb, persistence
+agent-frontmatter:end */
+
 import { createRequire } from "node:module";
 import type { Db } from "mongodb";
 import { getTables } from "@/db";

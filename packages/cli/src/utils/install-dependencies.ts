@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: CLI utility module
+PURPOSE: Installs dependencies via the selected package manager for generated projects.
+USAGE: Invoke after scaffolding to install required packages.
+EXPORTS: installDependencies
+FEATURES:
+  - Supports npm, pnpm, bun, and yarn install flows
+  - Executes installs in a specified working directory
+SEARCHABLE: packages, cli, src, utils, install, dependencies
+agent-frontmatter:end */
+
 import { exec } from "node:child_process";
 
 export function installDependencies({

@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent client store module
+PURPOSE: Manages thread collections and coordinates linked agent stores on the client.
+USAGE: Access via useThreadStore to hydrate UI components with thread metadata.
+EXPORTS: useThreadStore
+FEATURES:
+  - Tracks thread maps for quick lookup and updates
+  - Ensures each thread owns its corresponding agent store instance
+SEARCHABLE: packages, agentstart, src, client, store, thread, zustand
+agent-frontmatter:end */
+
 import type { StoreApi, UseBoundStore } from "zustand";
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";

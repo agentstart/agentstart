@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent client state helper
+PURPOSE: Maps streamed data parts into React Query state updates for the client dashboard.
+USAGE: Invoke after receiving agent data events to invalidate or refetch client caches.
+EXPORTS: useDataStateMapper
+FEATURES:
+  - Bridges ORPC query utilities with TanStack Query cache
+  - Keeps mission and thread metadata synchronized after updates
+SEARCHABLE: packages, agentstart, src, client, data, state, mapper, tanstack
+agent-frontmatter:end */
+
 import { createTanstackQueryUtils } from "@orpc/tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import type { DataUIPart } from "ai";

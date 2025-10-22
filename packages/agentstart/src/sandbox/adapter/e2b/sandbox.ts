@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent sandbox adapter
+PURPOSE: Manages the lifecycle of E2B sandboxes and exposes a unified SandboxAPI implementation.
+USAGE: Instantiate through connectOrCreate to reuse or create sandbox environments.
+EXPORTS: E2BSandbox
+FEATURES:
+  - Reconnects to existing sandboxes via KV heartbeat tracking
+  - Initializes bash, git, and file-system adapters for downstream tools
+SEARCHABLE: packages, agentstart, src, sandbox, adapter, e2b, lifecycle, manager
+agent-frontmatter:end */
+
 import { Sandbox, type SandboxOpts } from "@e2b/code-interpreter";
 import type { KV } from "@/kv";
 import type { BashAPI } from "@/sandbox/types/bash";

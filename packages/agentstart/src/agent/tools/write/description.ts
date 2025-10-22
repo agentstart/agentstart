@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent runtime tool metadata
+PURPOSE: Provides prompt guidance and guardrails for the Write tool.
+USAGE: Referenced by the "write" tool definition to describe expected behavior.
+EXPORTS: default
+FEATURES:
+  - Summarizes capabilities, inputs, and cautions for Write
+  - Feeds documentation into adapter surfaces when exposing the tool
+SEARCHABLE: packages, agentstart, src, agent, tools, write, description, tool, runtime
+agent-frontmatter:end */
+
 export default `Writes a file to the filesystem.
 
 Usage:

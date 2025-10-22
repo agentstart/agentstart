@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Playground database schema
+PURPOSE: Defines thread, message, and todo tables for the sample application.
+USAGE: Used by Drizzle to generate queries and migrations.
+EXPORTS: thread, message, todo
+FEATURES:
+  - Configures foreign keys and cascade behavior
+  - Captures timestamps and metadata columns for agent data
+SEARCHABLE: playground, next, src, db, schema, agent, drizzle
+agent-frontmatter:end */
+
 import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 export const thread = pgTable("thread", {

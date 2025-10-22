@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: CLI utility module
+PURPOSE: Generates in-memory modules that emulate SvelteKit environment imports.
+USAGE: Use during build tooling to polyfill $env imports when bundling.
+EXPORTS: addSvelteKitEnvModules, env, filterPrivateEnv, filterPublicEnv
+FEATURES:
+  - Creates data URI modules for dynamic and static env access
+  - Filters environment variables based on public/private prefixes
+SEARCHABLE: packages, cli, src, utils, add, svelte, kit, env, modules, sveltekit
+agent-frontmatter:end */
+
 export function addSvelteKitEnvModules(aliases: Record<string, string>) {
   aliases["$env/dynamic/private"] = createDataUriModule(
     createDynamicEnvModule(),

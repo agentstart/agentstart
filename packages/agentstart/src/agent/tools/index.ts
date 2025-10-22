@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent runtime tool registry
+PURPOSE: Aggregates built-in tool definitions exposed by the AgentStart runtime.
+USAGE: Import these exports when wiring tools in agentstart.config.ts.
+EXPORTS: Tools, innerTools, osTools, webTools
+FEATURES:
+  - Collects sandbox-aware tool implementations in a single map
+  - Simplifies registration of built-in tools across environments
+SEARCHABLE: packages, agentstart, src, agent, tools, index, tool, registry
+agent-frontmatter:end */
+
 import { bash } from "./bash";
 import { glob } from "./glob";
 import { grep } from "./grep";

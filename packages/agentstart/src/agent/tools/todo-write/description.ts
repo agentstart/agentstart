@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent runtime tool metadata
+PURPOSE: Provides prompt guidance and guardrails for the Todo Write tool.
+USAGE: Referenced by the "todo-write" tool definition to describe expected behavior.
+EXPORTS: default
+FEATURES:
+  - Summarizes capabilities, inputs, and cautions for Todo Write
+  - Feeds documentation into adapter surfaces when exposing the tool
+SEARCHABLE: packages, agentstart, src, agent, tools, todo, write, description, tool, runtime
+agent-frontmatter:end */
+
 export default `Use this tool to create and manage a structured task list for your current coding thread. This helps you track progress, organize complex tasks, and demonstrate thoroughness to the user.
 It also helps the user understand the progress of the task and overall progress of their requests.
 

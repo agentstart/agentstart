@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Utility module
+PURPOSE: Provides configurable logging utilities with colored console output.
+USAGE: Create logger instances to standardize CLI and runtime logging.
+EXPORTS: LogLevel, levels, shouldPublishLog, Logger, LogHandlerParams, createLogger, logger
+FEATURES:
+  - Supports log levels with threshold-based publishing
+  - Formats messages with timestamps and ANSI colors
+SEARCHABLE: packages, utils, src, logger, logging
+agent-frontmatter:end */
+
 export type LogLevel = "info" | "success" | "warn" | "error" | "debug";
 
 export const levels = ["info", "success", "warn", "error", "debug"] as const;

@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent runtime tool helper
+PURPOSE: Commits and pushes sandbox filesystem changes triggered by tooling operations.
+USAGE: Call after modifying files in a sandbox to persist git history for the user.
+EXPORTS: commitChanges
+FEATURES:
+  - Configures git author metadata automatically before committing
+  - Stages, commits, and pushes updates via the sandbox Git interface
+SEARCHABLE: packages, agentstart, src, agent, tools, commit, changes, git, sandbox, tool
+agent-frontmatter:end */
+
 import path from "pathe";
 import type { SandboxAPI } from "@/sandbox";
 import { GIT_CONFIG } from "./constants";

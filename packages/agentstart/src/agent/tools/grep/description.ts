@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent runtime tool metadata
+PURPOSE: Provides prompt guidance and guardrails for the Grep tool.
+USAGE: Referenced by the "grep" tool definition to describe expected behavior.
+EXPORTS: default
+FEATURES:
+  - Summarizes capabilities, inputs, and cautions for Grep
+  - Feeds documentation into adapter surfaces when exposing the tool
+SEARCHABLE: packages, agentstart, src, agent, tools, grep, description, tool, runtime
+agent-frontmatter:end */
+
 export default `A powerful search tool
 
 Usage:

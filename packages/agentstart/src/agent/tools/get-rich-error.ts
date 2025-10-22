@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent runtime tool helper
+PURPOSE: Transforms thrown errors into structured payloads consumable by the agent runtime.
+USAGE: Use when surfacing tool failures back to the LLM with additional context.
+EXPORTS: getRichError
+FEATURES:
+  - Extracts safe error message fields for model consumption
+  - Appends serialized parameters to aid debugging
+SEARCHABLE: packages, agentstart, src, agent, tools, get, rich, error, tooling, metadata
+agent-frontmatter:end */
+
 interface Params {
   args?: Record<string, unknown>;
   action: string;

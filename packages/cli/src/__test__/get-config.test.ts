@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: CLI test module
+PURPOSE: Exercises AgentStart CLI commands to prevent regressions.
+USAGE: Executed with Vitest to validate CLI generators and configuration helpers.
+EXPORTS: tmpdirTest, start, db
+FEATURES:
+  - Covers critical CLI workflows for schema generation
+  - Uses snapshot assertions to track emitted files
+SEARCHABLE: packages, cli, src, test, get, config, vitest
+agent-frontmatter:end */
+
 import path from "node:path";
 import fs from "fs-extra";
 import { afterEach, beforeEach, describe, expect, it, test } from "vitest";

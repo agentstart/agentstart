@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Sandbox adapter test
+PURPOSE: Validates the Node.js sandbox adapter behaviors using Vitest.
+USAGE: Run during test suites to ensure local sandbox implementations stay compliant.
+EXPORTS: None
+FEATURES:
+  - Covers Node.js sandbox scenario: file-system.test.ts
+  - Guards regression on file system and git interactions
+SEARCHABLE: packages, agentstart, src, sandbox, adapter, nodejs, tests, file, system, test, vitest
+agent-frontmatter:end */
+
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import path from "node:path";

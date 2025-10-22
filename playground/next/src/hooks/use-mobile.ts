@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Playground hook
+PURPOSE: Detects when the viewport falls below the mobile breakpoint.
+USAGE: Use within client components to toggle responsive layouts.
+EXPORTS: useIsMobile
+FEATURES:
+  - Listens to matchMedia changes for breakpoint updates
+  - Caches mobile state to avoid unnecessary renders
+SEARCHABLE: playground, next, src, hooks, use, mobile, hook, responsive
+agent-frontmatter:end */
+
 import * as React from "react";
 
 const MOBILE_BREAKPOINT = 768;

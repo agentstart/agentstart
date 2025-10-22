@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent persistence adapter
+PURPOSE: Implements an in-memory adapter satisfying the AgentStart persistence contract.
+USAGE: Use for tests or ephemeral environments that do not require durable storage.
+EXPORTS: MemoryDB, memoryAdapter
+FEATURES:
+  - Stores agent data in process-local maps
+  - Implements query helpers for quick lookups and filtering
+SEARCHABLE: packages, agentstart, src, db, adapter, memory, persistence
+agent-frontmatter:end */
+
 import { generateId } from "@agentstart/utils";
 import { getTables } from "@/db";
 import { withApplyDefault } from "@/db/adapter/utils";

@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: CLI command module
+PURPOSE: Implements the generate command wiring adapters to schema generators.
+USAGE: Registered with Commander to expose `agentstart generate`.
+EXPORTS: generate
+FEATURES:
+  - Parses command options and validates working directories
+  - Invokes adapter-specific generators with interactive prompts
+SEARCHABLE: packages, cli, src, commands, generate, command
+agent-frontmatter:end */
+
 import path from "node:path";
 import { logger } from "@agentstart/utils";
 import { getAdapter } from "agentstart/db";

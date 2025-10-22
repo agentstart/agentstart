@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent client store module
+PURPOSE: Creates the Zustand store slice that manages agent-level chat state.
+USAGE: Use via useAgentStore to read and mutate agent conversation data.
+EXPORTS: newThreadInput, AgentStore, AgentStoreWithSync, getAgentStore, useAgentStore
+FEATURES:
+  - Initializes per-thread agent store instances on demand
+  - Provides typed selectors compatible with AI SDK message helpers
+SEARCHABLE: packages, agentstart, src, client, store, agent, zustand
+agent-frontmatter:end */
+
 import type { UIMessage, UseChatHelpers } from "@ai-sdk/react";
 import type { FileUIPart } from "ai";
 import { create, type StoreApi, type UseBoundStore } from "zustand";

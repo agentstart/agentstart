@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent runtime tool metadata
+PURPOSE: Provides prompt guidance and guardrails for the Bash tool.
+USAGE: Referenced by the "bash" tool definition to describe expected behavior.
+EXPORTS: default
+FEATURES:
+  - Summarizes capabilities, inputs, and cautions for Bash
+  - Feeds documentation into adapter surfaces when exposing the tool
+SEARCHABLE: packages, agentstart, src, agent, tools, bash, description, tool, runtime
+agent-frontmatter:end */
+
 export default `Executes a given bash command in a persistent shell thread with optional timeout, ensuring proper handling and security measures.
 
 Before executing the command, please follow these steps:

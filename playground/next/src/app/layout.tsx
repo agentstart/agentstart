@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Playground layout component
+PURPOSE: Defines the root HTML shell and injects shared providers for the playground.
+USAGE: Wraps all pages in the App Router with fonts and the Agent provider.
+EXPORTS: metadata, default
+FEATURES:
+  - Applies Geist fonts to the entire playground UI
+  - Wraps children with the AgentStart provider component
+SEARCHABLE: playground, next, src, app, layout, provider
+agent-frontmatter:end */
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";

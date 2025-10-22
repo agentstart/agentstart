@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent runtime tool module
+PURPOSE: Implements Glob tool execution within the AgentStart runtime.
+USAGE: Register the "glob" tool when composing the agent configuration to expose this capability.
+EXPORTS: glob
+FEATURES:
+  - Bridges sandbox APIs into the Glob workflow
+  - Streams structured progress updates and normalizes tool output
+SEARCHABLE: packages, agentstart, src, agent, tools, glob, index, tool, runtime
+agent-frontmatter:end */
+
 import { tool } from "ai";
 import path from "pathe";
 import type { BaseContext } from "@/agent/context";

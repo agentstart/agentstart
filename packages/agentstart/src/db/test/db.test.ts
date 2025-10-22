@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent persistence test
+PURPOSE: Validates database helper utilities that map logical models to tables.
+USAGE: Run with Vitest to ensure schema helpers respect custom mappings.
+EXPORTS: None
+FEATURES:
+  - Covers table generation with custom model and field names
+  - Checks conversion functions between DB rows and domain models
+SEARCHABLE: packages, agentstart, src, db, test, vitest, schema
+agent-frontmatter:end */
+
 import { describe, expect, it } from "vitest";
 import { getTables } from "@/db";
 import { convertFromDB, convertToDB } from "@/db/utils";

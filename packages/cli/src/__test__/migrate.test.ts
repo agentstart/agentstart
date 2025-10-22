@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: CLI test module
+PURPOSE: Exercises AgentStart CLI commands to prevent regressions.
+USAGE: Executed with Vitest to validate CLI generators and configuration helpers.
+EXPORTS: None
+FEATURES:
+  - Covers critical CLI workflows for schema generation
+  - Uses snapshot assertions to track emitted files
+SEARCHABLE: packages, cli, src, test, migrate, vitest
+agent-frontmatter:end */
+
 import { agentStart } from "agentstart";
 import Database from "better-sqlite3";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";

@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Playground page component
+PURPOSE: Renders the introductory landing page with the prompt input.
+USAGE: Serves as the default route for the playground experience.
+EXPORTS: default
+FEATURES:
+  - Displays hero messaging and prompt composer
+  - Centers content with responsive layout classes
+SEARCHABLE: playground, next, src, app, page, landing, prompt
+agent-frontmatter:end */
+
 import { PromptInput } from "@/components/agent/prompt-input";
 
 export default function Page() {

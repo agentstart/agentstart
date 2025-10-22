@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent runtime tool module
+PURPOSE: Implements Packages tool execution within the AgentStart runtime.
+USAGE: Register the "packages" tool when composing the agent configuration to expose this capability.
+EXPORTS: adapters, getGenerator
+FEATURES:
+  - Bridges sandbox APIs into the Packages workflow
+  - Streams structured progress updates and normalizes tool output
+SEARCHABLE: packages, cli, src, generators, index, tool, agent, runtime
+agent-frontmatter:end */
+
 import { logger } from "@agentstart/utils";
 import type { Adapter, AgentStartOptions } from "agentstart";
 import { generateDrizzleSchema } from "./drizzle";

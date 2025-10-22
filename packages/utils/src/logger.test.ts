@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Utility test module
+PURPOSE: Verifies logger level gating behavior.
+USAGE: Run with Vitest to ensure logger publishes at the right thresholds.
+EXPORTS: None
+FEATURES:
+  - Covers shouldPublishLog across log levels
+  - Guards regressions in logging threshold logic
+SEARCHABLE: packages, utils, src, logger, test, vitest
+agent-frontmatter:end */
+
 import { describe, expect, it } from "vitest";
 import { type LogLevel, shouldPublishLog } from "./logger";
 

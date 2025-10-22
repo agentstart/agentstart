@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Utility module
+PURPOSE: Maps file extensions to syntax highlighting languages.
+USAGE: Use when presenting code snippets to downstream tooling.
+EXPORTS: getFileExtension, getLanguage, getLanguageFromFilePath
+FEATURES:
+  - Detects Shiki language identifiers from extensions
+  - Falls back to bash for unknown file types
+SEARCHABLE: packages, utils, src, file, language, mapping
+agent-frontmatter:end */
+
 import type { BundledLanguage } from "shiki";
 
 export function getFileExtension(filePath: string): string {

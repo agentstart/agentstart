@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Agent runtime tool module
+PURPOSE: Implements Write tool execution within the AgentStart runtime.
+USAGE: Register the "write" tool when composing the agent configuration to expose this capability.
+EXPORTS: write
+FEATURES:
+  - Bridges sandbox APIs into the Write workflow
+  - Streams structured progress updates and normalizes tool output
+SEARCHABLE: packages, agentstart, src, agent, tools, write, index, tool, runtime
+agent-frontmatter:end */
+
 import { tool } from "ai";
 import type { BaseContext } from "@/agent/context";
 import {

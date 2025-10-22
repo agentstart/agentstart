@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Playground agent bootstrap
+PURPOSE: Bootstraps the AgentStart runtime with OpenRouter and Drizzle adapters.
+USAGE: Import to obtain the agent handler for API routes.
+EXPORTS: start
+FEATURES:
+  - Configures OpenRouter model provider with API key
+  - Connects Drizzle adapter to the playground database schema
+SEARCHABLE: playground, next, src, lib, agent, bootstrap, openrouter
+agent-frontmatter:end */
+
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { agentStart } from "agentstart";
 import { Agent, innerTools, osTools } from "agentstart/agent";

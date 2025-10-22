@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: CLI test module
+PURPOSE: Exercises AgentStart CLI commands to prevent regressions.
+USAGE: Executed with Vitest to validate CLI generators and configuration helpers.
+EXPORTS: None
+FEATURES:
+  - Covers critical CLI workflows for schema generation
+  - Uses snapshot assertions to track emitted files
+SEARCHABLE: packages, cli, src, test, generate, vitest
+agent-frontmatter:end */
+
 import type { AgentStartOptions } from "agentstart";
 import { drizzleAdapter, prismaAdapter } from "agentstart/db";
 import Database from "better-sqlite3";
