@@ -4,7 +4,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "target": "esnext",
-    "lib": ["esnext", "dom"],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "resolveJsonModule": true,
     "moduleDetection": "force",

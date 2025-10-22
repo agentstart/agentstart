@@ -837,7 +837,6 @@ export const PromptInputTextarea = ({
 
     const files: File[] = [];
 
-    // @ts-expect-error DataTransferItem kind is always "file" when type is not empty
     for (const item of items) {
       if (item.kind === "file") {
         const file = item.getAsFile();
