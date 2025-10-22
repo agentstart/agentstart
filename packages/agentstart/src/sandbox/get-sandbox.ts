@@ -6,12 +6,11 @@ EXPORTS: getSandbox
 FEATURES:
   - Supports Node.js and E2B sandbox providers
   - Caches initialized sandboxes for reuse
-  - Lazy-initializes shared KV connections when required
+  - Uses secondaryMemory from options for sandbox state management
 SEARCHABLE: sandbox resolver, getSandbox, e2b sandbox setup
 agent-frontmatter:end */
 
 import { AgentStartError } from "@agentstart/utils";
-import { createKV } from "@/kv";
 import type { SandboxAPI } from "@/sandbox";
 import { E2BSandbox } from "@/sandbox/adapter/e2b";
 import { NodeSandbox } from "@/sandbox/adapter/nodejs";
@@ -22,14 +21,6 @@ import type {
 } from "@/types";
 
 const sandboxCache = new Map<string, Promise<SandboxAPI>>();
-let sharedKV: ReturnType<typeof createKV> | null = null;
-
-const getSharedKV = () => {
-  if (!sharedKV) {
-    sharedKV = createKV();
-  }
-  return sharedKV;
-};
 
 const getCacheKey = (
   nodeConfig: NodeSandboxOptions | undefined,
@@ -76,10 +67,18 @@ export async function getSandbox(
         process.env.E2B_API_KEY = e2bConfig.apiKey;
       }
 
-      const kv = e2bConfig.kv ?? getSharedKV();
+      if (!e2bConfig.secondaryMemory && !options.secondaryMemory) {
+        throw new AgentStartError(
+          "SECONDARY_MEMORY_MISSING",
+          "E2B sandbox requires secondaryMemory to be provided via configuration or AgentStartOptions.",
+        );
+      }
+
+      const secondaryMemory =
+        e2bConfig.secondaryMemory ?? options.secondaryMemory;
 
       return E2BSandbox.connectOrCreate({
-        kv,
+        secondaryMemory,
         sandboxId: e2bConfig.sandboxId,
         githubToken: e2bConfig.githubToken,
         timeout: e2bConfig.timeout,
@@ -96,7 +95,8 @@ export async function getSandbox(
           workspacePath: nodeConfig.workspacePath,
           timeout: nodeConfig.timeout,
           maxLifetime: nodeConfig.maxLifetime,
-          kv: nodeConfig.kv,
+          secondaryMemory:
+            nodeConfig.secondaryMemory ?? options.secondaryMemory,
         }
       : undefined;
 

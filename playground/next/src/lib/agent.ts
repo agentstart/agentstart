@@ -10,6 +10,7 @@ SEARCHABLE: playground, next, src, lib, agent, bootstrap, openrouter
 agent-frontmatter:end */
 
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { onStart, onSuccess, os } from "@orpc/server";
 import { agentStart } from "agentstart";
 import { Agent, innerTools, osTools } from "agentstart/agent";
 import { drizzleAdapter } from "agentstart/db";
@@ -30,6 +31,15 @@ const agent = new Agent({
     ...osTools,
   },
 });
+
+// Create custom middleware
+const loggingMiddleware = os.middleware(async ({ next }) => {
+  console.log("Request started");
+  const result = await next();
+  console.log("Request completed");
+  return result;
+});
+
 export const start = agentStart({
   memory: drizzleAdapter(db, {
     provider: "pg",
@@ -37,4 +47,9 @@ export const start = agentStart({
   }),
   appName: "example-nextjs",
   agent,
+  middleware: [
+    loggingMiddleware,
+    onStart(() => console.log("Handler starting")),
+    onSuccess(() => console.log("Handler succeeded")),
+  ],
 });

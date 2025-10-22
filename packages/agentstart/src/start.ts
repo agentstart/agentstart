@@ -7,12 +7,13 @@ FEATURES:
   - Creates a fetch-compatible RPC handler
   - Binds request-specific context for router execution
   - Provides a server-side API client via getApi
+  - Supports user-defined middleware injection
 SEARCHABLE: agent runtime, orpc handler, server api
 agent-frontmatter:end */
 
 import { RPCHandler } from "@orpc/server/fetch";
 import type { Context, CreateContextOptions } from "@/api";
-import { appRouter, createContext } from "@/api";
+import { createAppRouter, createContext } from "@/api";
 import { getApi } from "@/api/get-api";
 import type { AgentStartOptions } from "@/types";
 
@@ -20,7 +21,8 @@ export function agentStart(options: AgentStartOptions) {
   const context = { current: null as Context | null };
 
   const api = getApi(context);
-  const rpcHandler = new RPCHandler(appRouter);
+  const router = createAppRouter(options.middleware);
+  const rpcHandler = new RPCHandler(router);
 
   return {
     handler: async (request: Request) => {

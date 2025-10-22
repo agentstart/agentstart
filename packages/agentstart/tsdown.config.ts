@@ -19,7 +19,6 @@ export default defineConfig({
     "./src/client/index.ts",
     "./src/db/index.ts",
     "./src/integration/index.ts",
-    "./src/kv/index.ts",
     "./src/sandbox/index.ts",
   ],
   dts: true,

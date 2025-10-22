@@ -28,10 +28,6 @@
       "import": "./dist/integration/index.js",
       "require": "./dist/integration/index.cjs"
     },
-    "./kv": {
-      "import": "./dist/kv/index.js",
-      "require": "./dist/kv/index.cjs"
-    },
     "./sandbox": {
       "import": "./dist/sandbox/index.js",
       "require": "./dist/sandbox/index.cjs"
@@ -59,7 +55,6 @@
     "fast-glob": "catalog:",
     "nanoid": "catalog:",
     "pathe": "catalog:",
-    "redis": "catalog:",
     "zod": "catalog:",
     "zustand": "catalog:"
   },
@@ -124,10 +119,6 @@
       "./integration": {
         "import": "./dist/integration/index.js",
         "require": "./dist/integration/index.cjs"
-      },
-      "./kv": {
-        "import": "./dist/kv/index.js",
-        "require": "./dist/kv/index.cjs"
       },
       "./sandbox": {
         "import": "./dist/sandbox/index.js",

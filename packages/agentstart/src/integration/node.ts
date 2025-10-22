@@ -1,0 +1,89 @@
+/* agent-frontmatter:start
+AGENT: Node.js integration
+PURPOSE: Adapt the Agent router to Node.js HTTP handlers (Express, Connect, etc.)
+USAGE: app.all("/api/agent/*", toNodeHandler(start))
+EXPORTS: toNodeHandler
+FEATURES:
+  - Wraps oRPC router with Node.js compatible request/response handlers
+  - Converts Node.js IncomingMessage to Web Request API
+  - Streams Response back to Node.js ServerResponse
+  - Supports Express, Connect, and native Node.js HTTP server
+SEARCHABLE: node.js handler, express handler, agent integration, http adapter
+agent-frontmatter:end */
+
+import type { IncomingMessage, ServerResponse } from "node:http";
+
+export function toNodeHandler(
+  handler:
+    | {
+        handler: (request: Request) => Promise<Response>;
+      }
+    | ((request: Request) => Promise<Response>),
+) {
+  const handleRequest = async (request: Request) => {
+    return "handler" in handler ? handler.handler(request) : handler(request);
+  };
+
+  return async (req: IncomingMessage, res: ServerResponse) => {
+    try {
+      // Construct the full URL from the request
+      const protocol = (req.socket as unknown as { encrypted?: boolean })
+        .encrypted
+        ? "https"
+        : "http";
+      const host = req.headers.host || "localhost";
+      const url = new URL(req.url || "/", `${protocol}://${host}`);
+
+      // Collect request body chunks
+      const chunks: Uint8Array[] = [];
+      for await (const chunk of req) {
+        chunks.push(chunk);
+      }
+      const body = chunks.length > 0 ? Buffer.concat(chunks) : undefined;
+
+      // Convert Node.js request to Web Request
+      const webRequest = new Request(url, {
+        method: req.method || "GET",
+        headers: req.headers as HeadersInit,
+        body:
+          body &&
+          req.method !== "GET" &&
+          req.method !== "HEAD" &&
+          req.method !== "OPTIONS"
+            ? body
+            : undefined,
+      });
+
+      // Execute the handler
+      const webResponse = await handleRequest(webRequest);
+
+      // Stream the response back to Node.js
+      res.statusCode = webResponse.status;
+      res.statusMessage = webResponse.statusText;
+
+      // Set response headers
+      webResponse.headers.forEach((value, key) => {
+        res.setHeader(key, value);
+      });
+
+      // Stream the response body
+      if (webResponse.body) {
+        const reader = webResponse.body.getReader();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          res.write(value);
+        }
+      }
+
+      res.end();
+    } catch (error) {
+      console.error("Error in toNodeHandler:", error);
+      if (!res.headersSent) {
+        res.statusCode = 500;
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify({ error: "Internal Server Error" }));
+      }
+    }
+  };
+}

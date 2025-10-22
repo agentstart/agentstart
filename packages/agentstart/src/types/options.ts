@@ -10,40 +10,39 @@ FEATURES:
 SEARCHABLE: agent configuration, sandbox options, e2b api key, agentstart options
 agent-frontmatter:end */
 
-import type { KV } from "../kv";
+import type { AnyMiddleware } from "@orpc/server";
 import type { Memory, ModelOptions, SecondaryMemory } from "./adapter";
 import type { Agent } from "./agent";
 
-export type NodeSandboxOptions = {
-  provider: "nodejs";
+export interface SandboxBaseOptions {
   sandboxId?: string;
-  workspacePath?: string;
   timeout?: number;
   maxLifetime?: number;
-  kv?: KV;
-};
+  secondaryMemory?: SecondaryMemory;
+}
 
-export type E2BSandboxOptions = {
+export interface NodeSandboxOptions extends SandboxBaseOptions {
+  provider: "nodejs";
+  workspacePath?: string;
+}
+
+export interface E2BSandboxOptions extends SandboxBaseOptions {
   provider: "e2b";
   apiKey: string;
-  sandboxId?: string;
   githubToken?: string;
-  timeout?: number;
-  maxLifetime?: number;
   ports?: number[];
   runtime?: string;
   resources?: {
     vcpus?: number;
   };
   autoStopDelay?: number;
-  kv?: KV;
-};
+}
 
 export type SandboxOptions = NodeSandboxOptions | E2BSandboxOptions;
 
 export type SandboxProvider = SandboxOptions["provider"];
 
-export type AgentStartOptions = {
+export interface AgentStartOptions {
   appName?: string;
   baseURL?: string;
   basePath?: `/${string}`;
@@ -52,6 +51,7 @@ export type AgentStartOptions = {
   agent: Agent;
   sandbox?: SandboxOptions;
   getUserId?: (headers: Headers) => string | Promise<string>;
+  middleware?: AnyMiddleware[];
   advanced?: {
     generateId?:
       | false
@@ -60,4 +60,4 @@ export type AgentStartOptions = {
   thread?: ModelOptions;
   message?: ModelOptions;
   todo?: ModelOptions;
-};
+}

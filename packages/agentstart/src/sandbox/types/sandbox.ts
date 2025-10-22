@@ -10,7 +10,7 @@ FEATURES:
 SEARCHABLE: sandbox api, lifecycle typing, sandbox contracts
 agent-frontmatter:end */
 
-import type { KV } from "@/kv";
+import type { SandboxBaseOptions } from "@/types";
 import type { BashAPI } from "./bash";
 import type { FileSystemAPI } from "./file-system";
 import type { GitAPI } from "./git";
@@ -32,24 +32,10 @@ export interface SandboxStatus {
 }
 
 /**
- * Base configuration shared across all sandbox implementations.
- */
-export interface BaseSandboxConfig {
-  /** Optional sandbox ID to reconnect to existing sandbox */
-  sandboxId?: string;
-  /** Timeout in milliseconds (max depends on plan) */
-  timeout?: number;
-  /** Maximum lifetime in milliseconds before forced recreation */
-  maxLifetime?: number;
-}
-
-/**
  * E2B-specific sandbox configuration.
- * Requires KV for heartbeat tracking and cross-instance sandbox reuse.
+ * Requires secondaryMemory for heartbeat tracking and cross-instance sandbox reuse.
  */
-export interface E2BSandboxConfig extends BaseSandboxConfig {
-  /** Required: KV client for heartbeat tracking */
-  kv: KV;
+export interface E2BSandboxConfig extends SandboxBaseOptions {
   /** Optional: GitHub token for git operations */
   githubToken?: string;
   /** Ports to expose from the sandbox */
@@ -66,11 +52,9 @@ export interface E2BSandboxConfig extends BaseSandboxConfig {
 
 /**
  * Node.js-specific sandbox configuration.
- * KV is optional since local sandboxes typically don't need cross-process state.
+ * secondaryMemory is optional since local sandboxes typically don't need cross-process state.
  */
-export interface NodeJSSandboxConfig extends BaseSandboxConfig {
-  /** Optional: KV client for cross-process state sharing */
-  kv?: KV;
+export interface NodeJSSandboxConfig extends SandboxBaseOptions {
   /** Local workspace path for file operations */
   workspacePath?: string;
 }
@@ -79,8 +63,7 @@ export interface NodeJSSandboxConfig extends BaseSandboxConfig {
  * Legacy unified config for backward compatibility.
  * @deprecated Use E2BSandboxConfig or NodeJSSandboxConfig instead
  */
-export interface SandboxConfig extends BaseSandboxConfig {
-  kv: KV;
+export interface SandboxConfig extends SandboxBaseOptions {
   workspacePath?: string;
   ports?: number[];
   runtime?: string;
@@ -122,7 +105,7 @@ export interface SandboxAPI {
   /**
    * Restart the sandbox, optionally applying new configuration.
    */
-  refresh(config?: BaseSandboxConfig): Promise<void>;
+  refresh(config?: SandboxBaseOptions): Promise<void>;
 
   /**
    * Retrieve the latest sandbox status snapshot.
@@ -147,7 +130,7 @@ export interface SandboxAPI {
   /**
    * Persist configuration that will be applied to future sandboxes.
    */
-  setConfig(config: BaseSandboxConfig): void;
+  setConfig(config: SandboxBaseOptions): void;
 
   /**
    * Dispose manager resources and detach sandbox hooks.

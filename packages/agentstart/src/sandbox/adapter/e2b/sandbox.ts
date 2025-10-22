@@ -4,13 +4,12 @@ PURPOSE: Manages the lifecycle of E2B sandboxes and exposes a unified SandboxAPI
 USAGE: Instantiate through connectOrCreate to reuse or create sandbox environments.
 EXPORTS: E2BSandbox
 FEATURES:
-  - Reconnects to existing sandboxes via KV heartbeat tracking
+  - Reconnects to existing sandboxes via secondaryMemory heartbeat tracking
   - Initializes bash, git, and file-system adapters for downstream tools
 SEARCHABLE: packages, agentstart, src, sandbox, adapter, e2b, lifecycle, manager
 agent-frontmatter:end */
 
 import { Sandbox, type SandboxOpts } from "@e2b/code-interpreter";
-import type { KV } from "@/kv";
 import type { BashAPI } from "@/sandbox/types/bash";
 import type { FileSystemAPI } from "@/sandbox/types/file-system";
 import type { GitAPI } from "@/sandbox/types/git";
@@ -19,6 +18,7 @@ import type {
   SandboxAPI,
   SandboxStatus,
 } from "@/sandbox/types/sandbox";
+import type { SecondaryMemory } from "@/types/adapter";
 import { Bash } from "./bash";
 import { DEFAULT_CONFIG } from "./constants";
 import { FileSystem } from "./file-system";
@@ -36,7 +36,7 @@ import { Git } from "./git";
  * // In Agent initialization
  * const sandbox = await E2BSandbox.connectOrCreate({
  *   sandboxId: cachedSandboxId, // from previous thread
- *   kv: kvClient,
+ *   secondaryMemory: secondaryMemory,
  *   githubToken: token
  * });
  *
@@ -54,7 +54,7 @@ export class E2BSandbox implements SandboxAPI {
   fs!: FileSystemAPI;
   bash!: BashAPI;
   git!: GitAPI;
-  kv: KV;
+  secondaryMemory: SecondaryMemory;
 
   private sandbox: Sandbox | null = null;
   private sandboxId: string | null = null;
@@ -68,7 +68,10 @@ export class E2BSandbox implements SandboxAPI {
    */
   private constructor(config: E2BSandboxConfig) {
     this.config = { ...DEFAULT_CONFIG, ...config };
-    this.kv = config.kv;
+    if (!config.secondaryMemory) {
+      throw new Error("E2BSandbox requires a secondaryMemory");
+    }
+    this.secondaryMemory = config.secondaryMemory;
   }
 
   /**
@@ -80,7 +83,7 @@ export class E2BSandbox implements SandboxAPI {
    *
    * @param options - Configuration options
    * @param options.sandboxId - Optional existing sandbox ID to reconnect
-   * @param options.kv - Required KV client for heartbeat tracking
+   * @param options.secondaryMemory - Required secondary memory for heartbeat tracking
    * @param options.githubToken - Optional GitHub token for git operations
    * @returns Initialized E2BSandbox instance
    *
@@ -88,7 +91,7 @@ export class E2BSandbox implements SandboxAPI {
    * ```typescript
    * const manager = await E2BSandbox.connectOrCreate({
    *   sandboxId: previousSandboxId,
-   *   kv: kvClient,
+   *   secondaryMemory: secondaryMemory,
    *   githubToken: 'ghp_...'
    * });
    * ```
@@ -96,8 +99,8 @@ export class E2BSandbox implements SandboxAPI {
   static async connectOrCreate(
     options: E2BSandboxConfig & { githubToken?: string },
   ): Promise<E2BSandbox> {
-    if (!options?.kv) {
-      throw new Error("E2BSandbox requires a kv client");
+    if (!options?.secondaryMemory) {
+      throw new Error("E2BSandbox requires a secondaryMemory");
     }
 
     const { sandboxId, githubToken, ...config } = options;
@@ -118,7 +121,7 @@ export class E2BSandbox implements SandboxAPI {
         }
       } else {
         console.log(
-          `Sandbox ${sandboxId} expired (KV heartbeat missing), creating new one...`,
+          `Sandbox ${sandboxId} expired (secondaryMemory heartbeat missing), creating new one...`,
         );
       }
     }
@@ -135,14 +138,14 @@ export class E2BSandbox implements SandboxAPI {
    * whether a previous one exists. Most use cases should use connectOrCreate() instead.
    *
    * @param options - Configuration options
-   * @param options.kv - Required KV client for heartbeat tracking
+   * @param options.secondaryMemory - Required secondary memory for heartbeat tracking
    * @param options.githubToken - Optional GitHub token for git operations
    * @returns New E2BSandbox instance
    *
    * @example
    * ```typescript
    * const manager = await E2BSandbox.forceCreate({
-   *   kv: kvClient,
+   *   secondaryMemory: secondaryMemory,
    *   timeout: 300000 // 5 minutes
    * });
    * ```
@@ -150,8 +153,8 @@ export class E2BSandbox implements SandboxAPI {
   static async forceCreate(
     options: E2BSandboxConfig & { githubToken?: string },
   ): Promise<E2BSandbox> {
-    if (!options?.kv) {
-      throw new Error("E2BSandbox requires a kv client");
+    if (!options?.secondaryMemory) {
+      throw new Error("E2BSandbox requires a secondaryMemory");
     }
 
     const { githubToken, ...config } = options;
@@ -209,7 +212,7 @@ export class E2BSandbox implements SandboxAPI {
         await this.sandbox.kill();
         console.log(`E2B sandbox stopped: ${this.sandboxId}`);
 
-        // Remove the heartbeat from KV
+        // Remove the heartbeat from secondaryMemory
         if (this.sandboxId) {
           await this.clearSandboxHeartbeat(this.sandboxId);
         }
@@ -230,8 +233,8 @@ export class E2BSandbox implements SandboxAPI {
   async refresh(config?: E2BSandboxConfig): Promise<void> {
     if (config) {
       this.config = { ...this.config, ...config };
-      if (config.kv) {
-        this.kv = config.kv;
+      if (config.secondaryMemory) {
+        this.secondaryMemory = config.secondaryMemory;
       }
     }
     await this.stop();
@@ -282,7 +285,9 @@ export class E2BSandbox implements SandboxAPI {
    */
   setConfig(config: E2BSandboxConfig): void {
     this.config = { ...this.config, ...config };
-    this.kv = config.kv;
+    if (config.secondaryMemory) {
+      this.secondaryMemory = config.secondaryMemory;
+    }
   }
 
   /**
@@ -328,7 +333,7 @@ export class E2BSandbox implements SandboxAPI {
         await this.git.setAuthToken(githubToken);
       }
 
-      // Set initial heartbeat in KV
+      // Set initial heartbeat in secondaryMemory
       await this.markSandboxAlive(this.sandboxId);
 
       console.log(`E2B Sandbox created: ${this.sandboxId}`);
@@ -356,19 +361,19 @@ export class E2BSandbox implements SandboxAPI {
 
   private async isSandboxAliveInStore(sandboxId: string): Promise<boolean> {
     const key = this.getHeartbeatKey(sandboxId);
-    const exists = await this.kv.exists(key);
-    return exists > 0;
+    const value = await this.secondaryMemory.get(key);
+    return value !== null;
   }
 
   private async markSandboxAlive(sandboxId: string): Promise<void> {
     const key = this.getHeartbeatKey(sandboxId);
     const ttl = this.getHeartbeatTtlMs();
-    await this.kv.set(key, Date.now().toString(), { PX: ttl });
+    await this.secondaryMemory.set(key, Date.now().toString(), ttl);
   }
 
   private async clearSandboxHeartbeat(sandboxId: string): Promise<void> {
     const key = this.getHeartbeatKey(sandboxId);
-    await this.kv.del(key);
+    await this.secondaryMemory.delete(key);
   }
 
   private async refreshHeartbeat(): Promise<void> {

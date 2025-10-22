@@ -7,20 +7,41 @@ FEATURES:
   - OpenAPI metadata support
   - Type-safe exports
   - Modular route organization
+  - Dynamic middleware support
 SEARCHABLE: orpc router, main router, api router
 agent-frontmatter:end */
 
-import { messageRouter } from "./routers/message";
-import { threadRouter } from "./routers/thread";
+import type { AnyMiddleware } from "@orpc/server";
+import { createProcedureBuilder } from "./procedures";
+import { createMessageRouter } from "./routers/message";
+import { createThreadRouter } from "./routers/thread";
 
 /**
  * Main API router combining all procedures
  * Each procedure can be accessed via RPC or REST
  */
 export const appRouter = {
-  thread: threadRouter,
-  message: messageRouter,
+  thread: createThreadRouter(),
+  message: createMessageRouter(),
 };
+
+/**
+ * Create app router with optional middleware applied
+ */
+export function createAppRouter(middleware?: AnyMiddleware[]) {
+  if (!middleware?.length) {
+    return appRouter;
+  }
+
+  // Create procedure builder with middleware
+  const procedureBuilder = createProcedureBuilder(middleware);
+
+  // Create routers with middleware-enhanced procedures
+  return {
+    thread: createThreadRouter(procedureBuilder),
+    message: createMessageRouter(procedureBuilder),
+  };
+}
 
 // Export the router type for client usage
 export type AppRouter = typeof appRouter;
