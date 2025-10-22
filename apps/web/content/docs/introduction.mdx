@@ -1,0 +1,88 @@
+---
+title: Introduction
+description: Introduction to AgentStart
+---
+
+AgentStart is a framework-agnostic AI agent framework for TypeScript. It provides a comprehensive set of tools and database adapters out of the box, making it easy to build production-ready agents with persistent memory, tool execution, and type-safe client integration.
+
+## Why AgentStart?
+
+Building AI agents often requires piecing together multiple libraries and writing boilerplate code for persistence, tool management, and client-server communication. AgentStart solves this by providing:
+
+- **Unified Agent Runtime**: Built on top of AI SDK with oRPC for type-safe communication
+- **Database Adapters**: First-class support for Drizzle, Prisma, Kysely, and MongoDB
+- **Built-in Tools**: File operations, shell commands, and task management out of the box
+- **React Hooks**: Type-safe client integration with automatic state management
+- **Framework Integration**: Ready-to-use adapters for Next.js, Node.js, and more
+
+## Features
+
+<Cards>
+  <Card title="Agent Class" description="Orchestrate model execution, tool calls, and message streaming" />
+  <Card title="Database Adapters" description="Persist conversations with Drizzle, Prisma, Kysely, or MongoDB" />
+  <Card title="Built-in Tools" description="File operations, shell commands, search, and task management" />
+  <Card title="Type-Safe Client" description="React hooks with automatic state synchronization" />
+  <Card title="Framework Integration" description="Next.js and Node.js adapters included" />
+  <Card title="Extensible" description="Add custom tools and middleware easily" />
+</Cards>
+
+## Architecture
+
+AgentStart uses a modern architecture:
+
+```
+┌─────────────────────────────────────────┐
+│          Your Application               │
+├─────────────────────────────────────────┤
+│  React Hooks (useThread, useSession)    │
+├─────────────────────────────────────────┤
+│      oRPC Handler (Type-Safe API)       │
+├─────────────────────────────────────────┤
+│  Agent (Model + Tools + Instructions)   │
+├─────────────────────────────────────────┤
+│  Database Adapter (Threads + Messages)  │
+└─────────────────────────────────────────┘
+```
+
+## Quick Example
+
+Here's a minimal example of an AgentStart agent:
+
+```ts
+// Server
+import { Agent, innerTools, osTools } from "agentstart/agent";
+import { agentStart } from "agentstart";
+import { drizzleAdapter } from "agentstart/db";
+
+const agent = new Agent({
+  model: openrouter("x-ai/grok-4-fast"),
+  instructions: "You are a helpful assistant.",
+  tools: { ...innerTools, ...osTools },
+});
+
+export const start = agentStart({
+  agent,
+  memory: drizzleAdapter(db, { provider: "pg", schema }),
+  appName: "my-app",
+});
+```
+
+```tsx
+// Client
+import { useThread } from "@/lib/agent-client";
+
+export function Chat() {
+  const { threadId } = useParams();
+  useThread(threadId);
+  
+  return <ChatInterface />;
+}
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Installation" href="/docs/installation" />
+  <Card title="Basic Usage" href="/docs/basic-usage" />
+  <Card title="Components" href="/docs/components/overview" />
+</Cards>

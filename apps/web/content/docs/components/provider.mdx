@@ -1,0 +1,213 @@
+---
+title: Provider
+description: Context provider for sharing AgentStart client
+---
+
+# Provider
+
+The `AgentStartProvider` is a React context provider that shares the AgentStart client instance across your application. It must wrap all other AgentStart components.
+
+<ProviderDemo />
+
+## Installation
+
+```bash
+npx shadcn@latest add provider --registry=@agentstart
+```
+
+## Usage
+
+```tsx
+import { createAgentClient } from "agentstart/client";
+import { AgentStartProvider } from "@/components/agent/provider";
+
+const { client } = createAgentClient();
+
+export default function App({ children }: { children: React.ReactNode }) {
+  return (
+    <AgentStartProvider 
+      client={client}
+      navigate={(path) => {
+        // Your navigation logic
+        window.location.href = path;
+      }}
+    >
+      {children}
+    </AgentStartProvider>
+  );
+}
+```
+
+## Props
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `client` | `AgentStartAPI` | ✅ | The AgentStart client instance created by createAgentClient() |
+| `navigate` | `(path: string) => void` | ✅ | Navigation function for routing between pages |
+| `children` | `ReactNode` | ✅ | Child components that will have access to the client |
+
+## Features
+
+- **Client Sharing** - Provides the AgentStart client to all descendant components
+- **TanStack Query** - Automatically sets up QueryClient for server state management
+- **Navigation** - Supplies navigation function for routing
+- **Tooltips** - Wraps children with TooltipProvider for consistent UI
+
+## With Next.js App Router
+
+```tsx title="app/layout.tsx"
+import { createAgentClient } from "agentstart/client";
+import { AgentStartProvider } from "@/components/agent/provider";
+
+const { client } = createAgentClient();
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html>
+      <body>
+        <AgentStartProvider 
+          client={client}
+          navigate={(path) => {
+            // Use Next.js router
+            if (typeof window !== 'undefined') {
+              window.location.href = path;
+            }
+          }}
+        >
+          {children}
+        </AgentStartProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+## With Next.js Pages Router
+
+```tsx title="pages/_app.tsx"
+import type { AppProps } from "next/app";
+import { useRouter } from "next/router";
+import { createAgentClient } from "agentstart/client";
+import { AgentStartProvider } from "@/components/agent/provider";
+
+const { client } = createAgentClient();
+
+export default function App({ Component, pageProps }: AppProps) {
+  const router = useRouter();
+
+  return (
+    <AgentStartProvider 
+      client={client}
+      navigate={(path) => router.push(path)}
+    >
+      <Component {...pageProps} />
+    </AgentStartProvider>
+  );
+}
+```
+
+## With React Router
+
+```tsx title="src/App.tsx"
+import { useNavigate } from "react-router-dom";
+import { createAgentClient } from "agentstart/client";
+import { AgentStartProvider } from "@/components/agent/provider";
+
+const { client } = createAgentClient();
+
+export default function App({ children }: { children: React.ReactNode }) {
+  const navigate = useNavigate();
+
+  return (
+    <AgentStartProvider 
+      client={client}
+      navigate={(path) => navigate(path)}
+    >
+      {children}
+    </AgentStartProvider>
+  );
+}
+```
+
+## Accessing the Context
+
+Use the `useAgentStartContext` hook to access the client in child components:
+
+```tsx
+import { useAgentStartContext } from "@/components/agent/provider";
+
+export function MyComponent() {
+  const { client, orpc, navigate } = useAgentStartContext();
+
+  // Use client directly
+  const threads = await client.thread.list();
+
+  // Use orpc for TanStack Query integration
+  const { data } = useQuery(orpc.thread.list.queryOptions());
+
+  // Navigate programmatically
+  navigate("/thread/123");
+
+  return <div>...</div>;
+}
+```
+
+## Context Values
+
+The provider exposes these values through context:
+
+```ts
+interface AgentStartContextState {
+  // Raw AgentStart client
+  client: AgentStartAPI;
+  
+  // TanStack Query utils for data fetching
+  orpc: RouterUtils<AgentStartAPI>;
+  
+  // Navigation function
+  navigate: (path: string) => void;
+}
+```
+
+## Error Handling
+
+The provider will throw an error if you try to use AgentStart components without wrapping them:
+
+```tsx
+// ❌ This will throw an error
+function BadComponent() {
+  const { client } = useAgentStartContext(); // Error: Provider not found
+  return <div>...</div>;
+}
+
+// ✅ This works
+function GoodComponent() {
+  return (
+    <AgentStartProvider client={client} navigate={navigate}>
+      <ChildComponent /> {/* Can now use useAgentStartContext */}
+    </AgentStartProvider>
+  );
+}
+```
+
+## TypeScript
+
+The provider is fully typed:
+
+```tsx
+import type { AgentStartProviderProps } from "@/components/agent/provider";
+
+const props: AgentStartProviderProps = {
+  client,
+  navigate: (path) => console.log(path),
+  children: <div />,
+};
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Conversation" href="/docs/components/conversation" />
+  <Card title="Prompt Input" href="/docs/components/prompt-input" />
+  <Card title="Sidebar" href="/docs/components/sidebar" />
+</Cards>

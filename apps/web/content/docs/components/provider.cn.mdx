@@ -1,0 +1,213 @@
+---
+title: Provider
+description: 共享 AgentStart 客户端的上下文提供者
+---
+
+# Provider
+
+`AgentStartProvider` 是一个 React 上下文提供者，用于在应用中共享 AgentStart 客户端实例。它必须包裹所有其他 AgentStart 组件。
+
+<ProviderDemo />
+
+## 安装
+
+```bash
+npx shadcn@latest add provider --registry=@agentstart
+```
+
+## 使用
+
+```tsx
+import { createAgentClient } from "agentstart/client";
+import { AgentStartProvider } from "@/components/agent/provider";
+
+const { client } = createAgentClient();
+
+export default function App({ children }: { children: React.ReactNode }) {
+  return (
+    <AgentStartProvider 
+      client={client}
+      navigate={(path) => {
+        // 你的导航逻辑
+        window.location.href = path;
+      }}
+    >
+      {children}
+    </AgentStartProvider>
+  );
+}
+```
+
+## Props
+
+| 名称 | 类型 | 必需 | 描述 |
+|------|------|------|------|
+| `client` | `AgentStartAPI` | ✅ | createAgentClient() 创建的 AgentStart 客户端实例 |
+| `navigate` | `(path: string) => void` | ✅ | 页面路由的导航函数 |
+| `children` | `ReactNode` | ✅ | 可以访问客户端的子组件 |
+
+## 功能
+
+- **客户端共享** - 向所有后代组件提供 AgentStart 客户端
+- **TanStack Query** - 自动设置 QueryClient 进行服务器状态管理
+- **导航** - 提供路由导航函数
+- **工具提示** - 使用 TooltipProvider 包裹子组件以保持 UI 一致性
+
+## 与 Next.js App Router 一起使用
+
+```tsx title="app/layout.tsx"
+import { createAgentClient } from "agentstart/client";
+import { AgentStartProvider } from "@/components/agent/provider";
+
+const { client } = createAgentClient();
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html>
+      <body>
+        <AgentStartProvider 
+          client={client}
+          navigate={(path) => {
+            // 使用 Next.js 路由
+            if (typeof window !== 'undefined') {
+              window.location.href = path;
+            }
+          }}
+        >
+          {children}
+        </AgentStartProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+## 与 Next.js Pages Router 一起使用
+
+```tsx title="pages/_app.tsx"
+import type { AppProps } from "next/app";
+import { useRouter } from "next/router";
+import { createAgentClient } from "agentstart/client";
+import { AgentStartProvider } from "@/components/agent/provider";
+
+const { client } = createAgentClient();
+
+export default function App({ Component, pageProps }: AppProps) {
+  const router = useRouter();
+
+  return (
+    <AgentStartProvider 
+      client={client}
+      navigate={(path) => router.push(path)}
+    >
+      <Component {...pageProps} />
+    </AgentStartProvider>
+  );
+}
+```
+
+## 与 React Router 一起使用
+
+```tsx title="src/App.tsx"
+import { useNavigate } from "react-router-dom";
+import { createAgentClient } from "agentstart/client";
+import { AgentStartProvider } from "@/components/agent/provider";
+
+const { client } = createAgentClient();
+
+export default function App({ children }: { children: React.ReactNode }) {
+  const navigate = useNavigate();
+
+  return (
+    <AgentStartProvider 
+      client={client}
+      navigate={(path) => navigate(path)}
+    >
+      {children}
+    </AgentStartProvider>
+  );
+}
+```
+
+## 访问上下文
+
+使用 `useAgentStartContext` hook 在子组件中访问客户端：
+
+```tsx
+import { useAgentStartContext } from "@/components/agent/provider";
+
+export function MyComponent() {
+  const { client, orpc, navigate } = useAgentStartContext();
+
+  // 直接使用客户端
+  const threads = await client.thread.list();
+
+  // 使用 orpc 进行 TanStack Query 集成
+  const { data } = useQuery(orpc.thread.list.queryOptions());
+
+  // 程序化导航
+  navigate("/thread/123");
+
+  return <div>...</div>;
+}
+```
+
+## 上下文值
+
+Provider 通过上下文公开这些值：
+
+```ts
+interface AgentStartContextState {
+  // 原始 AgentStart 客户端
+  client: AgentStartAPI;
+  
+  // TanStack Query 工具用于数据获取
+  orpc: RouterUtils<AgentStartAPI>;
+  
+  // 导航函数
+  navigate: (path: string) => void;
+}
+```
+
+## 错误处理
+
+如果尝试在未包裹的情况下使用 AgentStart 组件，Provider 会抛出错误：
+
+```tsx
+// ❌ 这会抛出错误
+function BadComponent() {
+  const { client } = useAgentStartContext(); // 错误：找不到 Provider
+  return <div>...</div>;
+}
+
+// ✅ 这样可以工作
+function GoodComponent() {
+  return (
+    <AgentStartProvider client={client} navigate={navigate}>
+      <ChildComponent /> {/* 现在可以使用 useAgentStartContext */}
+    </AgentStartProvider>
+  );
+}
+```
+
+## TypeScript
+
+Provider 完全支持类型：
+
+```tsx
+import type { AgentStartProviderProps } from "@/components/agent/provider";
+
+const props: AgentStartProviderProps = {
+  client,
+  navigate: (path) => console.log(path),
+  children: <div />,
+};
+```
+
+## 下一步
+
+<Cards>
+  <Card title="Conversation" href="/docs/components/conversation" />
+  <Card title="Prompt Input" href="/docs/components/prompt-input" />
+  <Card title="Sidebar" href="/docs/components/sidebar" />
+</Cards>

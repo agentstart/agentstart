@@ -1,5 +1,4 @@
 import { GitCommitIcon } from "lucide-react";
-import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 
@@ -20,7 +19,7 @@ export function CommitHash({ hash, href }: CommitHashProps) {
       className="h-6 gap-1 px-2 font-mono text-xs"
       asChild
     >
-      <Link
+      <a
         href={href}
         target="_blank"
         title={`Commit: ${hash} (click to view on GitHub)`}
@@ -28,7 +27,7 @@ export function CommitHash({ hash, href }: CommitHashProps) {
       >
         <GitCommitIcon className="h-3 w-3" />
         {shortHash}
-      </Link>
+      </a>
     </Button>
   );
 }

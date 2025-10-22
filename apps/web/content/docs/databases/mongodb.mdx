@@ -1,0 +1,189 @@
+---
+title: MongoDB Adapter
+description: Integrate AgentStart with MongoDB
+---
+
+# MongoDB Adapter
+
+MongoDB is a popular NoSQL document database. AgentStart provides first-class support for MongoDB through a native adapter.
+
+## Installation
+
+```bash
+npm install mongodb
+```
+
+## Example Usage
+
+<Steps>
+
+<Step>
+
+### Initialize MongoDB Client
+
+```ts title="db/index.ts"
+import { MongoClient } from "mongodb";
+
+const client = new MongoClient(process.env.DATABASE_URL!);
+
+// Connect to MongoDB
+await client.connect();
+
+export const db = client.db("agentstart");
+```
+
+</Step>
+
+<Step>
+
+### Use with AgentStart
+
+```ts title="lib/agent.ts"
+import { agentStart } from "agentstart";
+import { mongodbAdapter } from "agentstart/db";
+import { db } from "@/db";
+
+export const start = agentStart({
+  agent,
+  memory: mongodbAdapter(db),
+});
+```
+
+</Step>
+
+</Steps>
+
+## Connection String
+
+```bash
+# Local MongoDB
+DATABASE_URL="mongodb://localhost:27017"
+
+# MongoDB Atlas
+DATABASE_URL="mongodb+srv://username:password@cluster.mongodb.net/agentstart"
+
+# MongoDB with authentication
+DATABASE_URL="mongodb://username:password@localhost:27017/agentstart?authSource=admin"
+```
+
+## Collections
+
+The MongoDB adapter creates these collections:
+
+### Threads Collection
+
+```json
+{
+  "_id": "thread-id",
+  "title": "My Thread",
+  "userId": "user-123",
+  "createdAt": ISODate("2024-01-01T00:00:00Z"),
+  "metadata": {}
+}
+```
+
+### Messages Collection
+
+```json
+{
+  "_id": "message-id",
+  "threadId": "thread-id",
+  "role": "user",
+  "content": "Hello",
+  "createdAt": ISODate("2024-01-01T00:00:00Z"),
+  "metadata": {}
+}
+```
+
+## Indexes
+
+The adapter automatically creates indexes for optimal performance:
+
+```ts
+// Created automatically by the adapter
+db.collection("messages").createIndex({ threadId: 1 });
+db.collection("threads").createIndex({ userId: 1 });
+db.collection("threads").createIndex({ createdAt: -1 });
+```
+
+## Connection Options
+
+Configure connection pooling and timeouts:
+
+```ts
+const client = new MongoClient(process.env.DATABASE_URL!, {
+  maxPoolSize: 10,
+  minPoolSize: 2,
+  connectTimeoutMS: 10000,
+  socketTimeoutMS: 45000,
+});
+```
+
+## Type Safety
+
+Define types for your documents:
+
+```ts
+interface Thread {
+  _id: string;
+  title?: string;
+  userId?: string;
+  createdAt: Date;
+  metadata?: Record<string, unknown>;
+}
+
+interface Message {
+  _id: string;
+  threadId: string;
+  role: string;
+  content: string;
+  createdAt: Date;
+  metadata?: Record<string, unknown>;
+}
+```
+
+## MongoDB Atlas
+
+For MongoDB Atlas (recommended for production):
+
+1. Create a free cluster at [mongodb.com/cloud/atlas](https://www.mongodb.com/cloud/atlas)
+2. Get your connection string from the Atlas dashboard
+3. Add it to your `.env` file
+
+```bash
+DATABASE_URL="mongodb+srv://username:password@cluster.mongodb.net/agentstart?retryWrites=true&w=majority"
+```
+
+## Transactions
+
+MongoDB adapter supports transactions for data consistency:
+
+```ts
+const session = client.startSession();
+
+try {
+  await session.withTransaction(async () => {
+    // Operations here are atomic
+    await db.collection("threads").insertOne({ ... });
+    await db.collection("messages").insertOne({ ... });
+  });
+} finally {
+  await session.endSession();
+}
+```
+
+## Best Practices
+
+1. **Use connection pooling** - Reuse client connections
+2. **Enable compression** - Reduce network traffic
+3. **Create indexes** - Optimize query performance
+4. **Monitor queries** - Use MongoDB Atlas monitoring
+5. **Regular backups** - Set up automated backups
+
+## Next Steps
+
+<Cards>
+  <Card title="PostgreSQL" href="/docs/databases/postgresql" />
+  <Card title="Drizzle Adapter" href="/docs/databases/drizzle" />
+  <Card title="Prisma Adapter" href="/docs/databases/prisma" />
+</Cards>

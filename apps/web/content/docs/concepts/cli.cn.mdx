@@ -1,0 +1,158 @@
+---
+title: CLI
+description: 管理智能体项目的内置 CLI
+---
+
+# CLI
+
+AgentStart 附带内置 CLI，帮助您管理数据库架构和项目设置。
+
+## Generate
+
+`generate` 命令创建 AgentStart 所需的数据库架构。如果您使用的是 Drizzle 或 Prisma，此命令会为您的 ORM 生成正确的架构。对于 Kysely，它会生成可以直接运行的 SQL 文件。
+
+```bash title="终端"
+npx @agentstart/cli generate
+```
+
+### 选项
+
+- `--output` - 保存生成架构的位置
+  - Prisma：`prisma/schema.prisma`
+  - Drizzle：项目根目录中的 `schema.ts`
+  - Kysely：项目根目录中的 `schema.sql`
+- `--config` - 智能体配置文件的路径（默认搜索 `./lib/agent.ts`、`./src/lib/agent.ts`）
+- `--y` - 跳过确认提示
+
+### 示例输出
+
+<Tabs items={["Drizzle", "Prisma", "Kysely"]}>
+  <Tab value="Drizzle">
+    ```ts title="schema.ts"
+    import { pgTable, text, timestamp, jsonb } from "drizzle-orm/pg-core";
+
+    export const threadsTable = pgTable("threads", {
+      id: text("id").primaryKey(),
+      title: text("title"),
+      userId: text("user_id"),
+      createdAt: timestamp("created_at").defaultNow(),
+      metadata: jsonb("metadata"),
+    });
+
+    export const messagesTable = pgTable("messages", {
+      id: text("id").primaryKey(),
+      threadId: text("thread_id").references(() => threadsTable.id),
+      role: text("role"),
+      content: text("content"),
+      createdAt: timestamp("created_at").defaultNow(),
+      metadata: jsonb("metadata"),
+    });
+    ```
+  </Tab>
+  
+  <Tab value="Prisma">
+    ```prisma title="prisma/schema.prisma"
+    model Thread {
+      id        String    @id @default(cuid())
+      title     String?
+      userId    String?
+      createdAt DateTime  @default(now())
+      messages  Message[]
+      metadata  Json?
+    }
+
+    model Message {
+      id        String   @id @default(cuid())
+      threadId  String
+      thread    Thread   @relation(fields: [threadId], references: [id])
+      role      String
+      content   String
+      createdAt DateTime @default(now())
+      metadata  Json?
+    }
+    ```
+  </Tab>
+  
+  <Tab value="Kysely">
+    ```sql title="schema.sql"
+    CREATE TABLE threads (
+      id TEXT PRIMARY KEY,
+      title TEXT,
+      user_id TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      metadata JSONB
+    );
+
+    CREATE TABLE messages (
+      id TEXT PRIMARY KEY,
+      thread_id TEXT REFERENCES threads(id),
+      role TEXT,
+      content TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      metadata JSONB
+    );
+    ```
+  </Tab>
+</Tabs>
+
+## Migrate
+
+`migrate` 命令直接将架构应用到您的数据库。这适用于内置的 Kysely 适配器。对于 Drizzle 或 Prisma，请使用您的 ORM 的迁移工具。
+
+```bash title="终端"
+npx @agentstart/cli migrate
+```
+
+### 选项
+
+- `--config` - 智能体配置文件的路径
+- `--y` - 跳过确认提示
+
+### 使用 ORM 迁移工具
+
+<Tabs items={["Drizzle", "Prisma"]}>
+  <Tab value="Drizzle">
+    ```bash
+    npx drizzle-kit generate
+    npx drizzle-kit push
+    ```
+  </Tab>
+  
+  <Tab value="Prisma">
+    ```bash
+    npx prisma generate
+    npx prisma db push
+    ```
+  </Tab>
+</Tabs>
+
+## 常见问题
+
+### 找不到模块
+
+如果看到"找不到模块 X"，CLI 无法解析配置中的导入。尝试：
+
+1. 删除配置文件中的导入别名，使用相对路径
+2. 运行 CLI
+3. 运行后恢复使用别名
+
+### 找不到配置文件
+
+CLI 默认搜索这些位置：
+- `./lib/agent.ts`
+- `./src/lib/agent.ts`
+- `./server/agent.ts`
+
+使用 `--config` 指定自定义位置：
+
+```bash
+npx @agentstart/cli generate --config ./custom/path/agent.ts
+```
+
+## 下一步
+
+<Cards>
+  <Card title="数据库概念" href="/docs/concepts/database" />
+  <Card title="Drizzle" href="/docs/databases/drizzle" />
+  <Card title="Prisma" href="/docs/databases/prisma" />
+</Cards>

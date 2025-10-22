@@ -1,0 +1,226 @@
+---
+title: Prisma Adapter
+description: Integrate AgentStart with Prisma ORM
+---
+
+# Prisma Adapter
+
+Prisma is a next-generation ORM that makes working with databases easy with type-safe database access, declarative migrations, and auto-completion.
+
+## Installation
+
+```bash
+npm install @prisma/client
+npm install -D prisma
+```
+
+## Example Usage
+
+<Steps>
+
+<Step>
+
+### Initialize Prisma
+
+```bash
+npx prisma init
+```
+
+This creates a `prisma/schema.prisma` file and adds `DATABASE_URL` to your `.env`.
+
+</Step>
+
+<Step>
+
+### Define Schema
+
+```prisma title="prisma/schema.prisma"
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // or "mysql", "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Thread {
+  id        String    @id @default(cuid())
+  title     String?
+  userId    String?
+  createdAt DateTime  @default(now())
+  metadata  Json?
+  messages  Message[]
+
+  @@map("threads")
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  threadId  String
+  role      String
+  content   String
+  createdAt DateTime @default(now())
+  metadata  Json?
+  thread    Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+```
+
+</Step>
+
+<Step>
+
+### Generate Client
+
+```bash
+npx prisma generate
+npx prisma db push
+```
+
+</Step>
+
+<Step>
+
+### Use with AgentStart
+
+```ts title="lib/agent.ts"
+import { PrismaClient } from "@prisma/client";
+import { agentStart } from "agentstart";
+import { prismaAdapter } from "agentstart/db";
+
+const prisma = new PrismaClient();
+
+export const start = agentStart({
+  agent,
+  memory: prismaAdapter(prisma, {
+    provider: "postgresql", // or "mysql", "sqlite", "mongodb"
+  }),
+});
+```
+
+</Step>
+
+</Steps>
+
+## Schema Generation & Migration
+
+The AgentStart CLI can generate Prisma schemas:
+
+```bash title="Schema Generation"
+npx @agentstart/cli generate
+```
+
+Then apply migrations with Prisma:
+
+```bash title="Schema Migration"
+npx prisma generate
+npx prisma db push
+```
+
+For production, use Prisma Migrate:
+
+```bash
+npx prisma migrate dev --name init
+npx prisma migrate deploy
+```
+
+## Database Providers
+
+Prisma supports multiple databases. Update your `schema.prisma`:
+
+<Tabs items={["PostgreSQL", "MySQL", "SQLite"]}>
+  <Tab value="PostgreSQL">
+    ```prisma
+    datasource db {
+      provider = "postgresql"
+      url      = env("DATABASE_URL")
+    }
+    ```
+    
+    ```bash
+    DATABASE_URL="postgresql://user:password@localhost:5432/agentstart"
+    ```
+  </Tab>
+  
+  <Tab value="MySQL">
+    ```prisma
+    datasource db {
+      provider = "mysql"
+      url      = env("DATABASE_URL")
+    }
+    ```
+    
+    ```bash
+    DATABASE_URL="mysql://user:password@localhost:3306/agentstart"
+    ```
+  </Tab>
+  
+  <Tab value="SQLite">
+    ```prisma
+    datasource db {
+      provider = "sqlite"
+      url      = env("DATABASE_URL")
+    }
+    ```
+    
+    ```bash
+    DATABASE_URL="file:./agentstart.db"
+    ```
+  </Tab>
+</Tabs>
+
+## Type Safety
+
+Prisma provides full type safety:
+
+```ts
+// Type-safe queries
+const threads = await prisma.thread.findMany();
+//    ^? Thread[]
+
+// Type-safe inserts
+await prisma.message.create({
+  data: {
+    id: "msg-1",
+    threadId: "thread-1",
+    role: "user",
+    content: "Hello",
+  },
+});
+```
+
+## Prisma Studio
+
+Use Prisma Studio to visualize and edit your data:
+
+```bash
+npx prisma studio
+```
+
+## Connection Pooling
+
+For production, use connection pooling:
+
+```ts
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL,
+    },
+  },
+});
+```
+
+For serverless environments, use Prisma Data Proxy or a connection pooler like PgBouncer.
+
+## Next Steps
+
+<Cards>
+  <Card title="Drizzle Adapter" href="/docs/databases/drizzle" />
+  <Card title="PostgreSQL" href="/docs/databases/postgresql" />
+  <Card title="MySQL" href="/docs/databases/mysql" />
+</Cards>

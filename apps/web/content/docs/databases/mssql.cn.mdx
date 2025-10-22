@@ -1,0 +1,136 @@
+---
+title: MS SQL Server
+description: 将 AgentStart 与 Microsoft SQL Server 集成
+---
+
+# Microsoft SQL Server
+
+Microsoft SQL Server 是由微软开发的关系型数据库管理系统。它支持各种事务处理、商业智能和分析应用程序。
+
+## 使用示例
+
+确保您已安装并配置了 SQL Server。然后，您可以将其连接到 AgentStart。
+
+```ts title="lib/agent.ts"
+import { agentStart } from "agentstart";
+import { Kysely, MssqlDialect } from "kysely";
+import { Pool } from "tarn";
+import * as Tedious from "tedious";
+
+const db = new Kysely({
+  dialect: new MssqlDialect({
+    tarn: {
+      ...Pool,
+    },
+    tedious: {
+      ...Tedious,
+      connectionFactory: () =>
+        new Tedious.Connection({
+          server: "localhost",
+          authentication: {
+            type: "default",
+            options: {
+              userName: "sa",
+              password: "YourPassword",
+            },
+          },
+          options: {
+            port: 1433,
+            database: "agentstart",
+          },
+        }),
+    },
+  }),
+});
+
+export const start = agentStart({
+  agent,
+  memory: kyselyAdapter(db),
+});
+```
+
+<Callout>
+  有关更多信息，请阅读 Kysely 关于
+  [MssqlDialect](https://kysely-org.github.io/kysely-apidoc/classes/MssqlDialect.html) 的文档。
+</Callout>
+
+## 架构生成和迁移
+
+AgentStart CLI 允许您生成或迁移数据库架构。
+
+<table>
+  <tr className="border-b">
+    <th>
+      <p className="font-bold text-[16px] mb-1">MSSQL 架构生成</p>
+    </th>
+    <th>
+      <p className="font-bold text-[16px] mb-1">MSSQL 架构迁移</p>
+    </th>
+  </tr>
+  <tr className="h-10">
+    <td>✅ 支持</td>
+    <td>✅ 支持</td>
+  </tr>
+</table>
+
+```bash title="架构生成"
+npx @agentstart/cli generate
+```
+
+```bash title="架构迁移"
+npx @agentstart/cli migrate
+```
+
+## 安装
+
+安装所需的依赖项：
+
+```bash
+npm install kysely tedious tarn
+```
+
+## 连接字符串格式
+
+```bash
+# 基本连接
+Server=localhost,1433;Database=agentstart;User Id=sa;Password=YourPassword;
+
+# 带加密
+Server=localhost,1433;Database=agentstart;User Id=sa;Password=YourPassword;Encrypt=true;TrustServerCertificate=true;
+```
+
+## Azure SQL Database
+
+对于 Azure SQL Database：
+
+```ts
+const db = new Kysely({
+  dialect: new MssqlDialect({
+    tedious: {
+      connectionFactory: () =>
+        new Tedious.Connection({
+          server: "your-server.database.windows.net",
+          authentication: {
+            type: "default",
+            options: {
+              userName: "your-username",
+              password: "your-password",
+            },
+          },
+          options: {
+            database: "your-database",
+            encrypt: true,
+          },
+        }),
+    },
+  }),
+});
+```
+
+## 下一步
+
+<Cards>
+  <Card title="PostgreSQL" href="/docs/databases/postgresql" />
+  <Card title="MySQL" href="/docs/databases/mysql" />
+  <Card title="其他数据库" href="/docs/databases/other-relational-databases" />
+</Cards>

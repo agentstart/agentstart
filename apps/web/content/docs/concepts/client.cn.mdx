@@ -1,0 +1,143 @@
+---
+title: 客户端
+description: 在应用程序中使用 AgentStart 客户端
+---
+
+# 客户端
+
+AgentStart 客户端提供类型安全的 React hooks 和存储访问，用于构建智能体 UI。
+
+## 创建客户端
+
+创建客户端实例以与您的智能体交互：
+
+```ts title="lib/agent-client.ts"
+import { createAgentClient } from "agentstart/client";
+
+export const { client, useThread } = createAgentClient({
+  baseURL: "http://localhost:3000", // 如果在同一域名则可选
+});
+```
+
+### 选项
+
+```ts
+interface ClientOptions {
+  baseURL?: string;  // 智能体 API 的基础 URL
+  fetch?: typeof fetch;  // 自定义 fetch 实现
+}
+```
+
+## React Hooks
+
+### useThread
+
+在 React 组件中同步线程状态：
+
+```tsx
+import { useThread } from "@/lib/agent-client";
+
+export function ChatPage() {
+  const { threadId } = useParams();
+  useThread(threadId);  // 同步此线程的状态
+  
+  return <ChatUI />;
+}
+```
+
+此 hook 自动：
+- 在挂载时获取线程数据
+- 订阅实时更新
+- 在卸载时清理
+
+### useAgentStore
+
+使用 Zustand 直接访问智能体状态：
+
+```tsx
+import { useAgentStore } from "@/lib/agent-client";
+
+export function Messages() {
+  const messages = useAgentStore((state) => state.messages, threadId);
+  const isLoading = useAgentStore((state) => state.isLoading, threadId);
+  
+  return (
+    <div>
+      {messages.map(msg => <Message key={msg.id} {...msg} />)}
+      {isLoading && <Spinner />}
+    </div>
+  );
+}
+```
+
+## 存储 API
+
+智能体存储提供这些选择器：
+
+```ts
+interface AgentState {
+  // 线程数据
+  thread: Thread | null;
+  messages: Message[];
+  
+  // 加载状态
+  isLoading: boolean;
+  isStreaming: boolean;
+  
+  // 操作
+  sendMessage: (params: { content: string }) => Promise<void>;
+  regenerate: () => Promise<void>;
+  stop: () => void;
+  
+  // 错误处理
+  error: Error | null;
+}
+```
+
+## 发送消息
+
+```tsx
+const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
+
+const handleSend = async (content: string) => {
+  await sendMessage({ content });
+};
+```
+
+## 管理线程
+
+```tsx
+import { client } from "@/lib/agent-client";
+
+// 创建新线程
+const thread = await client.thread.create();
+
+// 列出线程
+const threads = await client.thread.list();
+
+// 删除线程
+await client.thread.delete({ id: threadId });
+```
+
+## 实时更新
+
+客户端使用服务器发送事件（SSE）自动处理实时消息流式传输。
+
+## 错误处理
+
+```tsx
+const error = useAgentStore((state) => state.error, threadId);
+
+{error && (
+  <Alert variant="error">
+    {error.message}
+  </Alert>
+)}
+```
+
+## 下一步
+
+<Cards>
+  <Card title="核心概念" href="/docs/concepts/core-concepts" />
+  <Card title="数据库" href="/docs/concepts/database" />
+</Cards>

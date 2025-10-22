@@ -1,0 +1,365 @@
+---
+title: 安装
+description: 学习如何在项目中配置 AgentStart
+---
+
+<Steps>
+
+<Step>
+
+### 安装包
+
+让我们从将 AgentStart 添加到您的项目开始：
+
+```bash
+npm install agentstart
+```
+
+<Callout type="info">
+如果您使用的是单独的客户端和服务器设置，请确保在项目的两个部分都安装 AgentStart。
+</Callout>
+
+</Step>
+
+<Step>
+
+### 设置环境变量
+
+在项目根目录创建 `.env` 文件并添加以下环境变量：
+
+1. **模型提供商 API 密钥**
+
+来自您的模型提供商（OpenRouter、OpenAI、Anthropic 等）的 API 密钥。
+
+```txt title=".env"
+MODEL_PROVIDER_API_KEY=your_api_key_here
+```
+
+2. **数据库 URL**
+
+您的数据库连接字符串：
+
+```txt title=".env"
+DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+```
+
+</Step>
+
+<Step>
+
+### 安装模型提供商
+
+选择并安装您喜欢的 AI 模型提供商：
+
+<Tabs items={["OpenRouter", "OpenAI", "Anthropic"]}>
+  <Tab value="OpenRouter">
+    ```bash
+    npm install @openrouter/ai-sdk-provider
+    ```
+    
+    从 [OpenRouter](https://openrouter.ai/keys) 获取您的 API 密钥
+  </Tab>
+  
+  <Tab value="OpenAI">
+    ```bash
+    npm install @ai-sdk/openai
+    ```
+    
+    从 [OpenAI Platform](https://platform.openai.com/api-keys) 获取您的 API 密钥
+  </Tab>
+  
+  <Tab value="Anthropic">
+    ```bash
+    npm install @ai-sdk/anthropic
+    ```
+    
+    从 [Anthropic Console](https://console.anthropic.com/) 获取您的 API 密钥
+  </Tab>
+</Tabs>
+
+</Step>
+
+<Step>
+
+### 配置数据库
+
+选择您的数据库适配器并安装依赖：
+
+<Tabs items={["Drizzle", "Prisma", "Kysely", "MongoDB"]}>
+  <Tab value="Drizzle">
+    ```bash
+    npm install drizzle-orm @neondatabase/serverless
+    ```
+    
+    创建您的数据库架构：
+    
+    ```ts title="db/schema/agent.ts"
+    import { pgTable, text, timestamp, jsonb } from "drizzle-orm/pg-core";
+
+    export const threadsTable = pgTable("threads", {
+      id: text("id").primaryKey(),
+      title: text("title"),
+      userId: text("user_id"),
+      createdAt: timestamp("created_at").defaultNow(),
+      metadata: jsonb("metadata"),
+    });
+
+    export const messagesTable = pgTable("messages", {
+      id: text("id").primaryKey(),
+      threadId: text("thread_id").references(() => threadsTable.id),
+      role: text("role"),
+      content: text("content"),
+      createdAt: timestamp("created_at").defaultNow(),
+      metadata: jsonb("metadata"),
+    });
+    ```
+    
+    初始化 Drizzle：
+    
+    ```ts title="db/index.ts"
+    import { drizzle } from "drizzle-orm/neon-http";
+    import { neon } from "@neondatabase/serverless";
+
+    const sql = neon(process.env.DATABASE_URL!);
+    export const db = drizzle(sql);
+    ```
+  </Tab>
+  
+  <Tab value="Prisma">
+    ```bash
+    npm install @prisma/client
+    npm install -D prisma
+    ```
+    
+    定义您的架构：
+    
+    ```prisma title="prisma/schema.prisma"
+    model Thread {
+      id        String    @id @default(cuid())
+      title     String?
+      userId    String?
+      createdAt DateTime  @default(now())
+      messages  Message[]
+      metadata  Json?
+    }
+
+    model Message {
+      id        String   @id @default(cuid())
+      threadId  String
+      thread    Thread   @relation(fields: [threadId], references: [id])
+      role      String
+      content   String
+      createdAt DateTime @default(now())
+      metadata  Json?
+    }
+    ```
+    
+    生成 Prisma 客户端：
+    
+    ```bash
+    npx prisma generate
+    npx prisma db push
+    ```
+  </Tab>
+  
+  <Tab value="Kysely">
+    ```bash
+    npm install kysely pg
+    ```
+    
+    定义您的类型并初始化：
+    
+    ```ts title="db/index.ts"
+    import { Kysely, PostgresDialect } from "kysely";
+    import { Pool } from "pg";
+
+    export const db = new Kysely({
+      dialect: new PostgresDialect({
+        pool: new Pool({
+          connectionString: process.env.DATABASE_URL,
+        }),
+      }),
+    });
+    ```
+  </Tab>
+  
+  <Tab value="MongoDB">
+    ```bash
+    npm install mongodb
+    ```
+    
+    初始化 MongoDB 客户端：
+    
+    ```ts title="db/index.ts"
+    import { MongoClient } from "mongodb";
+
+    const client = new MongoClient(process.env.DATABASE_URL!);
+    await client.connect();
+
+    export const db = client.db("agentstart");
+    ```
+  </Tab>
+</Tabs>
+
+</Step>
+
+<Step>
+
+### 创建 Agent 实例
+
+在以下位置之一创建名为 `agent.ts` 的文件：
+- `lib/agent.ts`
+- `src/lib/agent.ts`
+- `server/agent.ts`
+
+```ts title="lib/agent.ts"
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { agentStart } from "agentstart";
+import { Agent, innerTools, osTools } from "agentstart/agent";
+import { drizzleAdapter } from "agentstart/db";
+import { db } from "@/db";
+import * as schema from "@/db/schema";
+
+const openrouter = createOpenRouter({
+  apiKey: process.env.MODEL_PROVIDER_API_KEY!,
+});
+
+const agent = new Agent({
+  model: openrouter("x-ai/grok-4-fast"),
+  instructions: "你是一个乐于助人的助手。",
+  tools: {
+    ...innerTools,
+    ...osTools,
+  },
+});
+
+export const start = agentStart({
+  agent,
+  memory: drizzleAdapter(db, {
+    provider: "pg",
+    schema: {
+      thread: schema.threadsTable,
+      message: schema.messagesTable,
+    },
+  }),
+  appName: "my-app",
+});
+```
+
+</Step>
+
+<Step>
+
+### 挂载处理器
+
+创建一个 API 路由来处理智能体请求。该路由应处理路径 `/api/agent/*` 的请求。
+
+<Tabs items={["Next.js", "Express", "Node.js"]}>
+  <Tab value="Next.js">
+    ```ts title="app/api/agent/[...all]/route.ts"
+    import { toNextJsHandler } from "agentstart/integration";
+    import { start } from "@/lib/agent";
+
+    export const { POST, GET } = toNextJsHandler(start.handler);
+    ```
+  </Tab>
+  
+  <Tab value="Express">
+    ```ts title="server.ts"
+    import express from "express";
+    import { toNodeHandler } from "agentstart/integration";
+    import { start } from "./lib/agent";
+
+    const app = express();
+    const handler = toNodeHandler(start.handler);
+
+    app.use("/api/agent", handler);
+
+    app.listen(3000, () => {
+      console.log("服务器运行在 http://localhost:3000");
+    });
+    ```
+  </Tab>
+  
+  <Tab value="Node.js">
+    ```ts title="server.ts"
+    import { createServer } from "node:http";
+    import { toNodeHandler } from "agentstart/integration";
+    import { start } from "./lib/agent";
+
+    const handler = toNodeHandler(start.handler);
+    const server = createServer(handler);
+
+    server.listen(3000, () => {
+      console.log("服务器运行在 http://localhost:3000");
+    });
+    ```
+  </Tab>
+</Tabs>
+
+</Step>
+
+<Step>
+
+### 创建客户端实例
+
+创建一个客户端以从前端与您的智能体交互：
+
+```ts title="lib/agent-client.ts"
+import { createAgentClient } from "agentstart/client";
+
+export const { client, useThread } = createAgentClient({
+  baseURL: "http://localhost:3000", // 如果在同一域名则可选
+});
+```
+
+<Callout type="info">
+如果您的智能体与前端运行在同一域名，您可以省略 `baseURL` 选项。
+</Callout>
+
+</Step>
+
+<Step>
+
+### 🎉 完成！
+
+您现在已准备好在应用程序中使用 AgentStart。继续阅读[基本用法](/cn/docs/basic-usage)以了解如何在应用程序中使用智能体。
+
+</Step>
+
+</Steps>
+
+## 数据库迁移
+
+设置架构后，运行迁移以创建表：
+
+<Tabs items={["Drizzle", "Prisma"]}>
+  <Tab value="Drizzle">
+    ```bash
+    npx drizzle-kit generate
+    npx drizzle-kit push
+    ```
+  </Tab>
+  
+  <Tab value="Prisma">
+    ```bash
+    npx prisma generate
+    npx prisma db push
+    ```
+  </Tab>
+</Tabs>
+
+## 示例项目
+
+查看完整示例：
+
+- **Next.js 示例**：查看仓库中的 `/playground/next`
+- **Express 示例**：即将推出
+
+## 下一步
+
+<Cards>
+  <Card title="基本用法" href="/docs/basic-usage" />
+  <Card title="数据库" href="/docs/concepts/database" />
+  <Card title="工具" href="/docs/concepts/tools" />
+</Cards>

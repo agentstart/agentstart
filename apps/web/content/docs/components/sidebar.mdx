@@ -1,0 +1,311 @@
+---
+title: Sidebar
+description: Thread list sidebar with navigation
+---
+
+# Sidebar
+
+The `Sidebar` component provides a collapsible sidebar that lists all threads with automatic loading, pagination, and thread management.
+
+<SidebarDemo />
+
+## Installation
+
+```bash
+npx shadcn@latest add sidebar --registry=@agentstart
+```
+
+## Usage
+
+```tsx
+import { Sidebar } from "@/components/agent/sidebar";
+import { useRouter } from "next/navigation";
+
+export default function App({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+
+  return (
+    <Sidebar
+      onSelectThread={(thread) => router.push(`/thread/${thread.id}`)}
+    >
+      {children}
+    </Sidebar>
+  );
+}
+```
+
+## Props
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Main content to display next to the sidebar |
+| `selectedThreadId` | `string` | - | Currently selected thread ID |
+| `onSelectThread` | `(thread: DBThread) => void` | - | Callback when a thread is selected |
+| `pageSize` | `number` | `20` | Number of threads to load per page |
+| `header` | `{ title?: string }` | - | Custom header configuration |
+| `footer` | `ReactNode` | - | Custom footer content |
+| `emptyState` | `ReactNode` | - | Custom empty state when no threads exist |
+| `errorState` | `(error: Error, retry: () => void) => ReactNode` | - | Custom error state renderer |
+| `sidebar` | `SidebarConfig` | - | Sidebar configuration (variant, side, collapsible, etc.) |
+| `className` | `string` | - | Additional CSS classes |
+
+## Features
+
+- **Auto-loading** - Fetches threads from AgentStart API
+- **Pagination** - Infinite scroll loading
+- **Thread Management** - Create, delete, and select threads
+- **Collapsible** - Can collapse to icon-only mode
+- **Responsive** - Works on mobile and desktop
+- **Empty States** - Built-in empty and error states
+- **Keyboard Navigation** - Arrow keys and shortcuts
+
+## Examples
+
+### Basic Usage
+
+```tsx
+import { Sidebar } from "@/components/agent/sidebar";
+import { useRouter } from "next/navigation";
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+
+  return (
+    <Sidebar onSelectThread={(thread) => router.push(`/thread/${thread.id}`)}>
+      {children}
+    </Sidebar>
+  );
+}
+```
+
+### With Selected Thread
+
+```tsx
+import { Sidebar } from "@/components/agent/sidebar";
+import { useParams, useRouter } from "next/navigation";
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const { threadId } = useParams();
+
+  return (
+    <Sidebar
+      selectedThreadId={threadId as string}
+      onSelectThread={(thread) => router.push(`/thread/${thread.id}`)}
+    >
+      {children}
+    </Sidebar>
+  );
+}
+```
+
+### Custom Header
+
+```tsx
+import { Sidebar } from "@/components/agent/sidebar";
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <Sidebar
+      header={{ title: "My AI Assistant" }}
+      onSelectThread={(thread) => console.log(thread)}
+    >
+      {children}
+    </Sidebar>
+  );
+}
+```
+
+### Custom Empty State
+
+```tsx
+import { Sidebar } from "@/components/agent/sidebar";
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <Sidebar
+      emptyState={
+        <div className="text-center p-4">
+          <h3 className="font-bold">No Threads Yet</h3>
+          <p className="text-sm text-muted-foreground">
+            Start a conversation to create your first thread
+          </p>
+        </div>
+      }
+      onSelectThread={(thread) => console.log(thread)}
+    >
+      {children}
+    </Sidebar>
+  );
+}
+```
+
+### Right Side Placement
+
+```tsx
+import { Sidebar } from "@/components/agent/sidebar";
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <Sidebar
+      sidebar={{ side: "right" }}
+      onSelectThread={(thread) => console.log(thread)}
+    >
+      {children}
+    </Sidebar>
+  );
+}
+```
+
+### Custom Page Size
+
+```tsx
+import { Sidebar } from "@/components/agent/sidebar";
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <Sidebar
+      pageSize={50}
+      onSelectThread={(thread) => console.log(thread)}
+    >
+      {children}
+    </Sidebar>
+  );
+}
+```
+
+## Sidebar Configuration
+
+The `sidebar` prop accepts these options:
+
+```ts
+interface SidebarConfig {
+  // Visual variant
+  variant?: "sidebar" | "floating" | "inset";
+  
+  // Which side to place the sidebar
+  side?: "left" | "right";
+  
+  // Collapse behavior
+  collapsible?: "offcanvas" | "icon" | "none";
+  
+  // Custom styling
+  className?: string;
+  
+  // Control open state
+  defaultOpen?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+```
+
+### Example with Full Configuration
+
+```tsx
+<Sidebar
+  sidebar={{
+    variant: "inset",
+    side: "left",
+    collapsible: "icon",
+    defaultOpen: true,
+    onOpenChange: (open) => console.log("Sidebar:", open),
+  }}
+  onSelectThread={(thread) => console.log(thread)}
+>
+  {children}
+</Sidebar>
+```
+
+## Thread Actions
+
+Each thread item includes action buttons:
+
+- **Select** - Click to navigate to thread
+- **Delete** - Remove thread (with confirmation)
+- **Menu** - Additional actions (rename, archive, etc.)
+
+## Keyboard Shortcuts
+
+- **Ctrl/Cmd + B** - Toggle sidebar
+- **Arrow Up/Down** - Navigate threads
+- **Enter** - Select focused thread
+- **Delete** - Delete focused thread
+
+## Loading States
+
+The sidebar shows:
+
+- **Skeleton** - While loading initial threads
+- **Empty** - When no threads exist
+- **Error** - If loading fails with retry button
+- **Spinner** - During pagination
+
+## TypeScript
+
+```tsx
+import type { SidebarProps } from "@/components/agent/sidebar";
+import type { DBThread } from "agentstart/db";
+
+const props: SidebarProps = {
+  selectedThreadId: "thread-123",
+  onSelectThread: (thread: DBThread) => {
+    console.log(thread.id);
+  },
+  pageSize: 20,
+  header: { title: "Threads" },
+};
+```
+
+## Integration Example
+
+Full layout with all components:
+
+```tsx
+import { Sidebar } from "@/components/agent/sidebar";
+import { Conversation } from "@/components/agent/conversation";
+import { PromptInput } from "@/components/agent/prompt-input";
+import { useParams, useRouter } from "next/navigation";
+import { useAgentStore, useThread } from "agentstart/client";
+
+export default function ThreadLayout() {
+  const router = useRouter();
+  const { threadId } = useParams<{ threadId: string }>();
+  
+  useThread(threadId);
+  const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
+
+  return (
+    <Sidebar
+      selectedThreadId={threadId}
+      onSelectThread={(thread) => router.push(`/thread/${thread.id}`)}
+    >
+      <div className="flex h-screen flex-col">
+        <header className="border-b p-4">
+          <h1 className="font-bold">Chat</h1>
+        </header>
+        
+        <div className="flex-1 overflow-y-auto">
+          <Conversation threadId={threadId} />
+        </div>
+        
+        <div className="border-t p-4">
+          <PromptInput
+            threadId={threadId}
+            onMessageSubmit={async (message) => {
+              await sendMessage({ text: message.text ?? "" });
+            }}
+          />
+        </div>
+      </div>
+    </Sidebar>
+  );
+}
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Conversation" href="/docs/components/conversation" />
+  <Card title="Prompt Input" href="/docs/components/prompt-input" />
+  <Card title="Provider" href="/docs/components/provider" />
+</Cards>

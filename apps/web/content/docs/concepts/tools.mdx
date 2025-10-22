@@ -1,0 +1,254 @@
+---
+title: Tools
+description: Built-in and custom tools for extending agent capabilities
+---
+
+# Tools
+
+Tools are executable functions that extend your agent's capabilities. AgentStart provides built-in tools and makes it easy to create custom ones.
+
+## Built-in Tools
+
+AgentStart includes two categories of built-in tools:
+
+### Inner Tools
+
+Task management tools:
+
+```ts
+import { innerTools } from "agentstart/agent";
+
+// Includes:
+// - todoRead: Read current task list
+// - todoWrite: Update task list
+```
+
+**todoRead**: Retrieves the current task list for the agent.
+
+**todoWrite**: Updates the task list with new tasks or status updates.
+
+### OS Tools
+
+File system and shell operation tools:
+
+```ts
+import { osTools } from "agentstart/agent";
+
+// Includes:
+// - bash: Execute shell commands
+// - read: Read file contents
+// - write: Write to files
+// - update: Update file sections
+// - glob: Search files by pattern
+// - grep: Search within files
+// - ls: List directory contents
+```
+
+<Tabs items={["bash", "read/write/update", "glob/grep", "ls"]}>
+
+<Tab value="bash">
+
+Execute shell commands safely:
+
+```ts
+// Agent can run shell commands
+// Example: "list all TypeScript files"
+// Executes: bash -c "find . -name '*.ts'"
+```
+
+**Features:**
+- Command execution with output capture
+- Error handling
+- Working directory support
+
+</Tab>
+
+<Tab value="read/write/update">
+
+File operations:
+
+- **read**: Read entire file contents
+- **write**: Create or overwrite files
+- **update**: Modify specific sections using search/replace
+
+```ts
+// Read a file
+// "read the contents of README.md"
+
+// Write a file
+// "create a new file called hello.ts with a greeting function"
+
+// Update a file
+// "update the port number in config.ts from 3000 to 3001"
+```
+
+</Tab>
+
+<Tab value="glob/grep">
+
+Search tools:
+
+- **glob**: Find files matching patterns
+- **grep**: Search file contents
+
+```ts
+// Find files
+// "find all .tsx files in the components directory"
+
+// Search contents
+// "search for 'useState' in all TypeScript files"
+```
+
+</Tab>
+
+<Tab value="ls">
+
+List directory contents:
+
+```ts
+// List files
+// "what files are in the src directory?"
+```
+
+</Tab>
+
+</Tabs>
+
+## Using Tools
+
+Tools are provided as an object to the Agent constructor:
+
+```ts
+import { Agent, innerTools, osTools } from "agentstart/agent";
+
+const agent = new Agent({
+  model,
+  instructions: "You are a helpful assistant.",
+  tools: {
+    ...innerTools,
+    ...osTools,
+  },
+});
+```
+
+## Creating Custom Tools
+
+Define custom tools using the AI SDK tool format:
+
+```ts
+import { z } from "zod";
+
+const weatherTool = {
+  description: "Get current weather for a location",
+  parameters: z.object({
+    location: z.string().describe("City name"),
+    units: z.enum(["celsius", "fahrenheit"]).default("celsius"),
+  }),
+  execute: async ({ location, units }) => {
+    const response = await fetch(
+      `https://api.weather.com/v1/weather?location=${location}&units=${units}`
+    );
+    return await response.json();
+  },
+};
+
+const agent = new Agent({
+  model,
+  instructions,
+  tools: {
+    ...osTools,
+    getWeather: weatherTool,
+  },
+});
+```
+
+### Tool Best Practices
+
+<Callout type="warn">
+  **Security**: Always validate inputs and handle errors. Avoid exposing sensitive data in tool responses.
+</Callout>
+
+1. **Clear Descriptions**: Write detailed descriptions so the model understands when to use the tool
+2. **Schema Validation**: Use Zod schemas to validate all parameters
+3. **Error Handling**: Catch errors and return helpful error messages
+4. **Idempotency**: Design tools to be safely retried
+5. **Minimal Scope**: Each tool should do one thing well
+
+## Tool Context
+
+Tools can access custom context provided to the Agent:
+
+```ts
+interface MyContext {
+  userId: string;
+  database: Database;
+}
+
+const agent = new Agent<MyContext>({
+  model,
+  instructions,
+  context: {
+    userId: "user-123",
+    database: db,
+  },
+  tools: {
+    getUserData: {
+      description: "Get user data from database",
+      parameters: z.object({}),
+      execute: async ({}, { context }) => {
+        // Access context in tools
+        const user = await context.database.users.findOne({
+          id: context.userId,
+        });
+        return user;
+      },
+    },
+  },
+});
+```
+
+## Tool Execution Flow
+
+```
+User sends message
+      ↓
+Agent analyzes and decides to use tool
+      ↓
+Tool parameters validated with Zod schema
+      ↓
+Tool execute function runs
+      ↓
+Result returned to agent
+      ↓
+Agent processes result and generates response
+      ↓
+Response sent to user
+```
+
+## Advanced: Streaming Tool Output
+
+For long-running operations, tools can stream progress updates:
+
+```ts
+const longRunningTool = {
+  description: "Analyze large codebase",
+  parameters: z.object({
+    path: z.string(),
+  }),
+  execute: async function* ({ path }) {
+    yield { status: "scanning", progress: 0 };
+    // ... scan files
+    yield { status: "analyzing", progress: 50 };
+    // ... analyze code
+    yield { status: "complete", progress: 100, results: [] };
+  },
+};
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Thread, Message & Todo" href="/docs/concepts/thread-message-todo" />
+  <Card title="Database" href="/docs/concepts/database" />
+  <Card title="API" href="/docs/concepts/api" />
+</Cards>

@@ -1,0 +1,158 @@
+---
+title: CLI
+description: Built-in CLI for managing your agent project
+---
+
+# CLI
+
+AgentStart comes with a built-in CLI to help you manage database schemas and project setup.
+
+## Generate
+
+The `generate` command creates the database schema required by AgentStart. If you're using Drizzle or Prisma, this command generates the right schema for your ORM. For Kysely, it generates an SQL file you can run directly.
+
+```bash title="Terminal"
+npx @agentstart/cli generate
+```
+
+### Options
+
+- `--output` - Where to save the generated schema
+  - Prisma: `prisma/schema.prisma`
+  - Drizzle: `schema.ts` in project root
+  - Kysely: `schema.sql` in project root
+- `--config` - Path to your agent config file (searches `./lib/agent.ts`, `./src/lib/agent.ts` by default)
+- `--y` - Skip confirmation prompt
+
+### Example Output
+
+<Tabs items={["Drizzle", "Prisma", "Kysely"]}>
+  <Tab value="Drizzle">
+    ```ts title="schema.ts"
+    import { pgTable, text, timestamp, jsonb } from "drizzle-orm/pg-core";
+
+    export const threadsTable = pgTable("threads", {
+      id: text("id").primaryKey(),
+      title: text("title"),
+      userId: text("user_id"),
+      createdAt: timestamp("created_at").defaultNow(),
+      metadata: jsonb("metadata"),
+    });
+
+    export const messagesTable = pgTable("messages", {
+      id: text("id").primaryKey(),
+      threadId: text("thread_id").references(() => threadsTable.id),
+      role: text("role"),
+      content: text("content"),
+      createdAt: timestamp("created_at").defaultNow(),
+      metadata: jsonb("metadata"),
+    });
+    ```
+  </Tab>
+  
+  <Tab value="Prisma">
+    ```prisma title="prisma/schema.prisma"
+    model Thread {
+      id        String    @id @default(cuid())
+      title     String?
+      userId    String?
+      createdAt DateTime  @default(now())
+      messages  Message[]
+      metadata  Json?
+    }
+
+    model Message {
+      id        String   @id @default(cuid())
+      threadId  String
+      thread    Thread   @relation(fields: [threadId], references: [id])
+      role      String
+      content   String
+      createdAt DateTime @default(now())
+      metadata  Json?
+    }
+    ```
+  </Tab>
+  
+  <Tab value="Kysely">
+    ```sql title="schema.sql"
+    CREATE TABLE threads (
+      id TEXT PRIMARY KEY,
+      title TEXT,
+      user_id TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      metadata JSONB
+    );
+
+    CREATE TABLE messages (
+      id TEXT PRIMARY KEY,
+      thread_id TEXT REFERENCES threads(id),
+      role TEXT,
+      content TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      metadata JSONB
+    );
+    ```
+  </Tab>
+</Tabs>
+
+## Migrate
+
+The `migrate` command applies the schema directly to your database. This is available for the built-in Kysely adapter. For Drizzle or Prisma, use your ORM's migration tool.
+
+```bash title="Terminal"
+npx @agentstart/cli migrate
+```
+
+### Options
+
+- `--config` - Path to your agent config file
+- `--y` - Skip confirmation prompt
+
+### Using ORM Migration Tools
+
+<Tabs items={["Drizzle", "Prisma"]}>
+  <Tab value="Drizzle">
+    ```bash
+    npx drizzle-kit generate
+    npx drizzle-kit push
+    ```
+  </Tab>
+  
+  <Tab value="Prisma">
+    ```bash
+    npx prisma generate
+    npx prisma db push
+    ```
+  </Tab>
+</Tabs>
+
+## Common Issues
+
+### Cannot find module
+
+If you see "Cannot find module X", the CLI can't resolve imports in your config. Try:
+
+1. Remove import aliases and use relative paths
+2. Run the CLI
+3. Revert to using aliases after
+
+### Config file not found
+
+The CLI searches these locations by default:
+- `./lib/agent.ts`
+- `./src/lib/agent.ts`
+- `./server/agent.ts`
+
+Use `--config` to specify a custom location:
+
+```bash
+npx @agentstart/cli generate --config ./custom/path/agent.ts
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Database Concepts" href="/docs/concepts/database" />
+  <Card title="Drizzle" href="/docs/databases/drizzle" />
+  <Card title="Prisma" href="/docs/databases/prisma" />
+</Cards>

@@ -30,6 +30,12 @@ import {
 import { Message, MessageContent } from "@/components/ai-elements/message";
 import { Response } from "@/components/ai-elements/response";
 import { Shimmer } from "@/components/ai-elements/shimmer";
+import {
+  Source,
+  Sources,
+  SourcesContent,
+  SourcesTrigger,
+} from "@/components/ai-elements/sources";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -201,16 +207,50 @@ export function Conversation({
   );
 
   const renderAssistantActions = useCallback(
-    (message: AgentStartUIMessage) => (
-      <Actions className="mt-2 w-full justify-start opacity-0 group-hover:opacity-100">
-        <Action onClick={() => regenerate()} label="Retry" tooltip="Retry">
-          <ArrowsClockwiseIcon className="size-4" />
-        </Action>
-        <Action onClick={() => handleCopy(message)} label="Copy" tooltip="Copy">
-          <CopyIcon className="size-4" />
-        </Action>
-      </Actions>
-    ),
+    (message: AgentStartUIMessage) => {
+      const parts = message.parts ?? [];
+      const sourceParts = parts.filter((part) => part.type === "source-url");
+
+      return (
+        <>
+          <Actions className="mt-2 w-full justify-start opacity-0 group-hover:opacity-100">
+            <Action onClick={() => regenerate()} label="Retry" tooltip="Retry">
+              <ArrowsClockwiseIcon className="size-4" />
+            </Action>
+            <Action
+              onClick={() => handleCopy(message)}
+              label="Copy"
+              tooltip="Copy"
+            >
+              <CopyIcon className="size-4" />
+            </Action>
+          </Actions>
+
+          {sourceParts.length > 0 && (
+            <div className="mt-2 w-full">
+              <Sources>
+                <SourcesTrigger count={sourceParts.length} />
+                <SourcesContent>
+                  {sourceParts.map((part, index) => {
+                    const sourcePart = part as {
+                      url: string;
+                      title?: string;
+                    };
+                    return (
+                      <Source
+                        key={`${message.id}-source-${index}`}
+                        href={sourcePart.url}
+                        title={sourcePart.title || sourcePart.url}
+                      />
+                    );
+                  })}
+                </SourcesContent>
+              </Sources>
+            </div>
+          )}
+        </>
+      );
+    },
     [handleCopy, regenerate],
   );
 

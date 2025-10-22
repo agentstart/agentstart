@@ -1,0 +1,263 @@
+---
+title: Guides
+description: Step-by-step guides for common use cases
+---
+
+# Guides
+
+Practical guides to help you build with AgentStart.
+
+## Building Your First Agent
+
+Create a complete agent application from scratch.
+
+<Steps>
+
+<Step>
+
+### Create Next.js Project
+
+```bash
+npx create-next-app@latest my-agent-app
+cd my-agent-app
+```
+
+</Step>
+
+<Step>
+
+### Install AgentStart
+
+```bash
+npm install agentstart @openrouter/ai-sdk-provider drizzle-orm @neondatabase/serverless
+```
+
+</Step>
+
+<Step>
+
+### Setup Database Schema
+
+Create `db/schema/agent.ts`:
+
+```ts
+import { pgTable, text, timestamp, jsonb } from "drizzle-orm/pg-core";
+
+export const threadsTable = pgTable("threads", {
+  id: text("id").primaryKey(),
+  title: text("title"),
+  userId: text("user_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+  metadata: jsonb("metadata"),
+});
+
+export const messagesTable = pgTable("messages", {
+  id: text("id").primaryKey(),
+  threadId: text("thread_id").references(() => threadsTable.id),
+  role: text("role"),
+  content: text("content"),
+  createdAt: timestamp("created_at").defaultNow(),
+  metadata: jsonb("metadata"),
+});
+```
+
+</Step>
+
+<Step>
+
+### Create Agent
+
+Create `lib/agent.ts`:
+
+```ts
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { agentStart } from "agentstart";
+import { Agent, innerTools, osTools } from "agentstart/agent";
+import { drizzleAdapter } from "agentstart/db";
+import { db } from "@/db";
+import * as schema from "@/db/schema";
+
+const openrouter = createOpenRouter({
+  apiKey: process.env.MODEL_PROVIDER_API_KEY!,
+});
+
+const agent = new Agent({
+  model: openrouter("x-ai/grok-4-fast"),
+  instructions: "You are a helpful coding assistant.",
+  tools: {
+    ...innerTools,
+    ...osTools,
+  },
+});
+
+export const start = agentStart({
+  agent,
+  memory: drizzleAdapter(db, {
+    provider: "pg",
+    schema: {
+      thread: schema.threadsTable,
+      message: schema.messagesTable,
+    },
+  }),
+  appName: "my-agent-app",
+});
+```
+
+</Step>
+
+<Step>
+
+### Create API Route
+
+Create `app/api/agent/[...all]/route.ts`:
+
+```ts
+import { toNextJsHandler } from "agentstart/integration";
+import { start } from "@/lib/agent";
+
+export const { POST, GET } = toNextJsHandler(start.handler);
+```
+
+</Step>
+
+<Step>
+
+### Create Client
+
+Create `lib/agent-client.ts`:
+
+```ts
+import { createAgentClient } from "agentstart/client";
+
+export const { client, useThread } = createAgentClient();
+```
+
+</Step>
+
+</Steps>
+
+## Adding Custom Tools
+
+Extend your agent with custom capabilities:
+
+```ts
+import { z } from "zod";
+
+const weatherTool = {
+  description: "Get weather for a city",
+  parameters: z.object({
+    city: z.string(),
+  }),
+  execute: async ({ city }) => {
+    const response = await fetch(
+      `https://api.weather.com/current?city=${city}`
+    );
+    return await response.json();
+  },
+};
+
+const agent = new Agent({
+  model,
+  instructions,
+  tools: {
+    ...osTools,
+    getWeather: weatherTool,
+  },
+});
+```
+
+## Authentication
+
+Add user authentication to your agent:
+
+```ts
+export const start = agentStart({
+  agent,
+  memory,
+  getUserId: async (headers) => {
+    // Extract user ID from auth header
+    const token = headers.get("authorization");
+    const user = await verifyToken(token);
+    return user.id;
+  },
+});
+```
+
+## Middleware
+
+Add custom middleware for logging, metrics, etc.:
+
+```ts
+import { os } from "@orpc/server";
+
+const loggingMiddleware = os.middleware(async ({ next }) => {
+  console.log("Request started");
+  const result = await next();
+  console.log("Request completed");
+  return result;
+});
+
+export const start = agentStart({
+  agent,
+  memory,
+  middleware: [loggingMiddleware],
+});
+```
+
+## Error Handling
+
+Handle errors gracefully:
+
+```ts
+const myTool = {
+  description: "Tool with error handling",
+  parameters: z.object({ input: z.string() }),
+  execute: async ({ input }) => {
+    try {
+      // Tool logic
+      return result;
+    } catch (error) {
+      return {
+        error: true,
+        message: "Failed to execute tool",
+      };
+    }
+  },
+};
+```
+
+## Best Practices
+
+<Callout type="info">
+  Follow these practices for production-ready agents.
+</Callout>
+
+### Security
+
+- Validate all inputs
+- Implement rate limiting
+- Use environment variables for secrets
+- Add authentication
+- Sanitize tool outputs
+
+### Performance
+
+- Use database connection pooling
+- Add indexes on frequently queried fields
+- Implement caching where appropriate
+- Monitor response times
+
+### Reliability
+
+- Add error handling to all tools
+- Implement retry logic for transient failures
+- Log errors with context
+- Set up monitoring and alerts
+
+## Next Steps
+
+<Cards>
+  <Card title="API Reference" href="/docs/reference/api" />
+  <Card title="Next.js Integration" href="/docs/integrations/next" />
+  <Card title="Database" href="/docs/concepts/database" />
+</Cards>

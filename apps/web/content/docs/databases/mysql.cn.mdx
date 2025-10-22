@@ -1,0 +1,126 @@
+---
+title: MySQL
+description: 将 AgentStart 与 MySQL 集成
+---
+
+# MySQL
+
+MySQL 是一个流行的开源关系型数据库管理系统（RDBMS），广泛用于构建 Web 应用程序和其他类型的软件。它提供灵活且可扩展的数据库解决方案。
+
+## 使用示例
+
+确保您已安装并配置了 MySQL。然后，您可以将其直接连接到 AgentStart。
+
+```ts title="lib/agent.ts"
+import { agentStart } from "agentstart";
+import { Kysely, MysqlDialect } from "kysely";
+import { createPool } from "mysql2/promise";
+
+const db = new Kysely({
+  dialect: new MysqlDialect({
+    pool: createPool({
+      host: "localhost",
+      user: "root",
+      password: "password",
+      database: "agentstart",
+    }),
+  }),
+});
+
+export const start = agentStart({
+  agent,
+  memory: kyselyAdapter(db, {
+    type: "mysql", // 可选配置
+  }),
+});
+```
+
+<Callout>
+  有关更多信息，请阅读 Kysely 关于
+  [MysqlDialect](https://kysely-org.github.io/kysely-apidoc/classes/MysqlDialect.html) 的文档。
+</Callout>
+
+## 架构生成和迁移
+
+AgentStart CLI 允许您生成或迁移数据库架构。
+
+<table>
+  <tr className="border-b">
+    <th>
+      <p className="font-bold text-[16px] mb-1">MySQL 架构生成</p>
+    </th>
+    <th>
+      <p className="font-bold text-[16px] mb-1">MySQL 架构迁移</p>
+    </th>
+  </tr>
+  <tr className="h-10">
+    <td>✅ 支持</td>
+    <td>✅ 支持</td>
+  </tr>
+</table>
+
+```bash title="架构生成"
+npx @agentstart/cli generate
+```
+
+```bash title="架构迁移"
+npx @agentstart/cli migrate
+```
+
+## 使用 Drizzle
+
+为了获得更好的开发体验，我们推荐使用 [Drizzle 适配器](/docs/databases/drizzle)：
+
+```bash
+npm install drizzle-orm mysql2
+```
+
+```ts title="lib/agent.ts"
+import { drizzle } from "drizzle-orm/mysql2";
+import mysql from "mysql2/promise";
+import { drizzleAdapter } from "agentstart/db";
+
+const pool = mysql.createPool({
+  host: "localhost",
+  user: "root",
+  password: "password",
+  database: "agentstart",
+});
+
+const db = drizzle(pool);
+
+export const start = agentStart({
+  agent,
+  memory: drizzleAdapter(db, {
+    provider: "mysql",
+    schema: {
+      thread: threadsTable,
+      message: messagesTable,
+    },
+  }),
+});
+```
+
+## 连接字符串格式
+
+```bash
+DATABASE_URL=mysql://user:password@localhost:3306/dbname
+```
+
+对于云提供商：
+
+```bash
+# PlanetScale
+DATABASE_URL=mysql://user:password@aws.connect.psdb.cloud/database?ssl={"rejectUnauthorized":true}
+
+# Railway
+DATABASE_URL=mysql://root:password@containers-us-west.railway.app:3306/railway
+```
+
+## 下一步
+
+<Cards>
+  <Card title="Drizzle 适配器" href="/docs/databases/drizzle" />
+  <Card title="PostgreSQL" href="/docs/databases/postgresql" />
+  <Card title="SQLite" href="/docs/databases/sqlite" />
+</Cards>

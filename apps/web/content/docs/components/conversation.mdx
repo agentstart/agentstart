@@ -1,0 +1,211 @@
+---
+title: Conversation
+description: Display thread messages with streaming support
+---
+
+# Conversation
+
+The `Conversation` component displays messages in a thread with automatic scrolling, streaming support, and tool visualization.
+
+<ConversationDemo />
+
+## Installation
+
+```bash
+npx shadcn@latest add conversation --registry=@agentstart
+```
+
+## Usage
+
+```tsx
+import { Conversation } from "@/components/agent/conversation";
+import { useThread } from "agentstart/client";
+
+export default function ChatPage({ threadId }: { threadId: string }) {
+  useThread(threadId); // Subscribe to thread updates
+
+  return <Conversation threadId={threadId} />;
+}
+```
+
+## Props
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `threadId` | `string` | - | The thread ID to display messages from. If not provided, uses 'default' store. |
+| `className` | `string` | - | Additional CSS classes for the conversation container |
+| `emptyState` | `ReactNode` | - | Custom component to show when there are no messages |
+| `loadingState` | `ReactNode` | - | Custom component to show while loading messages |
+| `errorState` | `(error: Error, retry: () => void) => ReactNode` | - | Custom error renderer with retry function |
+
+## Features
+
+- **Auto-scroll** - Automatically scrolls to latest message
+- **Streaming** - Real-time message streaming with SSE
+- **Tool Visualization** - Renders tool execution results
+- **Loading States** - Built-in loading and error states
+- **Message Actions** - Copy and regenerate message actions
+
+## Examples
+
+### Basic Usage
+
+```tsx
+import { Conversation } from "@/components/agent/conversation";
+
+export default function ThreadPage({ threadId }: { threadId: string }) {
+  return (
+    <div className="h-screen">
+      <Conversation threadId={threadId} />
+    </div>
+  );
+}
+```
+
+### Custom Empty State
+
+```tsx
+import { Conversation } from "@/components/agent/conversation";
+
+export default function ThreadPage({ threadId }: { threadId: string }) {
+  return (
+    <Conversation
+      threadId={threadId}
+      emptyState={
+        <div className="flex flex-col items-center justify-center h-full">
+          <h2 className="text-2xl font-bold">Start a Conversation</h2>
+          <p className="text-muted-foreground">Send a message to begin</p>
+        </div>
+      }
+    />
+  );
+}
+```
+
+### Custom Error State
+
+```tsx
+import { Conversation } from "@/components/agent/conversation";
+
+export default function ThreadPage({ threadId }: { threadId: string }) {
+  return (
+    <Conversation
+      threadId={threadId}
+      errorState={(error, retry) => (
+        <div className="flex flex-col items-center justify-center h-full gap-4">
+          <p className="text-destructive">{error.message}</p>
+          <button onClick={retry} className="px-4 py-2 bg-primary text-white rounded">
+            Retry
+          </button>
+        </div>
+      )}
+    />
+  );
+}
+```
+
+### With Custom Styling
+
+```tsx
+import { Conversation } from "@/components/agent/conversation";
+
+export default function ThreadPage({ threadId }: { threadId: string }) {
+  return (
+    <Conversation
+      threadId={threadId}
+      className="bg-slate-50 dark:bg-slate-900 rounded-lg p-4"
+    />
+  );
+}
+```
+
+## Message Actions
+
+The conversation includes built-in actions for each message:
+
+- **Copy** - Copy message content to clipboard
+- **Regenerate** - Regenerate the last assistant message
+
+```tsx
+// Actions are automatically included
+<Conversation threadId={threadId} />
+```
+
+## Tool Rendering
+
+The conversation automatically renders tool execution results:
+
+```tsx
+// Tools like bash, read, write are automatically visualized
+<Conversation threadId={threadId} />
+```
+
+## Scroll Behavior
+
+The conversation includes smart scrolling:
+
+- **Auto-scroll** - Scrolls to bottom on new messages
+- **Scroll Button** - Shows a button to scroll to bottom when not at bottom
+- **Manual Control** - User can scroll freely without interference
+
+## Integration with useThread
+
+The conversation works with the `useThread` hook for real-time updates:
+
+```tsx
+import { Conversation } from "@/components/agent/conversation";
+import { useThread } from "agentstart/client";
+
+export default function ThreadPage({ threadId }: { threadId: string }) {
+  // Subscribe to real-time updates
+  useThread(threadId);
+
+  return <Conversation threadId={threadId} />;
+}
+```
+
+## Message Structure
+
+Messages are displayed with:
+
+- **Role indicator** - User, Assistant, System, or Tool
+- **Timestamp** - Message creation time
+- **Content** - Message text with markdown support
+- **Tool results** - Visual rendering of tool outputs
+- **Actions** - Copy and regenerate buttons
+
+## TypeScript
+
+```tsx
+import type { ConversationProps } from "@/components/agent/conversation";
+
+const props: ConversationProps = {
+  threadId: "thread-123",
+  className: "h-full",
+  emptyState: <div>No messages</div>,
+};
+```
+
+## Accessibility
+
+The conversation includes:
+
+- **Keyboard navigation** - Arrow keys and Tab support
+- **Screen reader support** - ARIA labels and roles
+- **Focus management** - Proper focus indicators
+
+## Performance
+
+The conversation is optimized for performance:
+
+- **Virtual scrolling** - Efficient rendering of large message lists
+- **Message memoization** - Prevents unnecessary re-renders
+- **Lazy loading** - Loads message history on demand
+
+## Next Steps
+
+<Cards>
+  <Card title="Prompt Input" href="/docs/components/prompt-input" />
+  <Card title="Provider" href="/docs/components/provider" />
+  <Card title="Sidebar" href="/docs/components/sidebar" />
+</Cards>

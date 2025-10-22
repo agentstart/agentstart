@@ -7,7 +7,7 @@
     "build": "next build --turbopack",
     "start": "next start",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "lint": "bunx biome check --write ./src",
+    "lint": "bunx biome check --write --unsafe ./src",
     "typecheck": "tsc --noEmit",
     "db:push": "drizzle-kit push"
   },
@@ -60,7 +60,7 @@
     "mongodb": "^6.20.0",
     "motion": "^12.23.24",
     "nanoid": "^5.1.6",
-    "next": "15.5.6",
+    "next": "^16.0.0",
     "next-themes": "^0.4.6",
     "react": "^19.2.0",
     "react-day-picker": "^9.11.1",
@@ -77,7 +77,7 @@
     "vaul": "^1.1.2"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.6",
+    "@biomejs/biome": "^2.2.7",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^24",
     "@types/react": "^19",

@@ -1,0 +1,226 @@
+---
+title: Prisma 适配器
+description: 将 AgentStart 与 Prisma ORM 集成
+---
+
+# Prisma 适配器
+
+Prisma 是新一代 ORM，通过类型安全的数据库访问、声明式迁移和自动完成使数据库工作变得轻松。
+
+## 安装
+
+```bash
+npm install @prisma/client
+npm install -D prisma
+```
+
+## 使用示例
+
+<Steps>
+
+<Step>
+
+### 初始化 Prisma
+
+```bash
+npx prisma init
+```
+
+这会创建 `prisma/schema.prisma` 文件并将 `DATABASE_URL` 添加到您的 `.env`。
+
+</Step>
+
+<Step>
+
+### 定义架构
+
+```prisma title="prisma/schema.prisma"
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // 或 "mysql", "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Thread {
+  id        String    @id @default(cuid())
+  title     String?
+  userId    String?
+  createdAt DateTime  @default(now())
+  metadata  Json?
+  messages  Message[]
+
+  @@map("threads")
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  threadId  String
+  role      String
+  content   String
+  createdAt DateTime @default(now())
+  metadata  Json?
+  thread    Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+```
+
+</Step>
+
+<Step>
+
+### 生成客户端
+
+```bash
+npx prisma generate
+npx prisma db push
+```
+
+</Step>
+
+<Step>
+
+### 与 AgentStart 一起使用
+
+```ts title="lib/agent.ts"
+import { PrismaClient } from "@prisma/client";
+import { agentStart } from "agentstart";
+import { prismaAdapter } from "agentstart/db";
+
+const prisma = new PrismaClient();
+
+export const start = agentStart({
+  agent,
+  memory: prismaAdapter(prisma, {
+    provider: "postgresql", // 或 "mysql", "sqlite", "mongodb"
+  }),
+});
+```
+
+</Step>
+
+</Steps>
+
+## 架构生成和迁移
+
+AgentStart CLI 可以生成 Prisma 架构：
+
+```bash title="架构生成"
+npx @agentstart/cli generate
+```
+
+然后使用 Prisma 应用迁移：
+
+```bash title="架构迁移"
+npx prisma generate
+npx prisma db push
+```
+
+对于生产环境，使用 Prisma Migrate：
+
+```bash
+npx prisma migrate dev --name init
+npx prisma migrate deploy
+```
+
+## 数据库提供商
+
+Prisma 支持多个数据库。更新您的 `schema.prisma`：
+
+<Tabs items={["PostgreSQL", "MySQL", "SQLite"]}>
+  <Tab value="PostgreSQL">
+    ```prisma
+    datasource db {
+      provider = "postgresql"
+      url      = env("DATABASE_URL")
+    }
+    ```
+    
+    ```bash
+    DATABASE_URL="postgresql://user:password@localhost:5432/agentstart"
+    ```
+  </Tab>
+  
+  <Tab value="MySQL">
+    ```prisma
+    datasource db {
+      provider = "mysql"
+      url      = env("DATABASE_URL")
+    }
+    ```
+    
+    ```bash
+    DATABASE_URL="mysql://user:password@localhost:3306/agentstart"
+    ```
+  </Tab>
+  
+  <Tab value="SQLite">
+    ```prisma
+    datasource db {
+      provider = "sqlite"
+      url      = env("DATABASE_URL")
+    }
+    ```
+    
+    ```bash
+    DATABASE_URL="file:./agentstart.db"
+    ```
+  </Tab>
+</Tabs>
+
+## 类型安全
+
+Prisma 提供完全的类型安全：
+
+```ts
+// 类型安全查询
+const threads = await prisma.thread.findMany();
+//    ^? Thread[]
+
+// 类型安全插入
+await prisma.message.create({
+  data: {
+    id: "msg-1",
+    threadId: "thread-1",
+    role: "user",
+    content: "你好",
+  },
+});
+```
+
+## Prisma Studio
+
+使用 Prisma Studio 可视化和编辑您的数据：
+
+```bash
+npx prisma studio
+```
+
+## 连接池
+
+对于生产环境，使用连接池：
+
+```ts
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL,
+    },
+  },
+});
+```
+
+对于无服务器环境，使用 Prisma Data Proxy 或像 PgBouncer 这样的连接池。
+
+## 下一步
+
+<Cards>
+  <Card title="Drizzle 适配器" href="/docs/databases/drizzle" />
+  <Card title="PostgreSQL" href="/docs/databases/postgresql" />
+  <Card title="MySQL" href="/docs/databases/mysql" />
+</Cards>

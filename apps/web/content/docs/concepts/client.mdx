@@ -1,0 +1,143 @@
+---
+title: Client
+description: Using the AgentStart client in your application
+---
+
+# Client
+
+The AgentStart client provides type-safe React hooks and store access for building agent UIs.
+
+## Creating a Client
+
+Create a client instance to interact with your agent:
+
+```ts title="lib/agent-client.ts"
+import { createAgentClient } from "agentstart/client";
+
+export const { client, useThread } = createAgentClient({
+  baseURL: "http://localhost:3000", // optional if same domain
+});
+```
+
+### Options
+
+```ts
+interface ClientOptions {
+  baseURL?: string;  // Base URL of your agent API
+  fetch?: typeof fetch;  // Custom fetch implementation
+}
+```
+
+## React Hooks
+
+### useThread
+
+Syncs thread state in your React components:
+
+```tsx
+import { useThread } from "@/lib/agent-client";
+
+export function ChatPage() {
+  const { threadId } = useParams();
+  useThread(threadId);  // Syncs this thread's state
+  
+  return <ChatUI />;
+}
+```
+
+This hook automatically:
+- Fetches thread data on mount
+- Subscribes to real-time updates
+- Cleans up on unmount
+
+### useAgentStore
+
+Access agent state directly with Zustand:
+
+```tsx
+import { useAgentStore } from "@/lib/agent-client";
+
+export function Messages() {
+  const messages = useAgentStore((state) => state.messages, threadId);
+  const isLoading = useAgentStore((state) => state.isLoading, threadId);
+  
+  return (
+    <div>
+      {messages.map(msg => <Message key={msg.id} {...msg} />)}
+      {isLoading && <Spinner />}
+    </div>
+  );
+}
+```
+
+## Store API
+
+The agent store provides these selectors:
+
+```ts
+interface AgentState {
+  // Thread data
+  thread: Thread | null;
+  messages: Message[];
+  
+  // Loading states
+  isLoading: boolean;
+  isStreaming: boolean;
+  
+  // Actions
+  sendMessage: (params: { content: string }) => Promise<void>;
+  regenerate: () => Promise<void>;
+  stop: () => void;
+  
+  // Error handling
+  error: Error | null;
+}
+```
+
+## Sending Messages
+
+```tsx
+const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
+
+const handleSend = async (content: string) => {
+  await sendMessage({ content });
+};
+```
+
+## Managing Threads
+
+```tsx
+import { client } from "@/lib/agent-client";
+
+// Create new thread
+const thread = await client.thread.create();
+
+// List threads
+const threads = await client.thread.list();
+
+// Delete thread
+await client.thread.delete({ id: threadId });
+```
+
+## Real-time Updates
+
+The client automatically handles real-time message streaming using Server-Sent Events (SSE).
+
+## Error Handling
+
+```tsx
+const error = useAgentStore((state) => state.error, threadId);
+
+{error && (
+  <Alert variant="error">
+    {error.message}
+  </Alert>
+)}
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="API" href="/docs/concepts/api" />
+  <Card title="Database" href="/docs/concepts/database" />
+</Cards>

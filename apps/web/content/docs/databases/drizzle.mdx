@@ -1,0 +1,211 @@
+---
+title: Drizzle ORM Adapter
+description: Integrate AgentStart with Drizzle ORM
+---
+
+# Drizzle ORM Adapter
+
+Drizzle ORM is a powerful and flexible ORM for Node.js and TypeScript. It provides a simple and intuitive API with full type safety and supports PostgreSQL, MySQL, and SQLite.
+
+## Installation
+
+```bash
+npm install drizzle-orm
+```
+
+Install your database driver:
+
+<Tabs items={["PostgreSQL", "MySQL", "SQLite"]}>
+  <Tab value="PostgreSQL">
+    ```bash
+    npm install @neondatabase/serverless
+    # or
+    npm install pg
+    ```
+  </Tab>
+  
+  <Tab value="MySQL">
+    ```bash
+    npm install mysql2
+    ```
+  </Tab>
+  
+  <Tab value="SQLite">
+    ```bash
+    npm install better-sqlite3
+    ```
+  </Tab>
+</Tabs>
+
+## Example Usage
+
+<Steps>
+
+<Step>
+
+### Define Schema
+
+Create your database schema with Drizzle:
+
+```ts title="db/schema.ts"
+import { pgTable, text, timestamp, jsonb } from "drizzle-orm/pg-core";
+
+export const threadsTable = pgTable("threads", {
+  id: text("id").primaryKey(),
+  title: text("title"),
+  userId: text("user_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+  metadata: jsonb("metadata"),
+});
+
+export const messagesTable = pgTable("messages", {
+  id: text("id").primaryKey(),
+  threadId: text("thread_id").references(() => threadsTable.id),
+  role: text("role"),
+  content: text("content"),
+  createdAt: timestamp("created_at").defaultNow(),
+  metadata: jsonb("metadata"),
+});
+```
+
+</Step>
+
+<Step>
+
+### Initialize Drizzle
+
+```ts title="db/index.ts"
+import { drizzle } from "drizzle-orm/neon-http";
+import { neon } from "@neondatabase/serverless";
+
+const sql = neon(process.env.DATABASE_URL!);
+export const db = drizzle(sql);
+```
+
+</Step>
+
+<Step>
+
+### Use with AgentStart
+
+```ts title="lib/agent.ts"
+import { agentStart } from "agentstart";
+import { drizzleAdapter } from "agentstart/db";
+import { db } from "@/db";
+import * as schema from "@/db/schema";
+
+export const start = agentStart({
+  agent,
+  memory: drizzleAdapter(db, {
+    provider: "pg", // or "mysql" or "sqlite"
+    schema: {
+      thread: schema.threadsTable,
+      message: schema.messagesTable,
+    },
+  }),
+});
+```
+
+</Step>
+
+</Steps>
+
+## Schema Generation & Migration
+
+The AgentStart CLI can generate Drizzle schemas:
+
+```bash title="Schema Generation"
+npx @agentstart/cli generate
+```
+
+Then apply the migration with Drizzle Kit:
+
+```bash title="Schema Migration"
+npx drizzle-kit generate
+npx drizzle-kit push
+```
+
+## Database Providers
+
+### PostgreSQL
+
+```ts
+import { drizzle } from "drizzle-orm/neon-http";
+import { neon } from "@neondatabase/serverless";
+
+const sql = neon(process.env.DATABASE_URL!);
+const db = drizzle(sql);
+```
+
+### MySQL
+
+```ts
+import { drizzle } from "drizzle-orm/mysql2";
+import mysql from "mysql2/promise";
+
+const pool = mysql.createPool(process.env.DATABASE_URL!);
+const db = drizzle(pool);
+```
+
+### SQLite
+
+```ts
+import { drizzle } from "drizzle-orm/better-sqlite3";
+import Database from "better-sqlite3";
+
+const sqlite = new Database("agentstart.db");
+const db = drizzle(sqlite);
+```
+
+## Custom Table Names
+
+If your schema uses different table names (e.g., plural forms):
+
+```ts
+import { drizzleAdapter } from "agentstart/db";
+
+export const start = agentStart({
+  agent,
+  memory: drizzleAdapter(db, {
+    provider: "pg",
+    schema: {
+      thread: threadsTable,  // maps to "threads" table
+      message: messagesTable, // maps to "messages" table
+    },
+  }),
+});
+```
+
+## Type Safety
+
+Drizzle provides full type safety:
+
+```ts
+// Type-safe queries
+const threads = await db.select().from(threadsTable);
+//    ^? Thread[]
+
+// Type-safe inserts
+await db.insert(messagesTable).values({
+  id: "msg-1",
+  threadId: "thread-1",
+  role: "user",
+  content: "Hello",
+});
+```
+
+## Drizzle Studio
+
+Use Drizzle Studio to visualize and edit your data:
+
+```bash
+npx drizzle-kit studio
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="PostgreSQL" href="/docs/databases/postgresql" />
+  <Card title="MySQL" href="/docs/databases/mysql" />
+  <Card title="Prisma Adapter" href="/docs/databases/prisma" />
+</Cards>

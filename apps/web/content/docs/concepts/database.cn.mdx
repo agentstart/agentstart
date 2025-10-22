@@ -1,0 +1,117 @@
+---
+title: 数据库
+description: 了解如何在 AgentStart 中使用数据库
+---
+
+# 数据库
+
+AgentStart 需要数据库来持久化智能体对话、消息和元数据。它支持多个数据库适配器。
+
+## 支持的数据库
+
+AgentStart 支持：
+
+- **PostgreSQL** - 通过 Drizzle、Prisma 或 Kysely
+- **MySQL** - 通过 Drizzle、Prisma 或 Kysely  
+- **SQLite** - 通过 Drizzle、Prisma 或 Kysely
+- **MongoDB** - 通过原生驱动
+- **内存** - 用于测试
+
+## 数据库适配器
+
+选择适合您技术栈的适配器：
+
+<Cards>
+  <Card title="Drizzle" href="/docs/databases/drizzle" />
+  <Card title="Prisma" href="/docs/databases/prisma" />
+  <Card title="PostgreSQL" href="/docs/databases/postgresql" />
+  <Card title="MongoDB" href="/docs/databases/mongodb" />
+</Cards>
+
+## 核心架构
+
+AgentStart 需要两个主要表：
+
+### Threads 表
+
+存储对话会话：
+
+```sql
+CREATE TABLE threads (
+  id TEXT PRIMARY KEY,
+  title TEXT,
+  user_id TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  metadata JSONB
+);
+```
+
+### Messages 表
+
+存储单个消息：
+
+```sql
+CREATE TABLE messages (
+  id TEXT PRIMARY KEY,
+  thread_id TEXT REFERENCES threads(id),
+  role TEXT,
+  content TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  metadata JSONB
+);
+```
+
+## 连接管理
+
+### 连接池
+
+在生产环境中始终使用连接池：
+
+```ts
+import { Pool } from "pg";
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 20,  // 最大池大小
+});
+```
+
+### 连接字符串
+
+使用环境变量存储数据库 URL：
+
+```bash
+# PostgreSQL
+DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+
+# MySQL
+DATABASE_URL=mysql://user:password@localhost:3306/dbname
+
+# MongoDB
+DATABASE_URL=mongodb://localhost:27017/dbname
+```
+
+## 最佳实践
+
+1. **索引**：在经常查询的字段上添加索引
+   ```sql
+   CREATE INDEX idx_messages_thread_id ON messages(thread_id);
+   CREATE INDEX idx_threads_user_id ON threads(user_id);
+   ```
+
+2. **清理**：定期清理旧数据
+   ```sql
+   DELETE FROM threads 
+   WHERE created_at < NOW() - INTERVAL '90 days';
+   ```
+
+3. **备份**：为生产环境设置自动备份
+
+4. **监控**：跟踪查询性能和连接池使用情况
+
+## 下一步
+
+<Cards>
+  <Card title="Drizzle 适配器" href="/docs/databases/drizzle" />
+  <Card title="Prisma 适配器" href="/docs/databases/prisma" />
+</Cards>

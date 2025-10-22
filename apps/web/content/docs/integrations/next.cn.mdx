@@ -1,0 +1,382 @@
+---
+title: Next.js
+description: 将 AgentStart 与 Next.js App Router 集成
+---
+
+# Next.js 集成
+
+AgentStart 为 Next.js App Router 提供一流支持，具有完整的类型安全和流式传输支持。
+
+## 安装
+
+```bash
+npm install agentstart
+```
+
+## 设置指南
+
+<Steps>
+
+<Step>
+
+### 创建 Agent 配置
+
+在 `lib/agent.ts` 中创建您的智能体：
+
+```ts title="lib/agent.ts"
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { agentStart } from "agentstart";
+import { Agent, innerTools, osTools } from "agentstart/agent";
+import { drizzleAdapter } from "agentstart/db";
+import { db } from "@/db";
+import * as schema from "@/db/schema";
+
+const openrouter = createOpenRouter({
+  apiKey: process.env.MODEL_PROVIDER_API_KEY!,
+});
+
+const agent = new Agent({
+  model: openrouter("x-ai/grok-4-fast"),
+  instructions: "你是一个乐于助人的编程助手。",
+  tools: {
+    ...innerTools,
+    ...osTools,
+  },
+});
+
+export const start = agentStart({
+  agent,
+  memory: drizzleAdapter(db, {
+    provider: "pg",
+    schema: {
+      thread: schema.threadsTable,
+      message: schema.messagesTable,
+    },
+  }),
+  appName: "my-app",
+});
+```
+
+</Step>
+
+<Step>
+
+### 创建 API 路由
+
+在 `app/api/agent/[...all]/route.ts` 中创建通配符路由处理器：
+
+```ts title="app/api/agent/[...all]/route.ts"
+import { toNextJsHandler } from "agentstart/integration";
+import { start } from "@/lib/agent";
+
+export const { POST, GET } = toNextJsHandler(start.handler);
+
+// 可选：配置路由
+export const runtime = "nodejs"; // 或 "edge"
+export const maxDuration = 300; // 5 分钟
+```
+
+</Step>
+
+<Step>
+
+### 创建客户端
+
+在 `lib/agent-client.ts` 中创建客户端实例：
+
+```ts title="lib/agent-client.ts"
+import { createAgentClient } from "agentstart/client";
+
+export const { client, useThread } = createAgentClient({
+  // 如果在同一域名上运行，baseURL 是可选的
+  baseURL: process.env.NEXT_PUBLIC_APP_URL,
+});
+
+// 导出 hooks
+export { useAgentStore } from "agentstart/client";
+```
+
+</Step>
+
+<Step>
+
+### 在组件中使用
+
+创建聊天界面：
+
+```tsx title="app/chat/[threadId]/page.tsx"
+"use client";
+
+import { useThread, useAgentStore } from "@/lib/agent-client";
+import { useParams } from "next/navigation";
+import { useState } from "react";
+
+export default function ChatPage() {
+  const { threadId } = useParams<{ threadId: string }>();
+  const [input, setInput] = useState("");
+
+  // 同步线程状态
+  useThread(threadId);
+
+  // 访问状态
+  const messages = useAgentStore((state) => state.messages, threadId);
+  const isLoading = useAgentStore((state) => state.isLoading, threadId);
+  const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
+
+  const handleSend = async () => {
+    if (!input.trim()) return;
+    await sendMessage({ content: input });
+    setInput("");
+  };
+
+  return (
+    <div className="flex flex-col h-screen">
+      <div className="flex-1 overflow-y-auto p-4">
+        {messages.map((message) => (
+          <div key={message.id} className="mb-4">
+            <div className="font-bold">{message.role}</div>
+            <div>{message.content}</div>
+          </div>
+        ))}
+        {isLoading && <div>加载中...</div>}
+      </div>
+
+      <div className="p-4 border-t">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSend()}
+          placeholder="输入消息..."
+          className="w-full p-2 border rounded"
+        />
+      </div>
+    </div>
+  );
+}
+```
+
+</Step>
+
+</Steps>
+
+## Server Actions
+
+在 Server Actions 中使用 AgentStart：
+
+```tsx title="app/actions.ts"
+"use server";
+
+import { start } from "@/lib/agent";
+
+export async function createThread(title: string) {
+  const thread = await start.api.thread.create({ title });
+  return thread;
+}
+
+export async function getThreads() {
+  const threads = await start.api.thread.list();
+  return threads;
+}
+
+export async function deleteThread(id: string) {
+  await start.api.thread.delete({ id });
+}
+```
+
+在组件中使用：
+
+```tsx
+import { createThread, getThreads } from "./actions";
+
+export default async function ThreadList() {
+  const threads = await getThreads();
+
+  return (
+    <div>
+      {threads.map((thread) => (
+        <div key={thread.id}>{thread.title}</div>
+      ))}
+    </div>
+  );
+}
+```
+
+## 中间件
+
+添加用于身份验证的自定义中间件：
+
+```ts title="lib/agent.ts"
+import { os } from "@orpc/server";
+
+const authMiddleware = os.middleware(async ({ context, next }) => {
+  const session = await getSession(); // 您的认证逻辑
+  
+  if (!session) {
+    throw new Error("未授权");
+  }
+
+  return next({
+    context: {
+      ...context,
+      userId: session.userId,
+    },
+  });
+});
+
+export const start = agentStart({
+  agent,
+  memory,
+  middleware: [authMiddleware],
+});
+```
+
+## 环境变量
+
+创建 `.env.local`：
+
+```bash title=".env.local"
+# 模型提供商
+MODEL_PROVIDER_API_KEY=your_api_key
+
+# 数据库
+DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+
+# 应用 URL（可选）
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+## 部署
+
+### Vercel
+
+零配置部署到 Vercel：
+
+```bash
+vercel
+```
+
+在 Vercel 仪表板中添加环境变量：
+- `MODEL_PROVIDER_API_KEY`
+- `DATABASE_URL`
+
+### Docker
+
+创建 `Dockerfile`：
+
+```dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+EXPOSE 3000
+CMD ["npm", "start"]
+```
+
+构建并运行：
+
+```bash
+docker build -t my-agent .
+docker run -p 3000:3000 --env-file .env my-agent
+```
+
+## Edge Runtime
+
+AgentStart 可在 Vercel Edge Runtime 上工作：
+
+```ts title="app/api/agent/[...all]/route.ts"
+import { toNextJsHandler } from "agentstart/integration";
+import { start } from "@/lib/agent";
+
+export const runtime = "edge";
+
+export const { POST, GET } = toNextJsHandler(start.handler);
+```
+
+<Callout type="warn">
+  某些数据库适配器可能无法在 Edge Runtime 上工作。使用兼容 edge 的适配器，如 Neon 或 PlanetScale。
+</Callout>
+
+## 流式响应
+
+流式传输默认启用。要自定义：
+
+```ts
+const agent = new Agent({
+  model,
+  instructions,
+  tools,
+  streamOptions: {
+    chunkSize: 1024,
+    flushInterval: 100,
+  },
+});
+```
+
+## 类型安全
+
+AgentStart 在 Next.js 中提供完全的类型安全：
+
+```tsx
+import { start } from "@/lib/agent";
+
+// 类型从您的智能体推断
+type Thread = Awaited<ReturnType<typeof start.api.thread.get>>;
+type Message = Awaited<ReturnType<typeof start.api.message.list>>[number];
+```
+
+## 示例
+
+查看完整示例：
+
+```bash
+git clone https://github.com/yourusername/agentstart
+cd agentstart/playground/next
+npm install
+npm run dev
+```
+
+## 故障排除
+
+### 找不到模块错误
+
+确保您已安装所有依赖项：
+
+```bash
+npm install agentstart @openrouter/ai-sdk-provider drizzle-orm
+```
+
+### 数据库连接错误
+
+验证您的 `DATABASE_URL` 正确且数据库可访问。
+
+### CORS 错误
+
+如果您的 API 在不同域名上，配置 CORS：
+
+```ts
+import { toNextJsHandler } from "agentstart/integration";
+import { start } from "@/lib/agent";
+
+const handler = toNextJsHandler(start.handler);
+
+export const POST = async (req: Request) => {
+  const response = await handler.POST(req);
+  response.headers.set("Access-Control-Allow-Origin", "*");
+  return response;
+};
+```
+
+## 下一步
+
+<Cards>
+  <Card title="基本用法" href="/docs/basic-usage" />
+  <Card title="API 参考" href="/docs/reference/api" />
+  <Card title="数据库设置" href="/docs/concepts/database" />
+</Cards>

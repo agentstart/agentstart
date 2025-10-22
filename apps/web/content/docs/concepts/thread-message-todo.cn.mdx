@@ -1,0 +1,270 @@
+---
+title: Thread、Message 和 Todo
+description: 理解 AgentStart 的核心数据模型
+---
+
+# Thread、Message 和 Todo
+
+AgentStart 使用三个核心数据模型组织智能体交互：Threads、Messages 和 Todos。
+
+## Threads（线程）
+
+**Thread** 代表用户与智能体之间的对话会话。每个线程维护自己的上下文和历史记录。
+
+### Thread 结构
+
+```ts
+interface Thread {
+  id: string;
+  title: string | null;
+  userId: string | null;
+  createdAt: Date;
+  metadata: unknown;
+}
+```
+
+### 创建 Threads
+
+```ts
+// 服务器端
+const thread = await start.api.thread.create({
+  title: "TypeScript 帮助",
+  userId: "user-123",
+});
+
+// 客户端
+const thread = await client.thread.create({
+  title: "TypeScript 帮助",
+});
+```
+
+### 列出 Threads
+
+```ts
+// 获取当前用户的所有线程
+const threads = await start.api.thread.list();
+
+// 按用户过滤
+const userThreads = await start.api.thread.list({ 
+  userId: "user-123" 
+});
+```
+
+### 删除 Threads
+
+```ts
+await start.api.thread.delete({ id: "thread-123" });
+```
+
+## Messages（消息）
+
+**Messages** 是线程中的单个交换。每条消息都有一个角色（user、assistant、system 或 tool）。
+
+### Message 结构
+
+```ts
+interface Message {
+  id: string;
+  threadId: string;
+  role: "user" | "assistant" | "system" | "tool";
+  content: string;
+  createdAt: Date;
+  metadata: unknown;
+}
+```
+
+### 消息角色
+
+- **user**: 来自用户的消息
+- **assistant**: 来自 AI 智能体的响应
+- **system**: 系统提示和指令
+- **tool**: 工具执行结果
+
+### 发送消息
+
+```tsx
+// 客户端使用 hooks
+const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
+await sendMessage({ content: "什么是 TypeScript？" });
+
+// 服务器端
+await start.api.message.send({
+  threadId: "thread-123",
+  content: "什么是 TypeScript？",
+});
+```
+
+### 获取消息
+
+```tsx
+// 客户端
+const messages = useAgentStore((state) => state.messages, threadId);
+
+// 服务器端
+const messages = await start.api.message.list({ 
+  threadId: "thread-123" 
+});
+```
+
+### 消息流式传输
+
+消息使用服务器发送事件（SSE）实时流式传输：
+
+```tsx
+const isStreaming = useAgentStore((state) => state.isStreaming, threadId);
+
+{isStreaming && <StreamingIndicator />}
+```
+
+## Todos（待办事项）
+
+**Todos** 帮助智能体跟踪线程内的任务和子目标。智能体可以使用内置工具读取和更新 todos。
+
+### Todo 结构
+
+```ts
+interface Todo {
+  id: string;
+  content: string;
+  status: "pending" | "in_progress" | "completed";
+  priority: "low" | "medium" | "high";
+}
+```
+
+### 读取 Todos
+
+智能体使用 `todoRead` 工具检查当前任务：
+
+```ts
+// 智能体自动访问此工具
+const todos = await start.api.todo.read({ threadId: "thread-123" });
+```
+
+### 写入 Todos
+
+智能体使用 `todoWrite` 工具更新任务：
+
+```ts
+await start.api.todo.write({
+  threadId: "thread-123",
+  todos: [
+    {
+      id: "1",
+      content: "研究 TypeScript 类型",
+      status: "completed",
+      priority: "high",
+    },
+    {
+      id: "2",
+      content: "编写文档",
+      status: "in_progress",
+      priority: "medium",
+    },
+  ],
+});
+```
+
+### Todo 示例
+
+```tsx
+"use client";
+
+import { useAgentStore } from "@/lib/agent-client";
+
+export function TodoList({ threadId }: { threadId: string }) {
+  const [todos, setTodos] = useState<Todo[]>([]);
+
+  // 获取 todos
+  useEffect(() => {
+    async function fetchTodos() {
+      const result = await client.todo.read({ threadId });
+      setTodos(result);
+    }
+    fetchTodos();
+  }, [threadId]);
+
+  return (
+    <div>
+      <h3>智能体任务</h3>
+      {todos.map((todo) => (
+        <div key={todo.id}>
+          <span className={todo.status === "completed" ? "line-through" : ""}>
+            {todo.content}
+          </span>
+          <span>{todo.status}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+## 关系
+
+```
+Thread (1)
+  ├── Messages (many)
+  │   ├── User messages
+  │   ├── Assistant messages
+  │   └── Tool messages
+  └── Todos (many)
+      ├── Pending tasks
+      ├── In-progress tasks
+      └── Completed tasks
+```
+
+## 最佳实践
+
+### Thread 管理
+
+1. **描述性标题** - 便于识别
+2. **清理旧线程** - 保持性能
+3. **使用 metadata** - 存储自定义线程数据
+
+### Message 处理
+
+1. **流式响应** - 更好的用户体验
+2. **优雅处理错误** - 使用 try-catch 块
+3. **显示加载状态** - 在发送消息期间
+
+### Todo 组织
+
+1. **保持聚焦** - 每个 todo 一个明确任务
+2. **定期更新状态** - 帮助智能体跟踪进度
+3. **使用优先级** - 帮助智能体决定下一步做什么
+
+## 示例：完整的 Thread 生命周期
+
+```tsx
+// 1. 创建线程
+const thread = await client.thread.create({
+  title: "构建 React 组件",
+});
+
+// 2. 发送初始消息
+await sendMessage({ 
+  content: "帮我构建一个按钮组件" 
+});
+
+// 3. 智能体响应并创建 todos
+// Todos 由智能体使用 innerTools 自动跟踪
+
+// 4. 继续对话
+await sendMessage({ 
+  content: "添加悬停效果" 
+});
+
+// 5. 检查进度
+const todos = await client.todo.read({ threadId: thread.id });
+
+// 6. 完成后清理
+await client.thread.delete({ id: thread.id });
+```
+
+## 下一步
+
+<Cards>
+  <Card title="API" href="/docs/concepts/api" />
+  <Card title="客户端" href="/docs/concepts/client" />
+  <Card title="数据库" href="/docs/concepts/database" />
+</Cards>

@@ -1,0 +1,117 @@
+---
+title: Database
+description: Learn how to use databases with AgentStart
+---
+
+# Database
+
+AgentStart requires a database to persist agent conversations, messages, and metadata. It supports multiple database adapters.
+
+## Supported Databases
+
+AgentStart supports:
+
+- **PostgreSQL** - via Drizzle, Prisma, or Kysely
+- **MySQL** - via Drizzle, Prisma, or Kysely  
+- **SQLite** - via Drizzle, Prisma, or Kysely
+- **MongoDB** - via native driver
+- **In-Memory** - for testing
+
+## Database Adapters
+
+Choose the adapter that matches your stack:
+
+<Cards>
+  <Card title="Drizzle" href="/docs/databases/drizzle" />
+  <Card title="Prisma" href="/docs/databases/prisma" />
+  <Card title="MongoDB" href="/docs/databases/mongodb" />
+</Cards>
+
+## Core Schema
+
+AgentStart requires two main tables:
+
+### Threads Table
+
+Stores conversation sessions:
+
+```sql
+CREATE TABLE threads (
+  id TEXT PRIMARY KEY,
+  title TEXT,
+  user_id TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  metadata JSONB
+);
+```
+
+### Messages Table
+
+Stores individual messages:
+
+```sql
+CREATE TABLE messages (
+  id TEXT PRIMARY KEY,
+  thread_id TEXT REFERENCES threads(id),
+  role TEXT,
+  content TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  metadata JSONB
+);
+```
+
+## Connection Management
+
+### Connection Pooling
+
+Always use connection pooling in production:
+
+```ts
+import { Pool } from "pg";
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 20,  // Maximum pool size
+});
+```
+
+### Connection String
+
+Use environment variables for database URLs:
+
+```bash
+# PostgreSQL
+DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+
+# MySQL
+DATABASE_URL=mysql://user:password@localhost:3306/dbname
+
+# MongoDB
+DATABASE_URL=mongodb://localhost:27017/dbname
+```
+
+## Best Practices
+
+1. **Indexes**: Add indexes on frequently queried fields
+   ```sql
+   CREATE INDEX idx_messages_thread_id ON messages(thread_id);
+   CREATE INDEX idx_threads_user_id ON threads(user_id);
+   ```
+
+2. **Cleanup**: Implement periodic cleanup of old data
+   ```sql
+   DELETE FROM threads 
+   WHERE created_at < NOW() - INTERVAL '90 days';
+   ```
+
+3. **Backups**: Set up automated backups for production
+
+4. **Monitoring**: Track query performance and connection pool usage
+
+## Next Steps
+
+<Cards>
+  <Card title="PostgreSQL" href="/docs/databases/postgresql" />
+  <Card title="MySQL" href="/docs/databases/mysql" />
+  <Card title="Drizzle Adapter" href="/docs/databases/drizzle" />
+</Cards>

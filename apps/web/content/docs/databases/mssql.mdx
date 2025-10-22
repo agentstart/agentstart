@@ -1,0 +1,136 @@
+---
+title: MS SQL Server
+description: Integrate AgentStart with Microsoft SQL Server
+---
+
+# Microsoft SQL Server
+
+Microsoft SQL Server is a relational database management system developed by Microsoft. It supports a wide variety of transaction processing, business intelligence, and analytics applications.
+
+## Example Usage
+
+Make sure you have SQL Server installed and configured. Then, you can connect it to AgentStart.
+
+```ts title="lib/agent.ts"
+import { agentStart } from "agentstart";
+import { Kysely, MssqlDialect } from "kysely";
+import { Pool } from "tarn";
+import * as Tedious from "tedious";
+
+const db = new Kysely({
+  dialect: new MssqlDialect({
+    tarn: {
+      ...Pool,
+    },
+    tedious: {
+      ...Tedious,
+      connectionFactory: () =>
+        new Tedious.Connection({
+          server: "localhost",
+          authentication: {
+            type: "default",
+            options: {
+              userName: "sa",
+              password: "YourPassword",
+            },
+          },
+          options: {
+            port: 1433,
+            database: "agentstart",
+          },
+        }),
+    },
+  }),
+});
+
+export const start = agentStart({
+  agent,
+  memory: kyselyAdapter(db),
+});
+```
+
+<Callout>
+  For more information, read Kysely's documentation on the
+  [MssqlDialect](https://kysely-org.github.io/kysely-apidoc/classes/MssqlDialect.html).
+</Callout>
+
+## Schema Generation & Migration
+
+The AgentStart CLI allows you to generate or migrate your database schema.
+
+<table>
+  <tr className="border-b">
+    <th>
+      <p className="font-bold text-[16px] mb-1">MSSQL Schema Generation</p>
+    </th>
+    <th>
+      <p className="font-bold text-[16px] mb-1">MSSQL Schema Migration</p>
+    </th>
+  </tr>
+  <tr className="h-10">
+    <td>✅ Supported</td>
+    <td>✅ Supported</td>
+  </tr>
+</table>
+
+```bash title="Schema Generation"
+npx @agentstart/cli generate
+```
+
+```bash title="Schema Migration"
+npx @agentstart/cli migrate
+```
+
+## Installation
+
+Install the required dependencies:
+
+```bash
+npm install kysely tedious tarn
+```
+
+## Connection String Format
+
+```bash
+# Basic connection
+Server=localhost,1433;Database=agentstart;User Id=sa;Password=YourPassword;
+
+# With encryption
+Server=localhost,1433;Database=agentstart;User Id=sa;Password=YourPassword;Encrypt=true;TrustServerCertificate=true;
+```
+
+## Azure SQL Database
+
+For Azure SQL Database:
+
+```ts
+const db = new Kysely({
+  dialect: new MssqlDialect({
+    tedious: {
+      connectionFactory: () =>
+        new Tedious.Connection({
+          server: "your-server.database.windows.net",
+          authentication: {
+            type: "default",
+            options: {
+              userName: "your-username",
+              password: "your-password",
+            },
+          },
+          options: {
+            database: "your-database",
+            encrypt: true,
+          },
+        }),
+    },
+  }),
+});
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="PostgreSQL" href="/docs/databases/postgresql" />
+  <Card title="MySQL" href="/docs/databases/mysql" />
+  <Card title="Other Databases" href="/docs/databases/other-relational-databases" />
+</Cards>

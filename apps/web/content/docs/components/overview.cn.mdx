@@ -1,0 +1,183 @@
+---
+title: 组件总览
+description: AgentStart 应用的预构建 React 组件
+---
+
+# 组件总览
+
+AgentStart 提供了一套全面的预构建 React 组件，与 AgentStart API 无缝配合。这些组件基于 [shadcn/ui](https://ui.shadcn.com) 构建，可以使用 shadcn CLI 安装。
+
+## 包含内容
+
+组件库包含构建完整智能体界面所需的一切：
+
+- **对话组件** - 显示带流式传输支持的线程消息
+- **输入组件** - 收集带文件附件的用户输入
+- **侧边栏组件** - 列出和管理线程
+- **工具渲染器** - 可视化工具执行结果
+- **Provider** - 在应用中共享 AgentStart 客户端
+
+## 快速开始
+
+### 1. 安装 shadcn CLI
+
+```bash
+npm install -D shadcn
+```
+
+### 2. 在项目中初始化 shadcn
+
+```bash
+npx shadcn@latest init
+```
+
+### 3. 配置 AgentStart 注册表
+
+在 `components.json` 中添加 AgentStart 注册表：
+
+```json title="components.json"
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "registries": {
+    "@agentstart": "./node_modules/@agentstart/components/registry/{name}.json"
+  }
+}
+```
+
+### 4. 安装组件
+
+```bash
+npx shadcn@latest add provider --registry=@agentstart
+npx shadcn@latest add conversation --registry=@agentstart
+npx shadcn@latest add prompt-input --registry=@agentstart
+```
+
+## 基本用法
+
+### 1. 使用 AgentStartProvider 包裹应用
+
+```tsx title="app/layout.tsx"
+import { createAgentClient } from "agentstart/client";
+import { AgentStartProvider } from "@/components/agent/provider";
+
+const { client } = createAgentClient();
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html>
+      <body>
+        <AgentStartProvider 
+          client={client}
+          navigate={(path) => {
+            // 你的导航逻辑（Next.js、React Router 等）
+            window.location.href = path;
+          }}
+        >
+          {children}
+        </AgentStartProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### 2. 在页面中使用组件
+
+```tsx title="app/thread/[threadId]/page.tsx"
+"use client";
+
+import { Conversation } from "@/components/agent/conversation";
+import { PromptInput } from "@/components/agent/prompt-input";
+import { useAgentStore, useThread } from "agentstart/client";
+
+export default function ThreadPage({ params }: { params: { threadId: string } }) {
+  useThread(params.threadId);
+  const sendMessage = useAgentStore((state) => state.sendMessage, params.threadId);
+
+  return (
+    <div className="flex h-screen flex-col">
+      <Conversation threadId={params.threadId} />
+      
+      <PromptInput
+        threadId={params.threadId}
+        onMessageSubmit={async (message) => {
+          await sendMessage({ text: message.text ?? "" });
+        }}
+      />
+    </div>
+  );
+}
+```
+
+## 可用组件
+
+<Cards>
+  <Card title="Provider" href="/docs/components/provider" />
+  <Card title="Conversation" href="/docs/components/conversation" />
+  <Card title="Prompt Input" href="/docs/components/prompt-input" />
+  <Card title="Sidebar" href="/docs/components/sidebar" />
+</Cards>
+
+## 完整示例
+
+这是一个组合所有主要组件的完整示例：
+
+```tsx title="app/page.tsx"
+"use client";
+
+import { createAgentClient } from "agentstart/client";
+import { AgentStartProvider } from "@/components/agent/provider";
+import { Sidebar } from "@/components/agent/sidebar";
+import { Conversation } from "@/components/agent/conversation";
+import { PromptInput } from "@/components/agent/prompt-input";
+import { useRouter } from "next/navigation";
+
+const { client } = createAgentClient();
+
+export default function AgentPage() {
+  const router = useRouter();
+
+  return (
+    <AgentStartProvider 
+      client={client}
+      navigate={(path) => router.push(path)}
+    >
+      <Sidebar
+        onSelectThread={(thread) => router.push(`/thread/${thread.id}`)}
+      >
+        <div className="flex h-screen flex-col">
+          <Conversation />
+          <PromptInput />
+        </div>
+      </Sidebar>
+    </AgentStartProvider>
+  );
+}
+```
+
+## 样式
+
+所有组件使用 Tailwind CSS 并遵循 shadcn/ui 设计系统。你可以通过以下方式自定义它们：
+
+1. **使用 className 属性** - 传递自定义 Tailwind 类
+2. **修改源代码** - 安装后编辑组件文件
+3. **使用 CSS 变量** - 通过全局 CSS 自定义颜色
+
+## TypeScript 支持
+
+所有组件都完全支持 TypeScript 类型：
+
+```tsx
+import type { ConversationProps } from "@/components/agent/conversation";
+import type { PromptInputProps } from "@/components/agent/prompt-input";
+import type { SidebarProps } from "@/components/agent/sidebar";
+```
+
+## 下一步
+
+<Cards>
+  <Card title="Provider" href="/docs/components/provider" />
+  <Card title="Conversation" href="/docs/components/conversation" />
+  <Card title="Prompt Input" href="/docs/components/prompt-input" />
+  <Card title="Sidebar" href="/docs/components/sidebar" />
+</Cards>

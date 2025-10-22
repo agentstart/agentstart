@@ -15,7 +15,13 @@
           "target": "components/agent/provider.tsx"
         }
       ],
-      "dependencies": ["agentstart", "react"]
+      "dependencies": [
+        "@orpc/tanstack-query",
+        "@tanstack/react-query",
+        "agentstart",
+        "react"
+      ],
+      "registryDependencies": ["tooltip"]
     },
     {
       "name": "sidebar",
@@ -35,13 +41,20 @@
         }
       ],
       "dependencies": [
-        "@tanstack/react-query",
         "@agentstart/utils",
+        "@tanstack/react-query",
+        "@phosphor-icons/react",
         "agentstart",
-        "lucide-react",
         "react"
       ],
-      "registryDependencies": ["button", "scroll-area", "sidebar"]
+      "registryDependencies": [
+        "button",
+        "dropdown-menu",
+        "empty",
+        "scroll-area",
+        "sidebar",
+        "tooltip"
+      ]
     }
   ]
 }

@@ -1,0 +1,365 @@
+---
+title: Installation
+description: Learn how to configure AgentStart in your project
+---
+
+<Steps>
+
+<Step>
+
+### Install the Package
+
+Let's start by adding AgentStart to your project:
+
+```bash
+npm install agentstart
+```
+
+<Callout type="info">
+If you're using a separate client and server setup, make sure to install AgentStart in both parts of your project.
+</Callout>
+
+</Step>
+
+<Step>
+
+### Set Environment Variables
+
+Create a `.env` file in the root of your project and add the following environment variables:
+
+1. **Model Provider API Key**
+
+API key from your model provider (OpenRouter, OpenAI, Anthropic, etc.).
+
+```txt title=".env"
+MODEL_PROVIDER_API_KEY=your_api_key_here
+```
+
+2. **Database URL**
+
+Connection string for your database:
+
+```txt title=".env"
+DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+```
+
+</Step>
+
+<Step>
+
+### Install Model Provider
+
+Choose and install your preferred AI model provider:
+
+<Tabs items={["OpenRouter", "OpenAI", "Anthropic"]}>
+  <Tab value="OpenRouter">
+    ```bash
+    npm install @openrouter/ai-sdk-provider
+    ```
+    
+    Get your API key from [OpenRouter](https://openrouter.ai/keys)
+  </Tab>
+  
+  <Tab value="OpenAI">
+    ```bash
+    npm install @ai-sdk/openai
+    ```
+    
+    Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys)
+  </Tab>
+  
+  <Tab value="Anthropic">
+    ```bash
+    npm install @ai-sdk/anthropic
+    ```
+    
+    Get your API key from [Anthropic Console](https://console.anthropic.com/)
+  </Tab>
+</Tabs>
+
+</Step>
+
+<Step>
+
+### Configure Database
+
+Choose your database adapter and install dependencies:
+
+<Tabs items={["Drizzle", "Prisma", "Kysely", "MongoDB"]}>
+  <Tab value="Drizzle">
+    ```bash
+    npm install drizzle-orm @neondatabase/serverless
+    ```
+    
+    Create your database schema:
+    
+    ```ts title="db/schema/agent.ts"
+    import { pgTable, text, timestamp, jsonb } from "drizzle-orm/pg-core";
+
+    export const threadsTable = pgTable("threads", {
+      id: text("id").primaryKey(),
+      title: text("title"),
+      userId: text("user_id"),
+      createdAt: timestamp("created_at").defaultNow(),
+      metadata: jsonb("metadata"),
+    });
+
+    export const messagesTable = pgTable("messages", {
+      id: text("id").primaryKey(),
+      threadId: text("thread_id").references(() => threadsTable.id),
+      role: text("role"),
+      content: text("content"),
+      createdAt: timestamp("created_at").defaultNow(),
+      metadata: jsonb("metadata"),
+    });
+    ```
+    
+    Initialize Drizzle:
+    
+    ```ts title="db/index.ts"
+    import { drizzle } from "drizzle-orm/neon-http";
+    import { neon } from "@neondatabase/serverless";
+
+    const sql = neon(process.env.DATABASE_URL!);
+    export const db = drizzle(sql);
+    ```
+  </Tab>
+  
+  <Tab value="Prisma">
+    ```bash
+    npm install @prisma/client
+    npm install -D prisma
+    ```
+    
+    Define your schema:
+    
+    ```prisma title="prisma/schema.prisma"
+    model Thread {
+      id        String    @id @default(cuid())
+      title     String?
+      userId    String?
+      createdAt DateTime  @default(now())
+      messages  Message[]
+      metadata  Json?
+    }
+
+    model Message {
+      id        String   @id @default(cuid())
+      threadId  String
+      thread    Thread   @relation(fields: [threadId], references: [id])
+      role      String
+      content   String
+      createdAt DateTime @default(now())
+      metadata  Json?
+    }
+    ```
+    
+    Generate Prisma client:
+    
+    ```bash
+    npx prisma generate
+    npx prisma db push
+    ```
+  </Tab>
+  
+  <Tab value="Kysely">
+    ```bash
+    npm install kysely pg
+    ```
+    
+    Define your types and initialize:
+    
+    ```ts title="db/index.ts"
+    import { Kysely, PostgresDialect } from "kysely";
+    import { Pool } from "pg";
+
+    export const db = new Kysely({
+      dialect: new PostgresDialect({
+        pool: new Pool({
+          connectionString: process.env.DATABASE_URL,
+        }),
+      }),
+    });
+    ```
+  </Tab>
+  
+  <Tab value="MongoDB">
+    ```bash
+    npm install mongodb
+    ```
+    
+    Initialize MongoDB client:
+    
+    ```ts title="db/index.ts"
+    import { MongoClient } from "mongodb";
+
+    const client = new MongoClient(process.env.DATABASE_URL!);
+    await client.connect();
+
+    export const db = client.db("agentstart");
+    ```
+  </Tab>
+</Tabs>
+
+</Step>
+
+<Step>
+
+### Create Agent Instance
+
+Create a file named `agent.ts` in one of these locations:
+- `lib/agent.ts`
+- `src/lib/agent.ts`
+- `server/agent.ts`
+
+```ts title="lib/agent.ts"
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { agentStart } from "agentstart";
+import { Agent, innerTools, osTools } from "agentstart/agent";
+import { drizzleAdapter } from "agentstart/db";
+import { db } from "@/db";
+import * as schema from "@/db/schema";
+
+const openrouter = createOpenRouter({
+  apiKey: process.env.MODEL_PROVIDER_API_KEY!,
+});
+
+const agent = new Agent({
+  model: openrouter("x-ai/grok-4-fast"),
+  instructions: "You are a helpful assistant.",
+  tools: {
+    ...innerTools,
+    ...osTools,
+  },
+});
+
+export const start = agentStart({
+  agent,
+  memory: drizzleAdapter(db, {
+    provider: "pg",
+    schema: {
+      thread: schema.threadsTable,
+      message: schema.messagesTable,
+    },
+  }),
+  appName: "my-app",
+});
+```
+
+</Step>
+
+<Step>
+
+### Mount Handler
+
+Create an API route to handle agent requests. The route should handle requests for the path `/api/agent/*`.
+
+<Tabs items={["Next.js", "Express", "Node.js"]}>
+  <Tab value="Next.js">
+    ```ts title="app/api/agent/[...all]/route.ts"
+    import { toNextJsHandler } from "agentstart/integration";
+    import { start } from "@/lib/agent";
+
+    export const { POST, GET } = toNextJsHandler(start.handler);
+    ```
+  </Tab>
+  
+  <Tab value="Express">
+    ```ts title="server.ts"
+    import express from "express";
+    import { toNodeHandler } from "agentstart/integration";
+    import { start } from "./lib/agent";
+
+    const app = express();
+    const handler = toNodeHandler(start.handler);
+
+    app.use("/api/agent", handler);
+
+    app.listen(3000, () => {
+      console.log("Server running on http://localhost:3000");
+    });
+    ```
+  </Tab>
+  
+  <Tab value="Node.js">
+    ```ts title="server.ts"
+    import { createServer } from "node:http";
+    import { toNodeHandler } from "agentstart/integration";
+    import { start } from "./lib/agent";
+
+    const handler = toNodeHandler(start.handler);
+    const server = createServer(handler);
+
+    server.listen(3000, () => {
+      console.log("Server running on http://localhost:3000");
+    });
+    ```
+  </Tab>
+</Tabs>
+
+</Step>
+
+<Step>
+
+### Create Client Instance
+
+Create a client to interact with your agent from the frontend:
+
+```ts title="lib/agent-client.ts"
+import { createAgentClient } from "agentstart/client";
+
+export const { client, useThread } = createAgentClient({
+  baseURL: "http://localhost:3000", // optional if same domain
+});
+```
+
+<Callout type="info">
+If you're running the agent on the same domain as your frontend, you can omit the `baseURL` option.
+</Callout>
+
+</Step>
+
+<Step>
+
+### 🎉 That's it!
+
+You're now ready to use AgentStart in your application. Continue to [Basic Usage](/docs/basic-usage) to learn how to use the agent in your application.
+
+</Step>
+
+</Steps>
+
+## Database Migrations
+
+After setting up your schema, run migrations to create the tables:
+
+<Tabs items={["Drizzle", "Prisma"]}>
+  <Tab value="Drizzle">
+    ```bash
+    npx drizzle-kit generate
+    npx drizzle-kit push
+    ```
+  </Tab>
+  
+  <Tab value="Prisma">
+    ```bash
+    npx prisma generate
+    npx prisma db push
+    ```
+  </Tab>
+</Tabs>
+
+## Example Projects
+
+Check out complete examples:
+
+- **Next.js Example**: See `/playground/next` in the repository
+- **Express Example**: Coming soon
+
+## Next Steps
+
+<Cards>
+  <Card title="Basic Usage" href="/docs/basic-usage" />
+  <Card title="Database" href="/docs/concepts/database" />
+  <Card title="Tools" href="/docs/concepts/tools" />
+</Cards>

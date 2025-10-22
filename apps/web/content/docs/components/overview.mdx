@@ -1,0 +1,183 @@
+---
+title: Components Overview
+description: Pre-built React components for AgentStart applications
+---
+
+# Components Overview
+
+AgentStart provides a comprehensive set of pre-built React components that work seamlessly with the AgentStart API. These components are built on top of [shadcn/ui](https://ui.shadcn.com) and can be installed using the shadcn CLI.
+
+## What's Included
+
+The component library includes everything you need to build a complete agent interface:
+
+- **Conversation Components** - Display thread messages with streaming support
+- **Input Components** - Collect user input with file attachments
+- **Sidebar Components** - List and manage threads
+- **Tool Renderers** - Visualize tool execution results
+- **Provider** - Share AgentStart client across your app
+
+## Quick Start
+
+### 1. Install shadcn CLI
+
+```bash
+npm install -D shadcn
+```
+
+### 2. Initialize shadcn in your project
+
+```bash
+npx shadcn@latest init
+```
+
+### 3. Configure AgentStart registry
+
+Add the AgentStart registry to your `components.json`:
+
+```json title="components.json"
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "registries": {
+    "@agentstart": "./node_modules/@agentstart/components/registry/{name}.json"
+  }
+}
+```
+
+### 4. Install components
+
+```bash
+npx shadcn@latest add provider --registry=@agentstart
+npx shadcn@latest add conversation --registry=@agentstart
+npx shadcn@latest add prompt-input --registry=@agentstart
+```
+
+## Basic Usage
+
+### 1. Wrap your app with AgentStartProvider
+
+```tsx title="app/layout.tsx"
+import { createAgentClient } from "agentstart/client";
+import { AgentStartProvider } from "@/components/agent/provider";
+
+const { client } = createAgentClient();
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html>
+      <body>
+        <AgentStartProvider 
+          client={client}
+          navigate={(path) => {
+            // Your navigation logic (Next.js, React Router, etc.)
+            window.location.href = path;
+          }}
+        >
+          {children}
+        </AgentStartProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### 2. Use components in your pages
+
+```tsx title="app/thread/[threadId]/page.tsx"
+"use client";
+
+import { Conversation } from "@/components/agent/conversation";
+import { PromptInput } from "@/components/agent/prompt-input";
+import { useAgentStore, useThread } from "agentstart/client";
+
+export default function ThreadPage({ params }: { params: { threadId: string } }) {
+  useThread(params.threadId);
+  const sendMessage = useAgentStore((state) => state.sendMessage, params.threadId);
+
+  return (
+    <div className="flex h-screen flex-col">
+      <Conversation threadId={params.threadId} />
+      
+      <PromptInput
+        threadId={params.threadId}
+        onMessageSubmit={async (message) => {
+          await sendMessage({ text: message.text ?? "" });
+        }}
+      />
+    </div>
+  );
+}
+```
+
+## Available Components
+
+<Cards>
+  <Card title="Provider" href="/docs/components/provider" />
+  <Card title="Conversation" href="/docs/components/conversation" />
+  <Card title="Prompt Input" href="/docs/components/prompt-input" />
+  <Card title="Sidebar" href="/docs/components/sidebar" />
+</Cards>
+
+## Complete Example
+
+Here's a full example combining all major components:
+
+```tsx title="app/page.tsx"
+"use client";
+
+import { createAgentClient } from "agentstart/client";
+import { AgentStartProvider } from "@/components/agent/provider";
+import { Sidebar } from "@/components/agent/sidebar";
+import { Conversation } from "@/components/agent/conversation";
+import { PromptInput } from "@/components/agent/prompt-input";
+import { useRouter } from "next/navigation";
+
+const { client } = createAgentClient();
+
+export default function AgentPage() {
+  const router = useRouter();
+
+  return (
+    <AgentStartProvider 
+      client={client}
+      navigate={(path) => router.push(path)}
+    >
+      <Sidebar
+        onSelectThread={(thread) => router.push(`/thread/${thread.id}`)}
+      >
+        <div className="flex h-screen flex-col">
+          <Conversation />
+          <PromptInput />
+        </div>
+      </Sidebar>
+    </AgentStartProvider>
+  );
+}
+```
+
+## Styling
+
+All components use Tailwind CSS and follow the shadcn/ui design system. You can customize them by:
+
+1. **Using className prop** - Pass custom Tailwind classes
+2. **Modifying the source** - Edit component files after installation
+3. **Using CSS variables** - Customize colors via your global CSS
+
+## TypeScript Support
+
+All components are fully typed with TypeScript:
+
+```tsx
+import type { ConversationProps } from "@/components/agent/conversation";
+import type { PromptInputProps } from "@/components/agent/prompt-input";
+import type { SidebarProps } from "@/components/agent/sidebar";
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Provider" href="/docs/components/provider" />
+  <Card title="Conversation" href="/docs/components/conversation" />
+  <Card title="Prompt Input" href="/docs/components/prompt-input" />
+  <Card title="Sidebar" href="/docs/components/sidebar" />
+</Cards>

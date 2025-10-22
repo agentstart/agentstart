@@ -1,0 +1,382 @@
+---
+title: Next.js
+description: Integrate AgentStart with Next.js App Router
+---
+
+# Next.js Integration
+
+AgentStart provides first-class support for Next.js App Router with full type safety and streaming support.
+
+## Installation
+
+```bash
+npm install agentstart
+```
+
+## Setup Guide
+
+<Steps>
+
+<Step>
+
+### Create Agent Configuration
+
+Create your agent in `lib/agent.ts`:
+
+```ts title="lib/agent.ts"
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { agentStart } from "agentstart";
+import { Agent, innerTools, osTools } from "agentstart/agent";
+import { drizzleAdapter } from "agentstart/db";
+import { db } from "@/db";
+import * as schema from "@/db/schema";
+
+const openrouter = createOpenRouter({
+  apiKey: process.env.MODEL_PROVIDER_API_KEY!,
+});
+
+const agent = new Agent({
+  model: openrouter("x-ai/grok-4-fast"),
+  instructions: "You are a helpful coding assistant.",
+  tools: {
+    ...innerTools,
+    ...osTools,
+  },
+});
+
+export const start = agentStart({
+  agent,
+  memory: drizzleAdapter(db, {
+    provider: "pg",
+    schema: {
+      thread: schema.threadsTable,
+      message: schema.messagesTable,
+    },
+  }),
+  appName: "my-app",
+});
+```
+
+</Step>
+
+<Step>
+
+### Create API Route
+
+Create a catch-all route handler in `app/api/agent/[...all]/route.ts`:
+
+```ts title="app/api/agent/[...all]/route.ts"
+import { toNextJsHandler } from "agentstart/integration";
+import { start } from "@/lib/agent";
+
+export const { POST, GET } = toNextJsHandler(start.handler);
+
+// Optional: Configure route
+export const runtime = "nodejs"; // or "edge"
+export const maxDuration = 300; // 5 minutes
+```
+
+</Step>
+
+<Step>
+
+### Create Client
+
+Create a client instance in `lib/agent-client.ts`:
+
+```ts title="lib/agent-client.ts"
+import { createAgentClient } from "agentstart/client";
+
+export const { client, useThread } = createAgentClient({
+  // baseURL is optional if running on same domain
+  baseURL: process.env.NEXT_PUBLIC_APP_URL,
+});
+
+// Export hooks
+export { useAgentStore } from "agentstart/client";
+```
+
+</Step>
+
+<Step>
+
+### Use in Components
+
+Create a chat interface:
+
+```tsx title="app/chat/[threadId]/page.tsx"
+"use client";
+
+import { useThread, useAgentStore } from "@/lib/agent-client";
+import { useParams } from "next/navigation";
+import { useState } from "react";
+
+export default function ChatPage() {
+  const { threadId } = useParams<{ threadId: string }>();
+  const [input, setInput] = useState("");
+
+  // Sync thread state
+  useThread(threadId);
+
+  // Access state
+  const messages = useAgentStore((state) => state.messages, threadId);
+  const isLoading = useAgentStore((state) => state.isLoading, threadId);
+  const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
+
+  const handleSend = async () => {
+    if (!input.trim()) return;
+    await sendMessage({ content: input });
+    setInput("");
+  };
+
+  return (
+    <div className="flex flex-col h-screen">
+      <div className="flex-1 overflow-y-auto p-4">
+        {messages.map((message) => (
+          <div key={message.id} className="mb-4">
+            <div className="font-bold">{message.role}</div>
+            <div>{message.content}</div>
+          </div>
+        ))}
+        {isLoading && <div>Loading...</div>}
+      </div>
+
+      <div className="p-4 border-t">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSend()}
+          placeholder="Type a message..."
+          className="w-full p-2 border rounded"
+        />
+      </div>
+    </div>
+  );
+}
+```
+
+</Step>
+
+</Steps>
+
+## Server Actions
+
+Use AgentStart in Server Actions:
+
+```tsx title="app/actions.ts"
+"use server";
+
+import { start } from "@/lib/agent";
+
+export async function createThread(title: string) {
+  const thread = await start.api.thread.create({ title });
+  return thread;
+}
+
+export async function getThreads() {
+  const threads = await start.api.thread.list();
+  return threads;
+}
+
+export async function deleteThread(id: string) {
+  await start.api.thread.delete({ id });
+}
+```
+
+Use in components:
+
+```tsx
+import { createThread, getThreads } from "./actions";
+
+export default async function ThreadList() {
+  const threads = await getThreads();
+
+  return (
+    <div>
+      {threads.map((thread) => (
+        <div key={thread.id}>{thread.title}</div>
+      ))}
+    </div>
+  );
+}
+```
+
+## Middleware
+
+Add custom middleware for authentication:
+
+```ts title="lib/agent.ts"
+import { os } from "@orpc/server";
+
+const authMiddleware = os.middleware(async ({ context, next }) => {
+  const session = await getSession(); // your auth logic
+  
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
+  return next({
+    context: {
+      ...context,
+      userId: session.userId,
+    },
+  });
+});
+
+export const start = agentStart({
+  agent,
+  memory,
+  middleware: [authMiddleware],
+});
+```
+
+## Environment Variables
+
+Create `.env.local`:
+
+```bash title=".env.local"
+# Model Provider
+MODEL_PROVIDER_API_KEY=your_api_key
+
+# Database
+DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+
+# App URL (optional)
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+## Deployment
+
+### Vercel
+
+Deploy to Vercel with zero configuration:
+
+```bash
+vercel
+```
+
+Add environment variables in Vercel dashboard:
+- `MODEL_PROVIDER_API_KEY`
+- `DATABASE_URL`
+
+### Docker
+
+Create `Dockerfile`:
+
+```dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+EXPOSE 3000
+CMD ["npm", "start"]
+```
+
+Build and run:
+
+```bash
+docker build -t my-agent .
+docker run -p 3000:3000 --env-file .env my-agent
+```
+
+## Edge Runtime
+
+AgentStart works on Vercel Edge Runtime:
+
+```ts title="app/api/agent/[...all]/route.ts"
+import { toNextJsHandler } from "agentstart/integration";
+import { start } from "@/lib/agent";
+
+export const runtime = "edge";
+
+export const { POST, GET } = toNextJsHandler(start.handler);
+```
+
+<Callout type="warn">
+  Some database adapters may not work on Edge Runtime. Use edge-compatible adapters like Neon or PlanetScale.
+</Callout>
+
+## Streaming Responses
+
+Streaming is enabled by default. To customize:
+
+```ts
+const agent = new Agent({
+  model,
+  instructions,
+  tools,
+  streamOptions: {
+    chunkSize: 1024,
+    flushInterval: 100,
+  },
+});
+```
+
+## Type Safety
+
+AgentStart provides full type safety in Next.js:
+
+```tsx
+import { start } from "@/lib/agent";
+
+// Types are inferred from your agent
+type Thread = Awaited<ReturnType<typeof start.api.thread.get>>;
+type Message = Awaited<ReturnType<typeof start.api.message.list>>[number];
+```
+
+## Examples
+
+Check out the complete example:
+
+```bash
+git clone https://github.com/yourusername/agentstart
+cd agentstart/playground/next
+npm install
+npm run dev
+```
+
+## Troubleshooting
+
+### Module not found errors
+
+Make sure you have all dependencies installed:
+
+```bash
+npm install agentstart @openrouter/ai-sdk-provider drizzle-orm
+```
+
+### Database connection errors
+
+Verify your `DATABASE_URL` is correct and the database is accessible.
+
+### CORS errors
+
+If your API is on a different domain, configure CORS:
+
+```ts
+import { toNextJsHandler } from "agentstart/integration";
+import { start } from "@/lib/agent";
+
+const handler = toNextJsHandler(start.handler);
+
+export const POST = async (req: Request) => {
+  const response = await handler.POST(req);
+  response.headers.set("Access-Control-Allow-Origin", "*");
+  return response;
+};
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Basic Usage" href="/docs/basic-usage" />
+  <Card title="API Reference" href="/docs/reference/api" />
+  <Card title="Database Setup" href="/docs/concepts/database" />
+</Cards>

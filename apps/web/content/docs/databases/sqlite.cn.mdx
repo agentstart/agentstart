@@ -1,0 +1,123 @@
+---
+title: SQLite
+description: 将 AgentStart 与 SQLite 集成
+---
+
+# SQLite
+
+SQLite 是一个轻量级、无服务器、自包含的 SQL 数据库引擎。非常适合开发、测试和中小型应用程序。
+
+## 使用示例
+
+SQLite 不需要单独的服务器进程，非常适合本地开发。
+
+```ts title="lib/agent.ts"
+import { agentStart } from "agentstart";
+import { Kysely, SqliteDialect } from "kysely";
+import Database from "better-sqlite3";
+
+const db = new Kysely({
+  dialect: new SqliteDialect({
+    database: new Database("agentstart.db"),
+  }),
+});
+
+export const start = agentStart({
+  agent,
+  memory: kyselyAdapter(db, {
+    type: "sqlite", // 可选配置
+  }),
+});
+```
+
+<Callout>
+  有关更多信息，请阅读 Kysely 关于
+  [SqliteDialect](https://kysely-org.github.io/kysely-apidoc/classes/SqliteDialect.html) 的文档。
+</Callout>
+
+## 架构生成和迁移
+
+AgentStart CLI 允许您生成或迁移数据库架构。
+
+<table>
+  <tr className="border-b">
+    <th>
+      <p className="font-bold text-[16px] mb-1">SQLite 架构生成</p>
+    </th>
+    <th>
+      <p className="font-bold text-[16px] mb-1">SQLite 架构迁移</p>
+    </th>
+  </tr>
+  <tr className="h-10">
+    <td>✅ 支持</td>
+    <td>✅ 支持</td>
+  </tr>
+</table>
+
+```bash title="架构生成"
+npx @agentstart/cli generate
+```
+
+```bash title="架构迁移"
+npx @agentstart/cli migrate
+```
+
+## 使用 Drizzle
+
+为了获得更好的开发体验，我们推荐使用 [Drizzle 适配器](/docs/databases/drizzle)：
+
+```bash
+npm install drizzle-orm better-sqlite3
+```
+
+```ts title="lib/agent.ts"
+import { drizzle } from "drizzle-orm/better-sqlite3";
+import Database from "better-sqlite3";
+import { drizzleAdapter } from "agentstart/db";
+
+const sqlite = new Database("agentstart.db");
+const db = drizzle(sqlite);
+
+export const start = agentStart({
+  agent,
+  memory: drizzleAdapter(db, {
+    provider: "sqlite",
+    schema: {
+      thread: threadsTable,
+      message: messagesTable,
+    },
+  }),
+});
+```
+
+## 文件路径选项
+
+```ts
+// 本地文件
+const db = new Database("agentstart.db");
+
+// 绝对路径
+const db = new Database("/path/to/agentstart.db");
+
+// 内存（用于测试）
+const db = new Database(":memory:");
+```
+
+## 最佳实践
+
+1. **使用 SQLite 进行开发** - 快速且无需设置
+2. **定期备份** - SQLite 数据库是单个文件，易于备份
+3. **预写日志** - 启用 WAL 模式以获得更好的并发性
+
+```ts
+const sqlite = new Database("agentstart.db");
+sqlite.pragma("journal_mode = WAL");
+```
+
+## 下一步
+
+<Cards>
+  <Card title="Drizzle 适配器" href="/docs/databases/drizzle" />
+  <Card title="PostgreSQL" href="/docs/databases/postgresql" />
+  <Card title="MySQL" href="/docs/databases/mysql" />
+</Cards>

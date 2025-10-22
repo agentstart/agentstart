@@ -1,0 +1,185 @@
+---
+title: Other Relational Databases
+description: Use AgentStart with other relational databases via Kysely
+---
+
+# Other Relational Databases
+
+AgentStart supports any database that Kysely supports. This includes many relational databases beyond the officially documented ones.
+
+## Supported Databases
+
+Via Kysely, AgentStart can work with:
+
+- PostgreSQL
+- MySQL
+- SQLite
+- MS SQL Server
+- **Any database with a Kysely dialect**
+
+## Custom Kysely Dialects
+
+You can use any custom Kysely dialect to connect to your database:
+
+```ts title="lib/agent.ts"
+import { agentStart } from "agentstart";
+import { Kysely } from "kysely";
+import { kyselyAdapter } from "agentstart/db";
+import { YourCustomDialect } from "your-dialect-package";
+
+const db = new Kysely({
+  dialect: new YourCustomDialect({
+    // your dialect configuration
+  }),
+});
+
+export const start = agentStart({
+  agent,
+  memory: kyselyAdapter(db),
+});
+```
+
+## Community Dialects
+
+The Kysely community maintains dialects for various databases:
+
+### CockroachDB
+
+```bash
+npm install kysely @cockroachdb/kysely-adapter
+```
+
+```ts
+import { CockroachDialect } from "@cockroachdb/kysely-adapter";
+
+const db = new Kysely({
+  dialect: new CockroachDialect({
+    connectionString: process.env.DATABASE_URL,
+  }),
+});
+```
+
+### PlanetScale
+
+```bash
+npm install kysely @planetscale/database
+```
+
+```ts
+import { PlanetScaleDialect } from "@planetscale/database";
+
+const db = new Kysely({
+  dialect: new PlanetScaleDialect({
+    url: process.env.DATABASE_URL,
+  }),
+});
+```
+
+### Cloudflare D1
+
+```bash
+npm install kysely @cloudflare/d1-dialect
+```
+
+```ts
+import { D1Dialect } from "@cloudflare/d1-dialect";
+
+const db = new Kysely({
+  dialect: new D1Dialect({
+    database: env.DB, // Cloudflare Workers binding
+  }),
+});
+```
+
+## Schema Requirements
+
+Regardless of the database, AgentStart requires these tables:
+
+### Threads Table
+
+```sql
+CREATE TABLE threads (
+  id TEXT PRIMARY KEY,
+  title TEXT,
+  user_id TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  metadata JSON
+);
+```
+
+### Messages Table
+
+```sql
+CREATE TABLE messages (
+  id TEXT PRIMARY KEY,
+  thread_id TEXT REFERENCES threads(id),
+  role TEXT,
+  content TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  metadata JSON
+);
+```
+
+## Using the CLI
+
+The AgentStart CLI can generate schemas for Kysely:
+
+```bash
+npx @agentstart/cli generate
+```
+
+This will create a SQL file that you can review and apply to your database.
+
+## Type Safety
+
+Define your database types for full type safety:
+
+```ts
+interface Database {
+  threads: {
+    id: string;
+    title: string | null;
+    user_id: string | null;
+    created_at: Date;
+    metadata: unknown;
+  };
+  messages: {
+    id: string;
+    thread_id: string;
+    role: string;
+    content: string;
+    created_at: Date;
+    metadata: unknown;
+  };
+}
+
+const db = new Kysely<Database>({
+  dialect: new YourDialect({
+    // config
+  }),
+});
+```
+
+## Migration Tools
+
+For schema migrations, use your database's preferred migration tool:
+
+- **Kysely Migrations** - Built-in migration system
+- **Database-specific tools** - pg_migrate, mysql-migrate, etc.
+- **ORM migrations** - If using Drizzle or Prisma alongside Kysely
+
+## Need Help?
+
+If you're using a database that's not listed here:
+
+1. Check if [Kysely supports it](https://kysely.dev/docs/dialects)
+2. Look for community dialects
+3. Open an issue on GitHub for official support
+
+## Next Steps
+
+<Cards>
+  <Card title="PostgreSQL" href="/docs/databases/postgresql" />
+  <Card title="MySQL" href="/docs/databases/mysql" />
+  <Card title="SQLite" href="/docs/databases/sqlite" />
+</Cards>

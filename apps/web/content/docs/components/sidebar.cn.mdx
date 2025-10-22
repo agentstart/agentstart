@@ -1,0 +1,311 @@
+---
+title: Sidebar
+description: 带导航的线程列表侧边栏
+---
+
+# Sidebar
+
+`Sidebar` 组件提供了一个可折叠的侧边栏，列出所有线程并支持自动加载、分页和线程管理。
+
+<SidebarDemo />
+
+## 安装
+
+```bash
+npx shadcn@latest add sidebar --registry=@agentstart
+```
+
+## 使用
+
+```tsx
+import { Sidebar } from "@/components/agent/sidebar";
+import { useRouter } from "next/navigation";
+
+export default function App({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+
+  return (
+    <Sidebar
+      onSelectThread={(thread) => router.push(`/thread/${thread.id}`)}
+    >
+      {children}
+    </Sidebar>
+  );
+}
+```
+
+## Props
+
+| 名称 | 类型 | 默认值 | 描述 |
+|------|------|--------|------|
+| `children` | `ReactNode` | - | 侧边栏旁边显示的主要内容 |
+| `selectedThreadId` | `string` | - | 当前选中的线程 ID |
+| `onSelectThread` | `(thread: DBThread) => void` | - | 选择线程时的回调 |
+| `pageSize` | `number` | `20` | 每页加载的线程数 |
+| `header` | `{ title?: string }` | - | 自定义标题配置 |
+| `footer` | `ReactNode` | - | 自定义页脚内容 |
+| `emptyState` | `ReactNode` | - | 没有线程时的自定义空状态 |
+| `errorState` | `(error: Error, retry: () => void) => ReactNode` | - | 自定义错误状态渲染器 |
+| `sidebar` | `SidebarConfig` | - | 侧边栏配置（变体、位置、可折叠等） |
+| `className` | `string` | - | 额外的 CSS 类 |
+
+## 功能
+
+- **自动加载** - 从 AgentStart API 获取线程
+- **分页** - 无限滚动加载
+- **线程管理** - 创建、删除和选择线程
+- **可折叠** - 可以折叠为仅图标模式
+- **响应式** - 适用于移动端和桌面端
+- **空状态** - 内置空状态和错误状态
+- **键盘导航** - 箭头键和快捷键
+
+## 示例
+
+### 基本用法
+
+```tsx
+import { Sidebar } from "@/components/agent/sidebar";
+import { useRouter } from "next/navigation";
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+
+  return (
+    <Sidebar onSelectThread={(thread) => router.push(`/thread/${thread.id}`)}>
+      {children}
+    </Sidebar>
+  );
+}
+```
+
+### 带选中线程
+
+```tsx
+import { Sidebar } from "@/components/agent/sidebar";
+import { useParams, useRouter } from "next/navigation";
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const { threadId } = useParams();
+
+  return (
+    <Sidebar
+      selectedThreadId={threadId as string}
+      onSelectThread={(thread) => router.push(`/thread/${thread.id}`)}
+    >
+      {children}
+    </Sidebar>
+  );
+}
+```
+
+### 自定义标题
+
+```tsx
+import { Sidebar } from "@/components/agent/sidebar";
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <Sidebar
+      header={{ title: "我的 AI 助手" }}
+      onSelectThread={(thread) => console.log(thread)}
+    >
+      {children}
+    </Sidebar>
+  );
+}
+```
+
+### 自定义空状态
+
+```tsx
+import { Sidebar } from "@/components/agent/sidebar";
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <Sidebar
+      emptyState={
+        <div className="text-center p-4">
+          <h3 className="font-bold">还没有线程</h3>
+          <p className="text-sm text-muted-foreground">
+            开始对话以创建你的第一个线程
+          </p>
+        </div>
+      }
+      onSelectThread={(thread) => console.log(thread)}
+    >
+      {children}
+    </Sidebar>
+  );
+}
+```
+
+### 右侧放置
+
+```tsx
+import { Sidebar } from "@/components/agent/sidebar";
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <Sidebar
+      sidebar={{ side: "right" }}
+      onSelectThread={(thread) => console.log(thread)}
+    >
+      {children}
+    </Sidebar>
+  );
+}
+```
+
+### 自定义页面大小
+
+```tsx
+import { Sidebar } from "@/components/agent/sidebar";
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <Sidebar
+      pageSize={50}
+      onSelectThread={(thread) => console.log(thread)}
+    >
+      {children}
+    </Sidebar>
+  );
+}
+```
+
+## 侧边栏配置
+
+`sidebar` 属性接受这些选项：
+
+```ts
+interface SidebarConfig {
+  // 视觉变体
+  variant?: "sidebar" | "floating" | "inset";
+  
+  // 放置侧边栏的位置
+  side?: "left" | "right";
+  
+  // 折叠行为
+  collapsible?: "offcanvas" | "icon" | "none";
+  
+  // 自定义样式
+  className?: string;
+  
+  // 控制打开状态
+  defaultOpen?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+```
+
+### 完整配置示例
+
+```tsx
+<Sidebar
+  sidebar={{
+    variant: "inset",
+    side: "left",
+    collapsible: "icon",
+    defaultOpen: true,
+    onOpenChange: (open) => console.log("侧边栏:", open),
+  }}
+  onSelectThread={(thread) => console.log(thread)}
+>
+  {children}
+</Sidebar>
+```
+
+## 线程操作
+
+每个线程项包含操作按钮：
+
+- **选择** - 点击导航到线程
+- **删除** - 删除线程（带确认）
+- **菜单** - 其他操作（重命名、归档等）
+
+## 键盘快捷键
+
+- **Ctrl/Cmd + B** - 切换侧边栏
+- **上/下箭头** - 导航线程
+- **Enter** - 选择聚焦的线程
+- **Delete** - 删除聚焦的线程
+
+## 加载状态
+
+侧边栏显示：
+
+- **骨架屏** - 加载初始线程时
+- **空状态** - 没有线程时
+- **错误** - 加载失败时带重试按钮
+- **加载图标** - 分页期间
+
+## TypeScript
+
+```tsx
+import type { SidebarProps } from "@/components/agent/sidebar";
+import type { DBThread } from "agentstart/db";
+
+const props: SidebarProps = {
+  selectedThreadId: "thread-123",
+  onSelectThread: (thread: DBThread) => {
+    console.log(thread.id);
+  },
+  pageSize: 20,
+  header: { title: "线程" },
+};
+```
+
+## 完整布局示例
+
+所有组件的完整布局：
+
+```tsx
+import { Sidebar } from "@/components/agent/sidebar";
+import { Conversation } from "@/components/agent/conversation";
+import { PromptInput } from "@/components/agent/prompt-input";
+import { useParams, useRouter } from "next/navigation";
+import { useAgentStore, useThread } from "agentstart/client";
+
+export default function ThreadLayout() {
+  const router = useRouter();
+  const { threadId } = useParams<{ threadId: string }>();
+  
+  useThread(threadId);
+  const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
+
+  return (
+    <Sidebar
+      selectedThreadId={threadId}
+      onSelectThread={(thread) => router.push(`/thread/${thread.id}`)}
+    >
+      <div className="flex h-screen flex-col">
+        <header className="border-b p-4">
+          <h1 className="font-bold">聊天</h1>
+        </header>
+        
+        <div className="flex-1 overflow-y-auto">
+          <Conversation threadId={threadId} />
+        </div>
+        
+        <div className="border-t p-4">
+          <PromptInput
+            threadId={threadId}
+            onMessageSubmit={async (message) => {
+              await sendMessage({ text: message.text ?? "" });
+            }}
+          />
+        </div>
+      </div>
+    </Sidebar>
+  );
+}
+```
+
+## 下一步
+
+<Cards>
+  <Card title="Conversation" href="/docs/components/conversation" />
+  <Card title="Prompt Input" href="/docs/components/prompt-input" />
+  <Card title="Provider" href="/docs/components/provider" />
+</Cards>

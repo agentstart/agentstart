@@ -1,0 +1,123 @@
+---
+title: SQLite
+description: Integrate AgentStart with SQLite
+---
+
+# SQLite
+
+SQLite is a lightweight, serverless, self-contained SQL database engine. It's perfect for development, testing, and small to medium-sized applications.
+
+## Example Usage
+
+SQLite requires no separate server process, making it ideal for local development.
+
+```ts title="lib/agent.ts"
+import { agentStart } from "agentstart";
+import { Kysely, SqliteDialect } from "kysely";
+import Database from "better-sqlite3";
+
+const db = new Kysely({
+  dialect: new SqliteDialect({
+    database: new Database("agentstart.db"),
+  }),
+});
+
+export const start = agentStart({
+  agent,
+  memory: kyselyAdapter(db, {
+    type: "sqlite", // optional config
+  }),
+});
+```
+
+<Callout>
+  For more information, read Kysely's documentation on the
+  [SqliteDialect](https://kysely-org.github.io/kysely-apidoc/classes/SqliteDialect.html).
+</Callout>
+
+## Schema Generation & Migration
+
+The AgentStart CLI allows you to generate or migrate your database schema.
+
+<table>
+  <tr className="border-b">
+    <th>
+      <p className="font-bold text-[16px] mb-1">SQLite Schema Generation</p>
+    </th>
+    <th>
+      <p className="font-bold text-[16px] mb-1">SQLite Schema Migration</p>
+    </th>
+  </tr>
+  <tr className="h-10">
+    <td>✅ Supported</td>
+    <td>✅ Supported</td>
+  </tr>
+</table>
+
+```bash title="Schema Generation"
+npx @agentstart/cli generate
+```
+
+```bash title="Schema Migration"
+npx @agentstart/cli migrate
+```
+
+## Using with Drizzle
+
+For a better development experience, we recommend using the [Drizzle adapter](/docs/databases/drizzle):
+
+```bash
+npm install drizzle-orm better-sqlite3
+```
+
+```ts title="lib/agent.ts"
+import { drizzle } from "drizzle-orm/better-sqlite3";
+import Database from "better-sqlite3";
+import { drizzleAdapter } from "agentstart/db";
+
+const sqlite = new Database("agentstart.db");
+const db = drizzle(sqlite);
+
+export const start = agentStart({
+  agent,
+  memory: drizzleAdapter(db, {
+    provider: "sqlite",
+    schema: {
+      thread: threadsTable,
+      message: messagesTable,
+    },
+  }),
+});
+```
+
+## File Path Options
+
+```ts
+// Local file
+const db = new Database("agentstart.db");
+
+// Absolute path
+const db = new Database("/path/to/agentstart.db");
+
+// In-memory (for testing)
+const db = new Database(":memory:");
+```
+
+## Best Practices
+
+1. **Use SQLite for development** - Fast and requires no setup
+2. **Regular backups** - SQLite databases are single files, easy to backup
+3. **Write-Ahead Logging** - Enable WAL mode for better concurrency
+
+```ts
+const sqlite = new Database("agentstart.db");
+sqlite.pragma("journal_mode = WAL");
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Drizzle Adapter" href="/docs/databases/drizzle" />
+  <Card title="PostgreSQL" href="/docs/databases/postgresql" />
+  <Card title="MySQL" href="/docs/databases/mysql" />
+</Cards>

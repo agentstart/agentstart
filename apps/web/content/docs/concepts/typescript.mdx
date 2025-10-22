@@ -1,0 +1,199 @@
+---
+title: TypeScript
+description: TypeScript integration with AgentStart
+---
+
+# TypeScript
+
+AgentStart is designed to be fully type-safe. Both the client and server are built with TypeScript, providing end-to-end type safety.
+
+## TypeScript Config
+
+### Strict Mode
+
+AgentStart is designed to work with TypeScript's strict mode. We recommend enabling it:
+
+```json title="tsconfig.json"
+{
+  "compilerOptions": {
+    "strict": true
+  }
+}
+```
+
+If you can't enable `strict`, at least enable `strictNullChecks`:
+
+```json title="tsconfig.json"
+{
+  "compilerOptions": {
+    "strictNullChecks": true
+  }
+}
+```
+
+## Type Inference
+
+Both the client SDK and server API offer type inference for all entities.
+
+### Server-Side Types
+
+```ts title="lib/agent.ts"
+import { agentStart } from "agentstart";
+import { Agent } from "agentstart/agent";
+
+const agent = new Agent({
+  model: openrouter("x-ai/grok-4-fast"),
+  instructions: "You are a helpful assistant.",
+  tools: { ...innerTools, ...osTools },
+});
+
+export const start = agentStart({ agent, memory });
+
+// Infer types from the start instance
+export type Thread = Awaited<ReturnType<typeof start.api.thread.get>>;
+export type Message = Awaited<ReturnType<typeof start.api.message.list>>[number];
+```
+
+### Client-Side Types
+
+```ts title="lib/agent-client.ts"
+import { createAgentClient } from "agentstart/client";
+
+export const { client, useThread } = createAgentClient();
+
+// The client provides typed hooks and methods
+const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
+//    ^? (params: { content: string }) => Promise<void>
+```
+
+## Tool Types
+
+Tools are fully typed with Zod schemas:
+
+```ts
+import { z } from "zod";
+
+const weatherTool = {
+  description: "Get current weather",
+  parameters: z.object({
+    location: z.string().describe("City name"),
+    units: z.enum(["celsius", "fahrenheit"]).default("celsius"),
+  }),
+  execute: async ({ location, units }) => {
+    // location: string
+    // units: "celsius" | "fahrenheit"
+    return { temperature: 72, units };
+  },
+};
+```
+
+TypeScript infers parameter types from the Zod schema:
+
+```ts
+// ✅ Correct
+await weatherTool.execute({ 
+  location: "San Francisco",
+  units: "celsius" 
+});
+
+// ❌ TypeScript error
+await weatherTool.execute({ 
+  location: 123,  // Type error: expected string
+  units: "kelvin" // Type error: not in enum
+});
+```
+
+## Agent Store Types
+
+The agent store is fully typed:
+
+```tsx
+import { useAgentStore } from "@/lib/agent-client";
+
+// All state is typed
+const messages = useAgentStore((state) => state.messages, threadId);
+//    ^? Message[]
+
+const isLoading = useAgentStore((state) => state.isLoading, threadId);
+//    ^? boolean
+
+const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
+//    ^? (params: { content: string }) => Promise<void>
+```
+
+## Custom Tool Types
+
+Define custom types for complex tools:
+
+```ts
+import { z } from "zod";
+
+const FileOperationSchema = z.object({
+  operation: z.enum(["read", "write", "delete"]),
+  path: z.string(),
+  content: z.string().optional(),
+});
+
+type FileOperation = z.infer<typeof FileOperationSchema>;
+
+const fileTool = {
+  description: "File operations",
+  parameters: FileOperationSchema,
+  execute: async (params: FileOperation) => {
+    // params is fully typed
+    if (params.operation === "write") {
+      // TypeScript knows content exists here
+      const content = params.content!;
+    }
+  },
+};
+```
+
+## API Response Types
+
+All API responses are typed:
+
+```ts
+// Thread type is inferred
+const thread = await start.api.thread.create({ title: "New Thread" });
+//    ^? { id: string; title: string; userId: string | null; createdAt: Date; metadata: unknown }
+
+// Message type is inferred
+const messages = await start.api.message.list({ threadId: thread.id });
+//    ^? Array<{ id: string; threadId: string; role: string; content: string; ... }>
+```
+
+## Type Guards
+
+Use type guards for runtime type checking:
+
+```ts
+function isTextMessage(message: Message): message is Message & { content: string } {
+  return typeof message.content === "string";
+}
+
+const messages = await start.api.message.list({ threadId });
+const textMessages = messages.filter(isTextMessage);
+```
+
+## Generic Types
+
+AgentStart exports useful generic types:
+
+```ts
+import type { 
+  Agent,
+  Thread,
+  Message,
+  Tool,
+  ToolExecutor,
+  DatabaseAdapter,
+} from "agentstart";
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="API" href="/docs/concepts/api" />
+  <Card title="Client" href="/docs/concepts/client" />
+</Cards>

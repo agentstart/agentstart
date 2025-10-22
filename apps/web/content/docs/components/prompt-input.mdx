@@ -1,0 +1,260 @@
+---
+title: Prompt Input
+description: Input component for sending messages and creating threads
+---
+
+# Prompt Input
+
+The `PromptInput` component provides a rich text input with file attachments, streaming control, and automatic thread creation.
+
+<PromptInputDemo />
+
+## Installation
+
+```bash
+npx shadcn@latest add prompt-input --registry=@agentstart
+```
+
+## Usage
+
+```tsx
+import { PromptInput } from "@/components/agent/prompt-input";
+import { useAgentStore } from "agentstart/client";
+
+export default function ChatPage({ threadId }: { threadId: string }) {
+  const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
+
+  return (
+    <PromptInput
+      threadId={threadId}
+      onMessageSubmit={async (message) => {
+        await sendMessage({ text: message.text ?? "" });
+      }}
+    />
+  );
+}
+```
+
+## Props
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `threadId` | `string` | - | Thread ID for chat page usage. If not provided, creates a new thread on submit. |
+| `onMessageSubmit` | `(message: { text?: string; files?: FileUIPart[] \| FileList }) => Promise<void>` | - | Custom message submit handler. Called when user sends a message. |
+| `className` | `string` | - | Additional CSS classes for the input container |
+
+## Features
+
+- **Dual Mode** - Works as both thread creator and message sender
+- **File Attachments** - Drag-and-drop or click to upload files
+- **Streaming Control** - Stop button appears during streaming
+- **Auto-focus** - Automatically focuses on mount
+- **Keyboard Shortcuts** - Enter to send, Shift+Enter for new line
+- **Loading States** - Visual feedback during submission
+
+## Examples
+
+### Chat Page (Existing Thread)
+
+```tsx
+import { PromptInput } from "@/components/agent/prompt-input";
+import { useAgentStore } from "agentstart/client";
+
+export default function ChatPage({ threadId }: { threadId: string }) {
+  const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
+
+  return (
+    <div className="p-4">
+      <PromptInput
+        threadId={threadId}
+        onMessageSubmit={async (message) => {
+          await sendMessage({
+            text: message.text ?? "",
+            files: message.files,
+          });
+        }}
+      />
+    </div>
+  );
+}
+```
+
+### Home Page (Create New Thread)
+
+```tsx
+import { PromptInput } from "@/components/agent/prompt-input";
+
+export default function HomePage() {
+  // When threadId is not provided, it automatically creates a new thread
+  return (
+    <div className="flex h-screen items-center justify-center p-4">
+      <div className="w-full max-w-2xl">
+        <PromptInput />
+      </div>
+    </div>
+  );
+}
+```
+
+### With Custom Styling
+
+```tsx
+import { PromptInput } from "@/components/agent/prompt-input";
+
+export default function StyledInput({ threadId }: { threadId: string }) {
+  const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
+
+  return (
+    <PromptInput
+      threadId={threadId}
+      className="border-2 border-primary rounded-2xl shadow-lg"
+      onMessageSubmit={async (message) => {
+        await sendMessage({ text: message.text ?? "" });
+      }}
+    />
+  );
+}
+```
+
+### With File Upload
+
+```tsx
+import { PromptInput } from "@/components/agent/prompt-input";
+import { useAgentStore } from "agentstart/client";
+
+export default function FileUploadExample({ threadId }: { threadId: string }) {
+  const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
+
+  return (
+    <PromptInput
+      threadId={threadId}
+      onMessageSubmit={async (message) => {
+        // Files are automatically included in message.files
+        await sendMessage({
+          text: message.text ?? "",
+          files: message.files,
+        });
+      }}
+    />
+  );
+}
+```
+
+## Behavior
+
+### Thread Creation Flow
+
+When `threadId` is **not** provided:
+
+1. User enters text and clicks send
+2. Component creates a new thread
+3. Sends the first message to the new thread
+4. Navigates to the new thread page
+
+### Message Sending Flow
+
+When `threadId` **is** provided:
+
+1. User enters text and clicks send
+2. `onMessageSubmit` is called with the message
+3. Your handler sends the message via AgentStart client
+4. Input is cleared automatically
+
+## Stop Streaming
+
+During streaming, the send button becomes a stop button:
+
+```tsx
+<PromptInput
+  threadId={threadId}
+  onMessageSubmit={async (message) => {
+    await sendMessage({ text: message.text ?? "" });
+  }}
+/>
+// Automatically shows stop icon during streaming
+```
+
+## File Attachments
+
+The input supports file attachments:
+
+- **Drag and Drop** - Drag files into the input area
+- **Click to Upload** - Click the attachment button
+- **Multiple Files** - Upload multiple files at once
+- **Preview** - Shows thumbnail previews of attached files
+- **Remove** - Click X to remove an attachment
+
+## Keyboard Shortcuts
+
+- **Enter** - Send message
+- **Shift + Enter** - New line
+- **Escape** - Clear input (when focused)
+
+## Loading States
+
+The component shows different states:
+
+- **Idle** - Ready for input (arrow up icon)
+- **Submitting** - Sending message (spinner)
+- **Streaming** - Receiving response (stop icon)
+- **Error** - Shows error icon with tooltip
+
+## TypeScript
+
+```tsx
+import type { PromptInputProps } from "@/components/agent/prompt-input";
+
+const props: PromptInputProps = {
+  threadId: "thread-123",
+  className: "border rounded-lg",
+  onMessageSubmit: async (message) => {
+    console.log(message.text, message.files);
+  },
+};
+```
+
+## Accessibility
+
+- **ARIA labels** - Proper labels for screen readers
+- **Keyboard navigation** - Full keyboard support
+- **Focus management** - Maintains focus state
+- **Error announcements** - Announces errors to screen readers
+
+## Integration
+
+Works seamlessly with other AgentStart components:
+
+```tsx
+import { Conversation } from "@/components/agent/conversation";
+import { PromptInput } from "@/components/agent/prompt-input";
+import { useAgentStore, useThread } from "agentstart/client";
+
+export default function ThreadPage({ threadId }: { threadId: string }) {
+  useThread(threadId);
+  const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
+
+  return (
+    <div className="flex h-screen flex-col">
+      <div className="flex-1 overflow-y-auto">
+        <Conversation threadId={threadId} />
+      </div>
+      <div className="border-t p-4">
+        <PromptInput
+          threadId={threadId}
+          onMessageSubmit={async (message) => {
+            await sendMessage({ text: message.text ?? "" });
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Conversation" href="/docs/components/conversation" />
+  <Card title="Sidebar" href="/docs/components/sidebar" />
+  <Card title="Provider" href="/docs/components/provider" />
+</Cards>

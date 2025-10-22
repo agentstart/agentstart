@@ -1,0 +1,260 @@
+---
+title: Prompt Input
+description: 用于发送消息和创建线程的输入组件
+---
+
+# Prompt Input
+
+`PromptInput` 组件提供了一个富文本输入，支持文件附件、流式传输控制和自动线程创建。
+
+<PromptInputDemo />
+
+## 安装
+
+```bash
+npx shadcn@latest add prompt-input --registry=@agentstart
+```
+
+## 使用
+
+```tsx
+import { PromptInput } from "@/components/agent/prompt-input";
+import { useAgentStore } from "agentstart/client";
+
+export default function ChatPage({ threadId }: { threadId: string }) {
+  const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
+
+  return (
+    <PromptInput
+      threadId={threadId}
+      onMessageSubmit={async (message) => {
+        await sendMessage({ text: message.text ?? "" });
+      }}
+    />
+  );
+}
+```
+
+## Props
+
+| 名称 | 类型 | 必需 | 描述 |
+|------|------|------|------|
+| `threadId` | `string` | - | 聊天页面使用的线程 ID。如果未提供，提交时创建新线程。 |
+| `onMessageSubmit` | `(message: { text?: string; files?: FileUIPart[] \| FileList }) => Promise<void>` | - | 自定义消息提交处理器。用户发送消息时调用。 |
+| `className` | `string` | - | 输入容器的额外 CSS 类 |
+
+## 功能
+
+- **双模式** - 既可作为线程创建器，也可作为消息发送器
+- **文件附件** - 拖放或点击上传文件
+- **流式传输控制** - 流式传输期间出现停止按钮
+- **自动聚焦** - 挂载时自动聚焦
+- **键盘快捷键** - Enter 发送，Shift+Enter 换行
+- **加载状态** - 提交期间的视觉反馈
+
+## 示例
+
+### 聊天页面（现有线程）
+
+```tsx
+import { PromptInput } from "@/components/agent/prompt-input";
+import { useAgentStore } from "agentstart/client";
+
+export default function ChatPage({ threadId }: { threadId: string }) {
+  const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
+
+  return (
+    <div className="p-4">
+      <PromptInput
+        threadId={threadId}
+        onMessageSubmit={async (message) => {
+          await sendMessage({
+            text: message.text ?? "",
+            files: message.files,
+          });
+        }}
+      />
+    </div>
+  );
+}
+```
+
+### 主页（创建新线程）
+
+```tsx
+import { PromptInput } from "@/components/agent/prompt-input";
+
+export default function HomePage() {
+  // 未提供 threadId 时，自动创建新线程
+  return (
+    <div className="flex h-screen items-center justify-center p-4">
+      <div className="w-full max-w-2xl">
+        <PromptInput />
+      </div>
+    </div>
+  );
+}
+```
+
+### 自定义样式
+
+```tsx
+import { PromptInput } from "@/components/agent/prompt-input";
+
+export default function StyledInput({ threadId }: { threadId: string }) {
+  const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
+
+  return (
+    <PromptInput
+      threadId={threadId}
+      className="border-2 border-primary rounded-2xl shadow-lg"
+      onMessageSubmit={async (message) => {
+        await sendMessage({ text: message.text ?? "" });
+      }}
+    />
+  );
+}
+```
+
+### 带文件上传
+
+```tsx
+import { PromptInput } from "@/components/agent/prompt-input";
+import { useAgentStore } from "agentstart/client";
+
+export default function FileUploadExample({ threadId }: { threadId: string }) {
+  const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
+
+  return (
+    <PromptInput
+      threadId={threadId}
+      onMessageSubmit={async (message) => {
+        // 文件自动包含在 message.files 中
+        await sendMessage({
+          text: message.text ?? "",
+          files: message.files,
+        });
+      }}
+    />
+  );
+}
+```
+
+## 行为
+
+### 线程创建流程
+
+当 `threadId` **未**提供时：
+
+1. 用户输入文本并点击发送
+2. 组件创建新线程
+3. 将第一条消息发送到新线程
+4. 导航到新线程页面
+
+### 消息发送流程
+
+当 `threadId` **已**提供时：
+
+1. 用户输入文本并点击发送
+2. 调用 `onMessageSubmit` 并传递消息
+3. 你的处理器通过 AgentStart 客户端发送消息
+4. 输入自动清空
+
+## 停止流式传输
+
+流式传输期间，发送按钮变为停止按钮：
+
+```tsx
+<PromptInput
+  threadId={threadId}
+  onMessageSubmit={async (message) => {
+    await sendMessage({ text: message.text ?? "" });
+  }}
+/>
+// 流式传输期间自动显示停止图标
+```
+
+## 文件附件
+
+输入支持文件附件：
+
+- **拖放** - 将文件拖入输入区域
+- **点击上传** - 点击附件按钮
+- **多个文件** - 一次上传多个文件
+- **预览** - 显示附加文件的缩略图预览
+- **删除** - 点击 X 删除附件
+
+## 键盘快捷键
+
+- **Enter** - 发送消息
+- **Shift + Enter** - 换行
+- **Escape** - 清空输入（聚焦时）
+
+## 加载状态
+
+组件显示不同的状态：
+
+- **空闲** - 准备输入（向上箭头图标）
+- **提交中** - 发送消息（旋转图标）
+- **流式传输** - 接收响应（停止图标）
+- **错误** - 显示带工具提示的错误图标
+
+## TypeScript
+
+```tsx
+import type { PromptInputProps } from "@/components/agent/prompt-input";
+
+const props: PromptInputProps = {
+  threadId: "thread-123",
+  className: "border rounded-lg",
+  onMessageSubmit: async (message) => {
+    console.log(message.text, message.files);
+  },
+};
+```
+
+## 可访问性
+
+- **ARIA 标签** - 屏幕阅读器的正确标签
+- **键盘导航** - 完整的键盘支持
+- **焦点管理** - 维护焦点状态
+- **错误公告** - 向屏幕阅读器公告错误
+
+## 集成
+
+与其他 AgentStart 组件无缝配合：
+
+```tsx
+import { Conversation } from "@/components/agent/conversation";
+import { PromptInput } from "@/components/agent/prompt-input";
+import { useAgentStore, useThread } from "agentstart/client";
+
+export default function ThreadPage({ threadId }: { threadId: string }) {
+  useThread(threadId);
+  const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
+
+  return (
+    <div className="flex h-screen flex-col">
+      <div className="flex-1 overflow-y-auto">
+        <Conversation threadId={threadId} />
+      </div>
+      <div className="border-t p-4">
+        <PromptInput
+          threadId={threadId}
+          onMessageSubmit={async (message) => {
+            await sendMessage({ text: message.text ?? "" });
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+```
+
+## 下一步
+
+<Cards>
+  <Card title="Conversation" href="/docs/components/conversation" />
+  <Card title="Sidebar" href="/docs/components/sidebar" />
+  <Card title="Provider" href="/docs/components/provider" />
+</Cards>

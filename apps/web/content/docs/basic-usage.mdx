@@ -1,0 +1,290 @@
+---
+title: Basic Usage
+description: Getting started with AgentStart
+---
+
+AgentStart makes it easy to build AI agents with persistent conversations, tool execution, and type-safe client integration.
+
+## Creating an Agent
+
+An agent consists of a model, instructions, and tools. Here's a basic example:
+
+```ts title="lib/agent.ts"
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { Agent, innerTools, osTools } from "agentstart/agent";
+
+const openrouter = createOpenRouter({
+  apiKey: process.env.MODEL_PROVIDER_API_KEY!,
+});
+
+const agent = new Agent({
+  model: openrouter("x-ai/grok-4-fast"),
+  instructions: "You are a helpful coding assistant.",
+  tools: {
+    ...innerTools,  // Task management tools
+    ...osTools,     // File and shell tools
+  },
+});
+```
+
+### Available Tools
+
+**innerTools** provides task management:
+- `todoRead` - Read the current task list
+- `todoWrite` - Update task list with new tasks
+
+**osTools** provides file system and shell operations:
+- `bash` - Execute shell commands
+- `read` - Read file contents
+- `write` - Write to files
+- `update` - Update file sections
+- `glob` - Search files by pattern
+- `grep` - Search file contents
+- `ls` - List directory contents
+
+## Starting the Agent Runtime
+
+Wrap your agent with `agentStart()` to create an API handler:
+
+```ts title="lib/agent.ts"
+import { agentStart } from "agentstart";
+import { drizzleAdapter } from "agentstart/db";
+import { db } from "@/db";
+import * as schema from "@/db/schema";
+
+export const start = agentStart({
+  agent,
+  memory: drizzleAdapter(db, {
+    provider: "pg",
+    schema: {
+      thread: schema.threadsTable,
+      message: schema.messagesTable,
+    },
+  }),
+  appName: "my-app",
+});
+```
+
+### Configuration Options
+
+<Tabs items={["memory", "basePath", "middleware"]}>
+  <Tab value="memory">
+    Database adapter for persisting conversations:
+    
+    ```ts
+    import { drizzleAdapter } from "agentstart/db";
+    import { prismaAdapter } from "agentstart/db";
+    import { kyselyAdapter } from "agentstart/db";
+    import { mongodbAdapter } from "agentstart/db";
+    
+    // Use Drizzle
+    memory: drizzleAdapter(db, { provider: "pg", schema })
+    
+    // Use Prisma
+    memory: prismaAdapter(prisma, { provider: "postgresql" })
+    
+    // Use Kysely
+    memory: kyselyAdapter(db)
+    
+    // Use MongoDB
+    memory: mongodbAdapter(db)
+    ```
+  </Tab>
+  
+  <Tab value="basePath">
+    Customize the API base path (default: `/api/agent`):
+    
+    ```ts
+    export const start = agentStart({
+      agent,
+      memory,
+      basePath: "/api/my-agent",
+    });
+    ```
+  </Tab>
+  
+  <Tab value="middleware">
+    Add custom middleware for logging, authentication, etc:
+    
+    ```ts
+    import { os } from "@orpc/server";
+    
+    const loggingMiddleware = os.middleware(async ({ next }) => {
+      console.log("Request started");
+      const result = await next();
+      console.log("Request completed");
+      return result;
+    });
+    
+    export const start = agentStart({
+      agent,
+      memory,
+      middleware: [loggingMiddleware],
+    });
+    ```
+  </Tab>
+</Tabs>
+
+## Using the Client
+
+Create a client to interact with your agent:
+
+```ts title="lib/agent-client.ts"
+import { createAgentClient } from "agentstart/client";
+
+export const { client, useThread } = createAgentClient({
+  baseURL: "http://localhost:3000", // optional if same domain
+});
+```
+
+### Accessing Thread State
+
+Use the `useThread` hook to sync thread state in your React components:
+
+```tsx title="app/thread/[threadId]/page.tsx"
+"use client";
+
+import { useThread, useAgentStore } from "@/lib/agent-client";
+import { useParams } from "next/navigation";
+
+export default function ThreadPage() {
+  const { threadId } = useParams<{ threadId: string }>();
+  
+  // Sync thread state
+  useThread(threadId);
+  
+  // Access agent state
+  const messages = useAgentStore((state) => state.messages, threadId);
+  const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
+  
+  const handleSend = async (content: string) => {
+    await sendMessage({ content });
+  };
+  
+  return (
+    <div>
+      {messages.map((message) => (
+        <div key={message.id}>
+          <strong>{message.role}:</strong> {message.content}
+        </div>
+      ))}
+      <input
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleSend(e.currentTarget.value);
+            e.currentTarget.value = "";
+          }
+        }}
+      />
+    </div>
+  );
+}
+```
+
+### Agent Store API
+
+The agent store provides access to conversation state:
+
+```tsx
+import { useAgentStore } from "@/lib/agent-client";
+
+// Get messages
+const messages = useAgentStore((state) => state.messages, threadId);
+
+// Get loading state
+const isLoading = useAgentStore((state) => state.isLoading, threadId);
+
+// Send message
+const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
+
+// Get thread metadata
+const thread = useAgentStore((state) => state.thread, threadId);
+```
+
+## Adding Custom Tools
+
+Extend your agent with custom tools:
+
+```ts
+import { z } from "zod";
+
+const weatherTool = {
+  description: "Get current weather for a location",
+  parameters: z.object({
+    location: z.string().describe("City name"),
+    units: z.enum(["celsius", "fahrenheit"]).default("celsius"),
+  }),
+  execute: async ({ location, units }) => {
+    const response = await fetch(
+      `https://api.weather.com/current?location=${location}&units=${units}`
+    );
+    return await response.json();
+  },
+};
+
+const agent = new Agent({
+  model,
+  instructions: "You are a helpful assistant with weather information.",
+  tools: {
+    ...osTools,
+    getWeather: weatherTool,
+  },
+});
+```
+
+### Tool Best Practices
+
+<Callout type="warn">
+Always validate inputs and handle errors in your tools. Never expose sensitive data in tool responses.
+</Callout>
+
+1. **Clear Descriptions**: Write detailed descriptions so the model knows when to use the tool
+2. **Schema Validation**: Use Zod to validate all parameters
+3. **Error Handling**: Return helpful error messages
+4. **Type Safety**: Use TypeScript for better IDE support
+
+## Server-Side Usage
+
+Access agent functionality on the server:
+
+```ts title="app/api/threads/route.ts"
+import { start } from "@/lib/agent";
+
+export async function GET() {
+  // Access the server API
+  const threads = await start.api.thread.list();
+  
+  return Response.json(threads);
+}
+```
+
+<Callout type="info">
+The `start.api` object provides type-safe access to all agent operations on the server.
+</Callout>
+
+## Authentication
+
+Add user authentication to your agent:
+
+```ts title="lib/agent.ts"
+export const start = agentStart({
+  agent,
+  memory,
+  getUserId: async (headers) => {
+    // Extract user ID from auth header
+    const token = headers.get("authorization");
+    if (!token) throw new Error("Unauthorized");
+    const user = await verifyToken(token);
+    return user.id;
+  },
+});
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Database" href="/docs/concepts/database" />
+  <Card title="Tools" href="/docs/concepts/tools" />
+  <Card title="Drizzle Adapter" href="/docs/databases/drizzle" />
+  <Card title="Framework Integration" href="/docs/templates" />
+</Cards>

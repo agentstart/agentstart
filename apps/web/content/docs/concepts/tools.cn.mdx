@@ -1,0 +1,254 @@
+---
+title: 工具
+description: 用于扩展智能体能力的内置和自定义工具
+---
+
+# 工具
+
+工具是扩展智能体能力的可执行函数。AgentStart 提供内置工具并使创建自定义工具变得容易。
+
+## 内置工具
+
+AgentStart 包含两类内置工具：
+
+### Inner Tools
+
+任务管理工具：
+
+```ts
+import { innerTools } from "agentstart/agent";
+
+// 包含：
+// - todoRead: 读取当前任务列表
+// - todoWrite: 更新任务列表
+```
+
+**todoRead**: 检索智能体的当前任务列表。
+
+**todoWrite**: 使用新任务或状态更新更新任务列表。
+
+### OS Tools
+
+文件系统和 Shell 操作工具：
+
+```ts
+import { osTools } from "agentstart/agent";
+
+// 包含：
+// - bash: 执行 Shell 命令
+// - read: 读取文件内容
+// - write: 写入文件
+// - update: 更新文件部分
+// - glob: 按模式搜索文件
+// - grep: 在文件中搜索
+// - ls: 列出目录内容
+```
+
+<Tabs items={["bash", "read/write/update", "glob/grep", "ls"]}>
+
+<Tab value="bash">
+
+安全地执行 Shell 命令：
+
+```ts
+// 智能体可以运行 Shell 命令
+// 示例："列出所有 TypeScript 文件"
+// 执行：bash -c "find . -name '*.ts'"
+```
+
+**特性：**
+- 命令执行并捕获输出
+- 错误处理
+- 工作目录支持
+
+</Tab>
+
+<Tab value="read/write/update">
+
+文件操作：
+
+- **read**: 读取整个文件内容
+- **write**: 创建或覆盖文件
+- **update**: 使用搜索/替换修改特定部分
+
+```ts
+// 读取文件
+// "读取 README.md 的内容"
+
+// 写入文件
+// "创建一个名为 hello.ts 的新文件，包含问候函数"
+
+// 更新文件
+// "将 config.ts 中的端口号从 3000 更新为 3001"
+```
+
+</Tab>
+
+<Tab value="glob/grep">
+
+搜索工具：
+
+- **glob**: 查找匹配模式的文件
+- **grep**: 搜索文件内容
+
+```ts
+// 查找文件
+// "在 components 目录中查找所有 .tsx 文件"
+
+// 搜索内容
+// "在所有 TypeScript 文件中搜索 'useState'"
+```
+
+</Tab>
+
+<Tab value="ls">
+
+列出目录内容：
+
+```ts
+// 列出文件
+// "src 目录中有哪些文件？"
+```
+
+</Tab>
+
+</Tabs>
+
+## 使用工具
+
+工具作为对象提供给 Agent 构造函数：
+
+```ts
+import { Agent, innerTools, osTools } from "agentstart/agent";
+
+const agent = new Agent({
+  model,
+  instructions: "你是一个乐于助人的助手。",
+  tools: {
+    ...innerTools,
+    ...osTools,
+  },
+});
+```
+
+## 创建自定义工具
+
+使用 AI SDK 工具格式定义自定义工具：
+
+```ts
+import { z } from "zod";
+
+const weatherTool = {
+  description: "获取某个位置的当前天气",
+  parameters: z.object({
+    location: z.string().describe("城市名称"),
+    units: z.enum(["celsius", "fahrenheit"]).default("celsius"),
+  }),
+  execute: async ({ location, units }) => {
+    const response = await fetch(
+      `https://api.weather.com/v1/weather?location=${location}&units=${units}`
+    );
+    return await response.json();
+  },
+};
+
+const agent = new Agent({
+  model,
+  instructions,
+  tools: {
+    ...osTools,
+    getWeather: weatherTool,
+  },
+});
+```
+
+### 工具最佳实践
+
+<Callout type="warn">
+  **安全性**：始终验证输入并处理错误。避免在工具响应中暴露敏感数据。
+</Callout>
+
+1. **清晰的描述**：编写详细的描述，以便模型理解何时使用该工具
+2. **模式验证**：使用 Zod 模式验证所有参数
+3. **错误处理**：捕获错误并返回有用的错误消息
+4. **幂等性**：设计工具以便安全重试
+5. **最小范围**：每个工具应该专注做好一件事
+
+## 工具上下文
+
+工具可以访问提供给 Agent 的自定义上下文：
+
+```ts
+interface MyContext {
+  userId: string;
+  database: Database;
+}
+
+const agent = new Agent<MyContext>({
+  model,
+  instructions,
+  context: {
+    userId: "user-123",
+    database: db,
+  },
+  tools: {
+    getUserData: {
+      description: "从数据库获取用户数据",
+      parameters: z.object({}),
+      execute: async ({}, { context }) => {
+        // 在工具中访问上下文
+        const user = await context.database.users.findOne({
+          id: context.userId,
+        });
+        return user;
+      },
+    },
+  },
+});
+```
+
+## 工具执行流程
+
+```
+用户发送消息
+      ↓
+智能体分析并决定使用工具
+      ↓
+使用 Zod 模式验证工具参数
+      ↓
+运行工具 execute 函数
+      ↓
+结果返回给智能体
+      ↓
+智能体处理结果并生成响应
+      ↓
+响应发送给用户
+```
+
+## 高级：流式工具输出
+
+对于长时间运行的操作，工具可以流式传输进度更新：
+
+```ts
+const longRunningTool = {
+  description: "分析大型代码库",
+  parameters: z.object({
+    path: z.string(),
+  }),
+  execute: async function* ({ path }) {
+    yield { status: "scanning", progress: 0 };
+    // ... 扫描文件
+    yield { status: "analyzing", progress: 50 };
+    // ... 分析代码
+    yield { status: "complete", progress: 100, results: [] };
+  },
+};
+```
+
+## 下一步
+
+<Cards>
+  <Card title="数据库" href="/docs/concepts/database" />
+  <Card title="API" href="/docs/concepts/api" />
+  <Card title="API 参考" href="/docs/reference/api" />
+</Cards>
