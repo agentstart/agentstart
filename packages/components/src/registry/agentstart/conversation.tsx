@@ -384,7 +384,7 @@ export function Conversation({
           (emptyState ?? defaultEmptyState)
         )}
       </ConversationContent>
-      <ConversationScrollButton />
+      <ConversationScrollButton className="bottom-40" />
     </BaseConversation>
   );
 }
