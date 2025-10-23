@@ -162,7 +162,7 @@
 - ✅ Fixed `prismaAdapter(prisma, config)` - requires 2 parameters
 - ✅ Fixed `kyselyAdapter(db, config?)` - config is optional
 - ✅ Verified `mongodbAdapter(db)` - single parameter
-- ✅ All code examples tested against playground/next
+- ✅ All code examples tested against apps/example
 
 ### Documentation Structure
 - ✅ Follows better-auth best practices
