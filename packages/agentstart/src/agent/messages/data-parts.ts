@@ -14,7 +14,6 @@ import z from "zod";
 export const dataPartSchema = z.object({
   "agentstart-title_update": z.object({
     title: z.string(),
-    emoji: z.string().optional(),
   }),
 });
 

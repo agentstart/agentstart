@@ -12,6 +12,7 @@ agent-frontmatter:end */
 import type {
   Experimental_AgentSettings as AISDK_AgentSettings,
   InferUIMessageChunk,
+  LanguageModel,
   ToolSet,
   UIMessage,
   UIMessageStreamOnFinishCallback,
@@ -26,6 +27,10 @@ export interface AgentStreamOptions {
   threadId: string;
   onFinish?: UIMessageStreamOnFinishCallback<UIMessage>;
   onError?: (error: unknown) => string;
+  generateTitle?: {
+    model: LanguageModel;
+    instructions: string;
+  };
 }
 
 export interface Agent<Context = unknown> {

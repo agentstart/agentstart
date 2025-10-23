@@ -29,7 +29,7 @@ import {
   addProviderOptionsToMessages,
   fixEmptyModelMessages,
 } from "./messages/message-processing";
-import { generateTitle } from "./model-tasks";
+import { generateThreadTitle } from "./model-tasks";
 import {
   getCompleteMessages,
   updateThreadTitle,
@@ -108,27 +108,14 @@ export class Agent<
       originalMessages: uiMessages,
       execute: async ({ writer }) => {
         // Generate and send title update for the first message
-        if (uiMessages.length === 1) {
-          const { title, emoji } = await generateTitle({
-            messages: [options.message],
-            model: this.settings.model, // TODO: Use a separate model for title generation
-          });
-          // Update database
-          await updateThreadTitle({
-            db: options.adapter,
-            threadId: options.threadId,
-            title,
-            emoji,
-          });
-          // Send title update through stream
-          writer.write({
-            type: "data-agentstart-title_update",
-            data: {
-              title,
-              emoji,
-            },
-          });
-        }
+        await this.maybeGenerateThreadTitle({
+          writer,
+          uiMessages,
+          message: options.message,
+          threadId: options.threadId,
+          adapter: options.adapter,
+          generateTitle: options.generateTitle,
+        });
 
         // Prepare the model messages
         const converted = convertToModelMessages(uiMessages, {
@@ -204,6 +191,71 @@ export class Agent<
       },
       onError: options?.onError,
     });
+  }
+
+  /**
+   * Generate a thread title if this is the first message.
+   * Checks if title generation is enabled and if this is the first message.
+   *
+   * @param uiMessages - Array of UI messages (to check if first message)
+   * @param message - The user's message to generate title from
+   * @param threadId - The thread identifier
+   * @param writer - Stream writer for sending title update
+   * @param adapter - Database adapter for persistence
+   */
+  private async maybeGenerateThreadTitle({
+    writer,
+    uiMessages,
+    message,
+    threadId,
+    adapter,
+    generateTitle,
+  }: {
+    writer: UIMessageStreamWriter;
+    uiMessages: UIMessage[];
+    message: UIMessage;
+    threadId: string;
+    adapter: AgentStreamOptions["adapter"];
+    generateTitle: AgentStreamOptions["generateTitle"];
+  }): Promise<void> {
+    // Only generate for first message
+    if (uiMessages.length !== 1) {
+      return;
+    }
+
+    // Only generate if config is provided
+    if (!generateTitle) {
+      return;
+    }
+
+    const model = generateTitle.model;
+    const instructions = generateTitle.instructions;
+
+    try {
+      // Generate title based on the user's message
+      const title = await generateThreadTitle({
+        messages: [message],
+        model,
+        instructions,
+      });
+
+      // Update database
+      await updateThreadTitle({
+        db: adapter,
+        threadId,
+        title,
+      });
+
+      // Send title update through stream
+      writer.write({
+        type: "data-agentstart-title_update",
+        data: {
+          title,
+        },
+      });
+    } catch (err) {
+      console.error("Title generation error:", err);
+    }
   }
 
   private async prepareInstance(

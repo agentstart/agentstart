@@ -8,4 +8,4 @@ FEATURES:
 SEARCHABLE: model task exports, agent model tasks
 agent-frontmatter:end */
 
-export * from "./generate-title";
+export * from "./generate-thread-title";

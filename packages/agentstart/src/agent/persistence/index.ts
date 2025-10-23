@@ -22,22 +22,17 @@ export interface AdapterContextOptions {
 export interface UpdateThreadTitleOptions extends AdapterContextOptions {
   threadId: string;
   title: string;
-  emoji?: string;
 }
 
 export async function updateThreadTitle({
   db,
   threadId,
   title,
-  emoji,
 }: UpdateThreadTitleOptions) {
   const updatePayload: Record<string, unknown> = {
     title,
     updatedAt: new Date().toISOString(),
   };
-  if (emoji !== undefined) {
-    updatePayload.emoji = emoji;
-  }
 
   await db.update({
     model: "thread",

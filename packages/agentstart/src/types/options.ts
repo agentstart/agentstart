@@ -11,6 +11,7 @@ SEARCHABLE: agent configuration, sandbox options, e2b api key, agentstart option
 agent-frontmatter:end */
 
 import type { AnyMiddleware } from "@orpc/server";
+import type { LanguageModel } from "ai";
 import type { Memory, ModelOptions, SecondaryMemory } from "./adapter";
 import type { Agent } from "./agent";
 
@@ -56,6 +57,15 @@ export interface AgentStartOptions {
     generateId?:
       | false
       | ((options: { model: string; size?: number }) => string);
+    generateTitle?: {
+      model: LanguageModel;
+      instructions: string;
+    };
+    generateSuggestions?: {
+      model: LanguageModel;
+      limit: number;
+      instructions: string;
+    };
   };
   thread?: ModelOptions;
   message?: ModelOptions;
