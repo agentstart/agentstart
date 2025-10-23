@@ -39,7 +39,14 @@ export function SuggestedPrompts({
 
   const handlePromptClick = (prompt: string) => {
     clearSuggestions();
-    sendMessage({ text: prompt });
+    sendMessage(
+      { text: prompt },
+      {
+        body: {
+          threadId,
+        },
+      },
+    );
   };
 
   if (!suggestions?.prompts || suggestions.prompts.length === 0) {

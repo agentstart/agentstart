@@ -114,13 +114,12 @@ export function useDataPart<T extends DataPartKey>(
     // Search through extracted message parts for matching type
     let latestMatch: AgentStartDataUIPart | null = null;
 
-    for (const part of extractedParts) {
-      if (part.type === dataPartType) {
-        if (!latestMatch) {
-          latestMatch = part;
-        }
-        // Note: We keep the first match as messages are in chronological order
-        // and we want the most recent (last) occurrence
+    for (let index = extractedParts.length - 1; index >= 0; index -= 1) {
+      // Iterate backward to grab the most recent occurrence quickly
+      const part = extractedParts[index];
+      if (part?.type === dataPartType) {
+        latestMatch = part;
+        break;
       }
     }
 
