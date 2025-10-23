@@ -815,8 +815,10 @@ async function getPackageManager() {
 }
 
 async function getEnvFiles(cwd: string) {
-  const files = await fs.readdir(cwd);
-  return files.filter((x) => x.startsWith(".env"));
+  const files = (await fs.readdir(cwd, {
+    encoding: "utf8",
+  })) as string[];
+  return files.filter((fileName) => fileName.startsWith(".env"));
 }
 
 async function updateEnvs({

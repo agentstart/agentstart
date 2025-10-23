@@ -133,6 +133,7 @@ The `SEARCHABLE` field should contain comma-separated keywords that describe the
 
 - Prefer precise TypeScript types and `unknown` over `any`. Unless a spec explicitly allows it, `any` is off limits.
 - When a function needs more than two parameters, wrap them in a single options object so call sites remain readable and extensible.
+- Do not introduce redundant wrapper callbacks (e.g. `const handleX = useCallback(() => doX())`); invoke the underlying function directly to keep the code concise.
 
 ## Roadmap Snapshot
 

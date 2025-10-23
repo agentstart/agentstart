@@ -27,7 +27,11 @@ import type { StoreApi, UseBoundStore } from "zustand";
 import type { AgentStartUIMessage } from "@/agent";
 import type { AgentStartAPI } from "@/api";
 import { useDataStateMapper } from "./data-state-mapper";
-import { type AgentStoreWithSync, getAgentStore } from "./store/agent";
+import {
+  type AgentStoreWithSync,
+  getAgentStore,
+  type ThreadDraft,
+} from "./store/agent";
 
 export function createUseThread(client: AgentStartAPI) {
   const hook = (storeId: string = "default") => {
@@ -61,6 +65,43 @@ export function createUseThread(client: AgentStartAPI) {
             },
           } satisfies ChatTransport<AgentStartUIMessage>,
           onData: (data) => mapDataToStateRef.current(data),
+          onFinish: ({ message, isAbort, isDisconnect, isError }) => {
+            if (isAbort || isDisconnect || isError) {
+              return;
+            }
+            if (message.role !== "assistant") {
+              return;
+            }
+
+            const store = getAgentStore<AgentStartUIMessage>(storeId);
+            const {
+              messageQueue,
+              dequeueQueuedMessage,
+              prependQueuedMessage,
+              sendMessage,
+            } = store.getState();
+            if (messageQueue.length === 0) {
+              return;
+            }
+            const next = dequeueQueuedMessage();
+            if (!next) {
+              return;
+            }
+            const payload: ThreadDraft = {
+              text: next.text ?? "",
+            };
+            if (next.files && next.files.length > 0) {
+              payload.files = next.files;
+            }
+            void sendMessage(payload, {
+              body: {
+                threadId: storeId,
+              },
+            }).catch((error) => {
+              console.error("Failed to send queued message", error);
+              prependQueuedMessage(next);
+            });
+          },
           onError: (error) => {
             console.error("Error sending message:", error);
           },

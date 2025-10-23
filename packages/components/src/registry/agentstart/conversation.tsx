@@ -19,7 +19,7 @@ import {
 } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import type { AgentStartUIMessage } from "agentstart/agent";
-import { type AgentStore, useAgentStore } from "agentstart/client";
+import { type AgentStore, useAgentStore, useDataPart } from "agentstart/client";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo } from "react";
 import { Action, Actions } from "@/components/ai-elements/actions";
@@ -113,16 +113,27 @@ export function Conversation({
     AgentStartUIMessage,
     UIAgentStore["regenerate"]
   >((state) => state.regenerate, resolvedStoreId);
-  const pendingNewThreadInput = useAgentStore<
+  const newThreadDraft = useAgentStore<
     AgentStartUIMessage,
-    UIAgentStore["pendingNewThreadInput"]
-  >((state) => state.pendingNewThreadInput);
+    UIAgentStore["newThreadDraft"]
+  >((state) => state.newThreadDraft);
+  const messageQueue = useAgentStore<
+    AgentStartUIMessage,
+    UIAgentStore["messageQueue"]
+  >((state) => state.messageQueue);
+  const hasQueue = messageQueue.length > 0;
 
-  const hasPendingNewThreadInput = useMemo(() => {
-    if (!pendingNewThreadInput) return false;
+  const [suggestions] = useDataPart(
+    "data-agentstart-suggestions",
+    resolvedStoreId,
+  );
+  const hasSuggestions = suggestions?.prompts && suggestions.prompts.length > 0;
 
-    const hasText = (pendingNewThreadInput.text?.trim() ?? "").length > 0;
-    const files = pendingNewThreadInput.files;
+  const hasNewThreadDraft = useMemo(() => {
+    if (!newThreadDraft) return false;
+
+    const hasText = (newThreadDraft.text?.trim() ?? "").length > 0;
+    const files = newThreadDraft.files;
     const fileCount =
       files instanceof FileList
         ? files.length
@@ -131,12 +142,12 @@ export function Conversation({
           : 0;
 
     return hasText || fileCount > 0;
-  }, [pendingNewThreadInput]);
+  }, [newThreadDraft]);
 
   const queryResult = useQuery(
     orpc.message.get.queryOptions({
       input: { threadId: threadId! },
-      enabled: Boolean(threadId) && !hasPendingNewThreadInput,
+      enabled: Boolean(threadId) && !hasNewThreadDraft,
       initialData: threadId ? initialMessages : undefined,
     }),
   );
@@ -272,7 +283,7 @@ export function Conversation({
   const showInitialLoading =
     Boolean(threadId) &&
     !hasMessages &&
-    (hasPendingNewThreadInput || isLoading || (isFetching && !fetchedMessages));
+    (hasNewThreadDraft || isLoading || (isFetching && !fetchedMessages));
 
   const defaultEmptyState = (
     <ConversationEmptyState
@@ -384,7 +395,12 @@ export function Conversation({
           (emptyState ?? defaultEmptyState)
         )}
       </ConversationContent>
-      <ConversationScrollButton className="bottom-40" />
+      <ConversationScrollButton
+        className={cn("bottom-42", {
+          "bottom-52": hasSuggestions || hasQueue,
+          "bottom-62": hasSuggestions && hasQueue,
+        })}
+      />
     </BaseConversation>
   );
 }

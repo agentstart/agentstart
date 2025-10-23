@@ -18,9 +18,9 @@ interface TmpDirFixture {
   tmpdir: string;
 }
 
-async function createTempDir() {
+async function createTempDir(): Promise<string> {
   const tmpdir = path.join(process.cwd(), "test", "getConfig_test-");
-  return await fs.mkdtemp(tmpdir);
+  return (await fs.mkdtemp(tmpdir, { encoding: "utf8" })) as string;
 }
 
 export const tmpdirTest = test.extend<TmpDirFixture>({
@@ -39,7 +39,7 @@ let tmpDir = ".";
 describe("getConfig", async () => {
   beforeEach(async () => {
     const tmp = path.join(process.cwd(), "getConfig_test-");
-    tmpDir = await fs.mkdtemp(tmp);
+    tmpDir = (await fs.mkdtemp(tmp, { encoding: "utf8" })) as string;
   });
 
   afterEach(async () => {
