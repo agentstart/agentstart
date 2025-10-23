@@ -22,13 +22,18 @@ import {
   type ToolSet,
   type UIMessage,
   type UIMessageStreamWriter,
+  validateUIMessages,
 } from "ai";
 import type { Agent as AgentContract, AgentStreamOptions } from "@/types";
 import type { BaseContext } from "./context";
-import type { AgentStartUIMessage } from "./messages";
+import {
+  type AgentStartUIMessage,
+  dataPartSchema,
+  metadataSchema,
+} from "./messages";
 import {
   addProviderOptionsToMessages,
-  fixEmptyModelMessages,
+  fixEmptyUIMessages,
 } from "./messages/message-processing";
 import { generateThreadSuggestions, generateThreadTitle } from "./model-tasks";
 import {
@@ -42,7 +47,11 @@ type InferUIMessageMetadata<T extends UIMessage> = T extends UIMessage<
   infer METADATA
 >
   ? METADATA
-  : unknown;
+  : Record<string, unknown>;
+type UIMessageMetadata = InferUIMessageMetadata<
+  UIMessage<Record<string, unknown>>
+>;
+
 export interface AgentOptions<Context extends Record<string, unknown>>
   extends AISDK_AgentSettings<ToolSet> {
   instructions: string;
@@ -50,7 +59,7 @@ export interface AgentOptions<Context extends Record<string, unknown>>
   context?: Context;
   messageMetadata?: (options: {
     part: TextStreamPart<ToolSet>;
-  }) => InferUIMessageMetadata<UIMessage>;
+  }) => UIMessageMetadata;
 }
 
 export class Agent<
@@ -63,7 +72,7 @@ export class Agent<
   context?: Context;
   private readonly metadataHandler?: (options: {
     part: TextStreamPart<ToolSet>;
-  }) => InferUIMessageMetadata<UIMessage>;
+  }) => UIMessageMetadata;
   private readonly exposedMessageMetadata?: (options: {
     part: unknown;
   }) => unknown;
@@ -98,6 +107,22 @@ export class Agent<
   }
 
   async stream(options: AgentStreamOptions) {
+    const createdAt = Date.now();
+    const model =
+      typeof this.settings.model === "string"
+        ? this.settings.model
+        : this.settings.model.modelId;
+    // Ensure message has metadata object
+    if (!options.message.metadata) {
+      options.message.metadata = {};
+    }
+    if (!(options.message.metadata as UIMessageMetadata).createdAt) {
+      (options.message.metadata as UIMessageMetadata).createdAt = createdAt;
+    }
+    if (!(options.message.metadata as UIMessageMetadata).model) {
+      (options.message.metadata as UIMessageMetadata).model = model;
+    }
+
     const uiMessages = (await getCompleteMessages({
       db: options.adapter,
       message: options.message,
@@ -108,10 +133,22 @@ export class Agent<
       generateId,
       originalMessages: uiMessages,
       execute: async ({ writer }) => {
+        // Fix any array content that should be strings
+        const fixedMessages = fixEmptyUIMessages(uiMessages);
+
+        const validatedMessages = await validateUIMessages({
+          messages: fixedMessages,
+          tools: this.settings.tools as Parameters<
+            typeof validateUIMessages
+          >[0]["tools"], // Ensures tool calls in messages match current schemas
+          dataSchemas: dataPartSchema.shape,
+          metadataSchema,
+        });
+
         // Generate and send title update for the first message
         await this.maybeGenerateThreadTitle({
           writer,
-          uiMessages,
+          uiMessages: validatedMessages,
           message: options.message,
           threadId: options.threadId,
           adapter: options.adapter,
@@ -119,12 +156,9 @@ export class Agent<
         });
 
         // Prepare the model messages
-        const converted = convertToModelMessages(uiMessages, {
+        const converted = convertToModelMessages(validatedMessages, {
           tools: this.settings.tools,
         });
-
-        // Fix any array content that should be strings
-        const fixedMessages = fixEmptyModelMessages(converted);
 
         let modelMessages: ModelMessage[] = [
           {
@@ -139,7 +173,7 @@ export class Agent<
                 },
               ]
             : []),
-          ...fixedMessages,
+          ...converted,
         ];
 
         // Add providerOptions to the last system, tool, and user/assistant messages
@@ -167,7 +201,23 @@ export class Agent<
         writer.merge(
           result.toUIMessageStream({
             sendReasoning: true,
-            messageMetadata: this.metadataHandler,
+            messageMetadata: (options) => {
+              const userMetadata = this.metadataHandler?.(options);
+              const agentStartMetadata: InferUIMessageMetadata<AgentStartUIMessage> =
+                {
+                  createdAt,
+                  model,
+                  totalTokens:
+                    options.part.type === "finish"
+                      ? options.part.totalUsage.totalTokens
+                      : undefined,
+                  finishReason:
+                    options.part.type === "finish"
+                      ? options.part.finishReason
+                      : undefined,
+                };
+              return { ...agentStartMetadata, ...userMetadata };
+            },
             onFinish: async (setting) => {
               if (
                 setting.responseMessage &&

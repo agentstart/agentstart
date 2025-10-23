@@ -12,9 +12,9 @@ SEARCHABLE: thread router, agent stream, rpc thread
 agent-frontmatter:end */
 
 import { AgentStartError } from "@agentstart/utils";
-import { streamToEventIterator, type } from "@orpc/server";
+import { streamToEventIterator } from "@orpc/server";
 import z from "zod";
-import { type AgentStartUIMessage, getThreads, loadThread } from "@/agent";
+import { getThreads, loadThread } from "@/agent";
 import { publicProcedure } from "@/api/procedures";
 import { type DBThread, getAdapter } from "@/db";
 import { getSandbox } from "@/sandbox";
@@ -137,11 +137,11 @@ export function createThreadRouter(procedure = publicProcedure) {
 
     stream: procedure
       .input(
-        type<{
-          threadId: string;
-          message: AgentStartUIMessage;
-          model?: string;
-        }>(),
+        z.object({
+          threadId: z.string().min(1, "Thread ID is required"),
+          message: z.any(),
+          model: z.string().optional(),
+        }),
       )
       .handler(async ({ input, context, errors }) => {
         try {
@@ -163,6 +163,10 @@ export function createThreadRouter(procedure = publicProcedure) {
             threadId: input.threadId,
             generateTitle: context.advanced?.generateTitle,
             generateSuggestions: context.advanced?.generateSuggestions,
+            onError: (error) => {
+              console.error("Agent stream error:", error);
+              return "An error occurred while processing your request.";
+            },
           });
 
           return streamToEventIterator(result);

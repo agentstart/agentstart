@@ -2,30 +2,49 @@
 AGENT: Message processing utilities
 PURPOSE: Provide helper functions for normalizing model message payloads
 USAGE: Import to clean or augment model message arrays before streaming
-EXPORTS: fixEmptyModelMessages, addProviderOptionsToMessages
+EXPORTS: fixEmptyUIMessages, addProviderOptionsToMessages
 FEATURES:
   - Removes empty assistant messages left behind by tool executions
   - Applies provider options to targeted messages
 SEARCHABLE: message processing, provider options, assistant message cleanup
 agent-frontmatter:end */
 
-import type { ModelMessage } from "ai";
+import type { ModelMessage, UIMessage } from "ai";
 
 /**
  * Filter out empty assistant messages
  * Empty assistant messages are created when the original message only contains tool calls
  * These can be safely removed as the tool messages themselves are preserved
  */
-export function fixEmptyModelMessages(
-  convertedMessages: ModelMessage[],
-): ModelMessage[] {
-  return convertedMessages.filter((msg) => {
-    // Remove empty assistant messages
-    if (msg.role === "assistant" && (msg.content === "" || !msg.content)) {
-      return false;
+export function fixEmptyUIMessages(uiMessages: UIMessage[]): UIMessage[] {
+  return uiMessages.reduce<UIMessage[]>((acc, message) => {
+    // Strip blank text parts and redacted reasoning snippets that occasionally linger after tool runs
+    const nonEmptyParts = (message.parts ?? []).filter((part) => {
+      if (part.type === "text") {
+        return Boolean(part.text.trim());
+      }
+      if (part.type === "reasoning") {
+        return part.text !== "[REDACTED]" && part.state !== "done";
+      }
+      return true;
+    });
+
+    if (nonEmptyParts.length === 0) {
+      return acc;
     }
-    return true;
-  });
+
+    if (message.parts && nonEmptyParts.length === message.parts.length) {
+      acc.push(message);
+      return acc;
+    }
+
+    acc.push({
+      ...message,
+      parts: nonEmptyParts,
+    });
+
+    return acc;
+  }, []);
 }
 
 /**
