@@ -139,7 +139,7 @@ export function useDataPart<T extends DataPartKey>(
 
   // Create a memoized clear function to remove this data part
   const clearDataPart = useCallback(() => {
-    removeDataPart(dataPartType as AgentStartDataUIPart["type"]);
+    removeDataPart(dataPartType);
   }, [dataPartType, removeDataPart]);
 
   // Return the data with proper type casting and the clear function

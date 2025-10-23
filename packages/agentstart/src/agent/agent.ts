@@ -330,6 +330,7 @@ export class Agent<
           data: {
             prompts,
           },
+          transient: true, // Won't be added to message history
         });
       }
     } catch (err) {

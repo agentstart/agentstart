@@ -19,12 +19,24 @@ import { useAgentStore } from "./store";
 export function useDataStateMapper(client: AgentStartAPI, storeId: string) {
   const queryClient = useQueryClient();
   const setDataPart = useAgentStore((state) => state.setDataPart, storeId);
-  return (data: DataUIPart<AgentStartDataPart>) => {
+  const removeDataPart = useAgentStore(
+    (state) => state.removeDataPart,
+    storeId,
+  );
+
+  return (dataPart: DataUIPart<AgentStartDataPart>) => {
     const orpc = createTanstackQueryUtils(client);
 
-    setDataPart(data.type, data.data);
+    // If data is null or undefined, remove the data part
+    if (dataPart.data === null || dataPart.data === undefined) {
+      if (removeDataPart) {
+        removeDataPart(dataPart.type);
+      }
+    } else if (setDataPart) {
+      setDataPart(dataPart.type, dataPart.data);
+    }
 
-    switch (data.type) {
+    switch (dataPart.type) {
       case "data-agentstart-title_update": {
         queryClient.invalidateQueries(orpc.thread.list.queryOptions());
         break;
