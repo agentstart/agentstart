@@ -20,7 +20,6 @@ import type { AgentStartOptions } from "@/types";
 export function agentStart(options: AgentStartOptions) {
   const context = { current: null as Context | null };
 
-  const api = getApi(context);
   const router = createAppRouter(options.middleware);
   const rpcHandler = new RPCHandler(router);
 
@@ -43,7 +42,7 @@ export function agentStart(options: AgentStartOptions) {
       return response ?? new Response("Not found", { status: 404 });
     },
     options,
-    api,
+    api: getApi(options),
 
     get $$context() {
       return context.current;

@@ -2,7 +2,7 @@
 AGENT: Server-side API factory
 PURPOSE: Create a typed oRPC client for invoking Agent Start routers on the server
 USAGE: const api = getApi(context)
-EXPORTS: getApi, AgentStartAPI, ContextResolver
+EXPORTS: getApi, AgentStartAPI
 FEATURES:
   - Lazily instantiates router clients via a proxy
   - Always reads the latest agent context when invoking procedures
@@ -10,60 +10,68 @@ FEATURES:
 SEARCHABLE: server api, getApi helper, orpc router client
 agent-frontmatter:end */
 
-import { AgentStartError } from "@agentstart/utils";
 import { createRouterClient, type RouterClient } from "@orpc/server";
-import type { Context } from "./context";
+import type { AgentStartOptions } from "@/types";
+import { type Context, createContext } from "./context";
 import { type AppRouter, appRouter } from "./router";
 
-export type AgentStartAPI = RouterClient<AppRouter>;
+type HeadersLike = ConstructorParameters<typeof Headers>[0];
 
-export type ContextResolver = { current: Context | null | undefined };
+type ContextOverride = Partial<Omit<Context, "headers">> & {
+  headers?: HeadersLike;
+};
+
+export type AgentStartAPI = RouterClient<AppRouter, ContextOverride>;
 
 /**
  * Create a proxy that instantiates a fresh oRPC client on each property access.
  * Ensures the latest context is used whenever a procedure is invoked.
  */
-export function getApi(resolver: ContextResolver): AgentStartAPI {
-  const resolveContext = createContextResolver(resolver);
-
+export function getApi(options: AgentStartOptions): AgentStartAPI {
+  const context = createContext(options as Context);
   return new Proxy({} as AgentStartAPI, {
     get(_target, property, receiver) {
-      const client = createClient(resolveContext());
+      const client = createClient(context);
       const value = Reflect.get(client as object, property, receiver);
       return typeof value === "function" ? value.bind(client) : value;
     },
     has(_target, property) {
-      const client = createClient(resolveContext());
+      const client = createClient(context);
       return Reflect.has(client as object, property);
     },
     ownKeys() {
-      const client = createClient(resolveContext());
+      const client = createClient(context);
       return Reflect.ownKeys(client as object);
     },
     getOwnPropertyDescriptor(_target, property) {
-      const client = createClient(resolveContext());
+      const client = createClient(context);
       return Reflect.getOwnPropertyDescriptor(client as object, property);
     },
   });
 }
 
-function createContextResolver(resolver: ContextResolver): () => Context {
-  return () => {
-    const value = resolver.current;
-
-    if (!value) {
-      throw new AgentStartError(
-        "CONTEXT_UNAVAILABLE",
-        "Agent context is not available. Call the API within an active request handler.",
-      );
-    }
-
-    return value;
-  };
+function createClient(context: Context): AgentStartAPI {
+  return createRouterClient<AppRouter, ContextOverride>(appRouter, {
+    context: (override = {}) => mergeContext(context, override),
+  });
 }
 
-function createClient(context: Context): AgentStartAPI {
-  return createRouterClient(appRouter, {
-    context,
-  });
+function mergeContext(base: Context, override: ContextOverride): Context {
+  if (!override || isEmptyObject(override)) {
+    return base;
+  }
+
+  return {
+    ...base,
+    ...override,
+  } as Context;
+}
+
+function isEmptyObject(value: object): boolean {
+  for (const key in value) {
+    if (Object.hasOwn(value, key)) {
+      return false;
+    }
+  }
+  return true;
 }

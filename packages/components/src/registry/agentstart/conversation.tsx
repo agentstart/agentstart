@@ -12,11 +12,14 @@ agent-frontmatter:end */
 
 "use client";
 
-import { ArrowsClockwiseIcon, CopyIcon } from "@phosphor-icons/react";
+import {
+  ArrowsClockwiseIcon,
+  ChatSlashIcon,
+  CopyIcon,
+} from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import type { AgentStartUIMessage } from "agentstart/agent";
 import { type AgentStore, useAgentStore } from "agentstart/client";
-import { MessageSquare } from "lucide-react";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo } from "react";
 import { Action, Actions } from "@/components/ai-elements/actions";
@@ -29,7 +32,6 @@ import {
 } from "@/components/ai-elements/conversation";
 import { Message, MessageContent } from "@/components/ai-elements/message";
 import { Response } from "@/components/ai-elements/response";
-import { Shimmer } from "@/components/ai-elements/shimmer";
 import {
   Source,
   Sources,
@@ -47,14 +49,20 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { useAgentStartContext } from "./provider";
+import { StatusIndicators } from "./status-indicators";
 import { MessagePart } from "./tools/message-part-view";
 
 export interface ConversationProps
   extends Omit<BaseConversationProps, "children"> {
+  contentClassName?: string;
   /**
    * Thread identifier to hydrate the conversation.
    */
   threadId?: string;
+  /**
+   * Optional messages used to hydrate the UI before the client store syncs.
+   */
+  initialMessages?: AgentStartUIMessage[];
   /**
    * Custom empty state element when no messages are present.
    */
@@ -69,17 +77,20 @@ export interface ConversationProps
   errorState?: (error: Error, retry: () => void) => ReactNode;
 }
 
+type UIAgentStore = AgentStore<AgentStartUIMessage>;
+
 export function Conversation({
   threadId,
   className,
+  contentClassName,
   emptyState,
   loadingState,
   errorState,
+  initialMessages,
   ...props
 }: ConversationProps) {
   const { orpc } = useAgentStartContext();
 
-  type UIAgentStore = AgentStore<AgentStartUIMessage>;
   const resolvedStoreId = threadId ?? "default";
 
   const messages = useAgentStore<AgentStartUIMessage, AgentStartUIMessage[]>(
@@ -122,12 +133,13 @@ export function Conversation({
     return hasText || fileCount > 0;
   }, [pendingNewThreadInput]);
 
-  const queryResult = useQuery({
-    ...orpc.message.get.queryOptions({
-      input: { threadId: threadId ?? "" },
+  const queryResult = useQuery(
+    orpc.message.get.queryOptions({
+      input: { threadId: threadId! },
+      enabled: Boolean(threadId) && !hasPendingNewThreadInput,
+      initialData: threadId ? initialMessages : undefined,
     }),
-    enabled: Boolean(threadId) && !hasPendingNewThreadInput,
-  });
+  );
 
   const {
     data: fetchedMessages,
@@ -139,6 +151,7 @@ export function Conversation({
   } = queryResult;
 
   useEffect(() => {
+    // If no threadId is provided, clear messages
     if (!threadId) {
       if (messages.length > 0) {
         setMessages([]);
@@ -146,19 +159,18 @@ export function Conversation({
       return;
     }
 
+    // If no messages were fetched, do nothing
     if (!fetchedMessages?.length) {
       return;
     }
 
-    const messagesChanged =
-      messages.length !== fetchedMessages.length ||
-      messages.some(
-        (message, index) => message.id !== fetchedMessages[index]?.id,
-      );
-
-    if (messagesChanged) {
-      setMessages(fetchedMessages);
+    // If there are already messages in the store, do nothing
+    if (messages.length > 0) {
+      return;
     }
+
+    // Set the fetched messages into the store
+    setMessages(fetchedMessages);
   }, [fetchedMessages, messages, setMessages, threadId]);
 
   const renderAssistantMessage = useCallback(
@@ -255,7 +267,8 @@ export function Conversation({
   );
 
   const fetchError = isError ? (queryError as Error) : null;
-  const hasMessages = messages.length > 0;
+  const effectiveMessages = messages.length > 0 ? messages : [];
+  const hasMessages = effectiveMessages.length > 0;
   const showInitialLoading =
     Boolean(threadId) &&
     !hasMessages &&
@@ -263,7 +276,7 @@ export function Conversation({
 
   const defaultEmptyState = (
     <ConversationEmptyState
-      icon={<MessageSquare className="size-12 text-muted-foreground" />}
+      icon={<ChatSlashIcon className="size-12 text-muted-foreground" />}
       title="Start a conversation"
       description="Send a message to begin chatting with the agent."
     />
@@ -279,7 +292,7 @@ export function Conversation({
 
   const defaultErrorState = fetchError && (
     <ConversationEmptyState
-      icon={<MessageSquare className="size-12 text-destructive" />}
+      icon={<ChatSlashIcon className="size-12 text-destructive" />}
       title="Unable to load messages"
       description={fetchError.message ?? "Please try again."}
     >
@@ -294,17 +307,22 @@ export function Conversation({
       className={cn("relative flex w-full flex-col", className)}
       {...props}
     >
-      <ConversationContent className="mx-auto flex flex-1 flex-col gap-4 p-0 sm:min-w-[390px] sm:max-w-[768px]">
+      <ConversationContent
+        className={cn(
+          "mx-auto flex flex-1 flex-col gap-4 p-0 sm:min-w-[390px] sm:max-w-[768px]",
+          contentClassName,
+        )}
+      >
         {fetchError ? (
           (errorState?.(fetchError, refetch) ?? defaultErrorState)
         ) : hasMessages ? (
           <div className="flex flex-col gap-4">
-            {messages.map((message, index) => {
+            {effectiveMessages.map((message, index) => {
               if (message.role === "system") {
                 return null;
               }
 
-              const isLastMessage = index === messages.length - 1;
+              const isLastMessage = index === effectiveMessages.length - 1;
               return (
                 <Message
                   from={message.role}
@@ -332,16 +350,14 @@ export function Conversation({
                   </MessageContent>
 
                   {message.role === "assistant" &&
-                    renderAssistantActions(message)}
+                  ["ready", "error"].includes(status)
+                    ? renderAssistantActions(message)
+                    : null}
                 </Message>
               );
             })}
             {["streaming", "submitted"].includes(status) && (
-              <Message from="assistant">
-                <MessageContent variant="flat">
-                  <Loader />
-                </MessageContent>
-              </Message>
+              <StatusIndicators />
             )}
             {storeError && (
               <Empty>
@@ -371,99 +387,4 @@ export function Conversation({
       <ConversationScrollButton />
     </BaseConversation>
   );
-}
-
-const words = [
-  "Accomplishing",
-  "Actioning",
-  "Actualizing",
-  "Baking",
-  "Booping",
-  "Brewing",
-  "Calculating",
-  "Cerebrating",
-  "Channelling",
-  "Churning",
-  "Clauding",
-  "Coalescing",
-  "Cogitating",
-  "Computing",
-  "Combobulating",
-  "Concocting",
-  "Considering",
-  "Contemplating",
-  "Cooking",
-  "Crafting",
-  "Creating",
-  "Crunching",
-  "Deciphering",
-  "Deliberating",
-  "Determining",
-  "Discombobulating",
-  "Doing",
-  "Effecting",
-  "Elucidating",
-  "Enchanting",
-  "Envisioning",
-  "Finagling",
-  "Flibbertigibbeting",
-  "Forging",
-  "Forming",
-  "Frolicking",
-  "Generating",
-  "Germinating",
-  "Hatching",
-  "Herding",
-  "Honking",
-  "Ideating",
-  "Imagining",
-  "Incubating",
-  "Inferring",
-  "Manifesting",
-  "Marinating",
-  "Meandering",
-  "Moseying",
-  "Mulling",
-  "Mustering",
-  "Musing",
-  "Noodling",
-  "Percolating",
-  "Perusing",
-  "Philosophising",
-  "Pontificating",
-  "Pondering",
-  "Processing",
-  "Puttering",
-  "Puzzling",
-  "Reticulating",
-  "Ruminating",
-  "Scheming",
-  "Schlepping",
-  "Shimmying",
-  "Simmering",
-  "Smooshing",
-  "Spelunking",
-  "Spinning",
-  "Stewing",
-  "Sussing",
-  "Synthesizing",
-  "Thinking",
-  "Tinkering",
-  "Transmuting",
-  "Unfurling",
-  "Unravelling",
-  "Vibing",
-  "Wandering",
-  "Whirring",
-  "Wibbling",
-  "Working",
-  "Wrangling",
-];
-function Loader() {
-  const randomWord = useMemo(() => {
-    const index = Math.floor(Math.random() * words.length);
-    return words[index];
-  }, []);
-
-  return <Shimmer>{`${randomWord}...`}</Shimmer>;
 }

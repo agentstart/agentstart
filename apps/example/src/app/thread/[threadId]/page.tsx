@@ -9,38 +9,24 @@ FEATURES:
 SEARCHABLE: playground, next, src, app, thread, [threadid], page
 agent-frontmatter:end */
 
-"use client";
+import { headers } from "next/headers";
 
-import { useParams } from "next/navigation";
-import { Conversation } from "@/components/agent/conversation";
-import { PromptInput } from "@/components/agent/prompt-input";
-import { useAgentStore, useThread } from "@/lib/agent-client";
+import { redirect } from "next/navigation";
+import { start } from "@/lib/agent";
+import Thread from "./thread";
 
-export default function Page() {
-  const { threadId } = useParams<{ threadId: string }>();
-  useThread(threadId);
+export default async function Page({
+  params,
+}: PageProps<"/thread/[threadId]">) {
+  const { threadId } = await params;
 
-  const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
-
-  return (
-    <div className="mx-auto flex h-full w-full max-w-full flex-1 flex-col">
-      <Conversation threadId={threadId} />
-
-      <div className="pb-3">
-        <PromptInput
-          threadId={threadId}
-          onMessageSubmit={(message) => {
-            return sendMessage(
-              { text: message?.text ?? "", files: message?.files },
-              {
-                body: {
-                  threadId,
-                },
-              },
-            );
-          }}
-        />
-      </div>
-    </div>
-  );
+  try {
+    const initialMessages = await start.api.message.get(
+      { threadId },
+      { context: { headers: await headers() } },
+    );
+    return <Thread threadId={threadId} initialMessages={initialMessages} />;
+  } catch {
+    redirect("/");
+  }
 }

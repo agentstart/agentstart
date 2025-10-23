@@ -8,6 +8,7 @@ FEATURES:
   - Re-exports agent and thread stores for convenience
 SEARCHABLE: playground, next, src, lib, agent, client, hooks
 agent-frontmatter:end */
+"use client";
 
 import {
   createAgentClient,

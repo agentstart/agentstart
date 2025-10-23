@@ -10,6 +10,8 @@ FEATURES:
 SEARCHABLE: thread hook, agent client, streaming thread
 agent-frontmatter:end */
 
+"use client";
+
 import { generateId } from "@agentstart/utils";
 import {
   Chat,

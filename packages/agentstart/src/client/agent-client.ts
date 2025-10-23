@@ -8,6 +8,7 @@ FEATURES:
   - Exposes a ready-to-use `useThread` hook bound to the client
 SEARCHABLE: agent client factory, orpc client, createAgentClient
 agent-frontmatter:end */
+"use client";
 
 import { createORPCClient } from "@orpc/client";
 import { RPCLink } from "@orpc/client/fetch";

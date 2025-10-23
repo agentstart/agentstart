@@ -46,26 +46,12 @@ import { useAgentStartContext } from "./provider";
 export interface PromptInputProps {
   className?: string;
   /**
-   * Thread ID for chat page usage
-   * - If provided: delegates message submission to onMessageSubmit
-   * - If undefined: creates new thread (home page usage)
+   * Thread ID for thread page usage
    */
   threadId?: string;
-  /**
-   * Custom message submit handler for chat page
-   * Called instead of creating a new thread when threadId is provided
-   */
-  onMessageSubmit?: (message: {
-    text?: string;
-    files?: FileUIPart[] | FileList;
-  }) => Promise<void>;
 }
 
-export function PromptInput({
-  className,
-  threadId,
-  onMessageSubmit,
-}: PromptInputProps = {}) {
+export function PromptInput({ className, threadId }: PromptInputProps = {}) {
   const { orpc, navigate } = useAgentStartContext();
   const queryClient = useQueryClient();
   const [input, setInput] = useState("");
@@ -73,6 +59,7 @@ export function PromptInput({
   const status = useAgentStore((state) => state.status, storeKey);
   const id = useAgentStore((state) => state.id, storeKey);
   const stop = useAgentStore((state) => state.stop, storeKey);
+  const sendMessage = useAgentStore((state) => state.sendMessage, storeKey);
   const pendingNewThreadInput = useAgentStore(
     (state) => state.pendingNewThreadInput,
   );
@@ -84,6 +71,20 @@ export function PromptInput({
     orpc.thread.create.mutationOptions(),
   );
 
+  const handleMessageSubmit = async (message: {
+    text?: string;
+    files?: FileUIPart[] | FileList;
+  }) => {
+    return sendMessage(
+      { text: message?.text ?? "", files: message?.files },
+      {
+        body: {
+          threadId,
+        },
+      },
+    );
+  };
+
   const handleSubmit = async (message: PromptInputMessage) => {
     // If currently streaming or submitted, stop instead of submitting
     if (["streaming", "submitted"].includes(status)) {
@@ -91,12 +92,16 @@ export function PromptInput({
       return;
     }
 
-    if (!message.text?.trim()) return;
+    const hasText = Boolean(message.text?.trim());
+    const hasAttachments = Boolean(message.files?.length);
+    if (!(hasText || hasAttachments)) {
+      return;
+    }
 
-    if (threadId && onMessageSubmit) {
+    if (threadId) {
       // Thread page: delegate to parent component
       setInput("");
-      await onMessageSubmit({
+      handleMessageSubmit({
         text: message.text ?? "",
         files: message.files,
       });
@@ -139,8 +144,9 @@ export function PromptInput({
     return <ArrowUpIcon className="size-4.5" weight="bold" />;
   }, [isPending, isStreaming, hasError]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: is fine
   useEffect(() => {
-    if (!threadId || !onMessageSubmit || !id || !pendingNewThreadInput) {
+    if (!threadId || !id || !pendingNewThreadInput) {
       return;
     }
 
@@ -161,18 +167,12 @@ export function PromptInput({
 
     void (async () => {
       try {
-        await onMessageSubmit({ text: storedText, files });
+        await handleMessageSubmit({ text: storedText, files });
       } catch {
         setPendingNewThreadInput({ text: storedText, files });
       }
     })();
-  }, [
-    id,
-    onMessageSubmit,
-    pendingNewThreadInput,
-    setPendingNewThreadInput,
-    threadId,
-  ]);
+  }, [id, pendingNewThreadInput, setPendingNewThreadInput, threadId]);
 
   return (
     <PromptInputProvider>
