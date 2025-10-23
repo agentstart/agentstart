@@ -52,4 +52,13 @@ export const start = agentStart({
     onStart(() => console.log("Handler starting")),
     onSuccess(() => console.log("Handler succeeded")),
   ],
+  advanced: {
+    generateTitle: {
+      model: openrouter("x-ai/grok-4-fast"),
+    },
+    generateSuggestions: {
+      model: openrouter("x-ai/grok-4-fast"),
+      limit: 5,
+    },
+  },
 });

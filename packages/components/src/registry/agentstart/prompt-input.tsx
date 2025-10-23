@@ -181,7 +181,7 @@ export function PromptInput({ className, threadId }: PromptInputProps = {}) {
         multiple
         onSubmit={handleSubmit}
         className={cn(
-          "mx-auto w-full max-w-full rounded-[22px] bg-background *:data-[slot=input-group]:rounded-[22px] sm:min-w-[390px] sm:max-w-[768px]",
+          "mx-auto w-full max-w-full rounded-[22px] bg-background *:data-[slot=input-group]:rounded-[22px] sm:min-w-[390px] sm:max-w-3xl",
           className,
         )}
       >

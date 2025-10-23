@@ -78,32 +78,6 @@ The agent class orchestrates prompts, tool execution, and memory updates. Tools 
   - `express` – Node.js REST integration
 - Each template wires prompts, memory, and tools according to best practices.
 
-## Configuration (`agentstart.config.ts`)
-
-- Export a default config object that declares:
-  - `prompts`: mission + summary definitions.
-  - `tools`: arrays of inner/document tools.
-  - `memory`: adapters for message, summary, task, and knowledge storage.
-  - `components`: UI bundles to expose.
-  - `templates`: enabled templates and route bindings.
-- Example skeleton:
-
-```ts
-import { innerTools, documentTools } from "agentstart/tools";
-import { postgresMemory } from "agentstart/memory/postgres";
-
-export default agentStartConfig({
-  prompts: {
-    mission: "./prompts/mission.md",
-    summary: "./prompts/summary.md",
-  },
-  tools: [...innerTools(), ...documentTools()],
-  memory: postgresMemory(),
-  components: ["AIElements", "Block"],
-  templates: ["express"],
-});
-```
-
 ## Metadata Comment Standard
 
 **IMPORTANT: Every new TypeScript or JavaScript file MUST start with an `agent-frontmatter` block.** This is a mandatory requirement for all code files in the project.

@@ -25,11 +25,12 @@ import {
 } from "ai";
 import type { Agent as AgentContract, AgentStreamOptions } from "@/types";
 import type { BaseContext } from "./context";
+import type { AgentStartUIMessage } from "./messages";
 import {
   addProviderOptionsToMessages,
   fixEmptyModelMessages,
 } from "./messages/message-processing";
-import { generateThreadTitle } from "./model-tasks";
+import { generateThreadSuggestions, generateThreadTitle } from "./model-tasks";
 import {
   getCompleteMessages,
   updateThreadTitle,
@@ -157,7 +158,7 @@ export class Agent<
           writer,
         });
 
-        const result = await instance.stream({
+        const result = instance.stream({
           messages: modelMessages,
         });
 
@@ -166,8 +167,19 @@ export class Agent<
         writer.merge(
           result.toUIMessageStream({
             sendReasoning: true,
-            // sendStart: false,
             messageMetadata: this.metadataHandler,
+            onFinish: async (setting) => {
+              if (
+                setting.responseMessage &&
+                setting.responseMessage.parts.length > 0
+              ) {
+                await this.maybeGenerateThreadSuggestions({
+                  uiMessages: setting.messages,
+                  writer,
+                  generateSuggestions: options.generateSuggestions,
+                });
+              }
+            },
           }),
         );
       },
@@ -211,7 +223,7 @@ export class Agent<
     adapter,
     generateTitle,
   }: {
-    writer: UIMessageStreamWriter;
+    writer: UIMessageStreamWriter<AgentStartUIMessage>;
     uiMessages: UIMessage[];
     message: UIMessage;
     threadId: string;
@@ -252,15 +264,82 @@ export class Agent<
         data: {
           title,
         },
+        transient: true, // Won't be added to message history
       });
     } catch (err) {
       console.error("Title generation error:", err);
     }
   }
 
+  /**
+   * Generate thread suggestions after the agent response completes.
+   * Analyzes the conversation context and produces follow-up prompts.
+   *
+   * @param uiMessages - All UI messages in the conversation including the response
+   * @param writer - Stream writer for sending suggestions
+   * @param generateSuggestions - Configuration for suggestion generation
+   */
+  private async maybeGenerateThreadSuggestions({
+    uiMessages,
+    writer,
+    generateSuggestions,
+  }: {
+    uiMessages: UIMessage[];
+    writer: UIMessageStreamWriter<AgentStartUIMessage>;
+    generateSuggestions: AgentStreamOptions["generateSuggestions"];
+  }): Promise<void> {
+    // Only generate if config is provided
+    if (!generateSuggestions) {
+      return;
+    }
+
+    const model = generateSuggestions.model;
+    const limit = generateSuggestions.limit;
+    const instructions = generateSuggestions.instructions;
+
+    try {
+      // Build conversation context from recent messages
+      // Use last exchange (user + assistant)
+      const recentMessages = uiMessages.slice(-2);
+
+      const conversationContext = recentMessages
+        .map((msg) => {
+          const role = msg.role === "user" ? "User" : "Assistant";
+          const text =
+            msg.parts.find((part) => part.type === "text")?.text ?? "";
+          return `${role}: ${text}`;
+        })
+        .join("\n\n");
+
+      if (!conversationContext) {
+        return;
+      }
+
+      // Generate suggestions based on conversation context
+      const prompts = await generateThreadSuggestions({
+        conversationContext,
+        model,
+        limit,
+        instructions,
+      });
+
+      if (prompts.length > 0) {
+        // Send suggestions through stream
+        writer.write({
+          type: "data-agentstart-suggestions",
+          data: {
+            prompts,
+          },
+        });
+      }
+    } catch (err) {
+      console.error("Thread suggestions generation error:", err);
+    }
+  }
+
   private async prepareInstance(
     options: Pick<AgentStreamOptions, "threadId" | "sandbox" | "adapter"> & {
-      writer: UIMessageStreamWriter;
+      writer: UIMessageStreamWriter<AgentStartUIMessage>;
     },
   ) {
     const context: BaseContext = {

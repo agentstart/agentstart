@@ -31,7 +31,7 @@ import { type AgentStoreWithSync, getAgentStore } from "./store/agent";
 
 export function createUseThread(client: AgentStartAPI) {
   const hook = (storeId: string = "default") => {
-    const mapDataToState = useDataStateMapper(client);
+    const mapDataToState = useDataStateMapper(client, storeId);
     const mapDataToStateRef = useRef(mapDataToState);
     mapDataToStateRef.current = mapDataToState;
 

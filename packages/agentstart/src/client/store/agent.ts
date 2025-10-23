@@ -10,10 +10,11 @@ SEARCHABLE: packages, agentstart, src, client, store, agent, zustand
 agent-frontmatter:end */
 
 import type { UIMessage, UseChatHelpers } from "@ai-sdk/react";
-import type { FileUIPart } from "ai";
+import type { DataUIPart, FileUIPart } from "ai";
 import { create, type StoreApi, type UseBoundStore } from "zustand";
 import { devtools } from "zustand/middleware";
 import { useShallow } from "zustand/shallow";
+import type { AgentStartDataPart } from "@/agent";
 
 export type PendingNewThreadInput = {
   text?: string;
@@ -24,8 +25,17 @@ export interface AgentStore<TMessage extends UIMessage = UIMessage>
   extends UseChatHelpers<TMessage> {
   pendingNewThreadInput: PendingNewThreadInput;
   setPendingNewThreadInput: (input: PendingNewThreadInput) => void;
+  dataParts: Map<
+    DataUIPart<AgentStartDataPart>["type"],
+    DataUIPart<AgentStartDataPart>["data"]
+  >;
+  setDataPart: (
+    type: DataUIPart<AgentStartDataPart>["type"],
+    data: DataUIPart<AgentStartDataPart>["data"],
+  ) => void;
+  removeDataPart: (type: DataUIPart<AgentStartDataPart>["type"]) => void;
 }
-
+``;
 // Internal sync method for connecting with useThread
 export interface AgentStoreWithSync<TMessage extends UIMessage = UIMessage>
   extends AgentStore<TMessage> {
@@ -67,6 +77,28 @@ function createAgentStore<TMessage extends UIMessage = UIMessage>() {
             "setPendingNewThreadInput",
           );
         },
+
+        dataParts: new Map(),
+        setDataPart: (type, data) =>
+          set(
+            (state) => {
+              const newDataParts = new Map(state.dataParts);
+              newDataParts.set(type, data);
+              return { dataParts: newDataParts };
+            },
+            false,
+            "setDataPart",
+          ),
+        removeDataPart: (type) =>
+          set(
+            (state) => {
+              const newDataParts = new Map(state.dataParts);
+              newDataParts.delete(type);
+              return { dataParts: newDataParts };
+            },
+            false,
+            "removeDataPart",
+          ),
 
         // Internal sync method for useThread integration
         _syncState: (newState: Partial<AgentStore<TMessage>>) => {

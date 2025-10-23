@@ -11,10 +11,11 @@ agent-frontmatter:end */
 import type { UIMessageStreamWriter } from "ai";
 import type { SandboxAPI } from "@/sandbox";
 import type { Adapter } from "@/types";
+import type { AgentStartUIMessage } from "./messages";
 
 export interface BaseContext {
   threadId: string;
-  writer: UIMessageStreamWriter;
+  writer: UIMessageStreamWriter<AgentStartUIMessage>;
   sandbox: SandboxAPI;
   db: Adapter;
 }

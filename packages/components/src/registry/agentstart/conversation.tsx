@@ -309,7 +309,7 @@ export function Conversation({
     >
       <ConversationContent
         className={cn(
-          "mx-auto flex flex-1 flex-col gap-4 p-0 sm:min-w-[390px] sm:max-w-[768px]",
+          "mx-auto flex flex-1 flex-col gap-4 p-0 sm:min-w-[390px] sm:max-w-3xl",
           contentClassName,
         )}
       >
@@ -365,7 +365,7 @@ export function Conversation({
                   <EmptyTitle className="text-destructive">
                     Error Occurred
                   </EmptyTitle>
-                  <EmptyDescription className="overflow-hidden sm:min-w-[390px] sm:max-w-[768px]">
+                  <EmptyDescription className="overflow-hidden sm:min-w-[390px] sm:max-w-3xl">
                     {storeError.message ?? "Unexpected error"}
                   </EmptyDescription>
                 </EmptyHeader>

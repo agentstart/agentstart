@@ -161,6 +161,8 @@ export function createThreadRouter(procedure = publicProcedure) {
             sandbox,
             message: input.message,
             threadId: input.threadId,
+            generateTitle: context.advanced?.generateTitle,
+            generateSuggestions: context.advanced?.generateSuggestions,
           });
 
           return streamToEventIterator(result);

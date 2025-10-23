@@ -15,6 +15,9 @@ export const dataPartSchema = z.object({
   "agentstart-title_update": z.object({
     title: z.string(),
   }),
+  "agentstart-suggestions": z.object({
+    prompts: z.array(z.string()),
+  }),
 });
 
 export type AgentStartDataPart = z.infer<typeof dataPartSchema>;

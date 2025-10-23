@@ -12,13 +12,16 @@ agent-frontmatter:end */
 import type {
   Experimental_AgentSettings as AISDK_AgentSettings,
   InferUIMessageChunk,
-  LanguageModel,
   ToolSet,
   UIMessage,
   UIMessageStreamOnFinishCallback,
 } from "ai";
 import type { SandboxAPI } from "@/sandbox";
 import type { Adapter } from "./adapter";
+import type {
+  AgentGenerateSuggestionsOptions,
+  AgentGenerateTitleOptions,
+} from "./options";
 
 export interface AgentStreamOptions {
   adapter: Adapter;
@@ -27,10 +30,8 @@ export interface AgentStreamOptions {
   threadId: string;
   onFinish?: UIMessageStreamOnFinishCallback<UIMessage>;
   onError?: (error: unknown) => string;
-  generateTitle?: {
-    model: LanguageModel;
-    instructions: string;
-  };
+  generateTitle?: AgentGenerateTitleOptions;
+  generateSuggestions?: AgentGenerateSuggestionsOptions;
 }
 
 export interface Agent<Context = unknown> {

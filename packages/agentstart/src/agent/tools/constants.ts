@@ -18,6 +18,6 @@ export const GIT_CONFIG = {
    */
   AUTHOR: {
     name: "agentstart-bot",
-    email: "bot@agentstart.dev",
+    email: "bot@agentstart.ai",
   },
 } as const;
