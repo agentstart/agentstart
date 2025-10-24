@@ -112,14 +112,14 @@ export async function getConfig({
       let resolvedPath: string = path.join(cwd, configPath);
       if (fs.existsSync(configPath)) resolvedPath = configPath; // If the configPath is a file, use it as is, as it means the path wasn't relative.
       const { config } = await loadConfig<{
-        agentStart?: AgentStartOptions;
+        start?: AgentStartOptions;
         default?: AgentStartOptions;
       }>({
         configFile: resolvedPath,
         dotenv: true,
         jitiOptions: jitiOptions(cwd),
       });
-      if (!config.agentStart && !config.default) {
+      if (!config.start && !config.default) {
         if (shouldThrowOnError) {
           throw new Error(
             `Couldn't read your agent config in ${resolvedPath}. Make sure to default export your agent instance or to export as a variable named agent.`,
@@ -130,7 +130,7 @@ export async function getConfig({
         );
         process.exit(1);
       }
-      configFile = config.agentStart || config.default || null;
+      configFile = config.start || config.default || null;
     }
 
     if (!configFile) {

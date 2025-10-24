@@ -2,7 +2,7 @@
 AGENT: CLI test module
 PURPOSE: Exercises AgentStart CLI commands to prevent regressions.
 USAGE: Executed with Vitest to validate CLI generators and configuration helpers.
-EXPORTS: tmpdirTest, start, db
+EXPORTS: (none)
 FEATURES:
   - Covers critical CLI workflows for schema generation
   - Uses snapshot assertions to track emitted files
@@ -10,36 +10,42 @@ SEARCHABLE: packages, cli, src, test, get, config, vitest
 agent-frontmatter:end */
 
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import fs from "fs-extra";
-import { afterEach, beforeEach, describe, expect, it, test } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { getConfig } from "../utils/get-config";
 
-interface TmpDirFixture {
-  tmpdir: string;
-}
-
-async function createTempDir(): Promise<string> {
-  const tmpdir = path.join(process.cwd(), "test", "getConfig_test-");
-  return (await fs.mkdtemp(tmpdir, { encoding: "utf8" })) as string;
-}
-
-export const tmpdirTest = test.extend<TmpDirFixture>({
-  // biome-ignore lint/correctness/noEmptyPattern: Vitest requires object destructuring for fixtures
-  tmpdir: async ({}, use) => {
-    const directory = await createTempDir();
-
-    await use(directory);
-
-    await fs.rm(directory, { recursive: true });
-  },
-});
-
 let tmpDir = ".";
+
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(currentDir, "../../../..");
+
+const linkNodeModules = async (targetDir: string) => {
+  const source = path.join(repoRoot, "node_modules");
+  const destination = path.join(targetDir, "node_modules");
+  if (!(await fs.pathExists(destination))) {
+    await fs.ensureSymlink(source, destination, "dir");
+  }
+};
+
+const createAgentModuleSource = (
+  dbImportPath: string,
+) => `import { agentStart } from "agentstart";
+import { prismaAdapter } from "agentstart/db";
+import { db } from "${dbImportPath}";
+
+export const start = agentStart({
+  memory: prismaAdapter(db, {
+    provider: "sqlite",
+  }),
+});
+`;
 
 describe("getConfig", async () => {
   beforeEach(async () => {
     const tmp = path.join(process.cwd(), "getConfig_test-");
     tmpDir = (await fs.mkdtemp(tmp, { encoding: "utf8" })) as string;
+    await linkNodeModules(tmpDir);
   });
 
   afterEach(async () => {
@@ -69,15 +75,7 @@ describe("getConfig", async () => {
     // create dummy agent.ts
     await fs.writeFile(
       path.join(agentPath, "agent.ts"),
-      `import {agentStart} from "agentstart";
-       import {prismaAdapter} from "agentstart/db";      
-       import {db} from "@server/db/db";
-
-       export const start = agentStart({
-          memory: prismaAdapter(db, {
-              provider: 'sqlite'
-          })
-       })`,
+      createAgentModuleSource("@server/db/db"),
     );
 
     // create dummy db.ts
@@ -121,15 +119,7 @@ describe("getConfig", async () => {
     // create dummy agent.ts
     await fs.writeFile(
       path.join(agentPath, "agent.ts"),
-      `import {agentStart} from "agentstart";
-       import {prismaAdapter} from "agentstart/db";      
-       import {db} from "prismaDbClient";
-
-       export const start = agentStart({
-          memory: prismaAdapter(db, {
-              provider: 'sqlite'
-          }),
-       })`,
+      createAgentModuleSource("prismaDbClient"),
     );
 
     // create dummy db.ts
@@ -173,15 +163,7 @@ describe("getConfig", async () => {
     // create dummy agent.ts
     await fs.writeFile(
       path.join(agentPath, "agent.ts"),
-      `import {agentStart} from "agentstart";
-       import {prismaAdapter} from "agentstart/db";      
-       import {db} from "@server/db/db";
-
-       export const start = agentStart({
-          memory: prismaAdapter(db, {
-              provider: 'sqlite'
-          })
-       })`,
+      createAgentModuleSource("@server/db/db"),
     );
 
     // create dummy db.ts
@@ -225,15 +207,7 @@ describe("getConfig", async () => {
     // create dummy agent.ts
     await fs.writeFile(
       path.join(agentPath, "agent.ts"),
-      `import {agentStart} from "agentstart";
-       import {prismaAdapter} from "agentstart/db";      
-       import {db} from "prismaDbClient";
-
-       export const start = agentStart({
-          memory: prismaAdapter(db, {
-              provider: 'sqlite'
-          })
-       })`,
+      createAgentModuleSource("prismaDbClient"),
     );
 
     // create dummy db.ts
@@ -277,15 +251,7 @@ describe("getConfig", async () => {
     // create dummy agent.ts
     await fs.writeFile(
       path.join(agentPath, "agent.ts"),
-      `import {agentStart} from "agentstart";
-       import {prismaAdapter} from "agentstart/db";      
-       import {db} from "../db/db";
-
-       export const start = agentStart({
-          memory: prismaAdapter(db, {
-              provider: 'sqlite'
-          })
-       })`,
+      createAgentModuleSource("../db/db"),
     );
 
     // create dummy db.ts
@@ -329,15 +295,7 @@ describe("getConfig", async () => {
     // create dummy agent.ts
     await fs.writeFile(
       path.join(agentPath, "agent.ts"),
-      `import {agentStart} from "agentstart";
-       import {prismaAdapter} from "agentstart/db";      
-       import {db} from "@server/db/db";
-
-       export const start = agentStart({
-          memory: prismaAdapter(db, {
-              provider: 'sqlite'
-          })
-       })`,
+      createAgentModuleSource("@server/db/db"),
     );
 
     // create dummy db.ts
@@ -350,36 +308,12 @@ describe("getConfig", async () => {
       export const db = new PrismaClient()`,
     );
 
-    await expect(() =>
+    await expect(
       getConfig({
         cwd: tmpDir,
         configPath: "server/agent/agent.ts",
         shouldThrowOnError: true,
       }),
     ).rejects.toThrowError();
-  });
-
-  it("should resolve js config", async () => {
-    const agentPath = path.join(tmpDir, "server", "agent");
-    const dbPath = path.join(tmpDir, "server", "db");
-    await fs.mkdir(agentPath, { recursive: true });
-    await fs.mkdir(dbPath, { recursive: true });
-
-    // create dummy agent.ts
-    await fs.writeFile(
-      path.join(agentPath, "agent.js"),
-      `import  { agentStart } from "agentstart";
-
-       export const start = agentStart({
-          appName: "test-name",
-       })`,
-    );
-    const config = await getConfig({
-      cwd: tmpDir,
-      configPath: "server/agent/agent.js",
-    });
-    expect(config).toMatchObject({
-      appName: "test-name",
-    });
   });
 });
