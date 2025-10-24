@@ -12,7 +12,7 @@ FEATURES:
 SEARCHABLE: install deps, workspace catalog, clack prompts workflow
 agent-frontmatter:end */
 
-import { resolve } from "node:path";
+import { dirname, relative, resolve } from "node:path";
 import {
   cancel,
   intro,
@@ -23,12 +23,12 @@ import {
   text,
 } from "@clack/prompts";
 import { execa } from "execa";
-import { readdir, readFile, stat, writeFile } from "fs-extra";
+import fg from "fast-glob";
+import { readFile, writeFile } from "fs-extra";
 
 import { sortWorkspaceCatalog, type WorkspaceCatalog } from "./update-deps";
 
 const rootDir = process.cwd();
-const packagesDir = resolve(rootDir, "packages");
 const rootPackageJsonPath = resolve(rootDir, "package.json");
 
 type DependencyGroup = "dependencies" | "devDependencies";
@@ -103,32 +103,70 @@ function sortRecord(record: Record<string, string>): Record<string, string> {
 }
 
 async function getWorkspacePackages(): Promise<WorkspacePackage[]> {
-  const packages: WorkspacePackage[] = [];
+  let workspacePatterns: string[] = [];
 
   try {
-    const entries = await readdir(packagesDir);
-    for (const entry of entries) {
-      const packagePath = resolve(packagesDir, entry);
-      try {
-        const stats = await stat(packagePath);
-        if (!stats.isDirectory()) continue;
-      } catch {
-        continue;
-      }
-
-      const packageJsonPath = resolve(packagePath, "package.json");
-      try {
-        const content = await readFile(packageJsonPath, "utf8");
-        const parsed = JSON.parse(content) as { name?: string };
-        packages.push({
-          name: parsed.name ?? entry,
-          dir: entry,
-          packageJsonPath,
-        });
-      } catch {}
+    const rawRootPackageJson = await readFile(rootPackageJsonPath, "utf8");
+    const rootPackageJson = JSON.parse(rawRootPackageJson) as RootPackageJson;
+    if (Array.isArray(rootPackageJson.workspaces?.packages)) {
+      workspacePatterns = rootPackageJson.workspaces.packages.filter(
+        (pattern): pattern is string =>
+          typeof pattern === "string" && pattern.trim().length > 0,
+      );
     }
-  } catch {
-    // ignore readdir errors, handled later
+  } catch (error) {
+    log.error(
+      `Failed to read root workspaces from ${rootPackageJsonPath}: ${
+        error instanceof Error ? error.message : "unknown error"
+      }`,
+    );
+    return [];
+  }
+
+  if (workspacePatterns.length === 0) {
+    log.error("No workspace package patterns defined in workspaces.packages.");
+    return [];
+  }
+
+  const manifestPatterns = workspacePatterns
+    .map((pattern) => {
+      const trimmed = pattern.trim();
+      if (trimmed.length === 0) return null;
+
+      const isNegated = trimmed.startsWith("!");
+      const withoutNegation = isNegated ? trimmed.slice(1) : trimmed;
+      const normalized = withoutNegation.replace(/\/+$/, "");
+      const withManifest = normalized.endsWith("package.json")
+        ? normalized
+        : `${normalized}/package.json`;
+
+      return isNegated ? `!${withManifest}` : withManifest;
+    })
+    .filter((pattern): pattern is string => Boolean(pattern));
+
+  const manifestPaths = await fg(manifestPatterns, {
+    cwd: rootDir,
+    absolute: true,
+    unique: true,
+  });
+
+  const packages: WorkspacePackage[] = [];
+
+  for (const manifestPath of manifestPaths) {
+    try {
+      const content = await readFile(manifestPath, "utf8");
+      const parsed = JSON.parse(content) as { name?: string };
+      const packageDir = dirname(manifestPath);
+      const relativeDir = relative(rootDir, packageDir) || ".";
+
+      packages.push({
+        name: parsed.name ?? relativeDir,
+        dir: relativeDir,
+        packageJsonPath: manifestPath,
+      });
+    } catch {
+      // ignore malformed package.json files
+    }
   }
 
   return packages.sort((a, b) => a.name.localeCompare(b.name));
@@ -240,9 +278,7 @@ async function updateWorkspacePackage(
 
     currentRecord[dependency] = "catalog:";
     addedDependencies.push(dependency);
-    log.success(
-      `${target.name}: queued ${dependency}@catalog: for ${group}.`,
-    );
+    log.success(`${target.name}: queued ${dependency}@catalog: for ${group}.`);
   }
 
   if (addedDependencies.length === 0) {
