@@ -1,3 +1,16 @@
+/* agent-frontmatter:start
+AGENT: Tool UI primitives
+PURPOSE: Provide base components for rendering tool execution UI with collapsible state
+USAGE: <Tool><ToolHeader /><ToolContent><ToolInput /><ToolOutput /></ToolContent></Tool>
+EXPORTS: Tool, ToolHeader, ToolContent, ToolInput, ToolOutput
+FEATURES:
+  - Collapsible tool execution container with state badges
+  - Displays tool parameters with JSON syntax highlighting
+  - Shows tool results or error messages with formatted output
+  - Status indicators for all tool execution states
+SEARCHABLE: tool ui, tool primitives, collapsible tool, tool execution ui
+agent-frontmatter:end */
+
 "use client";
 
 import type { ToolUIPart } from "ai";

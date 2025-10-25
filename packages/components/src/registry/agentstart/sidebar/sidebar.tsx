@@ -105,8 +105,8 @@ export function Sidebar({
   );
 
   // Rename mutation
-  const renameMutation = useMutation(
-    orpc.thread.rename.mutationOptions({
+  const updateMutation = useMutation(
+    orpc.thread.update.mutationOptions({
       onSuccess: () => {
         refetch();
       },
@@ -199,7 +199,10 @@ export function Sidebar({
           <MoreOptions
             threadTitle={thread.title ?? "Thread"}
             onRename={(title) =>
-              renameMutation.mutate({ threadId: thread.id, title })
+              updateMutation.mutate({
+                threadId: thread.id,
+                data: { title },
+              })
             }
             onDelete={() => deleteMutation.mutate({ threadId: thread.id })}
           />
@@ -219,7 +222,7 @@ export function Sidebar({
     isLoading,
     threads,
     deleteMutation.mutate,
-    renameMutation.mutate,
+    updateMutation.mutate,
   ]);
 
   return (

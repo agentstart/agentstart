@@ -1,3 +1,16 @@
+/* agent-frontmatter:start
+AGENT: Code block component with syntax highlighting
+PURPOSE: Render syntax-highlighted code snippets with line numbers and copy functionality
+USAGE: <CodeBlock code={code} language="typescript" showLineNumbers />
+EXPORTS: CodeBlock, CodeBlockCopyButton, highlightCode
+FEATURES:
+  - Dual-theme syntax highlighting (light/dark) using Shiki
+  - Optional line number display
+  - Copy-to-clipboard button with success feedback
+  - Supports all Shiki bundled languages
+SEARCHABLE: code block, syntax highlighting, shiki, copy button
+agent-frontmatter:end */
+
 "use client";
 
 import { CheckIcon, CopyIcon } from "@phosphor-icons/react";

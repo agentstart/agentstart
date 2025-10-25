@@ -1,3 +1,17 @@
+/* agent-frontmatter:start
+AGENT: Tool UI primitives (Registry)
+PURPOSE: AgentStart registry version of tool UI components with collapsible state
+USAGE: <Tool><ToolHeader /><ToolContent><ToolInput /><ToolOutput /></ToolContent></Tool>
+EXPORTS: Tool, ToolHeader, ToolContent, ToolInput, ToolOutput
+FEATURES:
+  - Collapsible tool execution container with state badges
+  - Displays tool parameters with JSON syntax highlighting
+  - Shows tool results or error messages with formatted output
+  - Status indicators for all tool execution states
+  - Uses Phosphor icons for consistent registry styling
+SEARCHABLE: tool ui registry, tool primitives, collapsible tool, tool execution ui
+agent-frontmatter:end */
+
 "use client";
 
 import {

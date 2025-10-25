@@ -79,6 +79,64 @@ export function createThreadRouter(procedure = publicProcedure) {
         }
       }),
 
+    loadMessages: procedure
+      .input(z.object({ threadId: z.string() }))
+      .handler(async ({ input, context, errors }) => {
+        try {
+          const db = await getAdapter(context);
+
+          const messages = await loadThread({
+            db,
+            threadId: input.threadId,
+          });
+          return messages;
+        } catch (error) {
+          console.error("Failed to load messages:", error);
+          throw errors.INTERNAL_SERVER_ERROR({
+            message: error instanceof Error ? error.message : "Unknown error",
+          });
+        }
+      }),
+
+    get: procedure
+      .input(z.object({ threadId: z.string() }))
+      .handler(async ({ input, context, errors }) => {
+        try {
+          const db = await getAdapter(context);
+          const userId = context.getUserId
+            ? await context.getUserId(context.headers)
+            : undefined;
+
+          const thread = await db.findOne<DBThread>({
+            model: "thread",
+            where: [{ field: "id", value: input.threadId }],
+          });
+
+          if (!thread) {
+            throw errors.NOT_FOUND({
+              message: "Thread not found",
+            });
+          }
+
+          // Check visibility: private threads require ownership
+          if (thread.visibility === "private" && thread.userId !== userId) {
+            throw errors.FORBIDDEN({
+              message: "You don't have permission to access this thread",
+            });
+          }
+
+          return { thread };
+        } catch (error) {
+          console.error("Failed to get thread:", error);
+          if (error instanceof Error && "code" in error) {
+            throw error;
+          }
+          throw errors.INTERNAL_SERVER_ERROR({
+            message: error instanceof Error ? error.message : "Unknown error",
+          });
+        }
+      }),
+
     create: procedure
       .input(
         z
@@ -90,13 +148,13 @@ export function createThreadRouter(procedure = publicProcedure) {
       )
       .handler(async ({ input, context, errors }) => {
         try {
-          const adapter = await getAdapter(context);
+          const db = await getAdapter(context);
           const now = new Date();
           const userId = context.getUserId
             ? await context.getUserId(context.headers)
             : "anonymous";
 
-          const thread = await adapter.create({
+          const thread = await db.create({
             model: "thread",
             data: {
               userId,
@@ -116,19 +174,145 @@ export function createThreadRouter(procedure = publicProcedure) {
         }
       }),
 
-    loadMessages: procedure
+    update: procedure
+      .input(
+        z.object({
+          threadId: z.string(),
+          data: z
+            .object({
+              title: z.string().min(1).optional(),
+              visibility: z.enum(["public", "private"]).optional(),
+              lastContext: z.any().nullable().optional(),
+            })
+            .refine(
+              (fields) =>
+                typeof fields.title !== "undefined" ||
+                typeof fields.visibility !== "undefined" ||
+                typeof fields.lastContext !== "undefined",
+              {
+                message: "Provide at least one field to update.",
+              },
+            ),
+        }),
+      )
+      .handler(async ({ input, context, errors }) => {
+        try {
+          const db = await getAdapter(context);
+          const userId = context.getUserId
+            ? await context.getUserId(context.headers)
+            : "anonymous";
+
+          // Verify thread ownership
+          const thread = await db.findOne<DBThread>({
+            model: "thread",
+            where: [{ field: "id", value: input.threadId }],
+          });
+
+          if (!thread) {
+            throw errors.NOT_FOUND({
+              message: "Thread not found",
+            });
+          }
+
+          if (thread.userId !== userId) {
+            throw errors.FORBIDDEN({
+              message: "You don't have permission to update this thread",
+            });
+          }
+
+          const updatePayload: Record<string, unknown> = {};
+
+          if (
+            "title" in input.data &&
+            typeof input.data.title !== "undefined"
+          ) {
+            updatePayload.title = input.data.title;
+          }
+          if (
+            "visibility" in input.data &&
+            typeof input.data.visibility !== "undefined"
+          ) {
+            updatePayload.visibility = input.data.visibility;
+          }
+          if (
+            "lastContext" in input.data &&
+            typeof input.data.lastContext !== "undefined"
+          ) {
+            updatePayload.lastContext = input.data.lastContext;
+          }
+
+          if (Object.keys(updatePayload).length === 0) {
+            throw errors.INTERNAL_SERVER_ERROR({
+              message: "No update fields provided.",
+            });
+          }
+
+          updatePayload.updatedAt = new Date();
+
+          const updatedThread = await db.update({
+            model: "thread",
+            where: [{ field: "id", value: input.threadId }],
+            update: updatePayload,
+          });
+
+          return { thread: updatedThread };
+        } catch (error) {
+          console.error("Failed to update thread:", error);
+          if (error instanceof Error && "code" in error) {
+            throw error;
+          }
+          throw errors.INTERNAL_SERVER_ERROR({
+            message: error instanceof Error ? error.message : "Unknown error",
+          });
+        }
+      }),
+
+    delete: procedure
       .input(z.object({ threadId: z.string() }))
       .handler(async ({ input, context, errors }) => {
         try {
           const db = await getAdapter(context);
+          const userId = context.getUserId
+            ? await context.getUserId(context.headers)
+            : "anonymous";
 
-          const messages = await loadThread({
-            db,
-            threadId: input.threadId,
+          // Verify thread ownership
+          const thread = await db.findOne<DBThread>({
+            model: "thread",
+            where: [{ field: "id", value: input.threadId }],
           });
-          return messages;
+
+          if (!thread) {
+            throw errors.NOT_FOUND({
+              message: "Thread not found",
+            });
+          }
+
+          if (thread.userId !== userId) {
+            throw errors.FORBIDDEN({
+              message: "You don't have permission to delete this thread",
+            });
+          }
+
+          await Promise.all([
+            // Delete associated messages first
+            db.deleteMany({
+              model: "message",
+              where: [{ field: "threadId", value: input.threadId }],
+            }),
+            // Delete the thread
+            await db.delete({
+              model: "thread",
+              where: [{ field: "id", value: input.threadId }],
+            }),
+          ]);
+
+          return { success: true };
         } catch (error) {
-          console.error("Failed to load messages:", error);
+          console.error("Failed to delete thread:", error);
+          if (error instanceof Error && "code" in error) {
+            throw error;
+          }
           throw errors.INTERNAL_SERVER_ERROR({
             message: error instanceof Error ? error.message : "Unknown error",
           });
@@ -176,111 +360,6 @@ export function createThreadRouter(procedure = publicProcedure) {
           return streamToEventIterator(result);
         } catch (error) {
           console.error("Failed to stream thread response:", error);
-          throw errors.INTERNAL_SERVER_ERROR({
-            message: error instanceof Error ? error.message : "Unknown error",
-          });
-        }
-      }),
-
-    rename: procedure
-      .input(
-        z.object({
-          threadId: z.string(),
-          title: z.string().min(1),
-        }),
-      )
-      .handler(async ({ input, context, errors }) => {
-        try {
-          const adapter = await getAdapter(context);
-          const userId = context.getUserId
-            ? await context.getUserId(context.headers)
-            : "anonymous";
-
-          // Verify thread ownership
-          const thread = await adapter.findOne<DBThread>({
-            model: "thread",
-            where: [{ field: "id", value: input.threadId }],
-          });
-
-          if (!thread) {
-            throw errors.NOT_FOUND({
-              message: "Thread not found",
-            });
-          }
-
-          if (thread.userId !== userId) {
-            throw errors.FORBIDDEN({
-              message: "You don't have permission to rename this thread",
-            });
-          }
-
-          const updatedThread = await adapter.update({
-            model: "thread",
-            where: [{ field: "id", value: input.threadId }],
-            update: {
-              title: input.title,
-              updatedAt: new Date(),
-            },
-          });
-
-          return { thread: updatedThread };
-        } catch (error) {
-          console.error("Failed to rename thread:", error);
-          if (error instanceof Error && "code" in error) {
-            throw error;
-          }
-          throw errors.INTERNAL_SERVER_ERROR({
-            message: error instanceof Error ? error.message : "Unknown error",
-          });
-        }
-      }),
-
-    delete: procedure
-      .input(z.object({ threadId: z.string() }))
-      .handler(async ({ input, context, errors }) => {
-        try {
-          const adapter = await getAdapter(context);
-          const userId = context.getUserId
-            ? await context.getUserId(context.headers)
-            : "anonymous";
-
-          // Verify thread ownership
-          const thread = await adapter.findOne<DBThread>({
-            model: "thread",
-            where: [{ field: "id", value: input.threadId }],
-          });
-
-          if (!thread) {
-            throw errors.NOT_FOUND({
-              message: "Thread not found",
-            });
-          }
-
-          if (thread.userId !== userId) {
-            throw errors.FORBIDDEN({
-              message: "You don't have permission to delete this thread",
-            });
-          }
-
-          await Promise.all([
-            // Delete associated messages first
-            adapter.deleteMany({
-              model: "message",
-              where: [{ field: "threadId", value: input.threadId }],
-            }),
-            // Delete the thread
-            await adapter.delete({
-              model: "thread",
-              where: [{ field: "id", value: input.threadId }],
-            }),
-          ]);
-
-          return { success: true };
-        } catch (error) {
-          console.error("Failed to delete thread:", error);
-          if (error instanceof Error && "code" in error) {
-            throw error;
-          }
           throw errors.INTERNAL_SERVER_ERROR({
             message: error instanceof Error ? error.message : "Unknown error",
           });

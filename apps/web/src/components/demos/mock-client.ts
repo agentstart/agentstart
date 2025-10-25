@@ -93,6 +93,12 @@ export const mockClient = {
         };
       },
     ),
+    loadMessages: createMockProcedure(
+      "thread.loadMessages",
+      async (_input: { threadId: string }) => {
+        return mockMessages;
+      },
+    ),
     create: createMockProcedure(
       "thread.create",
       async (input?: { title?: string; visibility?: "public" | "private" }) => {
@@ -112,39 +118,63 @@ export const mockClient = {
         };
       },
     ),
-    loadMessages: createMockProcedure(
-      "thread.loadMessages",
-      async (_input: { threadId: string }) => {
-        return mockMessages;
-      },
-    ),
-    stream: createMockProcedure("thread.stream", async () => {
-      return (async function* () {
-        yield { type: "text-delta", textDelta: "Hello" };
-      })();
-    }),
-    rename: createMockProcedure(
-      "thread.rename",
-      async (input: { threadId: string; title: string }) => {
+    update: createMockProcedure(
+      "thread.update",
+      async (input: {
+        threadId: string;
+        data: {
+          title?: string;
+          visibility?: "public" | "private";
+          lastContext?: unknown;
+        };
+      }) => {
         const thread = mockThreads.find((t) => t.id === input.threadId);
+        const now = new Date();
+
+        const updates: {
+          title?: string;
+          visibility?: "public" | "private";
+          lastContext?: unknown;
+        } = {};
+
+        if ("title" in input.data && typeof input.data.title !== "undefined") {
+          updates.title = input.data.title;
+        }
+        if (
+          "visibility" in input.data &&
+          typeof input.data.visibility !== "undefined"
+        ) {
+          updates.visibility = input.data.visibility;
+        }
+        if (
+          "lastContext" in input.data &&
+          typeof input.data.lastContext !== "undefined"
+        ) {
+          updates.lastContext = input.data.lastContext;
+        }
+
         if (thread) {
           return {
             thread: {
               ...thread,
-              title: input.title,
-              updatedAt: new Date(),
+              ...updates,
+              updatedAt: now,
             },
           };
         }
+
         return {
           thread: {
             id: input.threadId,
             userId: "demo-user",
-            title: input.title,
-            visibility: "private" as const,
-            lastContext: null,
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            title:
+              typeof updates.title === "string"
+                ? updates.title
+                : "Untitled Thread",
+            visibility: updates.visibility ?? "private",
+            lastContext: updates.lastContext ?? null,
+            createdAt: now,
+            updatedAt: now,
           },
         };
       },
@@ -155,6 +185,11 @@ export const mockClient = {
         return { success: true };
       },
     ),
+    stream: createMockProcedure("thread.stream", async () => {
+      return (async function* () {
+        yield { type: "text-delta", textDelta: "Hello" };
+      })();
+    }),
   },
   message: {
     get: createMockProcedure(
