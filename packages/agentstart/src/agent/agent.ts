@@ -1,3 +1,16 @@
+/* agent-frontmatter:start
+AGENT: AI SDK v6 Agent implementation
+PURPOSE: Implement AI SDK Agent interface with tool loop execution support
+USAGE: new BaseAgent({ settings, tools, instructions })
+EXPORTS: BaseAgent, AgentCallParameters
+FEATURES:
+  - Implements AI SDK v6 Agent protocol
+  - Supports tool loop execution with configurable stop conditions
+  - Provides runtime context injection for call options
+  - Exposes agent ID and tools via getters
+SEARCHABLE: base agent, ai sdk agent, tool loop agent, agent v6
+agent-frontmatter:end */
+
 import type {
   Agent,
   GenerateTextResult,

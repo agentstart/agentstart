@@ -1,14 +1,16 @@
 /* agent-frontmatter:start
 AGENT: Thread router using oRPC
 PURPOSE: Stream agent responses through the shared Agent instance
-USAGE: thread.stream({ threadId, message })
-EXPORTS: threadRouter, createThreadRouter
+USAGE: const threadRouter = createThreadRouter(customProcedure)
+EXPORTS: createThreadRouter
 FEATURES:
-  - Delegates streaming to the configured Agent
+  - Delegates streaming to the configured Agent via Run class
   - Forwards client-provided thread identifiers to persistence
-  - Returns AI SDK UI message event streams
+  - Returns AI SDK UI message event streams via oRPC
   - Supports dynamic middleware via procedure builder
-SEARCHABLE: thread router, agent stream, rpc thread
+  - Provides thread list endpoint with pagination
+  - Provides thread load endpoint with message history
+SEARCHABLE: thread router, agent stream, rpc thread, orpc router
 agent-frontmatter:end */
 
 import { AgentStartError } from "@agentstart/utils";

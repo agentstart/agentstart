@@ -1,13 +1,15 @@
 /* agent-frontmatter:start
-AGENT: Core agent implementation
-PURPOSE: Orchestrate message streaming, persistence, and model execution
-USAGE: Instantiate Agent with instructions, memory, and model settings
-EXPORTS: Agent, AgentSettings
+AGENT: Agent execution orchestrator
+PURPOSE: Coordinate message streaming, persistence, validation, and UI message stream creation
+USAGE: const run = new Run(agentStartOptions); await run.start({ input, runtimeContext })
+EXPORTS: Run
 FEATURES:
-  - Streams model responses via the AI SDK agent
-  - Persists thread history through configured adapters
-  - Applies prompt sanitization before invoking models
-SEARCHABLE: agent class, message streaming, persistence orchestration
+  - Creates and manages UI message streams via AI SDK
+  - Validates messages and ensures tool schema consistency
+  - Persists thread messages and metadata to database
+  - Generates thread titles and suggestions automatically
+  - Fixes empty assistant messages from tool-only responses
+SEARCHABLE: agent run, run orchestrator, message streaming, thread persistence
 agent-frontmatter:end */
 
 import { generateId } from "@agentstart/utils";

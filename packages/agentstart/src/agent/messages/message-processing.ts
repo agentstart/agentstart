@@ -1,12 +1,13 @@
 /* agent-frontmatter:start
 AGENT: Message processing utilities
-PURPOSE: Provide helper functions for normalizing model message payloads
+PURPOSE: Provide helper functions for normalizing and cleaning message payloads
 USAGE: Import to clean or augment model message arrays before streaming
 EXPORTS: fixEmptyUIMessages, addProviderOptionsToMessages
 FEATURES:
   - Removes empty assistant messages left behind by tool executions
-  - Applies provider options to targeted messages
-SEARCHABLE: message processing, provider options, assistant message cleanup
+  - Filters blank text parts and redacted reasoning snippets
+  - Applies provider options to last system, tool, and user/assistant messages
+SEARCHABLE: message processing, provider options, message cleanup, reasoning filter
 agent-frontmatter:end */
 
 import type { ModelMessage, UIMessage } from "ai";
