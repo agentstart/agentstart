@@ -1,17 +1,21 @@
 "use client";
 
-import type { AgentStartUIMessage } from "agentstart/agent";
+import type { AgentStartUIMessage, AgentUsageSummary } from "agentstart/agent";
 import { Conversation } from "@/components/agent/conversation";
 import { PromptInput } from "@/components/agent/prompt-input";
-import { SuggestedPrompts } from "@/components/agent/suggested-prompts";
 import { useThread } from "@/lib/agent-client";
 
 interface ThreadProps {
   threadId: string;
   initialMessages?: AgentStartUIMessage[];
+  initialUsage?: AgentUsageSummary;
 }
 
-export default function Thread({ threadId, initialMessages }: ThreadProps) {
+export default function Thread({
+  threadId,
+  initialMessages,
+  initialUsage,
+}: ThreadProps) {
   useThread(threadId);
 
   return (
@@ -23,8 +27,11 @@ export default function Thread({ threadId, initialMessages }: ThreadProps) {
       />
 
       <div className="absolute inset-x-0 bottom-0 pb-4">
-        <SuggestedPrompts threadId={threadId} />
-        <PromptInput className="mx-auto" threadId={threadId} />
+        <PromptInput
+          className="mx-auto"
+          threadId={threadId}
+          initialUsage={initialUsage}
+        />
       </div>
     </div>
   );

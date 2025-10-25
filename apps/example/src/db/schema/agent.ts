@@ -9,14 +9,15 @@ FEATURES:
 SEARCHABLE: playground, next, src, db, schema, agent, drizzle
 agent-frontmatter:end */
 
-import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import type { AgentUsageSummary } from "agentstart/agent";
+import { jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 export const thread = pgTable("thread", {
   id: text("id").primaryKey(),
   title: text("title").notNull(),
   userId: text("user_id").notNull(),
   visibility: text("visibility").notNull(),
-  lastContext: text("last_context"),
+  lastContext: jsonb("last_context").$type<AgentUsageSummary | null>(),
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
 });

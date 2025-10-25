@@ -46,7 +46,7 @@ export const getTables = (
           fieldName: options.thread?.fields?.visibility || "visibility",
         },
         lastContext: {
-          type: "string",
+          type: "json",
           required: false,
           fieldName: options.thread?.fields?.lastContext || "lastContext",
         },

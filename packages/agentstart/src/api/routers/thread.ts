@@ -17,6 +17,7 @@ import { AgentStartError } from "@agentstart/utils";
 import { streamToEventIterator } from "@orpc/server";
 import z from "zod";
 import { getThreads, loadThread, Run } from "@/agent";
+import type { RunFinishEvent } from "@/agent/run";
 import { publicProcedure } from "@/api/procedures";
 import { type DBThread, getAdapter } from "@/db";
 import { getSandbox } from "@/sandbox";
@@ -356,6 +357,24 @@ export function createThreadRouter(procedure = publicProcedure) {
               db,
               sandbox,
               threadId: input.threadId,
+            },
+            onFinish: async (event: RunFinishEvent) => {
+              if (!event.usageSummary) {
+                return;
+              }
+
+              try {
+                await db.update({
+                  model: "thread",
+                  where: [{ field: "id", value: input.threadId }],
+                  update: {
+                    lastContext: event.usageSummary,
+                    updatedAt: new Date(),
+                  },
+                });
+              } catch (persistError) {
+                console.error("Failed to persist usage summary:", persistError);
+              }
             },
             onError: (error) => {
               console.error("Agent stream error:", error);

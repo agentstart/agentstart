@@ -55,6 +55,7 @@
     "fast-glob": "catalog:",
     "nanoid": "catalog:",
     "pathe": "catalog:",
+    "tokenlens": "catalog:",
     "zod": "catalog:",
     "zustand": "catalog:"
   },
@@ -112,6 +113,10 @@
       "./client": {
         "import": "./dist/client/index.js",
         "require": "./dist/client/index.cjs"
+      },
+      "./usage": {
+        "import": "./dist/usage/index.js",
+        "require": "./dist/usage/index.cjs"
       },
       "./db": {
         "import": "./dist/db/index.js",

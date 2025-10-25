@@ -22,6 +22,12 @@ import {
   type UIMessageStreamWriter,
   validateUIMessages,
 } from "ai";
+import {
+  type AgentUsageSummary,
+  createUsageSummary,
+  mergeUsageSummaries,
+} from "@/agent/usage";
+import type { DBThread } from "@/db/schema";
 import type {
   Adapter,
   AgentGenerateSuggestionsOptions,
@@ -46,12 +52,22 @@ import {
   upsertMessage,
 } from "./persistence";
 
+type UIStreamFinishEvent = Parameters<
+  UIMessageStreamOnFinishCallback<UIMessage>
+>[0];
+
+export interface RunFinishEvent extends UIStreamFinishEvent {
+  usageSummary?: AgentUsageSummary;
+}
+
+type RunOnFinishCallback = (event: RunFinishEvent) => PromiseLike<void> | void;
+
 interface StartOptions {
   input: {
     message: UIMessage;
   };
   runtimeContext: Omit<RuntimeContext, "writer">;
-  onFinish?: UIMessageStreamOnFinishCallback<UIMessage>;
+  onFinish?: RunOnFinishCallback;
   onError?: (error: unknown) => string;
 }
 
@@ -60,14 +76,34 @@ interface StartOptions {
  */
 function ensureMessageMetadata(
   message: UIMessage,
-  defaults: { createdAt: number; model: string },
+  defaults: { createdAt: number; modelId: string },
 ): asserts message is UIMessage & { metadata: UIMessageMetadata } {
   const metadata = (message.metadata ?? {}) as UIMessageMetadata;
   message.metadata = {
     createdAt: metadata.createdAt ?? defaults.createdAt,
-    model: metadata.model ?? defaults.model,
+    model: metadata.model ?? defaults.modelId,
     ...metadata,
   };
+}
+
+function deserializeUsageSummary(raw: unknown): AgentUsageSummary | undefined {
+  if (!raw) {
+    return undefined;
+  }
+
+  try {
+    if (typeof raw === "string") {
+      return JSON.parse(raw) as AgentUsageSummary;
+    }
+
+    if (typeof raw === "object") {
+      return raw as AgentUsageSummary;
+    }
+  } catch (error) {
+    console.error("Failed to parse stored usage summary:", error);
+  }
+
+  return undefined;
 }
 
 export class Run {
@@ -76,19 +112,32 @@ export class Run {
   async start(options: StartOptions) {
     const createdAt = Date.now();
     const agent = this.agentStartOptions.agent;
-    const model =
+    const modelId =
       typeof agent.settings.model === "string"
         ? agent.settings.model
         : agent.settings.model.modelId;
 
     // Ensure message has metadata with defaults
-    ensureMessageMetadata(options.input.message, { createdAt, model });
+    ensureMessageMetadata(options.input.message, {
+      createdAt,
+      modelId: modelId,
+    });
 
     const uiMessages = (await getCompleteMessages({
       db: options.runtimeContext.db,
       message: options.input.message,
       threadId: options.runtimeContext.threadId,
     })) ?? [options.input.message];
+
+    const threadRecord = await options.runtimeContext.db.findOne<DBThread>({
+      model: "thread",
+      where: [{ field: "id", value: options.runtimeContext.threadId }],
+    });
+
+    let aggregatedUsageSummary = deserializeUsageSummary(
+      threadRecord?.lastContext,
+    );
+    let latestUsageSummary: AgentUsageSummary | undefined;
 
     return createUIMessageStream({
       generateId,
@@ -154,6 +203,13 @@ export class Run {
           },
         });
 
+        const usageMetricsPromise = result.totalUsage
+          .then((usage) => usage)
+          .catch((error) => {
+            console.error("Failed to read usage metrics:", error);
+            return undefined;
+          });
+
         result.consumeStream();
 
         writer.merge(
@@ -162,7 +218,7 @@ export class Run {
             messageMetadata: (options) => {
               const agentStartMetadata: UIMessageMetadata = {
                 createdAt,
-                model,
+                model: modelId,
                 totalTokens:
                   options.part.type === "finish"
                     ? options.part.totalUsage.totalTokens
@@ -186,6 +242,31 @@ export class Run {
                     this.agentStartOptions.advanced?.generateSuggestions,
                 });
               }
+
+              const usageMetrics = await usageMetricsPromise;
+              const usageSummary = await createUsageSummary({
+                modelId,
+                usage: usageMetrics,
+              });
+
+              if (usageSummary) {
+                aggregatedUsageSummary = mergeUsageSummaries(
+                  aggregatedUsageSummary,
+                  usageSummary,
+                );
+
+                if (aggregatedUsageSummary) {
+                  latestUsageSummary = aggregatedUsageSummary;
+                  writer.write({
+                    type: "data-agentstart-usage",
+                    data: aggregatedUsageSummary,
+                    transient: true,
+                  });
+                }
+
+                // No need to emit the incremental usage; the aggregated summary
+                // reflects the total usage across the thread.
+              }
             },
           }),
         );
@@ -206,7 +287,12 @@ export class Run {
           });
         }
 
-        return options?.onFinish?.(setting);
+        const extendedSetting: RunFinishEvent = {
+          ...setting,
+          usageSummary: latestUsageSummary,
+        };
+
+        return options?.onFinish?.(extendedSetting);
       },
       onError: options?.onError,
     });

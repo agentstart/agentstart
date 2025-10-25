@@ -10,6 +10,20 @@ SEARCHABLE: data parts, custom events, title update, stream data
 agent-frontmatter:end */
 
 import z from "zod";
+import type { AgentUsageSummary } from "@/agent/usage";
+
+const usageSchema = z
+  .object({
+    modelId: z.string().optional(),
+    usedTokens: z.number().nonnegative(),
+    maxTokens: z.number().positive(),
+    percentUsed: z.number().min(0).max(1).optional(),
+    generatedAt: z.string().optional(),
+    usage: z.any().optional(),
+    context: z.any().optional(),
+    costUSD: z.any().optional(),
+  })
+  .transform((value) => value as AgentUsageSummary);
 
 export const dataPartSchema = z.object({
   "agentstart-title_update": z.object({
@@ -24,6 +38,7 @@ export const dataPartSchema = z.object({
   "agentstart-suggestions_error": z.object({
     error: z.string(),
   }),
+  "agentstart-usage": usageSchema,
 });
 
 export type AgentStartDataPart = z.infer<typeof dataPartSchema>;

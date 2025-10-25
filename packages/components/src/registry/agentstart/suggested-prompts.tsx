@@ -14,14 +14,13 @@ agent-frontmatter:end */
 
 "use client";
 
+import { ArrowUpRightIcon } from "@phosphor-icons/react";
 import { useAgentStore, useDataPart } from "agentstart/client";
+import type { HTMLMotionProps } from "motion/react";
 import { AnimatePresence, motion } from "motion/react";
-import type { ComponentProps } from "react";
 import { Button } from "@/components/ui/button";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
 
-export type SuggestionsProps = ComponentProps<typeof ScrollArea> & {
+export type SuggestionsProps = Omit<HTMLMotionProps<"div">, "children"> & {
   threadId?: string;
 };
 
@@ -55,13 +54,19 @@ export function SuggestedPrompts({
 
   return (
     <AnimatePresence mode="wait">
-      <ScrollArea
-        className="mx-auto mb-4 flex gap-2 overflow-x-auto sm:min-w-[390px] sm:max-w-3xl"
+      <motion.div
+        key="suggested-prompts"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 12 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+        className={className}
         {...props}
       >
-        <div
-          className={cn("flex w-max flex-nowrap items-center gap-2", className)}
-        >
+        <div className="w-fit px-0.5 pt-1 pb-2 text-muted-foreground">
+          Suggestions
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
           {suggestions.prompts.map((prompt, index) => (
             <motion.div
               key={prompt}
@@ -81,13 +86,12 @@ export function SuggestedPrompts({
                 className="cursor-pointer"
               >
                 {prompt}
+                <ArrowUpRightIcon className="size-3" weight="bold" />
               </Button>
             </motion.div>
           ))}
         </div>
-
-        <ScrollBar className="hidden" orientation="horizontal" />
-      </ScrollArea>
+      </motion.div>
     </AnimatePresence>
   );
 }

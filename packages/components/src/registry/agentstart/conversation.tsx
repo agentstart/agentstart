@@ -19,7 +19,7 @@ import {
 } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import type { AgentStartUIMessage } from "agentstart/agent";
-import { type AgentStore, useAgentStore, useDataPart } from "agentstart/client";
+import { type AgentStore, useAgentStore } from "agentstart/client";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo } from "react";
 import { Action, Actions } from "@/components/ai-elements/actions";
@@ -50,6 +50,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { useAgentStartContext } from "./provider";
 import { StatusIndicators } from "./status-indicators";
+import { SuggestedPrompts } from "./suggested-prompts";
 import { MessagePart } from "./tools/message-part-view";
 
 export interface ConversationProps
@@ -122,12 +123,6 @@ export function Conversation({
     UIAgentStore["messageQueue"]
   >((state) => state.messageQueue);
   const hasQueue = messageQueue.length > 0;
-
-  const [suggestions] = useDataPart(
-    "data-agentstart-suggestions",
-    resolvedStoreId,
-  );
-  const hasSuggestions = suggestions?.prompts && suggestions.prompts.length > 0;
 
   const hasNewThreadDraft = useMemo(() => {
     if (!newThreadDraft) return false;
@@ -394,11 +389,18 @@ export function Conversation({
         ) : (
           (emptyState ?? defaultEmptyState)
         )}
+
+        <SuggestedPrompts
+          threadId={threadId}
+          className={cn({
+            "pt-0": !hasMessages,
+          })}
+        />
       </ConversationContent>
+
       <ConversationScrollButton
         className={cn("bottom-42", {
-          "bottom-52": hasSuggestions || hasQueue,
-          "bottom-62": hasSuggestions && hasQueue,
+          "bottom-52": hasQueue,
         })}
       />
     </BaseConversation>

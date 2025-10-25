@@ -9,8 +9,8 @@ FEATURES:
 SEARCHABLE: playground, next, src, app, thread, [threadid], page
 agent-frontmatter:end */
 
+import type { AgentUsageSummary } from "agentstart/agent";
 import { headers } from "next/headers";
-
 import { redirect } from "next/navigation";
 import { start } from "@/lib/agent";
 import Thread from "./thread";
@@ -21,11 +21,37 @@ export default async function Page({
   const { threadId } = await params;
 
   try {
-    const initialMessages = await start.api.message.get(
-      { threadId },
-      { context: { headers: await headers() } },
+    const requestHeaders = await headers();
+    const [{ thread }, initialMessages] = await Promise.all([
+      start.api.thread.get(
+        { threadId },
+        { context: { headers: requestHeaders } },
+      ),
+      start.api.message.get(
+        { threadId },
+        { context: { headers: requestHeaders } },
+      ),
+    ]);
+
+    let initialUsage: AgentUsageSummary | undefined;
+    if (thread?.lastContext) {
+      try {
+        initialUsage =
+          typeof thread.lastContext === "string"
+            ? (JSON.parse(thread.lastContext) as AgentUsageSummary)
+            : (thread.lastContext as AgentUsageSummary);
+      } catch (parseError) {
+        console.error("Failed to parse lastContext:", parseError);
+      }
+    }
+
+    return (
+      <Thread
+        threadId={threadId}
+        initialMessages={initialMessages}
+        initialUsage={initialUsage}
+      />
     );
-    return <Thread threadId={threadId} initialMessages={initialMessages} />;
   } catch {
     redirect("/");
   }

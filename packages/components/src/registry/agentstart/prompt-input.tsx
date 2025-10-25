@@ -23,10 +23,23 @@ import {
   TrashIcon,
 } from "@phosphor-icons/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { AgentUsageSummary } from "agentstart/agent";
 import type { QueuedAgentMessage } from "agentstart/client";
-import { useAgentStore } from "agentstart/client";
+import { useAgentStore, useDataPart } from "agentstart/client";
 import type { FileUIPart } from "ai";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Context,
+  ContextCacheUsage,
+  ContextContent,
+  ContextContentBody,
+  ContextContentFooter,
+  ContextContentHeader,
+  ContextInputUsage,
+  ContextOutputUsage,
+  ContextReasoningUsage,
+  ContextTrigger,
+} from "@/components/ai-elements/context";
 import {
   PromptInput as BasePromptInput,
   PromptInputActionAddAttachments,
@@ -68,9 +81,17 @@ export interface PromptInputProps {
    * Thread ID for thread page usage
    */
   threadId?: string;
+  /**
+   * Optional initial usage payload to hydrate the UI before the store syncs.
+   */
+  initialUsage?: AgentUsageSummary;
 }
 
-export function PromptInput({ className, threadId }: PromptInputProps = {}) {
+export function PromptInput({
+  className,
+  threadId,
+  initialUsage,
+}: PromptInputProps = {}) {
   const { orpc, navigate } = useAgentStartContext();
   const queryClient = useQueryClient();
   const [input, setInput] = useState("");
@@ -102,6 +123,12 @@ export function PromptInput({ className, threadId }: PromptInputProps = {}) {
   );
   const newThreadDraft = useAgentStore((state) => state.newThreadDraft);
   const setNewThreadDraft = useAgentStore((state) => state.setNewThreadDraft);
+  const [usagePart] = useDataPart<"data-agentstart-usage">(
+    "data-agentstart-usage",
+    storeKey,
+  );
+  const usageSummary = usagePart ?? initialUsage ?? null;
+  const showUsage = Boolean(threadId) && Boolean(usageSummary);
 
   const createThreadMutation = useMutation(
     orpc.thread.create.mutationOptions(),
@@ -439,6 +466,29 @@ export function PromptInput({ className, threadId }: PromptInputProps = {}) {
               </PromptInputActionMenu>
             </PromptInputTools>
             <div className="flex items-center gap-2">
+              {showUsage && usageSummary ? (
+                <div className="flex w-full justify-end">
+                  <Context
+                    maxTokens={usageSummary.maxTokens}
+                    modelId={usageSummary.modelId}
+                    usage={usageSummary.usage}
+                    usedTokens={usageSummary.usedTokens}
+                  >
+                    <ContextTrigger />
+                    <ContextContent className="w-full max-w-xs lg:max-w-sm">
+                      <ContextContentHeader />
+                      <ContextContentBody className="space-y-2">
+                        <ContextInputUsage />
+                        <ContextOutputUsage />
+                        <ContextReasoningUsage />
+                        <ContextCacheUsage />
+                      </ContextContentBody>
+                      <ContextContentFooter />
+                    </ContextContent>
+                  </Context>
+                </div>
+              ) : null}
+
               <PromptInputSubmit
                 className="cursor-pointer rounded-full"
                 disabled={!input.trim() && !isStreaming}

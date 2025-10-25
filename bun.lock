@@ -194,6 +194,7 @@
         "fast-glob": "catalog:",
         "nanoid": "catalog:",
         "pathe": "catalog:",
+        "tokenlens": "catalog:",
         "zod": "catalog:",
         "zustand": "catalog:",
       },
