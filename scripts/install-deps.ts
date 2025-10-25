@@ -25,8 +25,13 @@ import {
 import { execa } from "execa";
 import fg from "fast-glob";
 import { readFile, writeFile } from "fs-extra";
-
 import { sortWorkspaceCatalog, type WorkspaceCatalog } from "./update-deps";
+
+function sortObjectByKeys<T extends Record<string, unknown>>(obj: T): T {
+  return Object.fromEntries(
+    Object.entries(obj).sort(([a], [b]) => a.localeCompare(b)),
+  ) as T;
+}
 
 const rootDir = process.cwd();
 const rootPackageJsonPath = resolve(rootDir, "package.json");
@@ -60,24 +65,62 @@ async function fetchLatestVersion(pkg: string): Promise<string> {
   }
 }
 
+/**
+ * Extract package name from a dependency specifier.
+ * Handles both scoped (@scope/pkg@1.0.0) and unscoped (pkg@1.0.0) packages.
+ *
+ * @example
+ * getDependencyName("@scope/pkg@1.0.0") // "@scope/pkg"
+ * getDependencyName("react@18.0.0") // "react"
+ * getDependencyName("@babel/core") // "@babel/core"
+ * getDependencyName("lodash") // "lodash"
+ */
 function getDependencyName(specifier: string): string {
+  // Handle scoped packages (@scope/pkg)
   if (specifier.startsWith("@")) {
-    const slashIndex = specifier.indexOf("/");
-    if (slashIndex === -1) {
-      return specifier;
-    }
-    const versionSeparator = specifier.indexOf("@", slashIndex);
-    if (versionSeparator === -1) {
-      return specifier;
-    }
-    return specifier.slice(0, versionSeparator);
+    return extractScopedPackageName(specifier);
   }
+
+  // Handle unscoped packages
+  return extractUnscopedPackageName(specifier);
+}
+
+/**
+ * Extract name from scoped package specifier.
+ * Scoped packages have format: @scope/name or @scope/name@version
+ */
+function extractScopedPackageName(specifier: string): string {
+  const slashIndex = specifier.indexOf("/");
+  if (slashIndex === -1) {
+    return specifier;
+  }
+
+  const versionSeparator = specifier.indexOf("@", slashIndex);
+  return versionSeparator === -1
+    ? specifier
+    : specifier.slice(0, versionSeparator);
+}
+
+/**
+ * Extract name from unscoped package specifier.
+ * Unscoped packages have format: name or name@version
+ */
+function extractUnscopedPackageName(specifier: string): string {
   const versionSeparator = specifier.indexOf("@");
   return versionSeparator === -1
     ? specifier
     : specifier.slice(0, versionSeparator);
 }
 
+/**
+ * Derive version specifier preserving the original version prefix.
+ * Maintains semantic versioning operators (^, ~, >=, etc) from the current spec.
+ *
+ * @example
+ * deriveSpec("^1.0.0", "2.0.0") // "^2.0.0"
+ * deriveSpec("~1.0.0", "2.0.0") // "~2.0.0"
+ * deriveSpec(undefined, "2.0.0") // "^2.0.0" (default)
+ */
 function deriveSpec(current: string | undefined, version: string): string {
   if (!current || current.trim().length === 0) {
     return `^${version}`;
@@ -96,11 +139,12 @@ function deriveSpec(current: string | undefined, version: string): string {
   return version;
 }
 
-function sortRecord(record: Record<string, string>): Record<string, string> {
-  return Object.fromEntries(
-    Object.entries(record).sort(([a], [b]) => a.localeCompare(b)),
-  );
-}
+/**
+ * Retrieve all workspace packages defined in the monorepo.
+ * Resolves workspace patterns from root package.json and reads each package manifest.
+ *
+ * @returns Array of workspace packages with name, directory, and manifest path
+ */
 
 async function getWorkspacePackages(): Promise<WorkspacePackage[]> {
   let workspacePatterns: string[] = [];
@@ -288,7 +332,7 @@ async function updateWorkspacePackage(
     return false;
   }
 
-  const nextRecord = sortRecord(currentRecord);
+  const nextRecord = sortObjectByKeys(currentRecord);
 
   if (bucket.key === "dependencies") {
     packageJson.dependencies = nextRecord;

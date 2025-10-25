@@ -55,6 +55,21 @@ interface StartOptions {
   onError?: (error: unknown) => string;
 }
 
+/**
+ * Ensures message has metadata with required defaults
+ */
+function ensureMessageMetadata(
+  message: UIMessage,
+  defaults: { createdAt: number; model: string },
+): asserts message is UIMessage & { metadata: UIMessageMetadata } {
+  const metadata = (message.metadata ?? {}) as UIMessageMetadata;
+  message.metadata = {
+    createdAt: metadata.createdAt ?? defaults.createdAt,
+    model: metadata.model ?? defaults.model,
+    ...metadata,
+  };
+}
+
 export class Run {
   constructor(readonly agentStartOptions: AgentStartOptions) {}
 
@@ -65,17 +80,9 @@ export class Run {
       typeof agent.settings.model === "string"
         ? agent.settings.model
         : agent.settings.model.modelId;
-    // Ensure message has metadata object
-    if (!options.input.message.metadata) {
-      options.input.message.metadata = {};
-    }
-    if (!(options.input.message.metadata as UIMessageMetadata).createdAt) {
-      (options.input.message.metadata as UIMessageMetadata).createdAt =
-        createdAt;
-    }
-    if (!(options.input.message.metadata as UIMessageMetadata).model) {
-      (options.input.message.metadata as UIMessageMetadata).model = model;
-    }
+
+    // Ensure message has metadata with defaults
+    ensureMessageMetadata(options.input.message, { createdAt, model });
 
     const uiMessages = (await getCompleteMessages({
       db: options.runtimeContext.db,
@@ -268,6 +275,14 @@ export class Run {
       });
     } catch (err) {
       console.error("Title generation error:", err);
+      // Notify user that title generation failed
+      writer.write({
+        type: "data-agentstart-title_update_error",
+        data: {
+          error: err instanceof Error ? err.message : "Unknown error",
+        },
+        transient: true,
+      });
     }
   }
 
@@ -335,6 +350,14 @@ export class Run {
       }
     } catch (err) {
       console.error("Thread suggestions generation error:", err);
+      // Notify user that suggestions generation failed
+      writer.write({
+        type: "data-agentstart-suggestions_error",
+        data: {
+          error: err instanceof Error ? err.message : "Unknown error",
+        },
+        transient: true,
+      });
     }
   }
 }

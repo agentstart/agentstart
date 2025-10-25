@@ -67,15 +67,31 @@ export type AgentCallParameters<CALL_OPTIONS> = ([CALL_OPTIONS] extends [never]
   );
 
 /**
- * A tool loop agent is an agent that runs tools in a loop. In each step,
- * it calls the LLM, and if there are tool calls, it executes the tools
- * and calls the LLM again in a new step with the tool results.
+ * BaseAgent provides the foundational implementation for AI SDK v6 Agent protocol.
+ * It orchestrates tool loop execution, managing the iterative cycle of LLM calls
+ * and tool invocations until completion criteria are met.
  *
- * The loop continues until:
- * - A finish reasoning other than tool-calls is returned, or
- * - A tool that is invoked does not have an execute function, or
- * - A tool call needs approval, or
- * - A stop condition is met (default stop condition is stepCountIs(20))
+ * Architecture:
+ * - Implements the AI SDK Agent<CallOptions, TOOLS, OUTPUT> interface
+ * - Wraps streamText/generateText with tool loop coordination
+ * - Injects runtime context (db, sandbox, writer) into each tool execution
+ * - Supports custom stop conditions via stopWhen (defaults to 20 steps)
+ *
+ * Tool Loop Lifecycle:
+ * 1. Call LLM with messages and available tools
+ * 2. If tool calls are returned, execute each tool with runtime context
+ * 3. Append tool results to message history
+ * 4. Repeat from step 1 until stop condition is met:
+ *    - Non tool-call finish reason (e.g., 'stop', 'length')
+ *    - Tool without execute function encountered
+ *    - Tool requiring approval is called
+ *    - Maximum step count reached (configurable)
+ *
+ * This class serves as the base for specialized agent implementations
+ * and should not be confused with higher-level orchestrators like Run.
+ *
+ * @template TOOLS - Tool definitions available to the agent
+ * @template OUTPUT - Structured output schema (when using output mode)
  */
 export class BaseAgent<
   // biome-ignore lint/complexity/noBannedTypes: is fine

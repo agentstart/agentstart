@@ -20,6 +20,57 @@ import { getThreads, loadThread, Run } from "@/agent";
 import { publicProcedure } from "@/api/procedures";
 import { type DBThread, getAdapter } from "@/db";
 import { getSandbox } from "@/sandbox";
+import type { Adapter } from "@/types";
+
+/**
+ * Verify thread ownership and return the thread if authorized
+ * @throws NOT_FOUND if thread doesn't exist
+ * @throws FORBIDDEN if user doesn't own the thread
+ */
+async function verifyThreadOwnership(options: {
+  db: Adapter;
+  threadId: string;
+  userId: string;
+  errors: {
+    NOT_FOUND: (opts: { message: string }) => Error;
+    FORBIDDEN: (opts: { message: string }) => Error;
+  };
+}): Promise<DBThread> {
+  const thread = await options.db.findOne<DBThread>({
+    model: "thread",
+    where: [{ field: "id", value: options.threadId }],
+  });
+
+  if (!thread) {
+    throw options.errors.NOT_FOUND({
+      message: "Thread not found",
+    });
+  }
+
+  if (thread.userId !== options.userId) {
+    throw options.errors.FORBIDDEN({
+      message: "You don't have permission to access this thread",
+    });
+  }
+
+  return thread;
+}
+
+/**
+ * Handle errors consistently across all endpoints
+ * Re-throws errors with 'code' property, wraps others in INTERNAL_SERVER_ERROR
+ */
+function handleRouterError(
+  error: unknown,
+  errors: { INTERNAL_SERVER_ERROR: (opts: { message: string }) => Error },
+): never {
+  if (error instanceof Error && "code" in error) {
+    throw error;
+  }
+  throw errors.INTERNAL_SERVER_ERROR({
+    message: error instanceof Error ? error.message : "Unknown error",
+  });
+}
 
 /**
  * Create thread router with optional custom procedure builder
@@ -75,9 +126,7 @@ export function createThreadRouter(procedure = publicProcedure) {
           };
         } catch (error) {
           console.error("Failed to list threads:", error);
-          throw errors.INTERNAL_SERVER_ERROR({
-            message: error instanceof Error ? error.message : "Unknown error",
-          });
+          handleRouterError(error, errors);
         }
       }),
 
@@ -94,9 +143,7 @@ export function createThreadRouter(procedure = publicProcedure) {
           return messages;
         } catch (error) {
           console.error("Failed to load messages:", error);
-          throw errors.INTERNAL_SERVER_ERROR({
-            message: error instanceof Error ? error.message : "Unknown error",
-          });
+          handleRouterError(error, errors);
         }
       }),
 
@@ -130,12 +177,7 @@ export function createThreadRouter(procedure = publicProcedure) {
           return { thread };
         } catch (error) {
           console.error("Failed to get thread:", error);
-          if (error instanceof Error && "code" in error) {
-            throw error;
-          }
-          throw errors.INTERNAL_SERVER_ERROR({
-            message: error instanceof Error ? error.message : "Unknown error",
-          });
+          handleRouterError(error, errors);
         }
       }),
 
@@ -170,9 +212,7 @@ export function createThreadRouter(procedure = publicProcedure) {
           return { threadId: thread.id.toString(), thread };
         } catch (error) {
           console.error("Failed to create thread:", error);
-          throw errors.INTERNAL_SERVER_ERROR({
-            message: error instanceof Error ? error.message : "Unknown error",
-          });
+          handleRouterError(error, errors);
         }
       }),
 
@@ -205,22 +245,12 @@ export function createThreadRouter(procedure = publicProcedure) {
             : "anonymous";
 
           // Verify thread ownership
-          const thread = await db.findOne<DBThread>({
-            model: "thread",
-            where: [{ field: "id", value: input.threadId }],
+          await verifyThreadOwnership({
+            db,
+            threadId: input.threadId,
+            userId,
+            errors,
           });
-
-          if (!thread) {
-            throw errors.NOT_FOUND({
-              message: "Thread not found",
-            });
-          }
-
-          if (thread.userId !== userId) {
-            throw errors.FORBIDDEN({
-              message: "You don't have permission to update this thread",
-            });
-          }
 
           const updatePayload: Record<string, unknown> = {};
 
@@ -243,12 +273,6 @@ export function createThreadRouter(procedure = publicProcedure) {
             updatePayload.lastContext = input.data.lastContext;
           }
 
-          if (Object.keys(updatePayload).length === 0) {
-            throw errors.INTERNAL_SERVER_ERROR({
-              message: "No update fields provided.",
-            });
-          }
-
           updatePayload.updatedAt = new Date();
 
           const updatedThread = await db.update({
@@ -260,12 +284,7 @@ export function createThreadRouter(procedure = publicProcedure) {
           return { thread: updatedThread };
         } catch (error) {
           console.error("Failed to update thread:", error);
-          if (error instanceof Error && "code" in error) {
-            throw error;
-          }
-          throw errors.INTERNAL_SERVER_ERROR({
-            message: error instanceof Error ? error.message : "Unknown error",
-          });
+          handleRouterError(error, errors);
         }
       }),
 
@@ -279,22 +298,12 @@ export function createThreadRouter(procedure = publicProcedure) {
             : "anonymous";
 
           // Verify thread ownership
-          const thread = await db.findOne<DBThread>({
-            model: "thread",
-            where: [{ field: "id", value: input.threadId }],
+          await verifyThreadOwnership({
+            db,
+            threadId: input.threadId,
+            userId,
+            errors,
           });
-
-          if (!thread) {
-            throw errors.NOT_FOUND({
-              message: "Thread not found",
-            });
-          }
-
-          if (thread.userId !== userId) {
-            throw errors.FORBIDDEN({
-              message: "You don't have permission to delete this thread",
-            });
-          }
 
           await Promise.all([
             // Delete associated messages first
@@ -303,7 +312,7 @@ export function createThreadRouter(procedure = publicProcedure) {
               where: [{ field: "threadId", value: input.threadId }],
             }),
             // Delete the thread
-            await db.delete({
+            db.delete({
               model: "thread",
               where: [{ field: "id", value: input.threadId }],
             }),
@@ -312,12 +321,7 @@ export function createThreadRouter(procedure = publicProcedure) {
           return { success: true };
         } catch (error) {
           console.error("Failed to delete thread:", error);
-          if (error instanceof Error && "code" in error) {
-            throw error;
-          }
-          throw errors.INTERNAL_SERVER_ERROR({
-            message: error instanceof Error ? error.message : "Unknown error",
-          });
+          handleRouterError(error, errors);
         }
       }),
 
@@ -362,9 +366,7 @@ export function createThreadRouter(procedure = publicProcedure) {
           return streamToEventIterator(result);
         } catch (error) {
           console.error("Failed to stream thread response:", error);
-          throw errors.INTERNAL_SERVER_ERROR({
-            message: error instanceof Error ? error.message : "Unknown error",
-          });
+          handleRouterError(error, errors);
         }
       }),
   };

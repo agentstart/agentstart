@@ -15,8 +15,14 @@ export const dataPartSchema = z.object({
   "agentstart-title_update": z.object({
     title: z.string(),
   }),
+  "agentstart-title_update_error": z.object({
+    error: z.string(),
+  }),
   "agentstart-suggestions": z.object({
     prompts: z.array(z.string()),
+  }),
+  "agentstart-suggestions_error": z.object({
+    error: z.string(),
   }),
 });
 
