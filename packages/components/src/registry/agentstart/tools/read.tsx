@@ -16,13 +16,8 @@ import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
 import { EyeIcon } from "lucide-react";
 import { useMemo } from "react";
-import { CodeBlock } from "@/components/ai-elements/code-block";
-import {
-  Tool,
-  ToolContent,
-  ToolHeader,
-  ToolOutput,
-} from "@/components/ai-elements/tool";
+import { CodeBlock } from "../code-block";
+import { Tool, ToolContent, ToolHeader, ToolOutput } from "./tool";
 
 export interface ReadFileProps {
   part: ToolUIPart<InferUITools<Pick<Tools, "read">>>;

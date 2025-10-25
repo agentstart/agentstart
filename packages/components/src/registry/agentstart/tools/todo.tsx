@@ -20,13 +20,8 @@ import {
   ClockIcon,
 } from "lucide-react";
 import type React from "react";
-import {
-  Tool,
-  ToolContent,
-  ToolHeader,
-  ToolOutput,
-} from "@/components/ai-elements/tool";
 import { cn } from "@/lib/utils";
+import { Tool, ToolContent, ToolHeader, ToolOutput } from "./tool";
 
 const statusOrder = ["inProgress", "pending", "completed"];
 

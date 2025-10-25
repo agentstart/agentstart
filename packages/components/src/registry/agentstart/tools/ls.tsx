@@ -15,12 +15,7 @@ import { formatDate, formatSize } from "@agentstart/utils";
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
 import { FileIcon, FolderIcon, LinkIcon } from "lucide-react";
-import {
-  Tool,
-  ToolContent,
-  ToolHeader,
-  ToolOutput,
-} from "@/components/ai-elements/tool";
+import { Tool, ToolContent, ToolHeader, ToolOutput } from "./tool";
 
 export interface LsProps {
   part: ToolUIPart<InferUITools<Pick<Tools, "ls">>>;

@@ -10,7 +10,7 @@ SEARCHABLE: packages, agentstart, src, agent, tools, write, index, tool, runtime
 agent-frontmatter:end */
 
 import { tool } from "ai";
-import type { BaseContext } from "@/agent/context";
+import type { RuntimeContext } from "@/agent/context";
 import {
   type AgentStartToolOutput,
   toolInputSchema,
@@ -25,7 +25,7 @@ export const write = tool({
   inputSchema: toolInputSchema.shape.write,
   outputSchema: toolOutputSchema.shape.write,
   async *execute({ filePath, content }, { experimental_context: context }) {
-    const { sandbox } = context as BaseContext;
+    const { sandbox } = context as RuntimeContext;
 
     // Check if file exists
     let exists = false;

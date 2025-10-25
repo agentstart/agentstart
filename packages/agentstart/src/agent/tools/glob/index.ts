@@ -11,7 +11,7 @@ agent-frontmatter:end */
 
 import { tool } from "ai";
 import path from "pathe";
-import type { BaseContext } from "@/agent/context";
+import type { RuntimeContext } from "@/agent/context";
 import {
   type AgentStartToolOutput,
   toolInputSchema,
@@ -31,7 +31,7 @@ export const glob = tool({
     { pattern, path: searchPath },
     { experimental_context: context },
   ) {
-    const { sandbox } = context as BaseContext;
+    const { sandbox } = context as RuntimeContext;
 
     yield {
       status: "pending" as const,

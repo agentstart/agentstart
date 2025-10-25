@@ -10,7 +10,7 @@ SEARCHABLE: packages, agentstart, src, agent, tools, grep, index, tool, runtime
 agent-frontmatter:end */
 
 import { tool } from "ai";
-import type { BaseContext } from "@/agent/context";
+import type { RuntimeContext } from "@/agent/context";
 import {
   type AgentStartToolOutput,
   toolInputSchema,
@@ -43,7 +43,7 @@ export const grep = tool({
     },
     { experimental_context: context },
   ) {
-    const { sandbox } = context as BaseContext;
+    const { sandbox } = context as RuntimeContext;
 
     yield {
       status: "pending" as const,

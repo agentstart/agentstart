@@ -9,6 +9,7 @@ FEATURES:
 SEARCHABLE: packages, agentstart, src, agent, tools, index, tool, registry
 agent-frontmatter:end */
 
+import type { TypedToolCall, TypedToolResult } from "ai";
 import { bash } from "./bash";
 import { glob } from "./glob";
 import { grep } from "./grep";
@@ -32,11 +33,13 @@ const tools = {
 } as const;
 
 export type Tools = typeof tools;
+export type AgentStartToolCall = TypedToolCall<Tools>;
+export type AgentStartToolResult = TypedToolResult<Tools>;
 
 export const innerTools = {
   todoRead,
   todoWrite,
-};
+} as const;
 export const osTools = {
   bash,
   glob,
@@ -45,5 +48,5 @@ export const osTools = {
   read,
   write,
   update,
-};
-export const webTools = {};
+} as const;
+export const webTools = {} as const;

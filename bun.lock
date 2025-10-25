@@ -77,6 +77,7 @@
         "react-resizable-panels": "catalog:",
         "react-syntax-highlighter": "catalog:",
         "redis": "catalog:",
+        "shiki": "catalog:",
         "sonner": "catalog:",
         "streamdown": "catalog:",
         "tailwind-merge": "catalog:",
@@ -155,6 +156,7 @@
         "react-resizable-panels": "catalog:",
         "react-syntax-highlighter": "catalog:",
         "recharts": "catalog:",
+        "shiki": "catalog:",
         "sonner": "catalog:",
         "streamdown": "catalog:",
         "tailwind-merge": "catalog:",
@@ -204,6 +206,7 @@
         "@types/fs-extra": "catalog:",
         "@types/pg": "catalog:",
         "@types/react": "catalog:",
+        "ai": "catalog:",
         "better-sqlite3": "catalog:",
         "drizzle-kit": "catalog:",
         "drizzle-orm": "catalog:",
@@ -218,7 +221,7 @@
         "vitest": "catalog:",
       },
       "peerDependencies": {
-        "ai": "^5",
+        "ai": "^6",
         "react": "^19",
       },
     },
@@ -318,6 +321,7 @@
         "react-syntax-highlighter": "catalog:",
         "refractor": "catalog:",
         "shadcn": "catalog:",
+        "shiki": "catalog:",
         "sonner": "catalog:",
         "streamdown": "catalog:",
         "tailwind-merge": "catalog:",
@@ -547,7 +551,7 @@
 
     "@ai-sdk/provider-utils": ["@ai-sdk/provider-utils@4.0.0-beta.20", "", { "dependencies": { "@ai-sdk/provider": "3.0.0-beta.8", "@standard-schema/spec": "^1.0.0", "eventsource-parser": "^3.0.5" }, "peerDependencies": { "@valibot/to-json-schema": "^1.3.0", "arktype": "^2.1.22", "effect": "^3.18.4", "zod": "^3.25.76 || ^4.1.8" }, "optionalPeers": ["@valibot/to-json-schema", "arktype", "effect"] }, "sha512-5tfooQSLjpTFAHrH3AH/bduGtgqwxG+DN3Zz4yTtprThSoGMGgiYgWWqVyu0BaaR+HGwyi3KTja+WXXaJnr1uQ=="],
 
-    "@ai-sdk/react": ["@ai-sdk/react@3.0.0-beta.68", "", { "dependencies": { "@ai-sdk/provider-utils": "4.0.0-beta.20", "ai": "6.0.0-beta.68", "swr": "^2.2.5", "throttleit": "2.1.0" }, "peerDependencies": { "react": "^18 || ^19 || ^19.0.0-rc" } }, "sha512-YU+fB2NyCce5BWuEhcup2cs7YwwDn4yLaMEXetyVXLw4/JC4W2swGEW9yLcxJK1wE7f8L1t4YQVDvL2G0wgNPA=="],
+    "@ai-sdk/react": ["@ai-sdk/react@3.0.0-beta.72", "", { "dependencies": { "@ai-sdk/provider-utils": "4.0.0-beta.20", "ai": "6.0.0-beta.72", "swr": "^2.2.5", "throttleit": "2.1.0" }, "peerDependencies": { "react": "^18 || ^19 || ^19.0.0-rc" } }, "sha512-KiPuLk5xaUVCYco/3V+a5lVgK+owusZyJNOlD8GcXWLCot+K0r9/RQ2Kp96eTvSo68PaX9U6FWeobvlCgpy1FQ=="],
 
     "@alloc/quick-lru": ["@alloc/quick-lru@5.2.0", "", {}, "sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw=="],
 
@@ -1341,7 +1345,7 @@
 
     "agentstart": ["agentstart@workspace:packages/agentstart"],
 
-    "ai": ["ai@6.0.0-beta.68", "", { "dependencies": { "@ai-sdk/gateway": "2.0.0-beta.37", "@ai-sdk/provider": "3.0.0-beta.8", "@ai-sdk/provider-utils": "4.0.0-beta.20", "@opentelemetry/api": "1.9.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-QOoGvEgtMmsbJUm1ZbdmzB8nklc+dbVgD3X1BNvmkh5y6OAi1uhTtO2hFadzxn0Z7BRuR/Xqd1y1y5uawFfTUg=="],
+    "ai": ["ai@6.0.0-beta.72", "", { "dependencies": { "@ai-sdk/gateway": "2.0.0-beta.37", "@ai-sdk/provider": "3.0.0-beta.8", "@ai-sdk/provider-utils": "4.0.0-beta.20", "@opentelemetry/api": "1.9.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-NA68xIayJI8KpY60HMFk/4gOExh9ihfSB2bppIl4jolEKKXZRF+DRO6fNGCalvfd8zO9kzKGUOG9yBd+MbQ72w=="],
 
     "ajv": ["ajv@6.12.6", "", { "dependencies": { "fast-deep-equal": "^3.1.1", "fast-json-stable-stringify": "^2.0.0", "json-schema-traverse": "^0.4.1", "uri-js": "^4.2.2" } }, "sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g=="],
 
@@ -2839,8 +2843,6 @@
 
     "@types/prompts/@types/node": ["@types/node@24.7.0", "", { "dependencies": { "undici-types": "~7.14.0" } }, "sha512-IbKooQVqUBrlzWTi79E8Fw78l8k1RNtlDDNWsFZs7XonuQSJ8oNYfEeclhprUldXISRMLzBpILuKgPlIxm+/Yw=="],
 
-    "agentstart/ai": ["ai@5.0.78", "", { "dependencies": { "@ai-sdk/gateway": "2.0.1", "@ai-sdk/provider": "2.0.0", "@ai-sdk/provider-utils": "3.0.12", "@opentelemetry/api": "1.9.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-ec77fmQwJGLduswMrW4AAUGSOiu8dZaIwMmWHHGKsrMUFFS6ugfkTyx0srtuKYHNRRLRC2dT7cPirnUl98VnxA=="],
-
     "body-parser/iconv-lite": ["iconv-lite@0.6.3", "", { "dependencies": { "safer-buffer": ">= 2.1.2 < 3.0.0" } }, "sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw=="],
 
     "chevrotain-allstar/chevrotain": ["chevrotain@11.0.3", "", { "dependencies": { "@chevrotain/cst-dts-gen": "11.0.3", "@chevrotain/gast": "11.0.3", "@chevrotain/regexp-to-ast": "11.0.3", "@chevrotain/types": "11.0.3", "@chevrotain/utils": "11.0.3", "lodash-es": "4.17.21" } }, "sha512-ci2iJH6LeIkvP9eJW6gpueU8cnZhv85ELY8w8WiFtNjMHA5ad6pQLaJo9mEly/9qUyCpvqX8/POVUTf18/HFdw=="],
@@ -3054,12 +3056,6 @@
     "@types/pg/@types/node/undici-types": ["undici-types@7.14.0", "", {}, "sha512-QQiYxHuyZ9gQUIrmPo3IA+hUl4KYk8uSA7cHrcKd/l3p1OTpZcM0Tbp9x7FAtXdAYhlasd60ncPpgu6ihG6TOA=="],
 
     "@types/prompts/@types/node/undici-types": ["undici-types@7.14.0", "", {}, "sha512-QQiYxHuyZ9gQUIrmPo3IA+hUl4KYk8uSA7cHrcKd/l3p1OTpZcM0Tbp9x7FAtXdAYhlasd60ncPpgu6ihG6TOA=="],
-
-    "agentstart/ai/@ai-sdk/gateway": ["@ai-sdk/gateway@2.0.1", "", { "dependencies": { "@ai-sdk/provider": "2.0.0", "@ai-sdk/provider-utils": "3.0.12", "@vercel/oidc": "3.0.3" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-vPVIbnP35ZnayS937XLo85vynR85fpBQWHCdUweq7apzqFOTU2YkUd4V3msebEHbQ2Zro60ZShDDy9SMiyWTqA=="],
-
-    "agentstart/ai/@ai-sdk/provider": ["@ai-sdk/provider@2.0.0", "", { "dependencies": { "json-schema": "^0.4.0" } }, "sha512-6o7Y2SeO9vFKB8lArHXehNuusnpddKPk7xqL7T2/b+OvXMRIXUO1rR4wcv1hAFUAT9avGZshty3Wlua/XA7TvA=="],
-
-    "agentstart/ai/@ai-sdk/provider-utils": ["@ai-sdk/provider-utils@3.0.12", "", { "dependencies": { "@ai-sdk/provider": "2.0.0", "@standard-schema/spec": "^1.0.0", "eventsource-parser": "^3.0.5" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-ZtbdvYxdMoria+2SlNarEk6Hlgyf+zzcznlD55EAl+7VZvJaSg2sqPvwArY7L6TfDEDJsnCq0fdhBSkYo0Xqdg=="],
 
     "chevrotain-allstar/chevrotain/@chevrotain/cst-dts-gen": ["@chevrotain/cst-dts-gen@11.0.3", "", { "dependencies": { "@chevrotain/gast": "11.0.3", "@chevrotain/types": "11.0.3", "lodash-es": "4.17.21" } }, "sha512-BvIKpRLeS/8UbfxXxgC33xOumsacaeCKAjAeLyOn7Pcp95HiRbrpl14S+9vaZLolnbssPIUuiUd8IvgkRyt6NQ=="],
 

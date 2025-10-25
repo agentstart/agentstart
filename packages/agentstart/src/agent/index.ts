@@ -10,8 +10,9 @@ FEATURES:
 SEARCHABLE: core exports, adapter re-exports, database helpers
 agent-frontmatter:end */
 
-export * from "./agent";
+export { BaseAgent as Agent } from "./agent";
 export * from "./context";
 export * from "./messages";
 export * from "./persistence";
+export * from "./run";
 export * from "./tools";

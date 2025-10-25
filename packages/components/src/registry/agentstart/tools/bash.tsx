@@ -14,13 +14,8 @@ agent-frontmatter:end */
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
 import { ClockIcon } from "lucide-react";
-import { CodeBlock } from "@/components/ai-elements/code-block";
-import {
-  Tool,
-  ToolContent,
-  ToolHeader,
-  ToolOutput,
-} from "@/components/ai-elements/tool";
+import { CodeBlock } from "../code-block";
+import { Tool, ToolContent, ToolHeader, ToolOutput } from "./tool";
 
 export interface BashProps {
   part: ToolUIPart<InferUITools<Pick<Tools, "bash">>>;

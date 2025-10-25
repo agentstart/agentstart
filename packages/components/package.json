@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@agentstart/utils": "workspace:*",
+    "@ai-sdk/react": "catalog:",
     "@hookform/resolvers": "catalog:",
     "@orpc/server": "catalog:",
     "@orpc/tanstack-query": "catalog:",
@@ -49,7 +50,6 @@
     "@tanstack/react-query": "catalog:",
     "agentstart": "workspace:*",
     "ai": "catalog:",
-    "@ai-sdk/react": "catalog:",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
     "cmdk": "catalog:",
@@ -67,6 +67,7 @@
     "react-syntax-highlighter": "catalog:",
     "refractor": "catalog:",
     "shadcn": "catalog:",
+    "shiki": "catalog:",
     "sonner": "catalog:",
     "streamdown": "catalog:",
     "tailwind-merge": "catalog:",

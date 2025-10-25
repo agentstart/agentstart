@@ -14,13 +14,8 @@ agent-frontmatter:end */
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
 import { FileIcon, HashIcon } from "lucide-react";
-import { CodeBlock } from "@/components/ai-elements/code-block";
-import {
-  Tool,
-  ToolContent,
-  ToolHeader,
-  ToolOutput,
-} from "@/components/ai-elements/tool";
+import { CodeBlock } from "../code-block";
+import { Tool, ToolContent, ToolHeader, ToolOutput } from "./tool";
 
 export interface GrepProps {
   part: ToolUIPart<InferUITools<Pick<Tools, "grep">>>;
@@ -141,7 +136,7 @@ export function Grep({
         </div>
         <CodeBlock
           code={content}
-          language="text"
+          language="markdown"
           className="max-h-[400px] overflow-auto text-xs"
         />
       </div>

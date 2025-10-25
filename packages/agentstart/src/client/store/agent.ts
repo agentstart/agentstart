@@ -99,33 +99,7 @@ function createAgentStore<TMessage extends UIMessage = UIMessage>() {
             "setNewThreadDraft",
           );
         },
-        messageQueue: [
-          {
-            id: "example-queued-message-id",
-            text: "This is an example queued message1.",
-            createdAt: Date.now(),
-          },
-          {
-            id: "example-queued-message-id",
-            text: "This is an example queued message2.",
-            createdAt: Date.now(),
-          },
-          {
-            id: "example-queued-message-id",
-            text: "This is an example queued message3.",
-            createdAt: Date.now(),
-          },
-          {
-            id: "example-queued-message-id",
-            text: "This is an example queued message4.",
-            createdAt: Date.now(),
-          },
-          {
-            id: "example-queued-message-id",
-            text: "This is an example queued message5.",
-            createdAt: Date.now(),
-          },
-        ],
+        messageQueue: [],
         enqueueQueuedMessage: (input) => {
           const queuedItem: QueuedAgentMessage = {
             ...input,

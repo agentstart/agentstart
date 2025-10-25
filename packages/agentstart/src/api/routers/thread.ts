@@ -14,7 +14,7 @@ agent-frontmatter:end */
 import { AgentStartError } from "@agentstart/utils";
 import { streamToEventIterator } from "@orpc/server";
 import z from "zod";
-import { getThreads, loadThread } from "@/agent";
+import { getThreads, loadThread, Run } from "@/agent";
 import { publicProcedure } from "@/api/procedures";
 import { type DBThread, getAdapter } from "@/db";
 import { getSandbox } from "@/sandbox";
@@ -153,16 +153,20 @@ export function createThreadRouter(procedure = publicProcedure) {
             );
           }
 
-          const adapter = await getAdapter(context);
+          const db = await getAdapter(context);
           const sandbox = await getSandbox(context);
 
-          const result = await agent.stream({
-            adapter,
-            sandbox,
-            message: input.message,
-            threadId: input.threadId,
-            generateTitle: context.advanced?.generateTitle,
-            generateSuggestions: context.advanced?.generateSuggestions,
+          const run = new Run(context);
+
+          const result = await run.start({
+            input: {
+              message: input.message,
+            },
+            runtimeContext: {
+              db,
+              sandbox,
+              threadId: input.threadId,
+            },
             onError: (error) => {
               console.error("Agent stream error:", error);
               return "An error occurred while processing your request.";

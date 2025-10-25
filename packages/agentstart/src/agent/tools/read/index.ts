@@ -11,7 +11,7 @@ agent-frontmatter:end */
 
 import { tool } from "ai";
 import path from "pathe";
-import type { BaseContext } from "@/agent/context";
+import type { RuntimeContext } from "@/agent/context";
 import {
   type AgentStartToolOutput,
   toolInputSchema,
@@ -79,7 +79,7 @@ export const read = tool({
   inputSchema: toolInputSchema.shape.read,
   outputSchema: toolOutputSchema.shape.read,
   async *execute(input, { experimental_context: context }) {
-    const { sandbox } = context as BaseContext;
+    const { sandbox } = context as RuntimeContext;
 
     yield {
       status: "pending" as const,

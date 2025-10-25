@@ -41,7 +41,6 @@ import { withApplyDefault } from "@/db/adapter/utils";
 import type { Adapter, AgentStartOptions, Where } from "@/types";
 
 export interface DB {
-  // biome-ignore lint/suspicious/noExplicitAny: Drizzle database exposes dynamic helpers without stable TypeScript types.
   [key: string]: any;
 }
 
@@ -407,7 +406,6 @@ export interface DrizzleAdapterConfig {
   /**
    * The schema object that defines the tables and fields
    */
-  /* biome-ignore lint/suspicious/noExplicitAny: Drizzle schema uses table metadata with complex generics. */
   schema?: Record<string, any>;
   /**
    * The database provider
@@ -422,7 +420,6 @@ export interface DrizzleAdapterConfig {
 }
 
 function checkMissingFields(
-  /* biome-ignore lint/suspicious/noExplicitAny: Schema validation requires iterating over Drizzle column metadata. */
   schema: Record<string, any>,
   model: string,
   values: Record<string, unknown>,

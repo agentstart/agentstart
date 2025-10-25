@@ -12,8 +12,8 @@ agent-frontmatter:end */
 
 import type { AnyMiddleware } from "@orpc/server";
 import type { LanguageModel } from "ai";
+import type { BaseAgent } from "@/agent/agent";
 import type { Memory, ModelOptions, SecondaryMemory } from "./adapter";
-import type { Agent } from "./agent";
 
 export interface SandboxBaseOptions {
   sandboxId?: string;
@@ -157,7 +157,8 @@ export interface AgentStartOptions {
    * Agent instance responsible for handling conversations and tool calls.
    * @type {Agent}
    */
-  agent: Agent;
+  // biome-ignore lint/suspicious/noExplicitAny: is fine
+  agent: BaseAgent<any, any>;
   /**
    * Sandbox configuration controlling code execution providers and limits.
    * @type {SandboxOptions | undefined}

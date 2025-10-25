@@ -14,12 +14,7 @@ agent-frontmatter:end */
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
 import { FileIcon, FolderIcon } from "lucide-react";
-import {
-  Tool,
-  ToolContent,
-  ToolHeader,
-  ToolOutput,
-} from "@/components/ai-elements/tool";
+import { Tool, ToolContent, ToolHeader, ToolOutput } from "./tool";
 
 export interface GlobProps {
   part: ToolUIPart<InferUITools<Pick<Tools, "glob">>>;

@@ -12,7 +12,7 @@ SEARCHABLE: message view, tool renderer, part dispatcher, ui orchestrator
 agent-frontmatter:end */
 
 import { BrainIcon } from "@phosphor-icons/react";
-import type { AgentStartUIMessage } from "agentstart/agent";
+import type { AgentStartMessagePart } from "agentstart/agent";
 import { memo } from "react";
 import {
   Reasoning as BaseReasoning,
@@ -31,7 +31,7 @@ import { UpdateFile } from "./update";
 import { WriteFile } from "./write";
 
 interface Props {
-  part: AgentStartUIMessage["parts"][number];
+  part: AgentStartMessagePart;
   isStreaming: boolean;
 }
 
@@ -40,8 +40,9 @@ export const MessagePart = memo(function MessagePart({
   isStreaming,
 }: Props) {
   switch (part.type) {
-    case "tool-read":
+    case "tool-read": {
       return <ReadFile part={part} />;
+    }
     case "tool-write":
       return <WriteFile part={part} />;
     case "tool-update":

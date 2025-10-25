@@ -9,38 +9,13 @@ FEATURES:
 SEARCHABLE: agent interface, agent stream options, shared agent types
 agent-frontmatter:end */
 
-import type {
-  Experimental_AgentSettings as AISDK_AgentSettings,
-  InferUIMessageChunk,
-  ToolSet,
-  UIMessage,
-  UIMessageStreamOnFinishCallback,
-} from "ai";
-import type { SandboxAPI } from "@/sandbox";
-import type { Adapter } from "./adapter";
-import type {
-  AgentGenerateSuggestionsOptions,
-  AgentGenerateTitleOptions,
-} from "./options";
+import type { UIMessage } from "ai";
 
-export interface AgentStreamOptions {
-  adapter: Adapter;
-  sandbox: SandboxAPI;
-  message: UIMessage;
-  threadId: string;
-  onFinish?: UIMessageStreamOnFinishCallback<UIMessage>;
-  onError?: (error: unknown) => string;
-  generateTitle?: AgentGenerateTitleOptions;
-  generateSuggestions?: AgentGenerateSuggestionsOptions;
-}
-
-export interface Agent<Context = unknown> {
-  instructions: string;
-  agentsMDPrompt?: string;
-  context?: Context;
-  messageMetadata?: (options: { part: unknown }) => unknown;
-  settings: AISDK_AgentSettings<ToolSet>;
-  stream(
-    options: AgentStreamOptions,
-  ): Promise<ReadableStream<InferUIMessageChunk<UIMessage>>>;
-}
+type InferUIMessageMetadata<T extends UIMessage> = T extends UIMessage<
+  infer METADATA
+>
+  ? METADATA
+  : Record<string, unknown>;
+export type UIMessageMetadata = InferUIMessageMetadata<
+  UIMessage<Record<string, unknown>>
+>;

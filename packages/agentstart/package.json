@@ -70,6 +70,7 @@
     "better-sqlite3": "catalog:",
     "drizzle-kit": "catalog:",
     "drizzle-orm": "catalog:",
+    "ai": "catalog:",
     "kysely": "catalog:",
     "mongodb": "catalog:",
     "mysql2": "catalog:",
@@ -81,7 +82,7 @@
     "vitest": "catalog:"
   },
   "peerDependencies": {
-    "ai": "^5",
+    "ai": "^6",
     "react": "^19"
   },
   "main": "./dist/index.cjs",

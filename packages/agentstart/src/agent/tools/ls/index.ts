@@ -12,7 +12,7 @@ agent-frontmatter:end */
 import { formatDate, formatSize } from "@agentstart/utils";
 import { tool } from "ai";
 import path from "pathe";
-import type { BaseContext } from "@/agent/context";
+import type { RuntimeContext } from "@/agent/context";
 import {
   type AgentStartToolOutput,
   toolInputSchema,
@@ -59,7 +59,7 @@ export const ls = tool({
     { path: targetPath, ignore },
     { experimental_context: context },
   ) {
-    const { sandbox } = context as BaseContext;
+    const { sandbox } = context as RuntimeContext;
 
     // Use current directory if no path specified
     const resolvedPath = targetPath || "/";

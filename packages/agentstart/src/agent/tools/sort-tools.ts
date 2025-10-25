@@ -12,7 +12,7 @@ agent-frontmatter:end */
 
 import type { ToolSet } from "ai";
 
-export const sortTools = (tools: ToolSet) => {
+export const sortTools = <T extends ToolSet>(tools: T): T => {
   // Get entries and sort in one pass
   const entries = Object.entries(tools).sort(([nameA], [nameB]) =>
     nameA.localeCompare(nameB),
@@ -40,5 +40,5 @@ export const sortTools = (tools: ToolSet) => {
   }
 
   // Reconstruct sorted tools object
-  return Object.fromEntries(entries);
+  return Object.fromEntries(entries) as T;
 };

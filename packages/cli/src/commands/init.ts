@@ -290,46 +290,50 @@ export async function initAction(opts: z.infer<typeof optionsSchema>) {
           process.exit(1);
         }
       }
-    } else if (
-      packageInfo.dependencies.agentstart !== "workspace:*" &&
-      semver.lt(
-        semver.coerce(packageInfo.dependencies.agentstart)?.toString()!,
-        semver.clean(latestAgentStartVersion)!,
-      )
-    ) {
-      s.stop("Finished version check");
-      const updateDep = await confirm({
-        message: `Update agentstart? (${chalk.bold(
-          packageInfo.dependencies.agentstart,
-        )} → ${chalk.bold(`v${latestAgentStartVersion}`)})`,
-      });
-      if (isCancel(updateDep)) {
-        cancel(`Operation cancelled`);
-        process.exit(0);
-      }
-      if (updateDep) {
-        if (packageManagerPreference === undefined) {
-          packageManagerPreference = await getPackageManager();
+    } else if (packageInfo.dependencies.agentstart !== "workspace:*") {
+      const currentVersion = semver.coerce(packageInfo.dependencies.agentstart);
+      const cleanedLatestVersion = semver.clean(latestAgentStartVersion);
+      if (
+        currentVersion &&
+        cleanedLatestVersion &&
+        semver.lt(currentVersion, cleanedLatestVersion)
+      ) {
+        s.stop("Finished version check");
+        const updateDep = await confirm({
+          message: `Update agentstart? (${chalk.bold(
+            packageInfo.dependencies.agentstart,
+          )} → ${chalk.bold(`v${latestAgentStartVersion}`)})`,
+        });
+        if (isCancel(updateDep)) {
+          cancel(`Operation cancelled`);
+          process.exit(0);
         }
-        const s = spinner({ indicator: "dots" });
-        s.start(
-          `Updating agentstart with ${chalk.bold(packageManagerPreference)}`,
-        );
-        try {
-          const start = Date.now();
-          await installDependencies({
-            dependencies: ["agentstart@latest"],
-            packageManager: packageManagerPreference,
-            cwd: cwd,
-          });
-          s.stop(
-            `✅ agentstart updated ${chalk.gray(`(${formatMilliseconds(Date.now() - start)})`)}`,
+        if (updateDep) {
+          if (packageManagerPreference === undefined) {
+            packageManagerPreference = await getPackageManager();
+          }
+          const s = spinner({ indicator: "dots" });
+          s.start(
+            `Updating agentstart with ${chalk.bold(packageManagerPreference)}`,
           );
-        } catch (error: unknown) {
-          s.stop(`❌ Update failed`);
-          log.error(getErrorMessage(error));
-          process.exit(1);
+          try {
+            const start = Date.now();
+            await installDependencies({
+              dependencies: ["agentstart@latest"],
+              packageManager: packageManagerPreference,
+              cwd: cwd,
+            });
+            s.stop(
+              `✅ agentstart updated ${chalk.gray(`(${formatMilliseconds(Date.now() - start)})`)}`,
+            );
+          } catch (error: unknown) {
+            s.stop(`❌ Update failed`);
+            log.error(getErrorMessage(error));
+            process.exit(1);
+          }
         }
+      } else {
+        s.stop("Finished version check");
       }
     } else {
       s.stop(`✅ agentstart is up-to-date`);

@@ -10,7 +10,7 @@ SEARCHABLE: packages, agentstart, src, agent, tools, bash, index, tool, runtime
 agent-frontmatter:end */
 
 import { tool } from "ai";
-import type { BaseContext } from "@/agent/context";
+import type { RuntimeContext } from "@/agent/context";
 import {
   type AgentStartToolOutput,
   toolInputSchema,
@@ -34,7 +34,7 @@ export const bash = tool({
     { command, timeout, description },
     { experimental_context: context },
   ) {
-    const { sandbox } = context as BaseContext;
+    const { sandbox } = context as RuntimeContext;
 
     // Calculate effective timeout (not exceeding maximum)
     const effectiveTimeout = Math.min(timeout || DEFAULT_TIMEOUT, MAX_TIMEOUT);

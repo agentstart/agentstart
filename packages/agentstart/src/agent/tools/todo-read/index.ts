@@ -10,7 +10,7 @@ SEARCHABLE: packages, agentstart, src, agent, tools, todo, read, index, tool, ru
 agent-frontmatter:end */
 
 import { tool } from "ai";
-import type { BaseContext } from "@/agent/context";
+import type { RuntimeContext } from "@/agent/context";
 import {
   type AgentStartToolOutput,
   toolInputSchema,
@@ -24,7 +24,7 @@ export const todoRead = tool({
   inputSchema: toolInputSchema.shape["todo-read"],
   outputSchema: toolOutputSchema.shape["todo-read"],
   async *execute(_, { experimental_context: context }) {
-    const { threadId, db } = context as BaseContext;
+    const { threadId, db } = context as RuntimeContext;
 
     const todos = await db.findOne<DBTodo>({
       model: "todo",

@@ -11,7 +11,7 @@ agent-frontmatter:end */
 
 import { generateUuidFromData } from "@agentstart/utils";
 import { tool } from "ai";
-import type { BaseContext } from "@/agent/context";
+import type { RuntimeContext } from "@/agent/context";
 import {
   type AgentStartToolOutput,
   toolInputSchema,
@@ -25,7 +25,7 @@ export const todoWrite = tool({
   inputSchema: toolInputSchema.shape["todo-write"],
   outputSchema: toolOutputSchema.shape["todo-write"],
   async *execute({ todos }, { experimental_context: context }) {
-    const { threadId, db } = context as BaseContext;
+    const { threadId, db } = context as RuntimeContext;
 
     // Add IDs to todos that don't have them
     const todosWithIds = todos.map((todo) => ({

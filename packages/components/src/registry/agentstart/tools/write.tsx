@@ -15,13 +15,8 @@ import { getLanguageFromFilePath } from "@agentstart/utils";
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
 import { FileIcon } from "lucide-react";
-import { CodeBlock } from "@/components/ai-elements/code-block";
-import {
-  Tool,
-  ToolContent,
-  ToolHeader,
-  ToolOutput,
-} from "@/components/ai-elements/tool";
+import { CodeBlock } from "../code-block";
+import { Tool, ToolContent, ToolHeader, ToolOutput } from "./tool";
 
 export interface WriteFileProps {
   part: ToolUIPart<InferUITools<Pick<Tools, "write">>>;

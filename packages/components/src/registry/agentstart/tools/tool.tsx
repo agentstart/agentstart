@@ -1,14 +1,14 @@
 "use client";
 
-import type { ToolUIPart } from "ai";
 import {
+  CaretDownIcon,
   CheckCircleIcon,
-  ChevronDownIcon,
   CircleIcon,
   ClockIcon,
   WrenchIcon,
   XCircleIcon,
-} from "lucide-react";
+} from "@phosphor-icons/react";
+import type { ToolUIPart } from "ai";
 import type { ComponentProps, ReactNode } from "react";
 import { isValidElement } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +18,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
-import { CodeBlock } from "./code-block";
+import { CodeBlock } from "../code-block";
 
 export type ToolProps = ComponentProps<typeof Collapsible>;
 
@@ -48,13 +48,23 @@ const getStatusBadge = (status: ToolUIPart["state"]) => {
   } as const;
 
   const icons = {
-    "input-streaming": <CircleIcon className="size-4" />,
-    "input-available": <ClockIcon className="size-4 animate-pulse" />,
-    "approval-requested": <ClockIcon className="size-4" />,
-    "approval-responded": <CheckCircleIcon className="size-4" />,
-    "output-available": <CheckCircleIcon className="size-4 text-green-600" />,
-    "output-error": <XCircleIcon className="size-4 text-red-600" />,
-    "output-denied": <XCircleIcon className="size-4 text-red-600" />,
+    "input-streaming": <CircleIcon className="size-4" weight="duotone" />,
+    "input-available": (
+      <ClockIcon className="size-4 animate-pulse" weight="duotone" />
+    ),
+    "approval-requested": <ClockIcon className="size-4" weight="duotone" />,
+    "approval-responded": (
+      <CheckCircleIcon className="size-4" weight="duotone" />
+    ),
+    "output-available": (
+      <CheckCircleIcon className="size-4 text-green-600" weight="duotone" />
+    ),
+    "output-error": (
+      <XCircleIcon className="size-4 text-red-600" weight="duotone" />
+    ),
+    "output-denied": (
+      <XCircleIcon className="size-4 text-red-600" weight="duotone" />
+    ),
   } as const;
 
   return (
@@ -80,13 +90,16 @@ export const ToolHeader = ({
     {...props}
   >
     <div className="flex items-center gap-2">
-      <WrenchIcon className="size-4 text-muted-foreground" />
+      <WrenchIcon className="size-4 text-muted-foreground" weight="duotone" />
       <span className="font-medium text-sm">
         {title ?? type.split("-").slice(1).join("-")}
       </span>
       {getStatusBadge(state)}
     </div>
-    <ChevronDownIcon className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+    <CaretDownIcon
+      className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180"
+      weight="duotone"
+    />
   </CollapsibleTrigger>
 );
 
