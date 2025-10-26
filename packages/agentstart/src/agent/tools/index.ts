@@ -1,7 +1,7 @@
 /* agent-frontmatter:start
 AGENT: Agent runtime tool registry
 PURPOSE: Aggregates built-in tool definitions exposed by the AgentStart runtime
-USAGE: Import these exports when wiring tools in agentstart.config.ts
+USAGE: Import these exports when wiring tools in agent.ts
 EXPORTS: Tools, AgentStartToolCall, AgentStartToolResult, innerTools, osTools, webTools
 FEATURES:
   - Collects sandbox-aware tool implementations in a single map

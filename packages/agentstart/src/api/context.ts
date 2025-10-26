@@ -27,5 +27,6 @@ export function createContext(opts: CreateContextOptions): Context {
     ...opts,
     getUserId: opts.getUserId ?? (() => "anonymous"),
     memory: opts.memory ?? memoryAdapter(),
+    blob: opts.blob,
   };
 }

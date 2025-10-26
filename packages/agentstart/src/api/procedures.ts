@@ -29,7 +29,6 @@ export function createProcedureBuilder(middleware?: AnyMiddleware[]) {
   // Apply middleware if provided
   if (middleware?.length) {
     for (const mw of middleware) {
-      // biome-ignore lint/suspicious/noExplicitAny: Middleware application changes procedure type
       procedure = (procedure as any).use(mw);
     }
   }

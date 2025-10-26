@@ -60,7 +60,6 @@ export function getSchema(config: Omit<AgentStartOptions, "agent">): Record<
     schema[table.modelName] = {
       modelName: table.modelName,
       fields: actualFields,
-      // biome-ignore lint/suspicious/noExplicitAny: is fine
       order: (table as any).order || Infinity,
     };
   }

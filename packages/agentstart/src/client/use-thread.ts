@@ -21,17 +21,54 @@ import {
   useChat as useOriginalChat,
 } from "@ai-sdk/react";
 import { eventIteratorToUnproxiedDataStream } from "@orpc/client";
-import type { ChatTransport } from "ai";
+import type { ChatTransport, FileUIPart } from "ai";
+import { isFileUIPart } from "ai";
 import { useEffect, useMemo, useRef } from "react";
 import type { StoreApi, UseBoundStore } from "zustand";
 import type { AgentStartUIMessage } from "@/agent";
 import type { AgentStartAPI } from "@/api";
 import { useDataStateMapper } from "./data-state-mapper";
-import {
-  type AgentStoreWithSync,
-  getAgentStore,
-  type ThreadDraft,
-} from "./store/agent";
+import { type AgentStoreWithSync, getAgentStore } from "./store/agent";
+import type { BlobAttachmentList } from "./use-blob-attachments";
+
+function toSendableFiles(
+  files?: BlobAttachmentList,
+): FileList | FileUIPart[] | undefined {
+  if (!files) {
+    return undefined;
+  }
+  if (files instanceof FileList) {
+    return files;
+  }
+  if (!Array.isArray(files) || files.length === 0) {
+    return undefined;
+  }
+  if (
+    files.every(
+      (file): file is FileUIPart =>
+        !(file instanceof File) && isFileUIPart(file),
+    )
+  ) {
+    return files;
+  }
+  if (files.every((file) => file instanceof File)) {
+    if (typeof DataTransfer === "undefined") {
+      return undefined;
+    }
+    const dataTransfer = new DataTransfer();
+    files.forEach((file) => {
+      dataTransfer.items.add(file);
+    });
+    return dataTransfer.files;
+  }
+  const sendable = files.filter(
+    (file): file is FileUIPart => !(file instanceof File) && isFileUIPart(file),
+  );
+  if (sendable.length > 0) {
+    return sendable;
+  }
+  return undefined;
+}
 
 export function createUseThread(client: AgentStartAPI) {
   const hook = (storeId: string = "default") => {
@@ -87,13 +124,18 @@ export function createUseThread(client: AgentStartAPI) {
             if (!next) {
               return;
             }
-            const payload: ThreadDraft = {
-              text: next.text ?? "",
+            const text = next.text ?? "";
+            const sendableFiles = toSendableFiles(next.files);
+            const messagePayload: {
+              text: string;
+              files?: FileList | FileUIPart[];
+            } = {
+              text,
             };
-            if (next.files && next.files.length > 0) {
-              payload.files = next.files;
+            if (sendableFiles) {
+              messagePayload.files = sendableFiles;
             }
-            void sendMessage(payload, {
+            void sendMessage(messagePayload, {
               body: {
                 threadId: storeId,
               },

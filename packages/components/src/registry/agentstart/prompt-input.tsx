@@ -24,10 +24,24 @@ import {
 } from "@phosphor-icons/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AgentUsageSummary } from "agentstart/agent";
-import type { QueuedAgentMessage } from "agentstart/client";
-import { useAgentStore, useDataPart } from "agentstart/client";
-import type { FileUIPart } from "ai";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import type {
+  BlobAttachment,
+  BlobAttachmentList,
+  QueuedAgentMessage,
+} from "agentstart/client";
+import {
+  useAgentStore,
+  useBlobAttachments,
+  useDataPart,
+} from "agentstart/client";
+import { type FileUIPart, isFileUIPart } from "ai";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   Context,
   ContextCacheUsage,
@@ -55,6 +69,7 @@ import {
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputTools,
+  usePromptInputAttachments,
 } from "@/components/ai-elements/prompt-input";
 import {
   Queue,
@@ -87,12 +102,14 @@ export interface PromptInputProps {
   initialUsage?: AgentUsageSummary;
 }
 
+type SendState = "idle" | "streaming" | "uploading";
+
 export function PromptInput({
   className,
   threadId,
   initialUsage,
 }: PromptInputProps = {}) {
-  const { orpc, navigate } = useAgentStartContext();
+  const { client, orpc, navigate } = useAgentStartContext();
   const queryClient = useQueryClient();
   const [input, setInput] = useState("");
   const storeKey = threadId ?? "default";
@@ -130,15 +147,44 @@ export function PromptInput({
   const usageSummary = usagePart ?? initialUsage ?? null;
   const showUsage = Boolean(threadId) && Boolean(usageSummary);
 
+  // Blob attachments hook
+  const {
+    files: blobFiles,
+    setFiles: setBlobFiles,
+    processFiles,
+    clearFiles,
+    isUploading,
+  } = useBlobAttachments(client);
+
   const createThreadMutation = useMutation(
     orpc.thread.create.mutationOptions(),
   );
   const handleMessageSubmit = async (message: {
     text?: string;
-    files?: FileUIPart[] | FileList;
+    files?: BlobAttachmentList;
   }) => {
+    const files = (() => {
+      if (message?.files) {
+        if (Array.isArray(message.files)) {
+          if (message.files.every((file) => file instanceof File)) {
+            const dataTransfer = new DataTransfer();
+            message.files.forEach((file) => {
+              dataTransfer.items.add(file);
+            });
+            return dataTransfer.files;
+          }
+          if (
+            message.files.every(
+              (file) => !(file instanceof File) && isFileUIPart(file),
+            )
+          ) {
+            return message.files as FileUIPart[];
+          }
+        }
+      }
+    })();
     return sendMessage(
-      { text: message?.text ?? "", files: message?.files },
+      { text: message?.text ?? "", files },
       {
         body: {
           threadId,
@@ -150,18 +196,38 @@ export function PromptInput({
   const handleSubmit = async (message: PromptInputMessage) => {
     const isBusy = ["streaming", "submitted"].includes(status);
     const hasText = Boolean(message.text?.trim());
-    const hasAttachments = Boolean(message.files?.length);
+    const hasAttachments = Boolean(blobFiles.length);
     if (!(hasText || hasAttachments)) {
+      return;
+    }
+
+    // Process files: upload to blob storage if enabled, otherwise return as-is
+    let processedFiles: BlobAttachmentList | undefined;
+    try {
+      processedFiles = await processFiles();
+    } catch (error) {
+      // processFiles handles validation and upload errors, just show alert
+      console.error(
+        error instanceof Error ? error.message : "File processing failed",
+      );
       return;
     }
 
     if (threadId) {
       const trimmedText = message.text?.trim() ?? "";
       const queueText = trimmedText.length > 0 ? trimmedText : undefined;
-      const queueFiles =
-        message.files && message.files.length > 0
-          ? message.files.map((file) => ({ ...file }))
-          : undefined;
+      // Queue only supports FileUIPart[]
+      let queueFiles: FileUIPart[] | undefined;
+      if (processedFiles) {
+        // Convert FileList to array if needed
+        const fileArray =
+          processedFiles instanceof FileList
+            ? Array.from(processedFiles)
+            : processedFiles;
+        queueFiles = fileArray.filter(
+          (file): file is FileUIPart => "type" in file && file.type === "file",
+        );
+      }
       const shouldQueue = isBusy || messageQueue.length > 0;
 
       if (shouldQueue) {
@@ -170,6 +236,7 @@ export function PromptInput({
           files: queueFiles,
         });
         setInput("");
+        clearFiles();
         return;
       }
     }
@@ -183,20 +250,22 @@ export function PromptInput({
     if (threadId) {
       // Thread page: delegate to parent component
       setInput("");
+      clearFiles();
       handleMessageSubmit({
         text: message.text?.trim() ?? "",
-        files: message.files,
+        files: processedFiles,
       });
     } else {
       // Home page: create new thread and navigate
       const trimmedText = message.text?.trim() ?? "";
       setNewThreadDraft({
         text: trimmedText,
-        files: message.files,
+        files: processedFiles,
       });
 
       try {
         setInput("");
+        clearFiles();
         const { threadId: newThreadId } =
           await createThreadMutation.mutateAsync({
             visibility: "public",
@@ -218,13 +287,23 @@ export function PromptInput({
     : createThreadMutation.isPending;
   const isStreaming = status === "streaming";
   const hasError = threadId ? false : createThreadMutation.isError;
+  const sendState: SendState = isStreaming
+    ? "streaming"
+    : isUploading
+      ? "uploading"
+      : "idle";
 
   const sendIcon = useMemo(() => {
     if (hasError) return <BugIcon className="size-4.5" weight="duotone" />;
-    if (isStreaming) return <StopIcon className="size-4.5" weight="bold" />;
+    if (sendState === "streaming") {
+      return <StopIcon className="size-4.5" weight="bold" />;
+    }
+    if (sendState === "uploading") {
+      return <Spinner className="size-4.5" />;
+    }
     if (isPending) return <Spinner className="size-4.5" />;
     return <ArrowUpIcon className="size-4.5" weight="bold" />;
-  }, [isPending, isStreaming, hasError]);
+  }, [hasError, isPending, sendState]);
 
   const summarizeQueuedMessage = useCallback((queued: QueuedAgentMessage) => {
     const raw = queued.text?.trim() ?? "";
@@ -299,7 +378,6 @@ export function PromptInput({
     }
   };
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: is fine
   useEffect(() => {
     if (!threadId || !id || !newThreadDraft) {
       return;
@@ -333,6 +411,7 @@ export function PromptInput({
 
   return (
     <PromptInputProvider>
+      <FilesSyncHandler setBlobFiles={setBlobFiles} />
       <div className="mx-auto flex w-full flex-col sm:min-w-[390px] sm:max-w-3xl">
         {showQueue ? (
           <Queue className="relative mx-auto w-[95%] rounded-b-none border-input border-b-0">
@@ -345,7 +424,10 @@ export function PromptInput({
                   {messageQueue.map((queued, index) => {
                     const summary = summarizeQueuedMessage(queued);
                     const remainder = summarizeQueuedRemainder(queued);
-                    const attachments = queued.files ?? [];
+                    const attachments =
+                      (queued.files instanceof FileList
+                        ? Array.from(queued.files)
+                        : queued.files) ?? [];
                     const attachmentsLabel =
                       attachments.length > 0
                         ? `${attachments.length} attachment${attachments.length > 1 ? "s" : ""}`
@@ -410,9 +492,11 @@ export function PromptInput({
                           <QueueItemAttachment>
                             {attachments.map((file, fileIndex) => {
                               const filename =
-                                file.filename ??
-                                file.mediaType ??
-                                `Attachment ${fileIndex + 1}`;
+                                file instanceof File
+                                  ? file.name
+                                  : (file.filename ??
+                                    file.mediaType ??
+                                    `Attachment ${fileIndex + 1}`);
                               const key = `${queued.id}-attachment-${fileIndex}`;
                               return (
                                 <QueueItemFile key={key} title={filename}>
@@ -489,16 +573,79 @@ export function PromptInput({
                 </div>
               ) : null}
 
-              <PromptInputSubmit
+              <SendButton
                 className="cursor-pointer rounded-full"
-                disabled={!input.trim() && !isStreaming}
+                input={input}
+                sendState={sendState}
               >
                 {sendIcon}
-              </PromptInputSubmit>
+              </SendButton>
             </div>
           </PromptInputFooter>
         </BasePromptInput>
       </div>
     </PromptInputProvider>
   );
+}
+
+function SendButton({
+  children,
+  className,
+  input,
+  sendState,
+}: {
+  children: ReactNode;
+  className?: string;
+  input: string;
+  sendState: SendState;
+}) {
+  const attachments = usePromptInputAttachments();
+  const hasText = input.trim().length > 0;
+  const hasAttachments = attachments.files.length > 0;
+  const isStreaming = sendState === "streaming";
+  const isUploading = sendState === "uploading";
+  const shouldDisable =
+    (!isStreaming && !hasText && !hasAttachments) || isUploading;
+
+  return (
+    <PromptInputSubmit className={className} disabled={shouldDisable}>
+      {children}
+    </PromptInputSubmit>
+  );
+}
+
+/**
+ * Internal component to sync PromptInputProvider files with blob files
+ * Must be inside PromptInputProvider to use usePromptInputAttachments
+ */
+function FilesSyncHandler({
+  setBlobFiles,
+}: {
+  setBlobFiles: (files: BlobAttachmentList) => void;
+}) {
+  const promptInputAttachments = usePromptInputAttachments();
+
+  useEffect(() => {
+    const currentFiles = promptInputAttachments?.files ?? [];
+
+    if (currentFiles.length === 0) {
+      setBlobFiles([]);
+      return;
+    }
+
+    const normalized: BlobAttachment[] = currentFiles.map((file) => {
+      if (file instanceof File) {
+        return file;
+      }
+      if (isFileUIPart(file)) {
+        const { id: _id, ...rest } = file;
+        return rest as FileUIPart;
+      }
+      return file as FileUIPart;
+    });
+
+    setBlobFiles(normalized);
+  }, [promptInputAttachments?.files, setBlobFiles]);
+
+  return null;
 }

@@ -8,7 +8,6 @@ FEATURES:
   - Offers helpers to infer TypeScript types from field definitions
 SEARCHABLE: adapter field, schema field attribute, infer fields
 agent-frontmatter:end */
-/** biome-ignore-all lint/suspicious/noExplicitAny: is fine */
 
 import type { FieldAttribute, FieldAttributeConfig, FieldType } from "@/types";
 

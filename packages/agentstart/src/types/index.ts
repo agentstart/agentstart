@@ -9,8 +9,8 @@ FEATURES:
 SEARCHABLE: shared types entry, adapter types export, agent interface export
 agent-frontmatter:end */
 
-export * from "./adapter";
 export * from "./agent";
 export * from "./field";
 export * from "./kysely";
+export * from "./memory-adapter";
 export * from "./options";

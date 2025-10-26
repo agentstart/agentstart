@@ -110,7 +110,6 @@ describe("generate", async () => {
       options: {
         memory: new Database(":memory:"),
       },
-      // biome-ignore lint/suspicious/noExplicitAny: is fine
       adapter: {} as any,
     });
     expect(schema.code).toMatchSnapshot();

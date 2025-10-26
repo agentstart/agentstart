@@ -18,7 +18,7 @@ import type {
   SandboxAPI,
   SandboxStatus,
 } from "@/sandbox/types/sandbox";
-import type { SecondaryMemory } from "@/types/adapter";
+import type { SecondaryMemory } from "@/types/memory-adapter";
 import { Bash } from "./bash";
 import { DEFAULT_CONFIG } from "./constants";
 import { FileSystem } from "./file-system";

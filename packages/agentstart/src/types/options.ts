@@ -1,7 +1,7 @@
 /* agent-frontmatter:start
 AGENT: Agent configuration options
 PURPOSE: Define the primary configuration contract consumed by Agent Start runtimes
-USAGE: Import types from "agentstart" to author agentstart.config.ts files
+USAGE: Import types from "agentstart" to author agent.ts files
 EXPORTS: AgentStartOptions, AgentAdvancedOptions, AgentGenerateTitleOptions, AgentGenerateSuggestionsOptions, SandboxOptions, SandboxProvider
 FEATURES:
   - Encapsulates high-level agent configuration knobs
@@ -10,10 +10,11 @@ FEATURES:
 SEARCHABLE: agent configuration, sandbox options, e2b api key, agentstart options
 agent-frontmatter:end */
 
+import type { BlobOptions } from "@agentstart/blob";
 import type { AnyMiddleware } from "@orpc/server";
 import type { LanguageModel } from "ai";
 import type { BaseAgent } from "@/agent/agent";
-import type { Memory, ModelOptions, SecondaryMemory } from "./adapter";
+import type { Memory, ModelOptions, SecondaryMemory } from "./memory-adapter";
 
 export interface SandboxBaseOptions {
   sandboxId?: string;
@@ -157,7 +158,6 @@ export interface AgentStartOptions {
    * Agent instance responsible for handling conversations and tool calls.
    * @type {Agent}
    */
-  // biome-ignore lint/suspicious/noExplicitAny: is fine
   agent: BaseAgent<any, any>;
   /**
    * Sandbox configuration controlling code execution providers and limits.
@@ -197,6 +197,11 @@ export interface AgentStartOptions {
    * @type {AgentAdvancedOptions | undefined}
    */
   advanced?: AgentAdvancedOptions;
+  /**
+   * Blob storage configuration controlling storage provider selection and constraints.
+   * @type {BlobOptions | undefined}
+   */
+  blob?: BlobOptions;
   /**
    * Model defaults applied to thread-level reasoning tasks.
    * @type {ModelOptions | undefined}

@@ -199,12 +199,74 @@ export function Conversation({
   );
 
   const renderUserMessage = useCallback((message: AgentStartUIMessage) => {
-    const parts = message.parts ?? [];
-    const textParts = parts.filter((part) => part.type === "text");
+    type MessagePart = NonNullable<AgentStartUIMessage["parts"]>[number];
+    const parts = (message.parts ?? []) as MessagePart[];
 
-    return textParts.map((part, index) => (
-      <Response key={`${message.id}-text-${index}`}>{part.text}</Response>
-    ));
+    const textParts = parts.filter(
+      (part): part is MessagePart & { type: "text"; text: string } =>
+        Boolean(
+          part?.type === "text" &&
+            typeof part.text === "string" &&
+            part.text.length > 0,
+        ),
+    );
+
+    const imageParts = parts.filter(
+      (
+        part,
+      ): part is MessagePart & {
+        type: "file";
+        url: string;
+        mediaType: string;
+        filename?: string;
+      } =>
+        Boolean(
+          part?.type === "file" &&
+            typeof (part as { mediaType?: unknown }).mediaType === "string" &&
+            ((part as { mediaType?: string }).mediaType?.startsWith("image/") ??
+              false) &&
+            typeof (part as { url?: unknown }).url === "string" &&
+            ((part as { url?: string }).url?.length ?? 0) > 0,
+        ),
+    );
+
+    if (textParts.length === 0 && imageParts.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className="flex w-full flex-col gap-2">
+        {imageParts.length > 0 ? (
+          <div
+            className={cn(
+              "grid gap-2",
+              imageParts.length === 1 ? "grid-cols-1" : "grid-cols-2",
+            )}
+          >
+            {imageParts.map((part, index) => (
+              <figure
+                key={`${message.id}-image-${index}`}
+                className="relative overflow-hidden rounded-md border bg-muted"
+              >
+                <img
+                  alt={part.filename || `Attachment ${index + 1}`}
+                  className="h-full max-h-60 w-full object-cover"
+                  loading="lazy"
+                  src={part.url}
+                />
+                {part.filename ? (
+                  <figcaption className="sr-only">{part.filename}</figcaption>
+                ) : null}
+              </figure>
+            ))}
+          </div>
+        ) : null}
+
+        {textParts.map((part, index) => (
+          <Response key={`${message.id}-text-${index}`}>{part.text}</Response>
+        ))}
+      </div>
+    );
   }, []);
 
   const handleCopy = useCallback((message: AgentStartUIMessage) => {
@@ -216,7 +278,12 @@ export function Conversation({
   const renderUserActions = useCallback(
     (message: AgentStartUIMessage) => (
       <Actions className="opacity-0 group-hover:opacity-100">
-        <Action onClick={() => handleCopy(message)} label="Copy" tooltip="Copy">
+        <Action
+          className="size-7"
+          onClick={() => handleCopy(message)}
+          label="Copy"
+          tooltip="Copy"
+        >
           <CopyIcon className="size-4" />
         </Action>
       </Actions>
@@ -232,10 +299,16 @@ export function Conversation({
       return (
         <>
           <Actions className="mt-2 w-full justify-start opacity-0 group-hover:opacity-100">
-            <Action onClick={() => regenerate()} label="Retry" tooltip="Retry">
+            <Action
+              className="size-7"
+              onClick={() => regenerate()}
+              label="Retry"
+              tooltip="Retry"
+            >
               <ArrowsClockwiseIcon className="size-4" />
             </Action>
             <Action
+              className="size-7"
               onClick={() => handleCopy(message)}
               label="Copy"
               tooltip="Copy"

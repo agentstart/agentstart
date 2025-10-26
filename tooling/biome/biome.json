@@ -48,7 +48,8 @@
       "suspicious": {
         "noArrayIndexKey": "off",
         "noUnknownAtRules": "off",
-        "noDocumentCookie": "off"
+        "noDocumentCookie": "off",
+        "noExplicitAny": "off"
       },
       "style": {
         "noNonNullAssertion": "off"

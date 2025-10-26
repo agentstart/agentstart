@@ -354,7 +354,6 @@ export function PromptInputAttachments({
     return () => ro.disconnect();
   }, []);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Force height measurement when attachments change
   useLayoutEffect(() => {
     const el = contentRef.current;
     if (!el) {

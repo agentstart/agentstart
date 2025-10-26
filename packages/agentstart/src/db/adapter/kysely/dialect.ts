@@ -9,8 +9,6 @@ FEATURES:
 SEARCHABLE: packages, agentstart, src, db, adapter, kysely, dialect, database
 agent-frontmatter:end */
 
-/** biome-ignore-all lint/suspicious/noExplicitAny: is fine */
-
 import {
   type Dialect,
   Kysely,

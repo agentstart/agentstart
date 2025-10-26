@@ -11,26 +11,27 @@ agent-frontmatter:end */
 
 import { generateId } from "@agentstart/utils";
 import type { UIMessage, UseChatHelpers } from "@ai-sdk/react";
-import type { DataUIPart, FileUIPart } from "ai";
+import type { DataUIPart } from "ai";
 import { create, type StoreApi, type UseBoundStore } from "zustand";
 import { devtools } from "zustand/middleware";
 import { useShallow } from "zustand/shallow";
 import type { AgentStartDataPart } from "@/agent";
+import type { BlobAttachmentList } from "../use-blob-attachments";
 
 export type ThreadDraft =
   | {
       text: string;
-      files?: FileList | FileUIPart[];
+      files?: BlobAttachmentList;
     }
   | {
       text?: string;
-      files: FileList | FileUIPart[];
+      files: BlobAttachmentList;
     };
 
 export interface QueuedAgentMessage {
   id: string;
   text?: string;
-  files?: FileUIPart[];
+  files?: BlobAttachmentList;
   createdAt: number;
 }
 
@@ -67,7 +68,6 @@ export interface AgentStoreWithSync<TMessage extends UIMessage = UIMessage>
 // Store instances map (using any for simplicity due to generic constraints)
 const storeInstances = new Map<
   string,
-  // biome-ignore lint/suspicious/noExplicitAny: is fine
   UseBoundStore<StoreApi<AgentStoreWithSync<any>>>
 >();
 

@@ -20,7 +20,6 @@ agent-frontmatter:end */
  * - Type safety is enforced through our transformation layer and schema validation
  * - The transform functions (transformValueToDB, transformValueFromDB) handle runtime type checking
  */
-/** biome-ignore-all lint/suspicious/noExplicitAny: Kysely database schema is user-defined and cannot be statically typed in the adapter layer. See JSDoc above for details. */
 
 import { generateId } from "@agentstart/utils";
 import {

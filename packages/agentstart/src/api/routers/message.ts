@@ -11,7 +11,7 @@ FEATURES:
 SEARCHABLE: messages router, thread history, loadThread api
 agent-frontmatter:end */
 
-import { z } from "zod/v4";
+import { z } from "zod";
 import { type AgentStartUIMessage, loadThread } from "@/agent";
 import { publicProcedure } from "@/api/procedures";
 import { getAdapter } from "@/db";

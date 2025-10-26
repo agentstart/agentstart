@@ -8,7 +8,7 @@ Deliver a batteries-included framework that lets developers assemble production-
 
 1. Install the core package: `npm install agentstart` (or `pnpm add agentstart`).
 2. Provide runtime credentials: define `E2B_API_KEY` and `MODEL_PROVIDER_API_KEY` in your environment.
-3. Author `agentstart.config.ts` to select adapters, tools, memory stores, and templates.
+3. Author `agent.ts` to select adapters, tools, memory stores, and templates.
 4. Generate backing tables: `npx agentstart/cli generate`.
 5. Mount the handler inside your API surface (e.g. Next.js route, Express handler, or serverless function).
 
@@ -51,7 +51,7 @@ The agent class orchestrates prompts, tool execution, and memory updates. Tools 
 - **Inner tools**: built-in capabilities (`run_code`, `sandbox_browser`, `search_sources`, `shell_exec`).
 - **Document tools**: ingest external files, create embeddings, and expose retrieval actions.
 - Tools share a base interface: `name`, `description`, `schema`, and `handler`.
-- Registration occurs inside `agentstart.config.ts`. Use `const tools = [...innerTools, ...documentTools];`
+- Registration occurs inside `agent.ts`. Use `const tools = [...innerTools, ...documentTools];`
 
 ### Memory
 
@@ -60,6 +60,132 @@ The agent class orchestrates prompts, tool execution, and memory updates. Tools 
 - **Task storage**: queue of outstanding tasks and sub-goals.
 - **Knowledge storage**: semantic search backed by embeddings + relational metadata.
 - Memory adapters implement `get`, `append`, `summarize`, and `clear` contracts so they can be swapped (PostgreSQL, Redis, in-memory, S3).
+
+### Blob Storage
+
+Blob storage enables agents to accept multimodal inputs by persisting user file uploads to cloud storage and surfacing normalized metadata to downstream tools and memory systems.
+
+**Supported Providers:**
+- **Vercel Blob**: Serverless blob storage with automatic global CDN distribution
+- **AWS S3**: Industry-standard object storage with flexible access controls
+- **Cloudflare R2**: S3-compatible storage with zero egress fees
+
+**Configuration Example:**
+
+```typescript
+import { agentStart } from "agentstart";
+import type { BlobOptions } from "agentstart/blob";
+
+// Configure Vercel Blob
+const blobConfig: BlobOptions = {
+  provider: {
+    provider: "vercelBlob",
+    token: process.env.BLOB_READ_WRITE_TOKEN,
+  },
+  constraints: {
+    maxFileSize: 10 * 1024 * 1024, // 10 MB
+    allowedMimeTypes: [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "application/pdf",
+      "text/plain",
+      "text/markdown",
+    ],
+    maxFiles: 5,
+  },
+};
+
+export const start = agentStart({
+  memory: /* ... */,
+  blob: blobConfig,
+  agent: /* ... */,
+});
+```
+
+**AWS S3 Configuration:**
+
+```typescript
+const blobConfig: BlobOptions = {
+  provider: {
+    provider: "awsS3",
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    },
+    bucket: process.env.AWS_S3_BUCKET!,
+    region: "us-east-1",
+  },
+  constraints: {
+    maxFileSize: 50 * 1024 * 1024, // 50 MB
+    allowedMimeTypes: ["image/*", "application/pdf"],
+  },
+};
+```
+
+**Cloudflare R2 Configuration:**
+
+```typescript
+const blobConfig: BlobOptions = {
+  provider: {
+    provider: "cloudflareR2",
+    credentials: {
+      accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+    },
+    bucket: process.env.R2_BUCKET!,
+    accountId: process.env.R2_ACCOUNT_ID,
+    endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  },
+  constraints: {
+    maxFileSize: 100 * 1024 * 1024, // 100 MB
+  },
+};
+```
+
+**Environment Variables:**
+
+```bash
+# Vercel Blob
+BLOB_READ_WRITE_TOKEN=vercel_blob_rw_...
+
+# AWS S3
+AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+AWS_S3_BUCKET=my-agent-uploads
+
+# Cloudflare R2
+R2_ACCESS_KEY_ID=...
+R2_SECRET_ACCESS_KEY=...
+R2_BUCKET=my-r2-bucket
+R2_ACCOUNT_ID=...
+```
+
+**Client Usage:**
+
+The `useBlobAttachments` hook handles client-side validation and upload:
+
+```typescript
+import { useBlobAttachments } from "agentstart/client";
+
+function MyComponent() {
+  const { uploadMutation, validateFiles, isEnabled } = useBlobAttachments(client);
+
+  const handleFileSelect = async (files: File[]) => {
+    const errors = validateFiles(files);
+    if (errors.length > 0) {
+      console.error("Validation errors:", errors);
+      return;
+    }
+
+    const uploadedFiles = await uploadMutation.mutateAsync(files);
+    // Use uploadedFiles in message attachments
+  };
+}
+```
+
+Blob storage is **optional** and will be disabled if no provider configuration is supplied. When disabled, the `blob.getConfig` API returns `{ enabled: false }` and file uploads will not be processed.
 
 ### Components
 
@@ -114,7 +240,11 @@ The `SEARCHABLE` field should contain comma-separated keywords that describe the
 
 - `E2B_API_KEY`: access to sandboxed code execution.
 - `MODEL_PROVIDER_API_KEY`: large language model routing.
-- Optional: database credentials for the memory adapters (`DATABASE_URL`), vector store keys, storage bucket secrets.
+- `DATABASE_URL`: database credentials for memory adapters (PostgreSQL, MySQL, etc.).
+- **Blob Storage** (optional):
+  - `BLOB_READ_WRITE_TOKEN`: Vercel Blob authentication token
+  - `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_S3_BUCKET`: AWS S3 credentials
+  - `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_ACCOUNT_ID`: Cloudflare R2 credentials
 - Store secrets in `.env` (not committed) and surface them in deployment platforms.
 
 ## Development Workflow

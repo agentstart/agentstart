@@ -20,7 +20,6 @@ describe("migrate base agent instance", () => {
 
   const start = agentStart({
     memory: db,
-    // biome-ignore lint/suspicious/noExplicitAny: is fine
     agent: {} as any,
   });
 

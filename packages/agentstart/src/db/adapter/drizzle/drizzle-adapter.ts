@@ -19,7 +19,6 @@ agent-frontmatter:end */
  * - The DB interface provides a consistent access pattern across different providers
  * - Type safety is maintained through our adapter layer's schema validation
  */
-/** biome-ignore-all lint/suspicious/noExplicitAny: Drizzle database exposes dynamic helpers without stable TypeScript types. See JSDoc above for details. */
 
 import { AgentStartError, generateId } from "@agentstart/utils";
 import {

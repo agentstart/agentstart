@@ -16,6 +16,10 @@
       "import": "./dist/api/index.js",
       "require": "./dist/api/index.cjs"
     },
+    "./blob": {
+      "import": "./dist/blob/index.js",
+      "require": "./dist/blob/index.cjs"
+    },
     "./client": {
       "import": "./dist/client/index.js",
       "require": "./dist/client/index.cjs"
@@ -44,6 +48,7 @@
     "prisma:push": "prisma db push --schema src/db/adapter/prisma/test/schema.prisma"
   },
   "dependencies": {
+    "@agentstart/blob": "workspace:*",
     "@agentstart/utils": "workspace:*",
     "@ai-sdk/react": "catalog:",
     "@e2b/code-interpreter": "catalog:",

@@ -8,7 +8,6 @@ FEATURES:
   - Handles pagination and ordering for memory retrieval
 SEARCHABLE: packages, agentstart, src, db, adapter, prisma, persistence
 agent-frontmatter:end */
-/** biome-ignore-all lint/suspicious/noExplicitAny: warnings for `any` in this file can be safely ignored */
 
 /**
  * IMPORTANT: Type Safety Note for Prisma Adapter

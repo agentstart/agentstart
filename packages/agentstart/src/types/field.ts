@@ -77,8 +77,7 @@ export type InferValueType<T extends FieldType> = T extends "string"
             ? Inner extends "string"
               ? string[]
               : number[]
-            : // biome-ignore lint/suspicious/noExplicitAny: is fine
-              T extends Array<any>
+            : T extends Array<any>
               ? T[number]
               : never;
 
