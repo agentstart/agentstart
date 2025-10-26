@@ -1,0 +1,42 @@
+{
+  "name": "@agentstart/types",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "lint": "bunx biome check --write --unsafe ./src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@types/better-sqlite3": "catalog:",
+    "@vercel/blob": "catalog:",
+    "@orpc/server": "catalog:",
+    "ai": "catalog:",
+    "better-sqlite3": "catalog:",
+    "kysely": "catalog:"
+  },
+  "devDependencies": {
+    "@agentstart/biome-config": "workspace:*",
+    "@agentstart/tsconfig": "workspace:*",
+    "@biomejs/biome": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.js",
+      "./package.json": "./package.json"
+    }
+  }
+}

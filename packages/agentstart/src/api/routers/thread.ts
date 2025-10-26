@@ -13,6 +13,7 @@ FEATURES:
 SEARCHABLE: thread router, agent stream, rpc thread, orpc router
 agent-frontmatter:end */
 
+import type { MemoryAdapter } from "@agentstart/types";
 import { AgentStartError } from "@agentstart/utils";
 import { streamToEventIterator } from "@orpc/server";
 import z from "zod";
@@ -21,7 +22,6 @@ import type { RunFinishEvent } from "@/agent/run";
 import { publicProcedure } from "@/api/procedures";
 import { type DBThread, getAdapter } from "@/db";
 import { getSandbox } from "@/sandbox";
-import type { Adapter } from "@/types";
 
 /**
  * Verify thread ownership and return the thread if authorized
@@ -29,7 +29,7 @@ import type { Adapter } from "@/types";
  * @throws FORBIDDEN if user doesn't own the thread
  */
 async function verifyThreadOwnership(options: {
-  db: Adapter;
+  db: MemoryAdapter;
   threadId: string;
   userId: string;
   errors: {

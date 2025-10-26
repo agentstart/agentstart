@@ -10,8 +10,7 @@ FEATURES:
 SEARCHABLE: blob adapter registry, storage provider factory, blob index
 agent-frontmatter:end */
 
-import type { BlobAdapter } from "./adapter";
-import type { BlobOptions, BlobProvider } from "./options";
+import type { BlobAdapter, BlobOptions, BlobProvider } from "@agentstart/types";
 import { createS3BlobAdapter } from "./providers/s3";
 import { createVercelBlobAdapter } from "./providers/vercel-blob";
 

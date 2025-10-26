@@ -9,8 +9,8 @@ FEATURES:
 SEARCHABLE: packages, agentstart, src, agent, tools, todo, read, index, tool, runtime
 agent-frontmatter:end */
 
+import type { RuntimeContext } from "@agentstart/types";
 import { tool } from "ai";
-import type { RuntimeContext } from "@/agent/context";
 import {
   type AgentStartToolOutput,
   toolInputSchema,

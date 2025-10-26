@@ -10,15 +10,15 @@ FEATURES:
 SEARCHABLE: sandbox resolver, getSandbox, e2b sandbox setup
 agent-frontmatter:end */
 
-import { AgentStartError } from "@agentstart/utils";
-import type { SandboxAPI } from "@/sandbox";
-import { E2BSandbox } from "@/sandbox/adapter/e2b";
-import { NodeSandbox } from "@/sandbox/adapter/nodejs";
 import type {
   AgentStartOptions,
   E2BSandboxOptions,
   NodeSandboxOptions,
-} from "@/types";
+} from "@agentstart/types";
+import { AgentStartError } from "@agentstart/utils";
+import type { SandboxAPI } from "@/sandbox";
+import { E2BSandbox } from "@/sandbox/adapter/e2b";
+import { NodeSandbox } from "@/sandbox/adapter/nodejs";
 
 const sandboxCache = new Map<string, Promise<SandboxAPI>>();
 

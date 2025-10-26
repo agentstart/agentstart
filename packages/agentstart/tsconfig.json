@@ -8,6 +8,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "../types/src/sandbox"],
   "exclude": ["node_modules", "dist"]
 }

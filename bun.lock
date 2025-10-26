@@ -184,6 +184,8 @@
       "version": "0.1.0",
       "dependencies": {
         "@agentstart/blob": "workspace:*",
+        "@agentstart/db": "workspace:*",
+        "@agentstart/types": "workspace:*",
         "@agentstart/utils": "workspace:*",
         "@ai-sdk/react": "catalog:",
         "@e2b/code-interpreter": "catalog:",
@@ -231,6 +233,7 @@
       "name": "@agentstart/blob",
       "version": "0.1.0",
       "dependencies": {
+        "@agentstart/types": "workspace:*",
         "@aws-sdk/client-s3": "catalog:",
         "@aws-sdk/s3-request-presigner": "catalog:",
         "@vercel/blob": "catalog:",
@@ -276,6 +279,7 @@
       "devDependencies": {
         "@agentstart/biome-config": "workspace:*",
         "@agentstart/tsconfig": "workspace:*",
+        "@agentstart/types": "workspace:*",
         "@types/fs-extra": "catalog:",
         "@types/semver": "catalog:",
         "tsdown": "catalog:",
@@ -360,6 +364,52 @@
         "@types/react-syntax-highlighter": "catalog:",
         "tailwindcss": "catalog:",
         "typescript": "catalog:",
+      },
+    },
+    "packages/db": {
+      "name": "@agentstart/db",
+      "version": "0.1.0",
+      "dependencies": {
+        "@agentstart/types": "workspace:*",
+        "@agentstart/utils": "workspace:*",
+        "@prisma/client": "catalog:",
+        "better-sqlite3": "catalog:",
+        "drizzle-orm": "catalog:",
+        "kysely": "catalog:",
+        "mongodb": "catalog:",
+        "mysql2": "catalog:",
+        "pg": "catalog:",
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@agentstart/biome-config": "workspace:*",
+        "@agentstart/tsconfig": "workspace:*",
+        "@biomejs/biome": "catalog:",
+        "@types/better-sqlite3": "catalog:",
+        "@types/pg": "catalog:",
+        "tsdown": "catalog:",
+        "typescript": "catalog:",
+        "vitest": "catalog:",
+      },
+    },
+    "packages/types": {
+      "name": "@agentstart/types",
+      "version": "0.1.0",
+      "dependencies": {
+        "@orpc/server": "catalog:",
+        "@types/better-sqlite3": "catalog:",
+        "@vercel/blob": "catalog:",
+        "ai": "catalog:",
+        "better-sqlite3": "catalog:",
+        "kysely": "catalog:",
+      },
+      "devDependencies": {
+        "@agentstart/biome-config": "workspace:*",
+        "@agentstart/tsconfig": "workspace:*",
+        "@biomejs/biome": "catalog:",
+        "tsdown": "catalog:",
+        "typescript": "catalog:",
+        "vitest": "catalog:",
       },
     },
     "packages/utils": {
@@ -565,7 +615,11 @@
 
     "@agentstart/components": ["@agentstart/components@workspace:packages/components"],
 
+    "@agentstart/db": ["@agentstart/db@workspace:packages/db"],
+
     "@agentstart/tsconfig": ["@agentstart/tsconfig@workspace:tooling/typescript"],
+
+    "@agentstart/types": ["@agentstart/types@workspace:packages/types"],
 
     "@agentstart/utils": ["@agentstart/utils@workspace:packages/utils"],
 
@@ -3001,6 +3055,8 @@
 
     "zwitch": ["zwitch@2.0.4", "", {}, "sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A=="],
 
+    "@agentstart/types/ai": ["ai@6.0.0-beta.73", "", { "dependencies": { "@ai-sdk/gateway": "2.0.0-beta.37", "@ai-sdk/provider": "3.0.0-beta.8", "@ai-sdk/provider-utils": "4.0.0-beta.20", "@opentelemetry/api": "1.9.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-liHQWsDqrXCk9WgboYfrkwi4te7S0IrOH9veN0Acmu3ZL4oU0qQz11U9JdoBEsrxFc7pbz3BNXoj39QHnD1XxQ=="],
+
     "@aws-crypto/sha1-browser/@smithy/util-utf8": ["@smithy/util-utf8@2.3.0", "", { "dependencies": { "@smithy/util-buffer-from": "^2.2.0", "tslib": "^2.6.2" } }, "sha512-R8Rdn8Hy72KKcebgLiv8jQcQkXoLMOGGv5uI1/k0l+snqkOzQ1R0ChUBCxWMlBsFMekWjq0wRudIweFs7sKT5A=="],
 
     "@aws-crypto/sha256-browser/@smithy/util-utf8": ["@smithy/util-utf8@2.3.0", "", { "dependencies": { "@smithy/util-buffer-from": "^2.2.0", "tslib": "^2.6.2" } }, "sha512-R8Rdn8Hy72KKcebgLiv8jQcQkXoLMOGGv5uI1/k0l+snqkOzQ1R0ChUBCxWMlBsFMekWjq0wRudIweFs7sKT5A=="],
@@ -3076,6 +3132,10 @@
     "@types/pg/@types/node": ["@types/node@24.7.0", "", { "dependencies": { "undici-types": "~7.14.0" } }, "sha512-IbKooQVqUBrlzWTi79E8Fw78l8k1RNtlDDNWsFZs7XonuQSJ8oNYfEeclhprUldXISRMLzBpILuKgPlIxm+/Yw=="],
 
     "@types/prompts/@types/node": ["@types/node@24.7.0", "", { "dependencies": { "undici-types": "~7.14.0" } }, "sha512-IbKooQVqUBrlzWTi79E8Fw78l8k1RNtlDDNWsFZs7XonuQSJ8oNYfEeclhprUldXISRMLzBpILuKgPlIxm+/Yw=="],
+
+    "agentstart/@ai-sdk/react": ["@ai-sdk/react@3.0.0-beta.73", "", { "dependencies": { "@ai-sdk/provider-utils": "4.0.0-beta.20", "ai": "6.0.0-beta.73", "swr": "^2.2.5", "throttleit": "2.1.0" }, "peerDependencies": { "react": "^18 || ^19 || ^19.0.0-rc" } }, "sha512-4iBFqEaUvWdIeBmvO47TGmnT77XL3Vbsja2PUtI0AllGLdjU97LAMBjpYjEsSyIe1K7J5VU4Apt+YnGFJntZnA=="],
+
+    "agentstart/ai": ["ai@6.0.0-beta.73", "", { "dependencies": { "@ai-sdk/gateway": "2.0.0-beta.37", "@ai-sdk/provider": "3.0.0-beta.8", "@ai-sdk/provider-utils": "4.0.0-beta.20", "@opentelemetry/api": "1.9.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-liHQWsDqrXCk9WgboYfrkwi4te7S0IrOH9veN0Acmu3ZL4oU0qQz11U9JdoBEsrxFc7pbz3BNXoj39QHnD1XxQ=="],
 
     "body-parser/iconv-lite": ["iconv-lite@0.6.3", "", { "dependencies": { "safer-buffer": ">= 2.1.2 < 3.0.0" } }, "sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw=="],
 
@@ -3156,6 +3216,8 @@
     "tsx/get-tsconfig": ["get-tsconfig@4.11.0", "", { "dependencies": { "resolve-pkg-maps": "^1.0.0" } }, "sha512-sNsqf7XKQ38IawiVGPOoAlqZo1DMrO7TU+ZcZwi7yLl7/7S0JwmoBMKz/IkUPhSoXM0Ng3vT0yB1iCe5XavDeQ=="],
 
     "vitest/tinyexec": ["tinyexec@0.3.2", "", {}, "sha512-KQQR9yN7R5+OSwaK0XQoj22pwHoTlgYqmUscPYoknOoWCWfj/5/ABTMRi69FrKU5ffPVh5QcFikpWJI/P1ocHA=="],
+
+    "web/ai": ["ai@6.0.0-beta.73", "", { "dependencies": { "@ai-sdk/gateway": "2.0.0-beta.37", "@ai-sdk/provider": "3.0.0-beta.8", "@ai-sdk/provider-utils": "4.0.0-beta.20", "@opentelemetry/api": "1.9.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-liHQWsDqrXCk9WgboYfrkwi4te7S0IrOH9veN0Acmu3ZL4oU0qQz11U9JdoBEsrxFc7pbz3BNXoj39QHnD1XxQ=="],
 
     "wrap-ansi/string-width": ["string-width@4.2.3", "", { "dependencies": { "emoji-regex": "^8.0.0", "is-fullwidth-code-point": "^3.0.0", "strip-ansi": "^6.0.1" } }, "sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g=="],
 

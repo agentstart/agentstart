@@ -12,6 +12,14 @@ FEATURES:
 SEARCHABLE: agent run, run orchestrator, message streaming, thread persistence
 agent-frontmatter:end */
 
+import type { DBThread } from "@agentstart/db";
+import type {
+  AgentGenerateSuggestionsOptions,
+  AgentGenerateTitleOptions,
+  AgentStartOptions,
+  MemoryAdapter,
+  RuntimeContext,
+} from "@agentstart/types";
 import { generateId } from "@agentstart/utils";
 import {
   convertToModelMessages,
@@ -27,15 +35,7 @@ import {
   createUsageSummary,
   mergeUsageSummaries,
 } from "@/agent/usage";
-import type { DBThread } from "@/db/schema";
-import type {
-  Adapter,
-  AgentGenerateSuggestionsOptions,
-  AgentGenerateTitleOptions,
-  AgentStartOptions,
-  UIMessageMetadata,
-} from "@/types";
-import type { RuntimeContext } from "./context";
+import type { BaseAgent } from "./agent";
 import {
   type AgentStartUIMessage,
   dataPartSchema,
@@ -51,6 +51,16 @@ import {
   updateThreadTitle,
   upsertMessage,
 } from "./persistence";
+
+type InferUIMessageMetadata<T extends UIMessage> = T extends UIMessage<
+  infer METADATA
+>
+  ? METADATA
+  : Record<string, unknown>;
+
+type UIMessageMetadata = InferUIMessageMetadata<
+  UIMessage<Record<string, unknown>>
+>;
 
 type UIStreamFinishEvent = Parameters<
   UIMessageStreamOnFinishCallback<UIMessage>
@@ -111,7 +121,7 @@ export class Run {
 
   async start(options: StartOptions) {
     const createdAt = Date.now();
-    const agent = this.agentStartOptions.agent;
+    const agent = this.agentStartOptions.agent as BaseAgent;
     const modelId =
       typeof agent.settings.model === "string"
         ? agent.settings.model
@@ -320,7 +330,7 @@ export class Run {
     uiMessages: UIMessage[];
     message: UIMessage;
     threadId: string;
-    db: Adapter;
+    db: MemoryAdapter;
     generateTitle?: AgentGenerateTitleOptions;
   }): Promise<void> {
     // Only generate for first message

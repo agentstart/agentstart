@@ -11,24 +11,7 @@ SEARCHABLE: blob storage, file upload, storage providers
 agent-frontmatter:end */
 
 // Adapter interface
-export type {
-  BlobAdapter,
-  BlobAdapterFactory,
-  BlobCommandOptions,
-} from "./adapter";
-// Core types
-export type {
-  BlobConstraints,
-  BlobOptions,
-  BlobProvider,
-  BlobProviderAwsS3,
-  BlobProviderCloudflareR2,
-  BlobProviderVercelBlob,
-  BlobS3ACL,
-  BlobS3Credentials,
-} from "./options";
 export { createS3BlobAdapter } from "./providers/s3";
-
 // Provider implementations (for advanced usage)
 export { createVercelBlobAdapter } from "./providers/vercel-blob";
 // Adapter registry

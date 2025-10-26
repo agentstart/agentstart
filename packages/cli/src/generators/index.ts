@@ -9,8 +9,9 @@ FEATURES:
 SEARCHABLE: packages, cli, src, generators, index, tool, agent, runtime
 agent-frontmatter:end */
 
+import type { MemoryAdapter } from "@agentstart/types";
 import { logger } from "@agentstart/utils";
-import type { Adapter, AgentStartOptions } from "agentstart";
+import type { AgentStartOptions } from "agentstart";
 import { generateDrizzleSchema } from "./drizzle";
 import { generateMigrations } from "./kysely";
 import { generatePrismaSchema } from "./prisma";
@@ -22,7 +23,7 @@ export const adapters = {
 };
 
 export const getGenerator = (opts: {
-  adapter: Adapter;
+  adapter: MemoryAdapter;
   file?: string;
   options: AgentStartOptions;
 }) => {

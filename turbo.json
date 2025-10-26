@@ -2,27 +2,28 @@
   "$schema": "https://turborepo.org/schema.json",
   "ui": "stream",
   "tasks": {
-    "topo": {
-      "dependsOn": ["^topo"]
-    },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".cache/tsbuildinfo.json", "dist/**"]
+      "outputs": ["dist/**"],
+      "cache": true
     },
     "dev": {
       "cache": false,
       "persistent": true
     },
     "test": {
-      "dependsOn": ["^topo", "^build"],
-      "outputs": [".vitest", "coverage/**"]
+      "dependsOn": ["^build"],
+      "outputs": [".vitest", "coverage/**"],
+      "cache": true
     },
     "lint": {
-      "dependsOn": ["^topo", "^build"]
+      "dependsOn": ["^build"],
+      "cache": true
     },
     "typecheck": {
-      "dependsOn": ["^topo", "^build"],
-      "outputs": [".cache/tsbuildinfo.json"]
+      "dependsOn": ["^build"],
+      "outputs": [".cache/tsbuildinfo.json"],
+      "cache": true
     },
     "clean": {
       "cache": false

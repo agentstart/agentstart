@@ -11,21 +11,6 @@ agent-frontmatter:end */
 
 import type { Sandbox } from "@e2b/code-interpreter";
 import path from "pathe";
-import type {
-  ShellCommandOptions,
-  ShellCommandResult,
-} from "@/sandbox/types/bash";
-import type {
-  GitAPI,
-  GitBranch,
-  GitCloneOptions,
-  GitCommitOptions,
-  GitLogEntry,
-  GitRemote,
-  GitResult,
-  GitStatus,
-  GitSyncOptions,
-} from "@/sandbox/types/git";
 import {
   buildGitAddCommand,
   buildGitCheckoutCommand,
@@ -37,6 +22,21 @@ import {
   extractCommitHash,
   parseGitStatusPorcelain,
 } from "@/sandbox/utils/git";
+import type {
+  ShellCommandOptions,
+  ShellCommandResult,
+} from "../../../../../types/src/sandbox/bash";
+import type {
+  GitAPI,
+  GitBranch,
+  GitCloneOptions,
+  GitCommitOptions,
+  GitLogEntry,
+  GitRemote,
+  GitResult,
+  GitStatus,
+  GitSyncOptions,
+} from "../../../../../types/src/sandbox/git";
 import { Bash } from "./bash";
 import { DEFAULT_WORKING_DIRECTORY } from "./constants";
 

@@ -9,11 +9,12 @@ FEATURES:
 SEARCHABLE: packages, cli, src, generators, types, generator
 agent-frontmatter:end */
 
-import type { Adapter, AgentStartOptions } from "agentstart";
+import type { MemoryAdapter } from "@agentstart/types";
+import type { AgentStartOptions } from "agentstart";
 
 export type SchemaGenerator = (opts: {
   file?: string;
-  adapter: Adapter;
+  adapter: MemoryAdapter;
   options: Omit<AgentStartOptions, "agent">;
 }) => Promise<{
   code?: string;

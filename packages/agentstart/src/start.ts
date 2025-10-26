@@ -11,11 +11,11 @@ FEATURES:
 SEARCHABLE: agent runtime, orpc handler, server api
 agent-frontmatter:end */
 
+import type { AgentStartOptions } from "@agentstart/types";
 import { RPCHandler } from "@orpc/server/fetch";
 import type { Context, CreateContextOptions } from "@/api";
 import { createAppRouter, createContext } from "@/api";
 import { getApi } from "@/api/get-api";
-import type { AgentStartOptions } from "@/types";
 
 export function agentStart(options: AgentStartOptions) {
   const context = { current: null as Context | null };

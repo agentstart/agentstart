@@ -22,7 +22,7 @@ import type {
   FileSystemEvent,
   WatchHandle,
   WatchOptions,
-} from "@/sandbox/types/file-system";
+} from "../../../../../types/src/sandbox/file-system";
 
 /**
  * Node.js implementation of FileSystemAPI

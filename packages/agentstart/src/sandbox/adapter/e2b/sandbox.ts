@@ -9,16 +9,16 @@ FEATURES:
 SEARCHABLE: packages, agentstart, src, sandbox, adapter, e2b, lifecycle, manager
 agent-frontmatter:end */
 
+import type { SecondaryMemory } from "@agentstart/types";
 import { Sandbox, type SandboxOpts } from "@e2b/code-interpreter";
-import type { BashAPI } from "@/sandbox/types/bash";
-import type { FileSystemAPI } from "@/sandbox/types/file-system";
-import type { GitAPI } from "@/sandbox/types/git";
+import type { BashAPI } from "../../../../../types/src/sandbox/bash";
+import type { FileSystemAPI } from "../../../../../types/src/sandbox/file-system";
+import type { GitAPI } from "../../../../../types/src/sandbox/git";
 import type {
   E2BSandboxConfig,
   SandboxAPI,
   SandboxStatus,
-} from "@/sandbox/types/sandbox";
-import type { SecondaryMemory } from "@/types/memory-adapter";
+} from "../../../../../types/src/sandbox/sandbox";
 import { Bash } from "./bash";
 import { DEFAULT_CONFIG } from "./constants";
 import { FileSystem } from "./file-system";

@@ -34,6 +34,7 @@
   "bin": "./dist/index.mjs",
   "devDependencies": {
     "@agentstart/biome-config": "workspace:*",
+    "@agentstart/types": "workspace:*",
     "@agentstart/tsconfig": "workspace:*",
     "@types/fs-extra": "catalog:",
     "@types/semver": "catalog:",

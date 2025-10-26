@@ -12,9 +12,9 @@ agent-frontmatter:end */
 
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { onStart, onSuccess, os } from "@orpc/server";
+import type { BlobOptions } from "agentstart";
 import { agentStart } from "agentstart";
 import { Agent, innerTools, osTools } from "agentstart/agent";
-import type { BlobOptions } from "agentstart/blob";
 import { drizzleAdapter } from "agentstart/db";
 import { db } from "@/db";
 import * as schema from "@/db/schema";

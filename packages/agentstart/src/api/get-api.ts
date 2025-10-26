@@ -10,8 +10,8 @@ FEATURES:
 SEARCHABLE: server api, getApi helper, orpc router client
 agent-frontmatter:end */
 
+import type { AgentStartOptions } from "@agentstart/types";
 import { createRouterClient, type RouterClient } from "@orpc/server";
-import type { AgentStartOptions } from "@/types";
 import { type Context, createContext } from "./context";
 import { type AppRouter, appRouter } from "./router";
 

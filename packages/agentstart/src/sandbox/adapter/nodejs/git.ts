@@ -13,22 +13,6 @@ agent-frontmatter:end */
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-
-import type {
-  ShellCommandOptions,
-  ShellCommandResult,
-} from "@/sandbox/types/bash";
-import type {
-  GitAPI,
-  GitBranch,
-  GitCloneOptions,
-  GitCommitOptions,
-  GitLogEntry,
-  GitRemote,
-  GitResult,
-  GitStatus,
-  GitSyncOptions,
-} from "@/sandbox/types/git";
 import {
   buildGitAddCommand,
   buildGitCheckoutCommand,
@@ -40,6 +24,21 @@ import {
   extractCommitHash,
   parseGitStatusPorcelain,
 } from "@/sandbox/utils/git";
+import type {
+  ShellCommandOptions,
+  ShellCommandResult,
+} from "../../../../../types/src/sandbox/bash";
+import type {
+  GitAPI,
+  GitBranch,
+  GitCloneOptions,
+  GitCommitOptions,
+  GitLogEntry,
+  GitRemote,
+  GitResult,
+  GitStatus,
+  GitSyncOptions,
+} from "../../../../../types/src/sandbox/git";
 
 import { Bash } from "./bash";
 

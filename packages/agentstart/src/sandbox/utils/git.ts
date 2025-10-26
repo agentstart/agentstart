@@ -15,7 +15,7 @@ import type {
   GitCommitOptions,
   GitStatus,
   GitSyncOptions,
-} from "@/sandbox/types/git";
+} from "../../../../types/src/sandbox/git";
 
 const defaultQuote = (value: string): string => value;
 const escapeDoubleQuotes = (value: string): string =>

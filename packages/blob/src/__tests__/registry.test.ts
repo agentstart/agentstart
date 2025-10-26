@@ -9,10 +9,8 @@ FEATURES:
 SEARCHABLE: blob registry test, createBlobAdapter test, storage provider tests
 agent-frontmatter:end */
 
+import type { BlobAdapter, BlobOptions } from "@agentstart/types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import type { BlobAdapter } from "../adapter";
-import type { BlobOptions } from "../options";
 
 const vercelFactory = vi.fn();
 const s3Factory = vi.fn();

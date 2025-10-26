@@ -4,22 +4,25 @@ PURPOSE: Provide persistence helpers backed by the configured db
 USAGE: Import to read or mutate thread and message records
 EXPORTS: updateThreadTitle, upsertMessage, deleteMessagesAfter, loadThread, getCompleteMessages, getThreads
 FEATURES:
-  - Works with any db implementing the shared Adapter interface
+  - Works with any db implementing the shared MemoryAdapter interface
   - Applies consistent timestamp handling and payload sanitization
   - Uses object-based parameters for extensibility
 SEARCHABLE: agent actions, memory helpers, thread persistence
 agent-frontmatter:end */
 
+import type {
+  MemoryAdapter,
+  Where as MemoryAdapterWhere,
+} from "@agentstart/types";
 import type { UIMessage } from "ai";
 import type { AgentStartUIMessage } from "@/agent/messages";
 import type { DBThread } from "@/db";
-import type { Adapter, Where as AdapterWhere } from "@/types";
 
-export interface AdapterContextOptions {
-  db: Adapter;
+export interface MemoryAdapterContextOptions {
+  db: MemoryAdapter;
 }
 
-export interface UpdateThreadTitleOptions extends AdapterContextOptions {
+export interface UpdateThreadTitleOptions extends MemoryAdapterContextOptions {
   threadId: string;
   title: string;
 }
@@ -48,7 +51,7 @@ export interface UpsertMessagePayload<Message extends UIMessage = UIMessage> {
 }
 
 export interface UpsertMessageOptions<Message extends UIMessage>
-  extends AdapterContextOptions {
+  extends MemoryAdapterContextOptions {
   payload: UpsertMessagePayload<Message>;
 }
 
@@ -60,7 +63,7 @@ export async function upsertMessage<Message extends UIMessage>({
     throw new Error("Message must have at least one part");
   }
 
-  const where: AdapterWhere[] = [{ field: "id", value: payload.id }];
+  const where: MemoryAdapterWhere[] = [{ field: "id", value: payload.id }];
   const now = new Date().toISOString();
 
   const serializedParts = JSON.stringify(payload.message.parts);
@@ -98,7 +101,8 @@ export async function upsertMessage<Message extends UIMessage>({
   });
 }
 
-export interface DeleteMessagesAfterOptions extends AdapterContextOptions {
+export interface DeleteMessagesAfterOptions
+  extends MemoryAdapterContextOptions {
   threadId: string;
   messageId: string;
 }
@@ -131,7 +135,7 @@ export async function deleteMessagesAfter({
   });
 }
 
-export interface LoadThreadOptions extends AdapterContextOptions {
+export interface LoadThreadOptions extends MemoryAdapterContextOptions {
   threadId: string;
 }
 
@@ -220,7 +224,7 @@ export async function loadThread<Message extends UIMessage>({
     .filter((message): message is Message => Boolean(message));
 }
 
-export interface GetThreadsOptions extends AdapterContextOptions {
+export interface GetThreadsOptions extends MemoryAdapterContextOptions {
   userId?: string;
   limit?: number;
   offset?: number;
@@ -233,7 +237,7 @@ export const getThreads = async ({
   offset,
 }: GetThreadsOptions): Promise<DBThread[]> => {
   const where = userId
-    ? ([{ field: "userId", value: userId }] as AdapterWhere[])
+    ? ([{ field: "userId", value: userId }] as MemoryAdapterWhere[])
     : undefined;
 
   const records = await db.findMany<DBThread>({
@@ -248,7 +252,7 @@ export const getThreads = async ({
 };
 
 export interface GetCompleteMessagesOptions<Message extends UIMessage>
-  extends AdapterContextOptions {
+  extends MemoryAdapterContextOptions {
   message: Message;
   threadId: string;
 }

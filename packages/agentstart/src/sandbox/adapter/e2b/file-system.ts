@@ -18,7 +18,7 @@ import type {
   FileSystemEventType,
   WatchHandle,
   WatchOptions,
-} from "@/sandbox/types/file-system";
+} from "../../../../../types/src/sandbox/file-system";
 import { DEFAULT_WORKING_DIRECTORY } from "./constants";
 
 const GLOB_SPECIAL_CHARS_REGEX = /([.+^=!:${}()|[\]\\])/g;

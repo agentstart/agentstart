@@ -11,12 +11,12 @@ FEATURES:
 SEARCHABLE: base agent, ai sdk agent, tool loop agent, agent v6
 agent-frontmatter:end */
 
+import type { AgentCallParameters, CallOptions } from "@agentstart/types";
 import type {
   Agent,
   GenerateTextResult,
   InferGenerateOutput,
   InferStreamOutput,
-  ModelMessage,
   Output,
   Prompt,
   StreamTextResult,
@@ -24,47 +24,6 @@ import type {
   ToolSet,
 } from "ai";
 import { generateText, stepCountIs, streamText } from "ai";
-import type { RuntimeContext } from "./context";
-
-interface CallOptions {
-  runtimeContext: RuntimeContext;
-}
-
-export type AgentCallParameters<CALL_OPTIONS> = ([CALL_OPTIONS] extends [never]
-  ? { options?: never }
-  : { options: CALL_OPTIONS }) &
-  (
-    | {
-        /**
-         * A prompt. It can be either a text prompt or a list of messages.
-         *
-         * You can either use `prompt` or `messages` but not both.
-         */
-        prompt: string | Array<ModelMessage>;
-
-        /**
-         * A list of messages.
-         *
-         * You can either use `prompt` or `messages` but not both.
-         */
-        messages?: never;
-      }
-    | {
-        /**
-         * A list of messages.
-         *
-         * You can either use `prompt` or `messages` but not both.
-         */
-        messages: Array<ModelMessage>;
-
-        /**
-         * A prompt. It can be either a text prompt or a list of messages.
-         *
-         * You can either use `prompt` or `messages` but not both.
-         */
-        prompt?: never;
-      }
-  );
 
 /**
  * BaseAgent provides the foundational implementation for AI SDK v6 Agent protocol.

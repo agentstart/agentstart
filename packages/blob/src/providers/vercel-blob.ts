@@ -11,6 +11,13 @@ SEARCHABLE: vercel blob, blob adapter, blob put, storage
 agent-frontmatter:end */
 
 import { Buffer } from "node:buffer";
+import type {
+  BlobAdapter,
+  BlobCommandOptions,
+  BlobConstraints,
+  BlobOptions,
+  BlobProviderVercelBlob,
+} from "@agentstart/types";
 import {
   type CompleteMultipartUploadCommandOptions,
   type CopyCommandOptions,
@@ -27,12 +34,6 @@ import {
   type UploadPartCommandOptions,
   uploadPart,
 } from "@vercel/blob";
-import type { BlobAdapter, BlobCommandOptions } from "../adapter";
-import type {
-  BlobConstraints,
-  BlobOptions,
-  BlobProviderVercelBlob,
-} from "../options";
 
 function resolveKey(key: string, prefix?: string) {
   if (!prefix) {

@@ -9,6 +9,6 @@ FEATURES:
 SEARCHABLE: packages, agentstart, src, sandbox, index, tool, agent, runtime
 agent-frontmatter:end */
 
+export * from "../../../types/src/sandbox";
 export * from "./adapter";
 export * from "./get-sandbox";
-export * from "./types";

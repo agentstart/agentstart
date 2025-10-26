@@ -49,6 +49,8 @@
   },
   "dependencies": {
     "@agentstart/blob": "workspace:*",
+    "@agentstart/db": "workspace:*",
+    "@agentstart/types": "workspace:*",
     "@agentstart/utils": "workspace:*",
     "@ai-sdk/react": "catalog:",
     "@e2b/code-interpreter": "catalog:",

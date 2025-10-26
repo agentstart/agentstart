@@ -10,7 +10,7 @@ FEATURES:
 SEARCHABLE: blob router test, upload constraints test, getConfig test
 agent-frontmatter:end */
 
-import type { BlobAdapter, BlobOptions } from "@agentstart/blob";
+import type { BlobAdapter, BlobOptions } from "@agentstart/types";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createBlobRouter } from "../routers/blob";
@@ -162,12 +162,10 @@ describe("blob router", () => {
 
     it("rejects files exceeding configured max size", async () => {
       const adapter = createAdapter({
-        getConstraints: vi
-          .fn()
-          .mockReturnValue({
-            maxFileSize: 1,
-            allowedMimeTypes: ["text/plain"],
-          }),
+        getConstraints: vi.fn().mockReturnValue({
+          maxFileSize: 1,
+          allowedMimeTypes: ["text/plain"],
+        }),
       });
       createBlobAdapter.mockResolvedValue(adapter);
 

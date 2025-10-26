@@ -14,7 +14,7 @@ import * as fs from "node:fs/promises";
 import path from "node:path";
 import { type Options as ExecaOptions, execa } from "execa";
 import glob from "fast-glob";
-
+import { chunkToString, interpolateTemplate } from "@/sandbox/utils/text";
 import type {
   BashAPI,
   GrepFileResult,
@@ -23,8 +23,7 @@ import type {
   ShellCommandOptions,
   ShellCommandPromise,
   ShellCommandResult,
-} from "@/sandbox/types/bash";
-import { chunkToString, interpolateTemplate } from "@/sandbox/utils/text";
+} from "../../../../../types/src/sandbox/bash";
 
 /**
  * Node.js implementation of BashAPI

@@ -11,9 +11,10 @@ SEARCHABLE: prisma schema, cli generator, database scaffolding
 agent-frontmatter:end */
 
 import path from "node:path";
+import type { FieldType } from "@agentstart/types";
 import { capitalizeFirstLetter } from "@agentstart/utils";
 import { produceSchema } from "@mrleebo/prisma-ast";
-import { type FieldType, getTables } from "agentstart/db";
+import { getTables } from "agentstart/db";
 import fs from "fs-extra";
 import type { SchemaGenerator } from "./types";
 

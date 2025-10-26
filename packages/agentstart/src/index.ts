@@ -9,5 +9,5 @@ FEATURES:
 SEARCHABLE: packages, agentstart, src, index, tool, agent, runtime
 agent-frontmatter:end */
 
+export * from "@agentstart/types";
 export * from "./start";
-export * from "./types";

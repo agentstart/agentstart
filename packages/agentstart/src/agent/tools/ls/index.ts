@@ -9,10 +9,10 @@ FEATURES:
 SEARCHABLE: packages, agentstart, src, agent, tools, ls, index, tool, runtime
 agent-frontmatter:end */
 
+import type { RuntimeContext } from "@agentstart/types";
 import { formatDate, formatSize } from "@agentstart/utils";
 import { tool } from "ai";
 import path from "pathe";
-import type { RuntimeContext } from "@/agent/context";
 import {
   type AgentStartToolOutput,
   toolInputSchema,
