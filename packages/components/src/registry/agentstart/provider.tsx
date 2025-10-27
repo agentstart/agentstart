@@ -20,6 +20,7 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { AgentStartAPI } from "agentstart/api";
 import { createContext, type ReactNode, useContext, useMemo } from "react";
+import { ToastProvider } from "@/components/ui/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 interface AgentStartClientContextState {
@@ -56,7 +57,9 @@ export function AgentStartProvider({
   return (
     <AgentStartClientContext.Provider value={state}>
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider delayDuration={0}>{children}</TooltipProvider>
+        <ToastProvider>
+          <TooltipProvider delay={0}>{children}</TooltipProvider>
+        </ToastProvider>
       </QueryClientProvider>
     </AgentStartClientContext.Provider>
   );

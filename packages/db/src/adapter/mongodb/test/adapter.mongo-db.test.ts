@@ -12,7 +12,7 @@ agent-frontmatter:end */
 import { type Db, MongoClient } from "mongodb";
 import { beforeAll, describe, expect, test } from "vitest";
 import { runAdapterTest } from "../../test";
-import { mongodbAdapter } from "../index";
+import { mongodbAdapter } from "../mongodb-adapter";
 
 const createDb = async (connectionString: string, dbName: string) => {
   const client = new MongoClient(connectionString);

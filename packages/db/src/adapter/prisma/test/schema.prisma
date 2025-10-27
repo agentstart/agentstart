@@ -18,6 +18,7 @@ model Thread {
     updatedAt   DateTime @default(now()) @updatedAt
 
     messages Message[]
+    todos    Todo[]
 }
 
 model Message {
@@ -29,6 +30,16 @@ model Message {
     metadata    Json?
     createdAt   DateTime @default(now())
     updatedAt   DateTime @default(now()) @updatedAt
+
+    thread Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+}
+
+model Todo {
+    id        String   @id @default(cuid())
+    threadId  String
+    todos     Json
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
 
     thread Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
 }

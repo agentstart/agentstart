@@ -9,8 +9,6 @@ FEATURES:
 SEARCHABLE: packages, agentstart, src, sandbox, adapter, e2b, bash
 agent-frontmatter:end */
 
-import type { Sandbox } from "@e2b/code-interpreter";
-import { interpolateTemplate } from "@/sandbox/utils/text";
 import type {
   BashAPI,
   GrepFileResult,
@@ -19,7 +17,9 @@ import type {
   ShellCommandOptions,
   ShellCommandPromise,
   ShellCommandResult,
-} from "../../../../../types/src/sandbox/bash";
+} from "@agentstart/types";
+import type { Sandbox } from "@e2b/code-interpreter";
+import { interpolateTemplate } from "@/sandbox/utils/text";
 import { DEFAULT_WORKING_DIRECTORY } from "./constants";
 
 /**

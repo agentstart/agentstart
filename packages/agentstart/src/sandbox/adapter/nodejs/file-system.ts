@@ -13,16 +13,16 @@ agent-frontmatter:end */
 import { once } from "node:events";
 import fs from "node:fs/promises";
 import path from "node:path";
-import chokidar from "chokidar";
-import fg, { type Entry } from "fast-glob";
-import { nanoid } from "nanoid";
 import type {
   Dirent,
   FileSystemAPI,
   FileSystemEvent,
   WatchHandle,
   WatchOptions,
-} from "../../../../../types/src/sandbox/file-system";
+} from "@agentstart/types";
+import chokidar from "chokidar";
+import fg, { type Entry } from "fast-glob";
+import { nanoid } from "nanoid";
 
 /**
  * Node.js implementation of FileSystemAPI

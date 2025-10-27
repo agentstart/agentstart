@@ -3,11 +3,12 @@
   "compilerOptions": {
     "outDir": "dist",
     "tsBuildInfoFile": ".cache/tsbuildinfo.json",
+    "composite": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "../types/src/sandbox"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }

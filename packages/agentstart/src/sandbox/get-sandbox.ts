@@ -14,9 +14,9 @@ import type {
   AgentStartOptions,
   E2BSandboxOptions,
   NodeSandboxOptions,
+  SandboxAPI,
 } from "@agentstart/types";
 import { AgentStartError } from "@agentstart/utils";
-import type { SandboxAPI } from "@/sandbox";
 import { E2BSandbox } from "@/sandbox/adapter/e2b";
 import { NodeSandbox } from "@/sandbox/adapter/nodejs";
 

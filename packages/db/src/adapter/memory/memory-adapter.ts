@@ -15,7 +15,7 @@ import type {
   Where,
 } from "@agentstart/types";
 import { generateId } from "@agentstart/utils";
-import { getTables } from "../../index";
+import { getTables } from "../../get-tables";
 import { createGetFieldFunction, toComparable } from "../shared";
 import { withApplyDefault } from "../utils";
 

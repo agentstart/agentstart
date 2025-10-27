@@ -16,7 +16,7 @@ import type {
   Where,
 } from "@agentstart/types";
 import type { Db } from "mongodb";
-import { getTables } from "../../index";
+import { getTables } from "../../get-tables";
 import { validateTable } from "../shared";
 import { withApplyDefault } from "../utils";
 
@@ -143,16 +143,27 @@ const createTransform = (options: Omit<AgentStartOptions, "agent">) => {
       model: string,
       action: "create" | "update",
     ): Record<string, unknown> {
-      const transformedData: Record<string, unknown> =
-        action === "update"
-          ? {}
-          : customIdGen
-            ? {
-                id: customIdGen({ model }),
-              }
-            : {
-                _id: new ObjectId(),
-              };
+      let transformedData: Record<string, unknown>;
+      if (action === "update") {
+        transformedData = {};
+      } else if (customIdGen && data.id === undefined) {
+        const generatedId = customIdGen({ model });
+        transformedData = {
+          id: generatedId,
+          _id: generatedId,
+        };
+      } else if (data.id !== undefined) {
+        transformedData = {
+          id: data.id,
+          _id: serializeID("id", data.id, model),
+        };
+      } else {
+        const objectId = new ObjectId();
+        transformedData = {
+          id: objectId.toHexString(),
+          _id: objectId,
+        };
+      }
       const table = validateTable(schema, model, "mongodb");
       const fields = table.fields;
       for (const field in fields) {
@@ -175,17 +186,17 @@ const createTransform = (options: Omit<AgentStartOptions, "agent">) => {
           continue;
         }
         transformedData[fieldAttr.fieldName || field] = withApplyDefault(
-          serializeID(field, value, model),
+          field === "id" ? value : serializeID(field, value, model),
           fieldAttr,
           action,
         );
       }
-
-      if (action === "create" && !customIdGen) {
-        const assignedId = transformedData.id;
-        if (assignedId !== undefined) {
-          transformedData._id = assignedId;
-        }
+      if (
+        action === "create" &&
+        transformedData.id === undefined &&
+        transformedData._id === undefined
+      ) {
+        transformedData._id = new ObjectId();
       }
       return transformedData;
     },
@@ -388,10 +399,11 @@ export const mongodbAdapter =
         ) as T[];
       },
       async count(data) {
-        const { model } = data;
+        const { model, where } = data;
+        const clause = where ? transform.convertWhereClause(where, model) : {};
         const res = await db
           .collection(transform.getModelName(model))
-          .countDocuments();
+          .countDocuments(clause);
         return res;
       },
       async update<T>(data: {
@@ -407,6 +419,7 @@ export const mongodbAdapter =
           model,
           "update",
         );
+        delete transformedData._id;
 
         const result = await db
           .collection(transform.getModelName(model))
@@ -432,6 +445,7 @@ export const mongodbAdapter =
           model,
           "update",
         );
+        delete transformedData._id;
         const res = await db
           .collection(transform.getModelName(model))
           .updateMany(clause, { $set: transformedData });
@@ -456,19 +470,19 @@ export const mongodbAdapter =
           model,
           "update",
         );
+        delete transformedUpdate._id;
 
         const transformedCreate = transform.transformInput(
           create,
           model,
           "create",
         );
+        delete transformedCreate._id;
 
-        const generatedId = transformedCreate.id;
-        if (generatedId && !hasCustomId) {
-          delete (transformedCreate as Record<string, unknown>).id;
-        }
-
-        const updateDocument: Record<string, unknown> = {};
+        const updateDocument: {
+          $set?: Record<string, unknown>;
+          $setOnInsert?: Record<string, unknown>;
+        } = {};
         if (Object.keys(transformedUpdate).length > 0) {
           updateDocument.$set = transformedUpdate;
         }
@@ -476,12 +490,19 @@ export const mongodbAdapter =
         // Only include fields in $setOnInsert that are not in $set to avoid conflicts
         const createOnlyFields: Record<string, unknown> = {};
         for (const key in transformedCreate) {
+          if (key === "_id") {
+            continue;
+          }
           if (!(key in transformedUpdate)) {
             createOnlyFields[key] = transformedCreate[key];
           }
         }
 
         if (Object.keys(createOnlyFields).length > 0) {
+          // Never allow _id to be set/updated inside $set or $setOnInsert
+          if (updateDocument.$set && "_id" in updateDocument.$set) {
+            delete updateDocument.$set._id;
+          }
           updateDocument.$setOnInsert = createOnlyFields;
         }
 
@@ -498,9 +519,18 @@ export const mongodbAdapter =
           },
         );
 
-        const document =
+        const document: Record<string, unknown> | null =
           result && typeof result === "object" && "value" in result
-            ? (result.value as Record<string, unknown> | null)
+            ? ((result.value as Record<string, unknown> | null) ??
+              (result.ok
+                ? {
+                    ...transformedCreate,
+                    ...transformedUpdate,
+                    id:
+                      where.find((w) => w.field === "id")?.value ??
+                      transformedCreate.id,
+                  }
+                : null))
             : (result as Record<string, unknown> | null);
 
         if (!document) {

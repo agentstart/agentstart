@@ -9,8 +9,6 @@ FEATURES:
 SEARCHABLE: packages, agentstart, src, sandbox, adapter, e2b, file, system
 agent-frontmatter:end */
 
-import type { Sandbox } from "@e2b/code-interpreter";
-import path from "pathe";
 import type {
   Dirent,
   FileSystemAPI,
@@ -18,7 +16,9 @@ import type {
   FileSystemEventType,
   WatchHandle,
   WatchOptions,
-} from "../../../../../types/src/sandbox/file-system";
+} from "@agentstart/types";
+import type { Sandbox } from "@e2b/code-interpreter";
+import path from "pathe";
 import { DEFAULT_WORKING_DIRECTORY } from "./constants";
 
 const GLOB_SPECIAL_CHARS_REGEX = /([.+^=!:${}()|[\]\\])/g;

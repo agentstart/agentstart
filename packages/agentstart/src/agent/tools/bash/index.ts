@@ -9,7 +9,7 @@ FEATURES:
 SEARCHABLE: packages, agentstart, src, agent, tools, bash, index, tool, runtime
 agent-frontmatter:end */
 
-import type { RuntimeContext } from "@agentstart/types";
+import type { GitStatus, RuntimeContext } from "@agentstart/types";
 import { tool } from "ai";
 import {
   type AgentStartToolOutput,
@@ -18,7 +18,6 @@ import {
 } from "@/agent/messages/tool";
 import { commitChanges } from "@/agent/tools/commit-changes";
 import { getRichError } from "@/agent/tools/get-rich-error";
-import type { GitStatus } from "@/sandbox";
 import description from "./description";
 
 // Constants

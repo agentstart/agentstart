@@ -28,6 +28,17 @@ export const message = pgTable("message", {
   role: text("role").notNull(),
   parts: jsonb("parts").notNull(),
   attachments: jsonb("attachments"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("createdAt").notNull(),
+  updatedAt: timestamp("updatedAt").notNull(),
+});
+
+export const todo = pgTable("todo", {
+  id: text("id").primaryKey(),
+  threadId: text("threadId")
+    .notNull()
+    .references(() => thread.id, { onDelete: "cascade" }),
+  todos: jsonb("todos").notNull(),
   createdAt: timestamp("createdAt").notNull(),
   updatedAt: timestamp("updatedAt").notNull(),
 });

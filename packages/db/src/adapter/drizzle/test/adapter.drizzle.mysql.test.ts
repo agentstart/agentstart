@@ -15,7 +15,7 @@ import { createPool, type Pool } from "mysql2/promise";
 import { afterAll, describe, expect, test } from "vitest";
 import { getMigrations } from "../../../get-migration";
 import { runAdapterTest } from "../../test";
-import { drizzleAdapter } from "../index";
+import { drizzleAdapter } from "../drizzle-adapter";
 import * as schema from "./schema.mysql";
 
 const TEST_DB_MYSQL_URL = "mysql://user:password@localhost:3306/agentstart";

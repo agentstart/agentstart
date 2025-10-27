@@ -1,3 +1,13 @@
+/* agent-frontmatter:start
+AGENT: Responsive helper
+PURPOSE: Detect viewport breakpoint for sidebar behavior.
+USAGE: import { useMobile } from "@/hooks/use-mobile"
+EXPORTS: useMobile
+FEATURES:
+  - Wraps Base UI media query hook for mobile detection
+SEARCHABLE: responsive, sidebar, base ui
+agent-frontmatter:end */
+
 import * as React from "react";
 
 const MOBILE_BREAKPOINT = 768;

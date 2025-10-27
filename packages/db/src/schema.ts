@@ -30,6 +30,7 @@ export const messageSchema = z.object({
   role: z.string(),
   parts: z.any(),
   attachments: z.any().optional(),
+  metadata: z.any().optional(),
   createdAt: z.date().default(() => new Date()),
   updatedAt: z.date().default(() => new Date()),
 });

@@ -1,9 +1,37 @@
 "use client";
 
-import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import { BrainIcon, ChevronDownIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 import { createContext, memo, useContext, useEffect, useState } from "react";
+
+// Simple implementation of useControllableState for Base UI compatibility
+function useControllableState<T>({
+  prop,
+  defaultProp,
+  onChange,
+}: {
+  prop?: T;
+  defaultProp: T;
+  onChange?: (value: T) => void;
+}) {
+  const [state, setState] = useState(prop ?? defaultProp);
+
+  useEffect(() => {
+    if (prop !== undefined) {
+      setState(prop);
+    }
+  }, [prop]);
+
+  const setValue = (value: T) => {
+    if (prop === undefined) {
+      setState(value);
+    }
+    onChange?.(value);
+  };
+
+  return [state, setValue] as const;
+}
+
 import {
   Collapsible,
   CollapsibleContent,

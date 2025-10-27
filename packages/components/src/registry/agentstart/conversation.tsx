@@ -301,7 +301,13 @@ export function Conversation({
           <Actions className="mt-2 w-full justify-start opacity-0 group-hover:opacity-100">
             <Action
               className="size-7"
-              onClick={() => regenerate()}
+              onClick={() =>
+                regenerate({
+                  body: {
+                    threadId,
+                  },
+                })
+              }
               label="Retry"
               tooltip="Retry"
             >

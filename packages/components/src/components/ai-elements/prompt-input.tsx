@@ -49,19 +49,20 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuPositioner,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupTextarea,
 } from "@/components/ui/input-group";
+import {
+  PreviewCard,
+  PreviewCardPopup,
+  PreviewCardTrigger,
+} from "@/components/ui/preview-card";
 import {
   Select,
   SelectContent,
@@ -294,7 +295,7 @@ export function PromptInputAttachment({
       ) : (
         <div className="flex size-full max-w-full cursor-pointer items-center justify-start gap-2 overflow-hidden px-2 text-muted-foreground">
           <PaperclipIcon className="size-4 shrink-0" />
-          <Tooltip delayDuration={400}>
+          <Tooltip delay={400}>
             <TooltipTrigger className="min-w-0 flex-1">
               <h4 className="w-full truncate text-left font-medium text-sm">
                 {data.filename || "Unknown file"}
@@ -302,7 +303,7 @@ export function PromptInputAttachment({
             </TooltipTrigger>
             <TooltipContent>
               <div className="text-muted-foreground text-xs">
-                <h4 className="max-w-[240px] overflow-hidden whitespace-normal break-words text-left font-semibold text-sm">
+                <h4 className="wrap-break-word max-w-60 overflow-hidden whitespace-normal text-left font-semibold text-sm">
                   {data.filename || "Unknown file"}
                 </h4>
                 {data.mediaType && <div>{data.mediaType}</div>}
@@ -412,7 +413,7 @@ export const PromptInputActionAddAttachments = ({
   return (
     <DropdownMenuItem
       {...props}
-      onSelect={(e) => {
+      onClick={(e) => {
         e.preventDefault();
         attachments.openFileDialog();
       }}
@@ -953,10 +954,10 @@ export const PromptInputActionMenuTrigger = ({
   children,
   ...props
 }: PromptInputActionMenuTriggerProps) => (
-  <DropdownMenuTrigger asChild>
-    <PromptInputButton className={className} {...props}>
-      {children ?? <PlusIcon className="size-4" />}
-    </PromptInputButton>
+  <DropdownMenuTrigger
+    render={<PromptInputButton className={className} {...props} />}
+  >
+    {children ?? <PlusIcon className="size-4" />}
   </DropdownMenuTrigger>
 );
 
@@ -967,7 +968,9 @@ export const PromptInputActionMenuContent = ({
   className,
   ...props
 }: PromptInputActionMenuContentProps) => (
-  <DropdownMenuContent align="start" className={cn(className)} {...props} />
+  <DropdownMenuPositioner>
+    <DropdownMenuContent className={cn(className)} {...props} />
+  </DropdownMenuPositioner>
 );
 
 export type PromptInputActionMenuItemProps = ComponentProps<
@@ -1196,7 +1199,7 @@ export const PromptInputModelSelectTrigger = ({
   <SelectTrigger
     className={cn(
       "border-none bg-transparent font-medium text-muted-foreground shadow-none transition-colors",
-      'hover:bg-accent hover:text-foreground [&[aria-expanded="true"]]:bg-accent [&[aria-expanded="true"]]:text-foreground',
+      "hover:bg-accent hover:text-foreground aria-expanded:bg-accent aria-expanded:text-foreground",
       className,
     )}
     {...props}
@@ -1234,33 +1237,33 @@ export const PromptInputModelSelectValue = ({
   <SelectValue className={cn(className)} {...props} />
 );
 
-export type PromptInputHoverCardProps = ComponentProps<typeof HoverCard>;
+export type PromptInputPreviewCardProps = ComponentProps<typeof PreviewCard>;
 
-export const PromptInputHoverCard = ({
-  openDelay = 0,
+export const PromptInputPreviewCard = ({
+  delay = 0,
   closeDelay = 0,
   ...props
-}: PromptInputHoverCardProps) => (
-  <HoverCard closeDelay={closeDelay} openDelay={openDelay} {...props} />
+}: PromptInputPreviewCardProps) => (
+  <PreviewCard closeDelay={closeDelay} delay={delay} {...props} />
 );
 
-export type PromptInputHoverCardTriggerProps = ComponentProps<
-  typeof HoverCardTrigger
+export type PromptInputPreviewCardTriggerProps = ComponentProps<
+  typeof PreviewCardTrigger
 >;
 
-export const PromptInputHoverCardTrigger = (
-  props: PromptInputHoverCardTriggerProps,
-) => <HoverCardTrigger {...props} />;
+export const PromptInputPreviewCardTrigger = (
+  props: PromptInputPreviewCardTriggerProps,
+) => <PreviewCardTrigger {...props} />;
 
-export type PromptInputHoverCardContentProps = ComponentProps<
-  typeof HoverCardContent
+export type PromptInputPreviewCardPopupProps = ComponentProps<
+  typeof PreviewCardPopup
 >;
 
-export const PromptInputHoverCardContent = ({
+export const PromptInputPreviewCardPopup = ({
   align = "start",
   ...props
-}: PromptInputHoverCardContentProps) => (
-  <HoverCardContent align={align} {...props} />
+}: PromptInputPreviewCardPopupProps) => (
+  <PreviewCardPopup align={align} {...props} />
 );
 
 export type PromptInputTabsListProps = HTMLAttributes<HTMLDivElement>;

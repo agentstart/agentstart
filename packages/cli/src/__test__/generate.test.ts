@@ -17,7 +17,7 @@ import { generateDrizzleSchema } from "../generators/drizzle";
 import { generateMigrations } from "../generators/kysely";
 import { generatePrismaSchema } from "../generators/prisma";
 
-describe("generate", async () => {
+describe("generate", () => {
   it("should generate prisma schema", async () => {
     const schema = await generatePrismaSchema({
       file: "test.prisma",

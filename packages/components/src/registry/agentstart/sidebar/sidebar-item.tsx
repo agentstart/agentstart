@@ -70,11 +70,13 @@ export const SidebarItem = memo(function SidebarItem({
         <div className="flex w-full items-center gap-3 overflow-hidden">
           {leading && <div className="shrink-0">{leading}</div>}
           <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="flex-1 truncate font-medium text-sm">
-                {thread.title || "Untitled thread"}
-              </span>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <span className="flex-1 truncate font-medium text-sm">
+                  {thread.title || "Untitled thread"}
+                </span>
+              }
+            />
             {computedSecondaryText && (
               <TooltipContent>
                 <span className="space-x-1">

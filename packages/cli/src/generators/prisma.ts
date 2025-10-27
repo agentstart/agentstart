@@ -85,6 +85,9 @@ export const generatePrismaSchema: SchemaGenerator = async ({
         if (type === "date") {
           return isOptional ? "DateTime?" : "DateTime";
         }
+        if (type === "json") {
+          return isOptional ? "String?" : "String";
+        }
         if (type === "string[]") {
           return isOptional ? "String[]" : "String[]";
         }
@@ -146,7 +149,7 @@ export const generatePrismaSchema: SchemaGenerator = async ({
           !attr.unique &&
           !attr.references &&
           provider === "mysql" &&
-          attr.type === "string"
+          (attr.type === "string" || attr.type === "json")
         ) {
           builder.model(modelName).field(field).attribute("db.Text");
         }

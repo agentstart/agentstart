@@ -16,7 +16,7 @@ import { Pool } from "pg";
 import { afterAll, describe, expect, test } from "vitest";
 import { getMigrations } from "../../../get-migration";
 import { runAdapterTest } from "../../test";
-import { drizzleAdapter } from "../index";
+import { drizzleAdapter } from "../drizzle-adapter";
 import * as schema from "./schema";
 
 const TEST_DB_URL = "postgres://user:password@localhost:5432/agentstart";

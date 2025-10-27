@@ -22,7 +22,23 @@ import fs from "fs-extra";
 import { addSvelteKitEnvModules } from "./add-svelte-kit-env-modules";
 import { getTsconfigInfo } from "./get-tsconfig-info";
 
-let possiblePaths = [
+// Type alias for config loading
+type AgentConfig =
+  | {
+      start?: AgentStart;
+    }
+  | AgentStart;
+
+// Error messages
+const ERROR_MESSAGES = {
+  INVALID_EXPORT:
+    'Make sure to default export your agent instance or to export as a variable named "start".',
+  SERVER_ONLY:
+    "Please remove import 'server-only' from your agent config file temporarily. The CLI cannot resolve the configuration with it included. You can re-add it after running the CLI.",
+} as const;
+
+// Build possible config file paths
+const baseFileNames = [
   "agent.ts",
   "agent.tsx",
   "agent.js",
@@ -31,17 +47,21 @@ let possiblePaths = [
   "agent.server.ts",
 ];
 
-possiblePaths = [
-  ...possiblePaths,
-  ...possiblePaths.map((it) => `lib/server/${it}`),
-  ...possiblePaths.map((it) => `server/${it}`),
-  ...possiblePaths.map((it) => `lib/${it}`),
-  ...possiblePaths.map((it) => `utils/${it}`),
+const subDirectories = ["lib/server", "server", "lib", "utils"];
+const rootDirectories = ["src", "app"];
+
+let possiblePaths = [
+  ...baseFileNames,
+  ...baseFileNames.flatMap((file) =>
+    subDirectories.map((dir) => `${dir}/${file}`),
+  ),
 ];
+
 possiblePaths = [
   ...possiblePaths,
-  ...possiblePaths.map((it) => `src/${it}`),
-  ...possiblePaths.map((it) => `app/${it}`),
+  ...possiblePaths.flatMap((file) =>
+    rootDirectories.map((dir) => `${dir}/${file}`),
+  ),
 ];
 
 function getPathAliases(cwd: string): Record<string, string> | null {
@@ -97,6 +117,73 @@ const jitiOptions = (cwd: string) => {
     alias,
   };
 };
+
+/**
+ * Extract AgentStartOptions from c12 config
+ * Handles both named export (export const start) and default export (export default)
+ */
+function extractAgentStartOptions(config: unknown): AgentStartOptions | null {
+  if (!config || typeof config !== "object") {
+    return null;
+  }
+
+  // Check if it's a named export: { start: AgentStart }
+  const configAsObject = config as { start?: AgentStart };
+  if (configAsObject.start?.options) {
+    return configAsObject.start.options;
+  }
+
+  // Check if it's a default export: AgentStart directly
+  if ("options" in config) {
+    const configAsAgentStart = config as AgentStart;
+    return configAsAgentStart.options;
+  }
+
+  return null;
+}
+
+/**
+ * Check if error is caused by 'server-only' import
+ */
+function isServerOnlyError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof error.message === "string" &&
+    error.message.includes(
+      "This module cannot be imported from a Client Component module",
+    )
+  );
+}
+
+/**
+ * Handle config loading errors
+ */
+function handleConfigError(
+  error: unknown,
+  context: string,
+  shouldThrow: boolean,
+): never {
+  if (isServerOnlyError(error)) {
+    const message = ERROR_MESSAGES.SERVER_ONLY;
+    if (shouldThrow) {
+      throw new Error(message);
+    }
+    logger.error(message);
+    process.exit(1);
+  }
+
+  if (shouldThrow) {
+    throw error;
+  }
+
+  logger.error(
+    `Couldn't read your agent config${context ? ` ${context}` : ""}.`,
+    error,
+  );
+  process.exit(1);
+}
 export async function getConfig({
   cwd,
   configPath,
@@ -107,114 +194,65 @@ export async function getConfig({
   shouldThrowOnError?: boolean;
 }) {
   try {
-    let configFile: AgentStartOptions | null = null;
+    let agentStartOptions: AgentStartOptions | null = null;
+
+    // Try to load config from specified path
     if (configPath) {
       let resolvedPath: string = path.join(cwd, configPath);
-      if (fs.existsSync(configPath)) resolvedPath = configPath; // If the configPath is a file, use it as is, as it means the path wasn't relative.
-      const { config } = await loadConfig<{
-        start?: AgentStartOptions;
-        default?: AgentStartOptions;
-      }>({
+      if (fs.existsSync(configPath)) resolvedPath = configPath;
+
+      const { config } = await loadConfig<AgentConfig>({
         configFile: resolvedPath,
         dotenv: true,
         jitiOptions: jitiOptions(cwd),
       });
-      if (!config.start && !config.default) {
+
+      agentStartOptions = extractAgentStartOptions(config);
+
+      if (!agentStartOptions) {
+        const message = `Couldn't read your agent config in ${resolvedPath}. ${ERROR_MESSAGES.INVALID_EXPORT}`;
         if (shouldThrowOnError) {
-          throw new Error(
-            `Couldn't read your agent config in ${resolvedPath}. Make sure to default export your agent instance or to export as a variable named agent.`,
-          );
+          throw new Error(message);
         }
-        logger.error(
-          `[#agentstart]: Couldn't read your agent config in ${resolvedPath}. Make sure to default export your agent instance or to export as a variable named agent.`,
-        );
+        logger.error(`[#agentstart]: ${message}`);
         process.exit(1);
       }
-      configFile = config.start || config.default || null;
     }
 
-    if (!configFile) {
+    // Try to find config in possible paths
+    if (!agentStartOptions) {
       for (const possiblePath of possiblePaths) {
         try {
-          const { config } = await loadConfig<{
-            start?: AgentStart;
-          }>({
+          const { config } = await loadConfig<AgentConfig>({
             configFile: possiblePath,
             jitiOptions: jitiOptions(cwd),
           });
+
           const hasConfig = Object.keys(config).length > 0;
           if (hasConfig) {
-            configFile = config.start?.options || null;
-            if (!configFile) {
+            agentStartOptions = extractAgentStartOptions(config);
+
+            if (!agentStartOptions) {
+              const message = `Couldn't read your agent config. ${ERROR_MESSAGES.INVALID_EXPORT}`;
               if (shouldThrowOnError) {
-                throw new Error(
-                  "Couldn't read your agent config. Make sure to default export your agent instance or to export as a variable named agent.",
-                );
+                throw new Error(message);
               }
-              logger.error("[#agentstart]: Couldn't read your agent config.");
+              logger.error(`[#agentstart]: ${message.split(".")[0]}.`);
               console.log("");
-              logger.info(
-                "[#agentstart]: Make sure to default export your agent instance or to export as a variable named agent.",
-              );
+              logger.info(`[#agentstart]: ${ERROR_MESSAGES.INVALID_EXPORT}`);
               process.exit(1);
             }
             break;
           }
         } catch (e) {
-          if (
-            typeof e === "object" &&
-            e &&
-            "message" in e &&
-            typeof e.message === "string" &&
-            e.message.includes(
-              "This module cannot be imported from a Client Component module",
-            )
-          ) {
-            if (shouldThrowOnError) {
-              throw new Error(
-                `Please remove import 'server-only' from your agent config file temporarily. The CLI cannot resolve the configuration with it included. You can re-add it after running the CLI.`,
-              );
-            }
-            logger.error(
-              `Please remove import 'server-only' from your agent config file temporarily. The CLI cannot resolve the configuration with it included. You can re-add it after running the CLI.`,
-            );
-            process.exit(1);
-          }
-          if (shouldThrowOnError) {
-            throw e;
-          }
-          logger.error("[#agentstart]: Couldn't read your agent config.", e);
-          process.exit(1);
+          handleConfigError(e, "", shouldThrowOnError);
         }
       }
     }
-    return configFile;
-  } catch (e) {
-    if (
-      typeof e === "object" &&
-      e &&
-      "message" in e &&
-      typeof e.message === "string" &&
-      e.message.includes(
-        "This module cannot be imported from a Client Component module",
-      )
-    ) {
-      if (shouldThrowOnError) {
-        throw new Error(
-          `Please remove import 'server-only' from your agent config file temporarily. The CLI cannot resolve the configuration with it included. You can re-add it after running the CLI.`,
-        );
-      }
-      logger.error(
-        `Please remove import 'server-only' from your agent config file temporarily. The CLI cannot resolve the configuration with it included. You can re-add it after running the CLI.`,
-      );
-      process.exit(1);
-    }
-    if (shouldThrowOnError) {
-      throw e;
-    }
 
-    logger.error("Couldn't read your agent config.", e);
-    process.exit(1);
+    return agentStartOptions;
+  } catch (e) {
+    handleConfigError(e, "", shouldThrowOnError);
   }
 }
 

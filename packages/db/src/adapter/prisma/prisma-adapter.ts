@@ -30,7 +30,7 @@ import type {
   Where,
 } from "@agentstart/types";
 import { AgentStartError, generateId } from "@agentstart/utils";
-import { getTables } from "../../index";
+import { getTables } from "../../get-tables";
 import {
   compareValues,
   createGetFieldFunction,

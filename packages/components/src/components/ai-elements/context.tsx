@@ -5,10 +5,10 @@ import { type ComponentProps, createContext, useContext } from "react";
 import { estimateCost, type ModelId } from "tokenlens";
 import { Button } from "@/components/ui/button";
 import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
+  PreviewCard,
+  PreviewCardPopup,
+  PreviewCardTrigger,
+} from "@/components/ui/preview-card";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
@@ -37,7 +37,7 @@ const useContextValue = () => {
   return context;
 };
 
-export type ContextProps = ComponentProps<typeof HoverCard> & ContextSchema;
+export type ContextProps = ComponentProps<typeof PreviewCard> & ContextSchema;
 
 export const Context = ({
   usedTokens,
@@ -54,7 +54,7 @@ export const Context = ({
       modelId,
     }}
   >
-    <HoverCard closeDelay={0} openDelay={0} {...props} />
+    <PreviewCard closeDelay={0} delay={0} {...props} />
   </ContextContext.Provider>
 );
 
@@ -110,27 +110,31 @@ export const ContextTrigger = ({ children, ...props }: ContextTriggerProps) => {
   }).format(usedPercent);
 
   return (
-    <HoverCardTrigger asChild>
-      {children ?? (
+    <PreviewCardTrigger
+      render={
         <Button type="button" variant="ghost" {...props}>
-          <span className="font-medium text-muted-foreground">
-            {renderedPercent}
-          </span>
-          <ContextIcon />
+          {children || (
+            <>
+              <span className="font-medium text-muted-foreground">
+                {renderedPercent}
+              </span>
+              <ContextIcon />
+            </>
+          )}
         </Button>
-      )}
-    </HoverCardTrigger>
+      }
+    />
   );
 };
 
-export type ContextContentProps = ComponentProps<typeof HoverCardContent>;
+export type ContextContentProps = ComponentProps<typeof PreviewCardPopup>;
 
 export const ContextContent = ({
   className,
   ...props
 }: ContextContentProps) => (
-  <HoverCardContent
-    className={cn("min-w-[240px] divide-y overflow-hidden p-0", className)}
+  <PreviewCardPopup
+    className={cn("min-w-60 divide-y overflow-hidden p-0", className)}
     {...props}
   />
 );

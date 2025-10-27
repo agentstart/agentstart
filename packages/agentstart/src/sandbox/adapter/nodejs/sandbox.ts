@@ -10,14 +10,14 @@ FEATURES:
 SEARCHABLE: nodejs sandbox, local sandbox implementation, adapter lifecycle
 agent-frontmatter:end */
 
-import type { BashAPI } from "../../../../../types/src/sandbox/bash";
-import type { FileSystemAPI } from "../../../../../types/src/sandbox/file-system";
-import type { GitAPI } from "../../../../../types/src/sandbox/git";
 import type {
+  BashAPI,
+  FileSystemAPI,
+  GitAPI,
   NodeJSSandboxConfig,
   SandboxAPI,
   SandboxStatus,
-} from "../../../../../types/src/sandbox/sandbox";
+} from "@agentstart/types";
 
 import { Bash } from "./bash";
 import { FileSystem } from "./file-system";

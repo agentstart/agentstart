@@ -37,6 +37,20 @@ AgentStart’s component kit packages the conversation, tool, and layout primiti
    import { MessagePart } from "@agentstart/components/components/tools/message-part-view";
    ```
 
+## Basecn & Coss UI Registries
+
+The `components.json` in this package now exposes two additional registries so you can pull Base UI powered components without juggling URLs. After installing `@agentstart/components`, run the shadcn CLI with the registry alias that matches the source you want:
+
+```bash
+npx shadcn@latest add button --registry=@basecn
+npx shadcn@latest add sidebar --registry=@cossui
+```
+
+- Basecn mirrors the shadcn/ui API on top of `@base-ui-components/react`. Components install into your local project just like Radix-based shadcn items.
+- Coss UI follows the same copy/paste philosophy and ships additional particles (aggregate components). The alias resolves to `https://coss.com/ui/r/{name}.json`.
+- `@base-ui-components/react` is declared in `@agentstart/components` so generated files compile without extra setup.
+- You can mix and match registries in the same project. The CLI writes the component source locally, so adapt styling or consolidate exports inside `@agentstart/components` as needed.
+
 ## Agent Registry Build Protocol
 
 Use this checklist whenever you, the agent, need to extend or publish the `@agentstart/components` registry.

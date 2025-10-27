@@ -528,7 +528,7 @@ export function PromptInput({
               {(attachment) => <PromptInputAttachment data={attachment} />}
             </PromptInputAttachments>
             <PromptInputTextarea
-              className="pl-4"
+              className="px-4 ring-0! before:shadow-none! [&>textarea]:resize-none [&>textarea]:p-0"
               placeholder="Ask anything"
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -559,7 +559,7 @@ export function PromptInput({
                     usedTokens={usageSummary.usedTokens}
                   >
                     <ContextTrigger />
-                    <ContextContent className="w-full max-w-xs lg:max-w-sm">
+                    <ContextContent className="flex w-full max-w-xs flex-col lg:max-w-sm">
                       <ContextContentHeader />
                       <ContextContentBody className="space-y-2">
                         <ContextInputUsage />

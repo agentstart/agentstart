@@ -13,7 +13,9 @@
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "lint": "bunx biome check --write --unsafe ./src",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "bun run prisma:push && vitest",
+    "prisma:push": "prisma db push --schema src/adapter/prisma/test/schema.prisma",
+    "test:adapters": "bun run prisma:push && vitest adapters"
   },
   "dependencies": {
     "@agentstart/types": "workspace:*",
@@ -33,6 +35,7 @@
     "@biomejs/biome": "catalog:",
     "@types/better-sqlite3": "catalog:",
     "@types/pg": "catalog:",
+    "prisma": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

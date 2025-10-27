@@ -7,7 +7,7 @@ function Empty({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="empty"
       className={cn(
-        "flex min-w-0 flex-1 flex-col items-center justify-center gap-6 text-balance rounded-lg border-dashed p-6 text-center md:p-12",
+        "flex min-w-0 flex-1 flex-col items-center justify-center gap-6 text-balance rounded-xl border-dashed p-6 text-center md:p-12",
         className,
       )}
       {...props}
@@ -20,7 +20,7 @@ function EmptyHeader({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="empty-header"
       className={cn(
-        "flex max-w-sm flex-col items-center gap-2 text-center",
+        "flex max-w-sm flex-col items-center text-center",
         className,
       )}
       {...props}
@@ -29,12 +29,12 @@ function EmptyHeader({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 const emptyMediaVariants = cva(
-  "mb-2 flex shrink-0 items-center justify-center [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "flex shrink-0 items-center justify-center [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default: "bg-transparent",
-        icon: "flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground [&_svg:not([class*='size-'])]:size-6",
+        icon: "relative flex size-9 shrink-0 items-center justify-center rounded-md border bg-card text-foreground shadow-black/5 shadow-sm before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-md)-1px)] before:shadow-[0_1px_--theme(--color-black/4%)] dark:before:shadow-[0_-1px_--theme(--color-white/8%)] [&_svg:not([class*='size-'])]:size-4.5",
       },
     },
     defaultVariants: {
@@ -50,11 +50,34 @@ function EmptyMedia({
 }: React.ComponentProps<"div"> & VariantProps<typeof emptyMediaVariants>) {
   return (
     <div
-      data-slot="empty-icon"
+      data-slot="empty-media"
       data-variant={variant}
-      className={cn(emptyMediaVariants({ variant, className }))}
+      className={cn("relative mb-6", className)}
       {...props}
-    />
+    >
+      {variant === "icon" && (
+        <>
+          <div
+            className={cn(
+              emptyMediaVariants({ variant, className }),
+              "-translate-x-0.5 -rotate-10 pointer-events-none absolute bottom-px origin-bottom-left scale-84 shadow-none",
+            )}
+            aria-hidden="true"
+          />
+          <div
+            className={cn(
+              emptyMediaVariants({ variant, className }),
+              "pointer-events-none absolute bottom-px origin-bottom-right translate-x-0.5 rotate-10 scale-84 shadow-none",
+            )}
+            aria-hidden="true"
+          />
+        </>
+      )}
+      <div
+        className={cn(emptyMediaVariants({ variant, className }))}
+        {...props}
+      />
+    </div>
   );
 }
 
@@ -62,7 +85,7 @@ function EmptyTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="empty-title"
-      className={cn("font-medium text-lg tracking-tight", className)}
+      className={cn("font-heading text-xl leading-none", className)}
       {...props}
     />
   );
@@ -73,7 +96,7 @@ function EmptyDescription({ className, ...props }: React.ComponentProps<"p">) {
     <div
       data-slot="empty-description"
       className={cn(
-        "text-muted-foreground text-sm/relaxed [&>a:hover]:text-primary [&>a]:underline [&>a]:underline-offset-4",
+        "text-muted-foreground text-sm/relaxed [&>a:hover]:text-primary [&>a]:underline [&>a]:underline-offset-4 [[data-slot=empty-title]+&]:mt-1",
         className,
       )}
       {...props}

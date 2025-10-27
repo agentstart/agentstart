@@ -34,7 +34,7 @@ import {
   sql,
   type UpdateQueryBuilder,
 } from "kysely";
-import { getTables } from "../../index";
+import { getTables } from "../../get-tables";
 import { createGetFieldFunction, validateTable } from "../shared";
 import { withApplyDefault } from "../utils";
 
@@ -81,6 +81,17 @@ const createTransform = (
       }
       return value;
     }
+    const isJsonField = f.type === "json";
+    if (
+      value !== null &&
+      value !== undefined &&
+      isJsonField
+    ) {
+      if (type === "sqlite" || type === "mssql" || type === "mysql") {
+        return JSON.stringify(value);
+      }
+      return value;
+    }
     if (
       value !== null &&
       value !== undefined &&
@@ -123,7 +134,10 @@ const createTransform = (
         return value;
       }
     }
-    if (typeof value === "string" && f.type === "string") {
+    if (
+      typeof value === "string" &&
+      (f.type === "string" || f.type === "json")
+    ) {
       const firstChar = value.trim()[0];
       if (firstChar === "{" || firstChar === "[") {
         try {
@@ -131,6 +145,27 @@ const createTransform = (
         } catch {
           return value;
         }
+      }
+      if (
+        f.type === "json" &&
+        (type === "sqlite" || type === "mssql" || type === "mysql")
+      ) {
+        try {
+          return JSON.parse(value);
+        } catch {
+          return value;
+        }
+      }
+    }
+    if (f.type === "json" && value && typeof value === "object") {
+      return value;
+    }
+    if (f.type === "json" && Buffer.isBuffer(value)) {
+      const text = value.toString("utf-8");
+      try {
+        return JSON.parse(text);
+      } catch {
+        return text;
       }
     }
     if (f.type === "date" && value) {

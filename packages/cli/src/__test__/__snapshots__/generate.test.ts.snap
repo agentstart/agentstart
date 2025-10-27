@@ -189,7 +189,7 @@ model Todo {
   id        String   @id
   threadId  String
   thread    Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
-  todos     String
+  todos     String   @db.Text
   createdAt DateTime
   updatedAt DateTime
 

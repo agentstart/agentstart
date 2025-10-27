@@ -9,8 +9,8 @@ FEATURES:
 SEARCHABLE: packages, agentstart, src, agent, tools, commit, changes, git, sandbox, tool
 agent-frontmatter:end */
 
+import type { SandboxAPI } from "@agentstart/types";
 import path from "pathe";
-import type { SandboxAPI } from "@/sandbox";
 import { GIT_CONFIG } from "./constants";
 
 export const commitChanges = async (

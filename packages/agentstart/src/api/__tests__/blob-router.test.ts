@@ -10,16 +10,16 @@ FEATURES:
 SEARCHABLE: blob router test, upload constraints test, getConfig test
 agent-frontmatter:end */
 
+import { createBlobAdapter } from "@agentstart/blob";
 import type { BlobAdapter, BlobOptions } from "@agentstart/types";
-
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createBlobRouter } from "../routers/blob";
 
-const createBlobAdapter = vi.fn();
-
 vi.mock("@agentstart/blob", () => ({
-  createBlobAdapter,
+  createBlobAdapter: vi.fn(),
 }));
+
+const mockCreateBlobAdapter = vi.mocked(createBlobAdapter);
 
 function thrower(name: string) {
   return ({ message }: { message?: string }) => {
@@ -87,7 +87,7 @@ describe("blob router", () => {
         constraints: null,
         provider: null,
       });
-      expect(createBlobAdapter).not.toHaveBeenCalled();
+      expect(mockCreateBlobAdapter).not.toHaveBeenCalled();
     });
 
     it("returns provider info and constraints when adapter resolves", async () => {
@@ -99,7 +99,7 @@ describe("blob router", () => {
         }),
         provider: "awsS3",
       });
-      createBlobAdapter.mockResolvedValue(adapter);
+      mockCreateBlobAdapter.mockResolvedValue(adapter);
 
       const result = await router.getConfig({
         context: {
@@ -140,7 +140,7 @@ describe("blob router", () => {
     });
 
     it("throws when adapter initialization fails", async () => {
-      createBlobAdapter.mockResolvedValue(null);
+      mockCreateBlobAdapter.mockResolvedValue(null);
 
       await expect(
         router.upload({
@@ -167,7 +167,7 @@ describe("blob router", () => {
           allowedMimeTypes: ["text/plain"],
         }),
       });
-      createBlobAdapter.mockResolvedValue(adapter);
+      mockCreateBlobAdapter.mockResolvedValue(adapter);
 
       await expect(
         router.upload({
@@ -195,7 +195,7 @@ describe("blob router", () => {
           allowedMimeTypes: ["text/plain"],
         }),
       });
-      createBlobAdapter.mockResolvedValue(adapter);
+      mockCreateBlobAdapter.mockResolvedValue(adapter);
 
       await expect(
         router.upload({
@@ -218,7 +218,7 @@ describe("blob router", () => {
     });
 
     it("propagates adapter authentication errors", async () => {
-      createBlobAdapter.mockRejectedValue(new Error("Missing credentials"));
+      mockCreateBlobAdapter.mockRejectedValue(new Error("Missing credentials"));
 
       await expect(
         router.upload({
@@ -254,7 +254,7 @@ describe("blob router", () => {
           maxFiles: 2,
         }),
       });
-      createBlobAdapter.mockResolvedValue(adapter);
+      mockCreateBlobAdapter.mockResolvedValue(adapter);
 
       const result = await router.upload({
         context: {

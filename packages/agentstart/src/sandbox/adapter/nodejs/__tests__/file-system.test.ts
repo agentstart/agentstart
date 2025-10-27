@@ -12,9 +12,9 @@ agent-frontmatter:end */
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import path from "node:path";
+import type { Dirent } from "@agentstart/types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { FileSystem } from "@/sandbox/adapter/nodejs/file-system";
-import type { Dirent } from "../../../../../../types/src/sandbox/file-system";
 
 describe("FileSystem", () => {
   let fileSystem: FileSystem;

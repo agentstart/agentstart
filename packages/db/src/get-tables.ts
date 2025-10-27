@@ -83,17 +83,17 @@ export const getTables = (
           fieldName: options.message?.fields?.role || "role",
         },
         parts: {
-          type: "string",
+          type: "json",
           required: true,
           fieldName: options.message?.fields?.parts || "parts",
         },
         attachments: {
-          type: "string",
+          type: "json",
           required: false,
           fieldName: options.message?.fields?.attachments || "attachments",
         },
         metadata: {
-          type: "string",
+          type: "json",
           required: false,
           fieldName: options.message?.fields?.metadata || "metadata",
         },

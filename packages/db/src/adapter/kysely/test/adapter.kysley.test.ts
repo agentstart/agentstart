@@ -18,7 +18,7 @@ import { createPool, type Pool } from "mysql2/promise";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { getMigrations } from "../../../get-migration";
 import { runAdapterTest } from "../../test";
-import { kyselyAdapter } from "../index";
+import { kyselyAdapter } from "../kysely-adapter";
 
 const MYSQL_URL = "mysql://user:password@localhost:3306/agentstart";
 
@@ -43,6 +43,7 @@ describe("adapter test", async () => {
   const sqliteDbPath = path.join(__dirname, "test.db");
   await fs.unlink(sqliteDbPath).catch(() => {});
   const sqlite = new Database(sqliteDbPath);
+  let mysqlKy: Kysely<unknown> | null = null;
   const sqliteKy = new Kysely({
     dialect: new SqliteDialect({
       database: sqlite,
@@ -61,7 +62,7 @@ describe("adapter test", async () => {
 
   beforeAll(async () => {
     if (!mysqlInit.skip && mysqlInit.pool) {
-      const mysqlKy = new Kysely({
+      mysqlKy = new Kysely({
         dialect: new MysqlDialect(mysqlInit.pool),
       });
       const mysqlOptions = createOptions({
@@ -70,7 +71,6 @@ describe("adapter test", async () => {
       });
       const { runMigrations } = await getMigrations(mysqlOptions);
       await runMigrations();
-      await mysqlKy.destroy();
     }
 
     const { runMigrations: runSqliteMigrations } =
@@ -84,7 +84,11 @@ describe("adapter test", async () => {
         .query("DROP DATABASE IF EXISTS agentstart")
         .catch(() => {});
       await mysqlInit.pool.query("CREATE DATABASE agentstart").catch(() => {});
-      await mysqlInit.pool.end();
+      if (mysqlKy) {
+        await mysqlKy.destroy().catch(() => {});
+      } else {
+        await mysqlInit.pool.end().catch(() => {});
+      }
     }
 
     sqlite.close();
@@ -92,9 +96,11 @@ describe("adapter test", async () => {
   });
 
   if (!mysqlInit.skip && mysqlInit.pool) {
-    const mysqlKy = new Kysely({
-      dialect: new MysqlDialect(mysqlInit.pool),
-    });
+    if (!mysqlKy) {
+      mysqlKy = new Kysely({
+        dialect: new MysqlDialect(mysqlInit.pool),
+      });
+    }
     const mysqlOptions = createOptions({
       db: mysqlKy,
       type: "mysql",
@@ -107,7 +113,6 @@ describe("adapter test", async () => {
         return mysqlAdapter({ ...mysqlOptions, ...customOptions });
       },
     });
-    await mysqlKy.destroy();
   }
 
   const sqliteAdapter = kyselyAdapter(sqliteKy, {

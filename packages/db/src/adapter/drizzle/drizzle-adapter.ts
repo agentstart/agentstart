@@ -40,7 +40,7 @@ import {
   or,
   type SQL,
 } from "drizzle-orm";
-import { getTables } from "../../index";
+import { getTables } from "../../get-tables";
 import { createGetFieldFunction, validateTable } from "../shared";
 import { withApplyDefault } from "../utils";
 
@@ -98,6 +98,28 @@ const createTransform = (
     return value;
   };
 
+  const normalizeJsonForWrite = (
+    value: unknown,
+    fieldAttr: FieldAttribute | undefined,
+  ) => {
+    if (
+      !fieldAttr ||
+      fieldAttr.type !== "json" ||
+      value === undefined ||
+      value === null
+    ) {
+      return value;
+    }
+    if (isSqliteProvider && typeof value !== "string") {
+      try {
+        return JSON.stringify(value);
+      } catch {
+        return value;
+      }
+    }
+    return value;
+  };
+
   const normalizeDateForQuery = (
     value: unknown,
     model: string,
@@ -124,6 +146,30 @@ const createTransform = (
     return value;
   };
 
+  const normalizeJsonForQuery = (
+    value: unknown,
+    model: string,
+    field: string,
+  ) => {
+    const fieldAttr = getFieldAttribute(model, field);
+    if (
+      !fieldAttr ||
+      fieldAttr.type !== "json" ||
+      value === undefined ||
+      value === null
+    ) {
+      return value;
+    }
+    if (isSqliteProvider && typeof value !== "string") {
+      try {
+        return JSON.stringify(value);
+      } catch {
+        return value;
+      }
+    }
+    return value;
+  };
+
   const normalizeDateForOutput = (
     value: unknown,
     fieldAttr: FieldAttribute | undefined,
@@ -138,6 +184,28 @@ const createTransform = (
     }
     if (value instanceof Date) {
       return value.toISOString();
+    }
+    return value;
+  };
+
+  const normalizeJsonForOutput = (
+    value: unknown,
+    fieldAttr: FieldAttribute | undefined,
+  ) => {
+    if (
+      !fieldAttr ||
+      fieldAttr.type !== "json" ||
+      value === undefined ||
+      value === null
+    ) {
+      return value;
+    }
+    if (isSqliteProvider && typeof value === "string") {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return value;
+      }
     }
     return value;
   };
@@ -183,9 +251,10 @@ const createTransform = (
             `The value for the field "${w.field}" must be an array when using the "in" operator.`,
           );
         }
-        const normalizedValues = w.value.map((entry: unknown) =>
-          normalizeDateForQuery(entry, model, w.field),
-        );
+        const normalizedValues = w.value.map((entry: unknown) => {
+          const withDates = normalizeDateForQuery(entry, model, w.field);
+          return normalizeJsonForQuery(withDates, model, w.field);
+        });
         return [inArray(schemaModel[field], normalizedValues)];
       }
 
@@ -202,26 +271,32 @@ const createTransform = (
       }
 
       if (w.operator === "lt") {
-        return [
-          lt(
-            schemaModel[field],
-            normalizeDateForQuery(w.value, model, w.field),
-          ),
-        ];
+        const withDates = normalizeDateForQuery(w.value, model, w.field);
+        const normalizedValue = normalizeJsonForQuery(
+          withDates,
+          model,
+          w.field,
+        );
+        return [lt(schemaModel[field], normalizedValue)];
       }
 
       if (w.operator === "lte") {
-        return [
-          lte(
-            schemaModel[field],
-            normalizeDateForQuery(w.value, model, w.field),
-          ),
-        ];
+        const withDates = normalizeDateForQuery(w.value, model, w.field);
+        const normalizedValue = normalizeJsonForQuery(
+          withDates,
+          model,
+          w.field,
+        );
+        return [lte(schemaModel[field], normalizedValue)];
       }
 
-      return [
-        eq(schemaModel[field], normalizeDateForQuery(w.value, model, w.field)),
-      ];
+      const withDates = normalizeDateForQuery(w.value, model, w.field);
+      const normalizedValue = normalizeJsonForQuery(
+        withDates,
+        model,
+        w.field,
+      );
+      return [eq(schemaModel[field], normalizedValue)];
     }
     const andGroup = where.filter((w) => w.connector === "AND" || !w.connector);
     const orGroup = where.filter((w) => w.connector === "OR");
@@ -236,24 +311,31 @@ const createTransform = (
               `The value for the field "${w.field}" must be an array when using the "in" operator.`,
             );
           }
-          const normalizedValues = w.value.map((entry: unknown) =>
-            normalizeDateForQuery(entry, model, w.field),
-          );
+          const normalizedValues = w.value.map((entry: unknown) => {
+            const withDates = normalizeDateForQuery(entry, model, w.field);
+            return normalizeJsonForQuery(withDates, model, w.field);
+          });
           return inArray(schemaModel[field], normalizedValues);
         }
-        return eq(
-          schemaModel[field],
-          normalizeDateForQuery(w.value, model, w.field),
+        const withDates = normalizeDateForQuery(w.value, model, w.field);
+        const normalizedValue = normalizeJsonForQuery(
+          withDates,
+          model,
+          w.field,
         );
+        return eq(schemaModel[field], normalizedValue);
       }),
     );
     const orClause = or(
       ...orGroup.map((w) => {
         const field = getField(model, w.field);
-        return eq(
-          schemaModel[field],
-          normalizeDateForQuery(w.value, model, w.field),
+        const withDates = normalizeDateForQuery(w.value, model, w.field);
+        const normalizedValue = normalizeJsonForQuery(
+          withDates,
+          model,
+          w.field,
         );
+        return eq(schemaModel[field], normalizedValue);
       }),
     );
 
@@ -306,10 +388,9 @@ const createTransform = (
           continue;
         }
         const appliedDefault = withApplyDefault(value, fieldAttr, action);
-        transformedData[fieldAttr.fieldName || field] = normalizeDateForWrite(
-          appliedDefault,
-          fieldAttr,
-        );
+        const withDates = normalizeDateForWrite(appliedDefault, fieldAttr);
+        const normalizedValue = normalizeJsonForWrite(withDates, fieldAttr);
+        transformedData[fieldAttr.fieldName || field] = normalizedValue;
       }
       return transformedData;
     },
@@ -344,7 +425,8 @@ const createTransform = (
         const field = tableSchema[key];
         if (field) {
           const rawValue = base[field.fieldName || key];
-          transformedData[key] = normalizeDateForOutput(rawValue, field);
+          const withDates = normalizeDateForOutput(rawValue, field);
+          transformedData[key] = normalizeJsonForOutput(withDates, field);
         }
       }
       return transformedData;
@@ -612,7 +694,21 @@ export const drizzleAdapter =
           rowsAffected?: number;
           length?: number;
         };
-        return maybe.changes ?? maybe.rowsAffected ?? maybe.length ?? 0;
+        if (typeof maybe.changes === "number") return maybe.changes;
+        if (typeof maybe.rowsAffected === "number") return maybe.rowsAffected;
+        if (typeof (maybe as { affectedRows?: number }).affectedRows === "number") {
+          return (maybe as { affectedRows: number }).affectedRows;
+        }
+        if (typeof (maybe as { rowCount?: number }).rowCount === "number") {
+          return (maybe as { rowCount: number }).rowCount;
+        }
+        if (typeof (maybe as { numChangedRows?: number }).numChangedRows === "number") {
+          return Number(
+            (maybe as { numChangedRows: bigint | number }).numChangedRows,
+          );
+        }
+        if (typeof maybe.length === "number") return maybe.length;
+        return 0;
       },
       async upsert<T>({
         model,
@@ -765,7 +861,21 @@ export const drizzleAdapter =
           rowsAffected?: number;
           length?: number;
         };
-        return maybe.changes ?? maybe.rowsAffected ?? maybe.length ?? 0;
+        if (typeof maybe.changes === "number") return maybe.changes;
+        if (typeof maybe.rowsAffected === "number") return maybe.rowsAffected;
+        if (typeof (maybe as { affectedRows?: number }).affectedRows === "number") {
+          return (maybe as { affectedRows: number }).affectedRows;
+        }
+        if (typeof (maybe as { rowCount?: number }).rowCount === "number") {
+          return (maybe as { rowCount: number }).rowCount;
+        }
+        if (typeof (maybe as { numChangedRows?: number }).numChangedRows === "number") {
+          return Number(
+            (maybe as { numChangedRows: bigint | number }).numChangedRows,
+          );
+        }
+        if (typeof maybe.length === "number") return maybe.length;
+        return 0;
       },
       options: config,
     } satisfies MemoryAdapter;

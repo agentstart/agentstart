@@ -2,7 +2,7 @@
 AGENT: CLI test module
 PURPOSE: Exercises AgentStart CLI commands to prevent regressions.
 USAGE: Executed with Vitest to validate CLI generators and configuration helpers.
-EXPORTS: (none)
+EXPORTS: tmpdirTest, start, db
 FEATURES:
   - Covers critical CLI workflows for schema generation
   - Uses snapshot assertions to track emitted files
@@ -10,42 +10,84 @@ SEARCHABLE: packages, cli, src, test, get, config, vitest
 agent-frontmatter:end */
 
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import fs from "fs-extra";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, test } from "vitest";
 import { getConfig } from "../utils/get-config";
+
+interface TmpDirFixture {
+  tmpdir: string;
+}
+
+async function createTempDir(): Promise<string> {
+  const tempRoot = path.join(
+    process.cwd(),
+    "src",
+    "__test__",
+    "temp",
+    "get-config",
+  );
+  await fs.ensureDir(tempRoot);
+  return (await fs.mkdtemp(path.join(tempRoot, "case-"))) as string;
+}
+
+export const tmpdirTest = test.extend<TmpDirFixture>({
+  // biome-ignore lint/correctness/noEmptyPattern: Vitest requires object destructuring for fixtures
+  tmpdir: async ({}, use) => {
+    const directory = await createTempDir();
+
+    await use(directory);
+  },
+});
 
 let tmpDir = ".";
 
-const currentDir = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(currentDir, "../../../..");
-
-const linkNodeModules = async (targetDir: string) => {
-  const source = path.join(repoRoot, "node_modules");
-  const destination = path.join(targetDir, "node_modules");
-  if (!(await fs.pathExists(destination))) {
-    await fs.ensureSymlink(source, destination, "dir");
-  }
-};
-
 const createAgentModuleSource = (
   dbImportPath: string,
-) => `import { agentStart } from "agentstart";
+  options?: { defaultExport?: boolean },
+) => {
+  return `import { agentStart } from "agentstart";
 import { prismaAdapter } from "agentstart/db";
 import { db } from "${dbImportPath}";
 
-export const start = agentStart({
+${options?.defaultExport ? "export default" : "export const start ="} agentStart({
+  agent: {} as any,
   memory: prismaAdapter(db, {
-    provider: "sqlite",
-  }),
-});
-`;
+    provider: "sqlite"
+  })
+})`;
+};
+
+const createDbModuleSource = () => {
+  return `class PrismaClient {
+  constructor() {}
+}
+
+export const db = new PrismaClient()`;
+};
+
+const createTsconfigSource = ({
+  baseUrl = ".",
+  paths,
+}: {
+  baseUrl?: string;
+  paths: Record<string, string[]>;
+}) =>
+  JSON.stringify(
+    {
+      compilerOptions: {
+        module: "esnext",
+        moduleResolution: "bundler",
+        baseUrl,
+        paths,
+      },
+    },
+    null,
+    2,
+  );
 
 describe("getConfig", async () => {
   beforeEach(async () => {
-    const tmp = path.join(process.cwd(), "getConfig_test-");
-    tmpDir = (await fs.mkdtemp(tmp, { encoding: "utf8" })) as string;
-    await linkNodeModules(tmpDir);
+    tmpDir = await createTempDir();
   });
 
   afterEach(async () => {
@@ -61,15 +103,11 @@ describe("getConfig", async () => {
     // create dummy tsconfig.json
     await fs.writeFile(
       path.join(tmpDir, "tsconfig.json"),
-      `{
-              "compilerOptions": {
-                /* Path Aliases */
-                "baseUrl": ".",
-                "paths": {
-                  "@server/*": ["./server/*"]
-                }
-              }
-          }`,
+      createTsconfigSource({
+        paths: {
+          "@server/*": ["./server/*"],
+        },
+      }),
     );
 
     // create dummy agent.ts
@@ -79,14 +117,7 @@ describe("getConfig", async () => {
     );
 
     // create dummy db.ts
-    await fs.writeFile(
-      path.join(dbPath, "db.ts"),
-      `class PrismaClient {
-        constructor() {}
-      }
-      
-      export const db = new PrismaClient()`,
-    );
+    await fs.writeFile(path.join(dbPath, "db.ts"), createDbModuleSource());
 
     const config = await getConfig({
       cwd: tmpDir,
@@ -105,15 +136,11 @@ describe("getConfig", async () => {
     // create dummy tsconfig.json
     await fs.writeFile(
       path.join(tmpDir, "tsconfig.json"),
-      `{
-              "compilerOptions": {
-                /* Path Aliases */
-                "baseUrl": ".",
-                "paths": {
-                  "prismaDbClient": ["./server/db/db"]
-                }
-              }
-          }`,
+      createTsconfigSource({
+        paths: {
+          prismaDbClient: ["./server/db/db"],
+        },
+      }),
     );
 
     // create dummy agent.ts
@@ -123,14 +150,7 @@ describe("getConfig", async () => {
     );
 
     // create dummy db.ts
-    await fs.writeFile(
-      path.join(dbPath, "db.ts"),
-      `class PrismaClient {
-        constructor() {}
-      }
-      
-      export const db = new PrismaClient()`,
-    );
+    await fs.writeFile(path.join(dbPath, "db.ts"), createDbModuleSource());
 
     const config = await getConfig({
       cwd: tmpDir,
@@ -149,15 +169,12 @@ describe("getConfig", async () => {
     // create dummy tsconfig.json
     await fs.writeFile(
       path.join(tmpDir, "tsconfig.json"),
-      `{
-              "compilerOptions": {
-                /* Path Aliases */
-                "baseUrl": "./test",
-                "paths": {
-                  "@server/*": ["./server/*"]
-                }
-              }
-          }`,
+      createTsconfigSource({
+        baseUrl: "./test",
+        paths: {
+          "@server/*": ["./server/*"],
+        },
+      }),
     );
 
     // create dummy agent.ts
@@ -167,14 +184,7 @@ describe("getConfig", async () => {
     );
 
     // create dummy db.ts
-    await fs.writeFile(
-      path.join(dbPath, "db.ts"),
-      `class PrismaClient {
-        constructor() {}
-      }
-      
-      export const db = new PrismaClient()`,
-    );
+    await fs.writeFile(path.join(dbPath, "db.ts"), createDbModuleSource());
 
     const config = await getConfig({
       cwd: tmpDir,
@@ -193,15 +203,12 @@ describe("getConfig", async () => {
     // create dummy tsconfig.json
     await fs.writeFile(
       path.join(tmpDir, "tsconfig.json"),
-      `{
-              "compilerOptions": {
-                /* Path Aliases */
-                "baseUrl": "./test",
-                "paths": {
-                  "prismaDbClient": ["./server/db/db"]
-                }
-              }
-          }`,
+      createTsconfigSource({
+        baseUrl: "./test",
+        paths: {
+          prismaDbClient: ["./server/db/db"],
+        },
+      }),
     );
 
     // create dummy agent.ts
@@ -211,14 +218,7 @@ describe("getConfig", async () => {
     );
 
     // create dummy db.ts
-    await fs.writeFile(
-      path.join(dbPath, "db.ts"),
-      `class PrismaClient {
-        constructor() {}
-      }
-      
-      export const db = new PrismaClient()`,
-    );
+    await fs.writeFile(path.join(dbPath, "db.ts"), createDbModuleSource());
 
     const config = await getConfig({
       cwd: tmpDir,
@@ -237,15 +237,12 @@ describe("getConfig", async () => {
     // create dummy tsconfig.json
     await fs.writeFile(
       path.join(tmpDir, "tsconfig.json"),
-      `{
-              "compilerOptions": {
-                /* Path Aliases */
-                "baseUrl": "./test",
-                "paths": {
-                  "prismaDbClient": ["./server/db/db"]
-                }
-              }
-          }`,
+      createTsconfigSource({
+        baseUrl: "./test",
+        paths: {
+          prismaDbClient: ["./server/db/db"],
+        },
+      }),
     );
 
     // create dummy agent.ts
@@ -255,14 +252,7 @@ describe("getConfig", async () => {
     );
 
     // create dummy db.ts
-    await fs.writeFile(
-      path.join(dbPath, "db.ts"),
-      `class PrismaClient {
-        constructor() {}
-      }
-      
-      export const db = new PrismaClient()`,
-    );
+    await fs.writeFile(path.join(dbPath, "db.ts"), createDbModuleSource());
 
     const config = await getConfig({
       cwd: tmpDir,
@@ -272,46 +262,107 @@ describe("getConfig", async () => {
     expect(config).not.toBe(null);
   });
 
-  it("should error with invalid alias", async () => {
-    const agentPath = path.join(tmpDir, "server", "agent");
-    const dbPath = path.join(tmpDir, "server", "db");
+  it("should resolve agent.ts file from root level", async () => {
+    const agentPath = path.join(tmpDir);
+    const dbPath = path.join(tmpDir, "db");
     await fs.mkdir(agentPath, { recursive: true });
     await fs.mkdir(dbPath, { recursive: true });
 
     // create dummy tsconfig.json
     await fs.writeFile(
       path.join(tmpDir, "tsconfig.json"),
-      `{
-              "compilerOptions": {
-                /* Path Aliases */
-                "baseUrl": ".",
-                "paths": {
-                  "@server/*": ["./PathIsInvalid/*"]
-                }
-              }
-          }`,
+      createTsconfigSource({
+        paths: {
+          prismaDbClient: ["./db/db"],
+        },
+      }),
     );
 
     // create dummy agent.ts
     await fs.writeFile(
       path.join(agentPath, "agent.ts"),
-      createAgentModuleSource("@server/db/db"),
+      createAgentModuleSource("prismaDbClient"),
     );
 
     // create dummy db.ts
+    await fs.writeFile(path.join(dbPath, "db.ts"), createDbModuleSource());
+
+    const config = await getConfig({
+      cwd: tmpDir,
+      configPath: "agent.ts",
+    });
+
+    expect(config).not.toBe(null);
+  });
+
+  it("should resolve agent.ts file from root level with default export", async () => {
+    const agentPath = path.join(tmpDir);
+    const dbPath = path.join(tmpDir, "db");
+    await fs.mkdir(agentPath, { recursive: true });
+    await fs.mkdir(dbPath, { recursive: true });
+
+    // create dummy tsconfig.json
     await fs.writeFile(
-      path.join(dbPath, "db.ts"),
-      `class PrismaClient {
-        constructor() {}
-      }
-      
-      export const db = new PrismaClient()`,
+      path.join(tmpDir, "tsconfig.json"),
+      createTsconfigSource({
+        paths: {
+          prismaDbClient: ["./db/db"],
+        },
+      }),
     );
+
+    // create dummy agent.ts
+    await fs.writeFile(
+      path.join(agentPath, "agent.ts"),
+      createAgentModuleSource("prismaDbClient", { defaultExport: true }),
+    );
+
+    // create dummy db.ts
+    await fs.writeFile(path.join(dbPath, "db.ts"), createDbModuleSource());
+
+    const config = await getConfig({ cwd: tmpDir, configPath: "agent.ts" });
+
+    expect(config).not.toBe(null);
+  });
+
+  it("should throw error if agent.ts file is invalid", async () => {
+    const agentPath = path.join(tmpDir);
+    const dbPath = path.join(tmpDir, "db");
+    await fs.mkdir(agentPath, { recursive: true });
+    await fs.mkdir(dbPath, { recursive: true });
+
+    // create dummy tsconfig.json
+    await fs.writeFile(
+      path.join(tmpDir, "tsconfig.json"),
+      createTsconfigSource({
+        paths: {
+          prismaDbClient: ["./db/db"],
+        },
+      }),
+    );
+
+    // create invalid agent.ts (no default export or start export)
+    await fs.writeFile(
+      path.join(agentPath, "agent.ts"),
+      `import { agentStart } from "agentstart";
+import { prismaAdapter } from "agentstart/db";
+import { db } from "prismaDbClient";
+
+export const invalidName = agentStart({
+  agent: {} as any,
+  memory: prismaAdapter(db, {
+    provider: "sqlite"
+  })
+})`,
+    );
+
+    // create dummy db.ts
+    await fs.writeFile(path.join(dbPath, "db.ts"), createDbModuleSource());
 
     await expect(
       getConfig({
         cwd: tmpDir,
-        configPath: "server/agent/agent.ts",
+        configPath: "agent.ts",
         shouldThrowOnError: true,
       }),
     ).rejects.toThrowError();

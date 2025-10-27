@@ -28,6 +28,17 @@ export const message = mysqlTable("message", {
   role: varchar("role", { length: 64 }).notNull(),
   parts: json("parts").notNull(),
   attachments: json("attachments"),
+  metadata: json("metadata"),
+  createdAt: datetime("createdAt", { mode: "date" }).notNull(),
+  updatedAt: datetime("updatedAt", { mode: "date" }).notNull(),
+});
+
+export const todo = mysqlTable("todo", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  threadId: varchar("threadId", { length: 255 })
+    .notNull()
+    .references(() => thread.id, { onDelete: "cascade" }),
+  todos: json("todos").notNull(),
   createdAt: datetime("createdAt", { mode: "date" }).notNull(),
   updatedAt: datetime("updatedAt", { mode: "date" }).notNull(),
 });

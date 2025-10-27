@@ -11,7 +11,7 @@ agent-frontmatter:end */
 import { PrismaClient } from "@prisma/client";
 import { beforeAll, describe, expect, test } from "vitest";
 import { runAdapterTest } from "../../test";
-import { prismaAdapter } from "../index";
+import { prismaAdapter } from "../prisma-adapter";
 
 const db = new PrismaClient();
 describe("adapter test", async () => {

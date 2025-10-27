@@ -9,6 +9,19 @@ FEATURES:
 SEARCHABLE: packages, agentstart, src, sandbox, adapter, e2b, git
 agent-frontmatter:end */
 
+import type {
+  GitAPI,
+  GitBranch,
+  GitCloneOptions,
+  GitCommitOptions,
+  GitLogEntry,
+  GitRemote,
+  GitResult,
+  GitStatus,
+  GitSyncOptions,
+  ShellCommandOptions,
+  ShellCommandResult,
+} from "@agentstart/types";
 import type { Sandbox } from "@e2b/code-interpreter";
 import path from "pathe";
 import {
@@ -22,21 +35,6 @@ import {
   extractCommitHash,
   parseGitStatusPorcelain,
 } from "@/sandbox/utils/git";
-import type {
-  ShellCommandOptions,
-  ShellCommandResult,
-} from "../../../../../types/src/sandbox/bash";
-import type {
-  GitAPI,
-  GitBranch,
-  GitCloneOptions,
-  GitCommitOptions,
-  GitLogEntry,
-  GitRemote,
-  GitResult,
-  GitStatus,
-  GitSyncOptions,
-} from "../../../../../types/src/sandbox/git";
 import { Bash } from "./bash";
 import { DEFAULT_WORKING_DIRECTORY } from "./constants";
 

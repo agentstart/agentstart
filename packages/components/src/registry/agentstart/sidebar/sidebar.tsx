@@ -27,6 +27,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuPositioner,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -307,32 +308,38 @@ function MoreOptions({
   return (
     <DropdownMenu>
       <Tooltip>
-        <DropdownMenuTrigger asChild>
-          <TooltipTrigger asChild>
-            <div className="flex size-5 cursor-pointer items-center justify-center rounded-md hover:bg-gray-200">
-              <DotsThreeIcon className="size-4" />
-            </div>
-          </TooltipTrigger>
-        </DropdownMenuTrigger>
+        <DropdownMenuTrigger
+          render={
+            <TooltipTrigger
+              render={
+                <div className="flex size-5 cursor-pointer items-center justify-center rounded-md hover:bg-gray-200">
+                  <DotsThreeIcon className="size-4" />
+                </div>
+              }
+            />
+          }
+        />
         <TooltipContent>
           <span>More options</span>
         </TooltipContent>
       </Tooltip>
 
-      <DropdownMenuContent>
-        <DropdownMenuItem onClick={handleRename}>
-          <PencilSimpleIcon weight="duotone" className="size-4.5" />{" "}
-          <span>Rename</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleDelete}>
-          <TrashIcon
-            weight="duotone"
-            className="size-4.5 text-destructive"
-            color="currentColor"
-          />{" "}
-          <span className="text-destructive">Delete</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
+      <DropdownMenuPositioner>
+        <DropdownMenuContent>
+          <DropdownMenuItem onClick={handleRename}>
+            <PencilSimpleIcon weight="duotone" className="size-4.5" />{" "}
+            <span>Rename</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleDelete}>
+            <TrashIcon
+              weight="duotone"
+              className="size-4.5 text-destructive"
+              color="currentColor"
+            />{" "}
+            <span className="text-destructive">Delete</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenuPositioner>
     </DropdownMenu>
   );
 }
