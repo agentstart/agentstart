@@ -11,9 +11,9 @@ FEATURES:
 SEARCHABLE: bash tool, shell command ui, terminal output view
 agent-frontmatter:end */
 
+import { ClockIcon } from "@phosphor-icons/react";
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
-import { ClockIcon } from "lucide-react";
 import { CodeBlock } from "../code-block";
 import { Tool, ToolContent, ToolHeader, ToolOutput } from "./tool";
 
@@ -48,7 +48,7 @@ export function Bash({
       {/* Status indicators */}
       {["input-streaming", "input-available"].includes(state) && (
         <div className="flex items-center gap-2 text-muted-foreground text-xs">
-          <ClockIcon className="h-3 w-3 animate-spin" />
+          <ClockIcon weight="duotone" className="size-4 animate-spin" />
           <span>Executing command...</span>
         </div>
       )}

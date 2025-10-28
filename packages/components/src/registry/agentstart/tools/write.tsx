@@ -12,9 +12,9 @@ SEARCHABLE: write tool, file creation ui, save file view
 agent-frontmatter:end */
 
 import { getLanguageFromFilePath } from "@agentstart/utils";
+import { FileIcon } from "@phosphor-icons/react";
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
-import { FileIcon } from "lucide-react";
 import { CodeBlock } from "../code-block";
 import { Tool, ToolContent, ToolHeader, ToolOutput } from "./tool";
 
@@ -59,7 +59,7 @@ export function WriteFile({
           output={
             <div>
               <div className="mb-2 flex items-center gap-2">
-                <FileIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                <FileIcon className="size-4" weight="duotone" />
                 <code className="text-xs">{fileName}</code>
                 {/* {state === "output-available" &&
                   output?.metadata?.commitHash && (

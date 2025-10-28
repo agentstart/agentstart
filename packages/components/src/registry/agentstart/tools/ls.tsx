@@ -12,9 +12,9 @@ SEARCHABLE: ls tool, directory listing, file browser ui
 agent-frontmatter:end */
 
 import { formatDate, formatSize } from "@agentstart/utils";
+import { FileIcon, FolderIcon, LinkIcon } from "@phosphor-icons/react";
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
-import { FileIcon, FolderIcon, LinkIcon } from "lucide-react";
 import { Tool, ToolContent, ToolHeader, ToolOutput } from "./tool";
 
 export interface LsProps {
@@ -27,11 +27,11 @@ export function Ls({
   const getIcon = (entryType: "file" | "directory" | "symlink") => {
     switch (entryType) {
       case "directory":
-        return <FolderIcon className="h-3 w-3 text-blue-600" />;
+        return <FolderIcon className="size-4" weight="duotone" />;
       case "symlink":
-        return <LinkIcon className="h-3 w-3 text-purple-600" />;
+        return <LinkIcon className="size-4" weight="duotone" />;
       default:
-        return <FileIcon className="h-3 w-3 text-muted-foreground" />;
+        return <FileIcon className="size-4" weight="duotone" />;
     }
   };
 

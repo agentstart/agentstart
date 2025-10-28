@@ -13,6 +13,6 @@ agent-frontmatter:end */
 export * from "./agent-client";
 export * from "./config";
 export * from "./store";
-export * from "./use-blob-attachments";
+export * from "./use-blob-files";
 export * from "./use-data-parts";
 export * from "./use-thread";

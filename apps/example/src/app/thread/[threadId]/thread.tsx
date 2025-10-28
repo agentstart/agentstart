@@ -26,7 +26,7 @@ export default function Thread({
         contentClassName="p-4 pb-48"
       />
 
-      <div className="absolute inset-x-0 bottom-0 pb-4">
+      <div className="sticky inset-x-0 bottom-0 pb-4">
         <PromptInput
           className="mx-auto"
           threadId={threadId}

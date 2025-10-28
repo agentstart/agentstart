@@ -12,9 +12,9 @@ SEARCHABLE: read tool, file view ui, code viewer
 agent-frontmatter:end */
 
 import { getLanguageFromFilePath } from "@agentstart/utils";
+import { EyeIcon } from "@phosphor-icons/react";
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
-import { EyeIcon } from "lucide-react";
 import { useMemo } from "react";
 import { CodeBlock } from "../code-block";
 import { Tool, ToolContent, ToolHeader, ToolOutput } from "./tool";
@@ -69,7 +69,7 @@ export function ReadFile({
           output={
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
-                <EyeIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                <EyeIcon className="size-4" weight="duotone" />
                 <code className="text-xs">{fileName}</code>
                 {readingRange && (
                   <span className="text-muted-foreground text-xs">

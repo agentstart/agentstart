@@ -83,7 +83,6 @@ export function SuggestedPrompts({
                 variant="outline"
                 size="sm"
                 onClick={() => handlePromptClick(prompt)}
-                className="cursor-pointer"
               >
                 {prompt}
                 <ArrowUpRightIcon className="size-3" weight="bold" />

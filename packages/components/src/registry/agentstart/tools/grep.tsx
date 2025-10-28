@@ -11,9 +11,9 @@ FEATURES:
 SEARCHABLE: grep tool, code search ui, content search results
 agent-frontmatter:end */
 
+import { FileIcon, HashIcon } from "@phosphor-icons/react";
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
-import { FileIcon, HashIcon } from "lucide-react";
 import { CodeBlock } from "../code-block";
 import { Tool, ToolContent, ToolHeader, ToolOutput } from "./tool";
 
@@ -60,7 +60,7 @@ export function Grep({
               key={`${file}-${index}`}
               className="flex items-center gap-2 py-0.5 text-xs"
             >
-              <FileIcon className="h-3 w-3 text-muted-foreground" />
+              <FileIcon className="size-4" weight="duotone" />
               <span className="font-mono">{file}</span>
             </div>
           ))}
@@ -99,7 +99,7 @@ export function Grep({
               key={`${item.filename}-${index}`}
               className="flex items-center gap-2 rounded px-1 py-0.5 hover:bg-muted/50"
             >
-              <HashIcon className="h-3 w-3 text-muted-foreground" />
+              <HashIcon className="size-4" weight="duotone" />
               <span className="w-12 text-right text-blue-600">
                 {item.count}
               </span>

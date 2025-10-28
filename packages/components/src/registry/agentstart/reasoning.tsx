@@ -1,6 +1,17 @@
+/* agent-frontmatter:start
+AGENT: Reasoning disclosure widget
+PURPOSE: Show expandable reasoning traces with streaming-aware behavior
+USAGE: import { Reasoning, ReasoningTrigger, ReasoningContent } from \"@/components/agent/reasoning\"
+EXPORTS: Reasoning, ReasoningTrigger, ReasoningContent
+FEATURES:
+  - Auto-opens while streaming and auto-closes after completion
+  - Displays duration summaries and shimmer placeholder
+SEARCHABLE: reasoning panel, collapsible thinking, agent reasoning ui
+agent-frontmatter:end */
+
 "use client";
 
-import { BrainIcon, ChevronDownIcon } from "lucide-react";
+import { BrainIcon, CaretDownIcon } from "@phosphor-icons/react";
 import type { ComponentProps } from "react";
 import { createContext, memo, useContext, useEffect, useState } from "react";
 
@@ -165,9 +176,9 @@ export const ReasoningTrigger = memo(
       >
         {children ?? (
           <>
-            <BrainIcon className="size-4" />
+            <BrainIcon className="size-4" weight="duotone" />
             {getThinkingMessage(isStreaming, duration)}
-            <ChevronDownIcon
+            <CaretDownIcon
               className={cn(
                 "size-4 transition-transform",
                 isOpen ? "rotate-180" : "rotate-0",

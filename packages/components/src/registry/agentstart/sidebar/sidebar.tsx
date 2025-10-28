@@ -24,13 +24,6 @@ import type { DBThread } from "agentstart/db";
 import { type ReactNode, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuPositioner,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Empty,
   EmptyContent,
   EmptyDescription,
@@ -38,6 +31,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { Menu, MenuItem, MenuPopup, MenuTrigger } from "@/components/ui/menu";
 import {
   Sidebar as ShadcnSidebar,
   SidebarInset,
@@ -248,7 +242,7 @@ export function Sidebar({
         <SidebarFooter footer={footer} />
         <SidebarRail />
       </ShadcnSidebar>
-      <SidebarInset className="h-screen bg-accent/80">{children}</SidebarInset>
+      <SidebarInset className="h-screen bg-background">{children}</SidebarInset>
     </SidebarProvider>
   );
 }
@@ -306,9 +300,9 @@ function MoreOptions({
   };
 
   return (
-    <DropdownMenu>
+    <Menu>
       <Tooltip>
-        <DropdownMenuTrigger
+        <MenuTrigger
           render={
             <TooltipTrigger
               render={
@@ -324,22 +318,20 @@ function MoreOptions({
         </TooltipContent>
       </Tooltip>
 
-      <DropdownMenuPositioner>
-        <DropdownMenuContent>
-          <DropdownMenuItem onClick={handleRename}>
-            <PencilSimpleIcon weight="duotone" className="size-4.5" />{" "}
-            <span>Rename</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleDelete}>
-            <TrashIcon
-              weight="duotone"
-              className="size-4.5 text-destructive"
-              color="currentColor"
-            />{" "}
-            <span className="text-destructive">Delete</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenuPositioner>
-    </DropdownMenu>
+      <MenuPopup>
+        <MenuItem onClick={handleRename}>
+          <PencilSimpleIcon weight="duotone" className="size-4.5" />{" "}
+          <span>Rename</span>
+        </MenuItem>
+        <MenuItem onClick={handleDelete}>
+          <TrashIcon
+            weight="duotone"
+            className="size-4.5 text-destructive"
+            color="currentColor"
+          />{" "}
+          <span className="text-destructive">Delete</span>
+        </MenuItem>
+      </MenuPopup>
+    </Menu>
   );
 }

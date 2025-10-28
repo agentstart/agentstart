@@ -18,9 +18,9 @@ import {
   Reasoning as BaseReasoning,
   ReasoningContent,
   ReasoningTrigger,
-} from "@/components/ai-elements/reasoning";
-import { Response } from "@/components/ai-elements/response";
-import { Shimmer } from "@/components/ai-elements/shimmer";
+} from "../reasoning";
+import { Response } from "../response";
+import { Shimmer } from "../shimmer";
 import { Bash } from "./bash";
 import { Glob } from "./glob";
 import { Grep } from "./grep";

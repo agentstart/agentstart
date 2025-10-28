@@ -16,22 +16,22 @@ import { create, type StoreApi, type UseBoundStore } from "zustand";
 import { devtools } from "zustand/middleware";
 import { useShallow } from "zustand/shallow";
 import type { AgentStartDataPart } from "@/agent";
-import type { BlobAttachmentList } from "../use-blob-attachments";
+import type { BlobFileList } from "../use-blob-files";
 
 export type ThreadDraft =
   | {
       text: string;
-      files?: BlobAttachmentList;
+      files?: BlobFileList;
     }
   | {
       text?: string;
-      files: BlobAttachmentList;
+      files: BlobFileList;
     };
 
 export interface QueuedAgentMessage {
   id: string;
   text?: string;
-  files?: BlobAttachmentList;
+  files?: BlobFileList;
   createdAt: number;
 }
 

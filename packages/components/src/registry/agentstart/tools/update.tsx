@@ -12,9 +12,9 @@ SEARCHABLE: update tool, file edit ui, code replacement view
 agent-frontmatter:end */
 
 import { getLanguageFromFilePath } from "@agentstart/utils";
+import { SwapIcon } from "@phosphor-icons/react";
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
-import { ReplaceIcon } from "lucide-react";
 import { CodeBlock } from "../code-block";
 import { Tool, ToolContent, ToolHeader, ToolOutput } from "./tool";
 
@@ -84,7 +84,7 @@ export function UpdateFile({
           output={
             <div>
               <div className="mb-2 flex items-center gap-2">
-                <ReplaceIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                <SwapIcon className="size-4" weight="duotone" />
                 <code className="text-xs">{fileName}</code>
                 {input?.replaceAll && (
                   <span className="text-muted-foreground text-xs">

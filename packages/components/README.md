@@ -1,6 +1,31 @@
 # @agentstart/components
 
-AgentStart’s component kit packages the conversation, tool, and layout primitives we use to wire agent front-ends. The goal is a batteries-included shadcn registry so teams can scaffold an AgentStart UI with a single CLI command.
+AgentStart's component kit packages the conversation, tool, and layout primitives we use to wire agent front-ends. The goal is a batteries-included shadcn registry so teams can scaffold an AgentStart UI with a single CLI command.
+
+## Available Components
+
+All components are available in the registry and can be installed via the shadcn CLI:
+
+### Core Components
+- **provider** - React context provider for sharing the AgentStart client instance
+- **conversation** - Thread messages with auto-scroll and tool-aware formatting
+- **prompt-input** - Input component supporting file attachments and drag-and-drop
+- **sidebar** - Thread management with infinite scroll and TanStack Query
+
+### UI Elements
+- **code-block** - Syntax-highlighted code with Shiki and copy functionality
+- **context** - Model usage widget with token/cost estimates via Tokenlens
+- **message** - Styled message wrappers for user and assistant messages
+- **queue** - Task queue with collapsible sections and file previews
+- **reasoning** - Expandable reasoning traces with streaming behavior
+- **response** - Markdown renderer using Streamdown
+- **shimmer** - Loading status with animated shimmer effects
+- **sources** - Collapsible citation lists for assistant responses
+- **suggested-prompts** - AI-generated follow-up suggestions
+
+### Tool Components
+- **message-part-view** - Tool dispatcher routing to specialized renderers
+  - Individual tool renderers: bash, glob, grep, ls, read, todo, tool, update, write
 
 ## Shadcn Registry Setup
 
@@ -30,11 +55,13 @@ AgentStart’s component kit packages the conversation, tool, and layout primiti
    npx shadcn@latest add tools/message-part-view --registry=@agentstart
    ```
 
-4. **Import components from the package export map**:
+4. **Use the generated components in your app**:
+
+   After running the CLI, the components live inside your project (for example `app/components/agent/*`). Import them just like any other shadcn-generated file:
 
    ```tsx
-   import { PromptInput } from "@agentstart/components/components/ai-elements/prompt-input";
-   import { MessagePart } from "@agentstart/components/components/tools/message-part-view";
+   import { PromptInput } from "@/components/agent/prompt-input";
+   import { MessagePart } from "@/components/agent/tools/message-part-view";
    ```
 
 ## Basecn & Coss UI Registries

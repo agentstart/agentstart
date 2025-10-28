@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Markdown response renderer
+PURPOSE: Render assistant text parts using Streamdown with stable memoization
+USAGE: import { Response } from \"@/components/agent/response\"
+EXPORTS: Response
+FEATURES:
+  - Applies consistent typography to markdown streams
+  - Memoizes children to avoid unnecessary rerenders
+SEARCHABLE: markdown renderer, streamdown response, agent output
+agent-frontmatter:end */
+
 "use client";
 
 import { type ComponentProps, memo } from "react";

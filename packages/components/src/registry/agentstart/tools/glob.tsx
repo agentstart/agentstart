@@ -11,9 +11,9 @@ FEATURES:
 SEARCHABLE: glob tool, file pattern match ui, file search results
 agent-frontmatter:end */
 
+import { FileIcon, FolderIcon } from "@phosphor-icons/react";
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
-import { FileIcon, FolderIcon } from "lucide-react";
 import { Tool, ToolContent, ToolHeader, ToolOutput } from "./tool";
 
 export interface GlobProps {
@@ -33,9 +33,9 @@ export function Glob({
     return (
       <div className="flex items-center gap-2 py-0.5 text-xs">
         {isDirectory ? (
-          <FolderIcon className="h-3 w-3 text-blue-600" />
+          <FolderIcon className="size-4" weight="duotone" />
         ) : (
-          <FileIcon className="h-3 w-3 text-muted-foreground" />
+          <FileIcon className="size-4" weight="duotone" />
         )}
         <span>
           {dirPath && <span className="text-muted-foreground">{dirPath}/</span>}

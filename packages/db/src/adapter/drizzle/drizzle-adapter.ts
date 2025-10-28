@@ -291,11 +291,7 @@ const createTransform = (
       }
 
       const withDates = normalizeDateForQuery(w.value, model, w.field);
-      const normalizedValue = normalizeJsonForQuery(
-        withDates,
-        model,
-        w.field,
-      );
+      const normalizedValue = normalizeJsonForQuery(withDates, model, w.field);
       return [eq(schemaModel[field], normalizedValue)];
     }
     const andGroup = where.filter((w) => w.connector === "AND" || !w.connector);
@@ -696,13 +692,18 @@ export const drizzleAdapter =
         };
         if (typeof maybe.changes === "number") return maybe.changes;
         if (typeof maybe.rowsAffected === "number") return maybe.rowsAffected;
-        if (typeof (maybe as { affectedRows?: number }).affectedRows === "number") {
+        if (
+          typeof (maybe as { affectedRows?: number }).affectedRows === "number"
+        ) {
           return (maybe as { affectedRows: number }).affectedRows;
         }
         if (typeof (maybe as { rowCount?: number }).rowCount === "number") {
           return (maybe as { rowCount: number }).rowCount;
         }
-        if (typeof (maybe as { numChangedRows?: number }).numChangedRows === "number") {
+        if (
+          typeof (maybe as { numChangedRows?: number }).numChangedRows ===
+          "number"
+        ) {
           return Number(
             (maybe as { numChangedRows: bigint | number }).numChangedRows,
           );
@@ -863,13 +864,18 @@ export const drizzleAdapter =
         };
         if (typeof maybe.changes === "number") return maybe.changes;
         if (typeof maybe.rowsAffected === "number") return maybe.rowsAffected;
-        if (typeof (maybe as { affectedRows?: number }).affectedRows === "number") {
+        if (
+          typeof (maybe as { affectedRows?: number }).affectedRows === "number"
+        ) {
           return (maybe as { affectedRows: number }).affectedRows;
         }
         if (typeof (maybe as { rowCount?: number }).rowCount === "number") {
           return (maybe as { rowCount: number }).rowCount;
         }
-        if (typeof (maybe as { numChangedRows?: number }).numChangedRows === "number") {
+        if (
+          typeof (maybe as { numChangedRows?: number }).numChangedRows ===
+          "number"
+        ) {
           return Number(
             (maybe as { numChangedRows: bigint | number }).numChangedRows,
           );

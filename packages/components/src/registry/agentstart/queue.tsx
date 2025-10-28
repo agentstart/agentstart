@@ -1,6 +1,17 @@
+/* agent-frontmatter:start
+AGENT: Prompt queue components
+PURPOSE: Render queued agent tasks, files, and todos with collapsible sections
+USAGE: import { Queue, QueueItem, QueueSection } from \"@/components/agent/queue\"
+EXPORTS: Queue, QueueItem, QueueItemIndicator, QueueItemContent, QueueItemDescription, QueueItemActions, QueueItemAction, QueueItemAttachment, QueueItemImage, QueueItemFile, QueueList, QueueSection, QueueSectionTrigger, QueueSectionLabel, QueueSectionContent
+FEATURES:
+  - Collapsible queue sections with counts
+  - Attachment previews for files and images
+SEARCHABLE: queue ui, task list, attachments queue, agent queue
+agent-frontmatter:end */
+
 "use client";
 
-import { ChevronDownIcon, PaperclipIcon } from "lucide-react";
+import { CaretDownIcon, FileIcon } from "@phosphor-icons/react";
 import type { ComponentProps } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -174,7 +185,7 @@ export const QueueItemFile = ({
     )}
     {...props}
   >
-    <PaperclipIcon size={12} />
+    <FileIcon size={12} />
     <span className="max-w-[100px] truncate">{children}</span>
   </span>
 );
@@ -243,7 +254,7 @@ export const QueueSectionLabel = ({
   ...props
 }: QueueSectionLabelProps) => (
   <span className={cn("flex items-center gap-2", className)} {...props}>
-    <ChevronDownIcon className="group-data-[state=closed]:-rotate-90 size-4 transition-transform" />
+    <CaretDownIcon className="group-data-panel-open:-rotate-90 size-3 transition-transform" />
     {icon}
     <span>
       {count} {label}

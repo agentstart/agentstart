@@ -1,8 +1,19 @@
+/* agent-frontmatter:start
+AGENT: Model usage context widget
+PURPOSE: Display token and cost usage details for the current model
+USAGE: import { Context, ContextTrigger, ContextContent } from \"@/components/agent/context\"
+EXPORTS: Context, ContextTrigger, ContextContent, ContextContentHeader, ContextContentBody, ContextContentFooter, ContextInputUsage, ContextOutputUsage, ContextReasoningUsage, ContextCacheUsage
+FEATURES:
+  - Calculates costs using Tokenlens estimates
+  - Provides hoverable preview card with token breakdown
+SEARCHABLE: token usage, cost estimator, context preview, agent usage widget
+agent-frontmatter:end */
+
 "use client";
 
 import type { LanguageModelUsage } from "ai";
 import { type ComponentProps, createContext, useContext } from "react";
-import { estimateCost, type ModelId } from "tokenlens";
+import { getUsage } from "tokenlens";
 import { Button } from "@/components/ui/button";
 import {
   PreviewCard,
@@ -22,7 +33,7 @@ type ContextSchema = {
   usedTokens: number;
   maxTokens: number;
   usage?: LanguageModelUsage;
-  modelId?: ModelId;
+  modelId?: string;
 };
 
 const ContextContext = createContext<ContextSchema | null>(null);
@@ -199,13 +210,13 @@ export const ContextContentFooter = ({
 }: ContextContentFooter) => {
   const { modelId, usage } = useContextValue();
   const costUSD = modelId
-    ? estimateCost({
+    ? getUsage({
         modelId,
         usage: {
           input: usage?.inputTokens ?? 0,
           output: usage?.outputTokens ?? 0,
         },
-      }).totalUSD
+      }).costUSD?.totalUSD
     : undefined;
   const totalCost = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -249,10 +260,10 @@ export const ContextInputUsage = ({
   }
 
   const inputCost = modelId
-    ? estimateCost({
+    ? getUsage({
         modelId,
         usage: { input: inputTokens, output: 0 },
-      }).totalUSD
+      })?.costUSD?.totalUSD
     : undefined;
   const inputCostText = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -289,10 +300,10 @@ export const ContextOutputUsage = ({
   }
 
   const outputCost = modelId
-    ? estimateCost({
+    ? getUsage({
         modelId,
         usage: { input: 0, output: outputTokens },
-      }).totalUSD
+      })?.costUSD?.totalUSD
     : undefined;
   const outputCostText = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -329,10 +340,10 @@ export const ContextReasoningUsage = ({
   }
 
   const reasoningCost = modelId
-    ? estimateCost({
+    ? getUsage({
         modelId,
         usage: { reasoningTokens },
-      }).totalUSD
+      })?.costUSD?.totalUSD
     : undefined;
   const reasoningCostText = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -369,10 +380,10 @@ export const ContextCacheUsage = ({
   }
 
   const cacheCost = modelId
-    ? estimateCost({
+    ? getUsage({
         modelId,
         usage: { cacheReads: cacheTokens, input: 0, output: 0 },
-      }).totalUSD
+      })?.costUSD?.totalUSD
     : undefined;
   const cacheCostText = new Intl.NumberFormat("en-US", {
     style: "currency",

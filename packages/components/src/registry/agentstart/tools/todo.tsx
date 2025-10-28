@@ -11,14 +11,14 @@ FEATURES:
 SEARCHABLE: todo tool, task list ui, progress tracker
 agent-frontmatter:end */
 
-import type { Tools } from "agentstart/agent";
-import type { InferUITools, ToolUIPart } from "ai";
 import {
-  AlertCircleIcon,
-  CheckCircle2Icon,
+  CheckIcon,
   CircleIcon,
   ClockIcon,
-} from "lucide-react";
+  WarningIcon,
+} from "@phosphor-icons/react";
+import type { Tools } from "agentstart/agent";
+import type { InferUITools, ToolUIPart } from "ai";
 import type React from "react";
 import { cn } from "@/lib/utils";
 import { Tool, ToolContent, ToolHeader, ToolOutput } from "./tool";
@@ -26,9 +26,9 @@ import { Tool, ToolContent, ToolHeader, ToolOutput } from "./tool";
 const statusOrder = ["inProgress", "pending", "completed"];
 
 const statusIcons: Record<string, React.ReactNode> = {
-  completed: <CheckCircle2Icon className="h-3.5 w-3.5 text-green-600" />,
-  inProgress: <ClockIcon className="h-3.5 w-3.5 animate-pulse text-blue-600" />,
-  pending: <CircleIcon className="h-3.5 w-3.5 text-muted-foreground" />,
+  completed: <CheckIcon className="size-3.5 text-green-600" />,
+  inProgress: <ClockIcon className="size-3.5 animate-pulse text-blue-600" />,
+  pending: <CircleIcon className="size-3.5 text-muted-foreground" />,
 };
 
 const getStatusIcon = (status: string) => statusIcons[status] ?? null;
@@ -87,7 +87,7 @@ export function Todo({ part: { type, state, output, errorText } }: TodoProps) {
 
   const todoListContent = errorText ? (
     <div className="flex items-center gap-2 text-red-600">
-      <AlertCircleIcon className="h-4 w-4" />
+      <WarningIcon className="size-4" weight="duotone" />
       <span className="text-xs">{errorText}</span>
     </div>
   ) : (

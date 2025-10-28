@@ -1,6 +1,17 @@
+/* agent-frontmatter:start
+AGENT: Source citation accordion
+PURPOSE: Display expandable citation lists for assistant responses
+USAGE: import { Sources, SourcesTrigger, SourcesContent, Source } from \"@/components/agent/sources\"
+EXPORTS: Sources, SourcesTrigger, SourcesContent, Source
+FEATURES:
+  - Collapsible list of used sources
+  - Provides default trigger and link styling
+SEARCHABLE: citations, sources list, collapsible references, agent sources
+agent-frontmatter:end */
+
 "use client";
 
-import { BookIcon, ChevronDownIcon } from "lucide-react";
+import { BookIcon, CaretDownIcon } from "@phosphor-icons/react";
 import type { ComponentProps } from "react";
 import {
   Collapsible,
@@ -35,7 +46,7 @@ export const SourcesTrigger = ({
     {children ?? (
       <>
         <p className="font-medium">Used {count} sources</p>
-        <ChevronDownIcon className="h-4 w-4" />
+        <CaretDownIcon className="size-4" />
       </>
     )}
   </CollapsibleTrigger>
@@ -69,7 +80,7 @@ export const Source = ({ href, title, children, ...props }: SourceProps) => (
   >
     {children ?? (
       <>
-        <BookIcon className="h-4 w-4" />
+        <BookIcon className="size-4" weight="duotone" />
         <span className="block font-medium">{title}</span>
       </>
     )}

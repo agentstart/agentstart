@@ -2,7 +2,7 @@
 AGENT: Agent conversation viewer
 PURPOSE: Render thread messages with auto-scroll and tool-aware formatting
 USAGE: <Conversation threadId={threadId} />
-EXPORTS: Conversation, ConversationProps
+EXPORTS: Conversation, ConversationProps, ConversationContent, ConversationEmptyState, ConversationScrollButton
 FEATURES:
   - Loads thread transcripts with TanStack Query and the AgentStart client
   - Displays AI responses and tool interactions with timeline styling
@@ -14,30 +14,18 @@ agent-frontmatter:end */
 
 import {
   ArrowsClockwiseIcon,
+  CaretDownIcon,
   ChatSlashIcon,
+  CheckIcon,
   CopyIcon,
 } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import type { AgentStartUIMessage } from "agentstart/agent";
 import { type AgentStore, useAgentStore } from "agentstart/client";
-import type { ReactNode } from "react";
-import { useCallback, useEffect, useMemo } from "react";
-import { Action, Actions } from "@/components/ai-elements/actions";
-import {
-  Conversation as BaseConversation,
-  type ConversationProps as BaseConversationProps,
-  ConversationContent,
-  ConversationEmptyState,
-  ConversationScrollButton,
-} from "@/components/ai-elements/conversation";
-import { Message, MessageContent } from "@/components/ai-elements/message";
-import { Response } from "@/components/ai-elements/response";
-import {
-  Source,
-  Sources,
-  SourcesContent,
-  SourcesTrigger,
-} from "@/components/ai-elements/sources";
+import { format, formatDistanceToNow } from "date-fns";
+import type { ComponentProps, ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -47,14 +35,114 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
+import { Tooltip, TooltipPopup, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { Message, MessageContent } from "./message";
 import { useAgentStartContext } from "./provider";
-import { StatusIndicators } from "./status-indicators";
+import { Response } from "./response";
+import { StatusIndicators } from "./shimmer";
+import { Source, Sources, SourcesContent, SourcesTrigger } from "./sources";
 import { SuggestedPrompts } from "./suggested-prompts";
 import { MessagePart } from "./tools/message-part-view";
 
-export interface ConversationProps
-  extends Omit<BaseConversationProps, "children"> {
+// Helper types
+type MessagePartType = NonNullable<AgentStartUIMessage["parts"]>[number];
+type TextPart = MessagePartType & { type: "text"; text: string };
+type ImagePart = MessagePartType & {
+  type: "file";
+  url: string;
+  mediaType: string;
+  filename?: string;
+};
+
+// Type guards
+const isTextPart = (part: MessagePartType): part is TextPart =>
+  part?.type === "text" &&
+  typeof part.text === "string" &&
+  part.text.length > 0;
+
+const isImagePart = (part: MessagePartType): part is ImagePart =>
+  part?.type === "file" &&
+  typeof (part as { mediaType?: unknown }).mediaType === "string" &&
+  ((part as { mediaType?: string }).mediaType?.startsWith("image/") ?? false) &&
+  typeof (part as { url?: unknown }).url === "string" &&
+  ((part as { url?: string }).url?.length ?? 0) > 0;
+
+// Helper functions
+const getFileCount = (files: unknown): number => {
+  if (files instanceof FileList) return files.length;
+  if (Array.isArray(files)) return files.length;
+  return 0;
+};
+
+const hasNewThreadDraftContent = (draft: unknown): boolean => {
+  if (!draft || typeof draft !== "object") return false;
+  const d = draft as { text?: string; files?: unknown };
+  const hasText = (d.text?.trim() ?? "").length > 0;
+  const fileCount = getFileCount(d.files);
+  return hasText || fileCount > 0;
+};
+
+const copyMessageText = (message: AgentStartUIMessage): void => {
+  const parts = message.parts ?? [];
+  if (parts.length === 0) return;
+  const text = parts.find((part) => part.type === "text")?.text ?? "";
+  if (!text) return;
+  void navigator.clipboard.writeText(text);
+};
+
+type RelativeTimeProps = {
+  timestamp?: number | Date;
+};
+
+const RelativeTime = ({ timestamp }: RelativeTimeProps) => {
+  const [relativeTime, setRelativeTime] = useState<string>("");
+  const absoluteTime = useMemo(
+    () =>
+      timestamp
+        ? format(timestamp, "M/d/yyyy, h:mm a") // 10/28/2025, 12:04 PM
+        : null,
+    [timestamp],
+  );
+
+  useEffect(() => {
+    if (!timestamp) {
+      setRelativeTime("");
+      return;
+    }
+
+    const updateRelativeTime = () => {
+      setRelativeTime(
+        formatDistanceToNow(new Date(timestamp), { addSuffix: true }),
+      );
+    };
+
+    updateRelativeTime();
+    const interval = setInterval(updateRelativeTime, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, [timestamp]);
+
+  if (!timestamp || !relativeTime) {
+    return null;
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger className="cursor-default text-muted-foreground text-xs">
+        {relativeTime}
+      </TooltipTrigger>
+      <TooltipPopup>
+        <p className="text-xs">{absoluteTime}</p>
+      </TooltipPopup>
+    </Tooltip>
+  );
+};
+
+export type ConversationProps = Omit<
+  ComponentProps<typeof StickToBottom>,
+  "children"
+> & {
   contentClassName?: string;
   /**
    * Thread identifier to hydrate the conversation.
@@ -76,7 +164,122 @@ export interface ConversationProps
    * Provide a custom error renderer when fetching messages fails.
    */
   errorState?: (error: Error, retry: () => void) => ReactNode;
-}
+};
+
+export type ConversationEmptyStateProps = ComponentProps<"div"> & {
+  title?: string;
+  description?: string;
+  icon?: ReactNode;
+};
+
+export const ConversationEmptyState = ({
+  className,
+  title = "No messages yet",
+  description = "Start a conversation to see messages here",
+  icon,
+  children,
+  ...props
+}: ConversationEmptyStateProps) => (
+  <div
+    className={cn(
+      "flex size-full flex-col items-center justify-center gap-3 p-8 text-center",
+      className,
+    )}
+    {...props}
+  >
+    {children ?? (
+      <>
+        {icon && <div className="text-muted-foreground">{icon}</div>}
+        <div className="space-y-1">
+          <h3 className="font-medium text-sm">{title}</h3>
+          {description && (
+            <p className="text-muted-foreground text-sm">{description}</p>
+          )}
+        </div>
+      </>
+    )}
+  </div>
+);
+
+type CopyButtonProps = Omit<
+  ComponentProps<typeof Button>,
+  "onClick" | "children"
+> & {
+  onCopy: () => void;
+  feedbackDuration?: number;
+};
+
+const CopyButton = ({
+  onCopy,
+  feedbackDuration = 3000,
+  disabled,
+  ...props
+}: CopyButtonProps) => {
+  const [isCopied, setIsCopied] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleClick = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    onCopy();
+    setIsCopied(true);
+
+    timeoutRef.current = setTimeout(() => {
+      setIsCopied(false);
+      timeoutRef.current = null;
+    }, feedbackDuration);
+  };
+
+  return (
+    <Button onClick={handleClick} disabled={disabled || isCopied} {...props}>
+      {isCopied ? (
+        <CheckIcon className="size-4" weight="duotone" />
+      ) : (
+        <CopyIcon className="size-4" weight="duotone" />
+      )}
+      <span className="sr-only">{isCopied ? "Copied" : "Copy"}</span>
+    </Button>
+  );
+};
+
+export type ConversationScrollButtonProps = ComponentProps<typeof Button>;
+
+export const ConversationScrollButton = ({
+  className,
+  ...props
+}: ConversationScrollButtonProps) => {
+  const { isAtBottom, scrollToBottom } = useStickToBottomContext();
+
+  if (isAtBottom) {
+    return null;
+  }
+
+  return (
+    <Button
+      className={cn(
+        "absolute bottom-4 left-[50%] translate-x-[-50%] rounded-full",
+        className,
+      )}
+      onClick={() => scrollToBottom()}
+      size="icon"
+      type="button"
+      variant="outline"
+      {...props}
+    >
+      <CaretDownIcon className="size-4" weight="duotone" />
+    </Button>
+  );
+};
 
 type UIAgentStore = AgentStore<AgentStartUIMessage>;
 
@@ -123,21 +326,7 @@ export function Conversation({
     UIAgentStore["messageQueue"]
   >((state) => state.messageQueue);
   const hasQueue = messageQueue.length > 0;
-
-  const hasNewThreadDraft = useMemo(() => {
-    if (!newThreadDraft) return false;
-
-    const hasText = (newThreadDraft.text?.trim() ?? "").length > 0;
-    const files = newThreadDraft.files;
-    const fileCount =
-      files instanceof FileList
-        ? files.length
-        : Array.isArray(files)
-          ? files.length
-          : 0;
-
-    return hasText || fileCount > 0;
-  }, [newThreadDraft]);
+  const hasNewThreadDraft = hasNewThreadDraftContent(newThreadDraft);
 
   const queryResult = useQuery(
     orpc.message.get.queryOptions({
@@ -199,36 +388,9 @@ export function Conversation({
   );
 
   const renderUserMessage = useCallback((message: AgentStartUIMessage) => {
-    type MessagePart = NonNullable<AgentStartUIMessage["parts"]>[number];
-    const parts = (message.parts ?? []) as MessagePart[];
-
-    const textParts = parts.filter(
-      (part): part is MessagePart & { type: "text"; text: string } =>
-        Boolean(
-          part?.type === "text" &&
-            typeof part.text === "string" &&
-            part.text.length > 0,
-        ),
-    );
-
-    const imageParts = parts.filter(
-      (
-        part,
-      ): part is MessagePart & {
-        type: "file";
-        url: string;
-        mediaType: string;
-        filename?: string;
-      } =>
-        Boolean(
-          part?.type === "file" &&
-            typeof (part as { mediaType?: unknown }).mediaType === "string" &&
-            ((part as { mediaType?: string }).mediaType?.startsWith("image/") ??
-              false) &&
-            typeof (part as { url?: unknown }).url === "string" &&
-            ((part as { url?: string }).url?.length ?? 0) > 0,
-        ),
-    );
+    const parts = (message.parts ?? []) as MessagePartType[];
+    const textParts = parts.filter(isTextPart);
+    const imageParts = parts.filter(isImagePart);
 
     if (textParts.length === 0 && imageParts.length === 0) {
       return null;
@@ -269,91 +431,80 @@ export function Conversation({
     );
   }, []);
 
-  const handleCopy = useCallback((message: AgentStartUIMessage) => {
+  const renderUserActions = (message: AgentStartUIMessage) => (
+    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
+      <CopyButton
+        className="size-7"
+        size="icon-sm"
+        variant="ghost"
+        onCopy={() => copyMessageText(message)}
+      />
+
+      <RelativeTime timestamp={message.metadata?.createdAt} />
+    </div>
+  );
+
+  const renderAssistantActions = (message: AgentStartUIMessage) => {
     const parts = message.parts ?? [];
-    const text = parts.find((part) => part.type === "text")?.text ?? "";
-    void navigator.clipboard.writeText(text);
-  }, []);
+    const sourceParts = parts.filter((part) => part.type === "source-url");
 
-  const renderUserActions = useCallback(
-    (message: AgentStartUIMessage) => (
-      <Actions className="opacity-0 group-hover:opacity-100">
-        <Action
-          className="size-7"
-          onClick={() => handleCopy(message)}
-          label="Copy"
-          tooltip="Copy"
-        >
-          <CopyIcon className="size-4" />
-        </Action>
-      </Actions>
-    ),
-    [handleCopy],
-  );
+    return (
+      <>
+        <div className="mt-2 flex w-full items-center justify-start gap-1 opacity-0 group-hover:opacity-100">
+          <Button
+            className="size-7"
+            size="icon-sm"
+            variant="ghost"
+            onClick={() =>
+              regenerate({
+                body: {
+                  threadId,
+                },
+              })
+            }
+          >
+            <ArrowsClockwiseIcon className="size-4" weight="duotone" />
+            <span className="sr-only">Retry</span>
+          </Button>
 
-  const renderAssistantActions = useCallback(
-    (message: AgentStartUIMessage) => {
-      const parts = message.parts ?? [];
-      const sourceParts = parts.filter((part) => part.type === "source-url");
+          <CopyButton
+            className="size-7"
+            size="icon-sm"
+            variant="ghost"
+            onCopy={() => copyMessageText(message)}
+          />
 
-      return (
-        <>
-          <Actions className="mt-2 w-full justify-start opacity-0 group-hover:opacity-100">
-            <Action
-              className="size-7"
-              onClick={() =>
-                regenerate({
-                  body: {
-                    threadId,
-                  },
-                })
-              }
-              label="Retry"
-              tooltip="Retry"
-            >
-              <ArrowsClockwiseIcon className="size-4" />
-            </Action>
-            <Action
-              className="size-7"
-              onClick={() => handleCopy(message)}
-              label="Copy"
-              tooltip="Copy"
-            >
-              <CopyIcon className="size-4" />
-            </Action>
-          </Actions>
+          <RelativeTime timestamp={message.metadata?.createdAt} />
+        </div>
 
-          {sourceParts.length > 0 && (
-            <div className="mt-2 w-full">
-              <Sources>
-                <SourcesTrigger count={sourceParts.length} />
-                <SourcesContent>
-                  {sourceParts.map((part, index) => {
-                    const sourcePart = part as {
-                      url: string;
-                      title?: string;
-                    };
-                    return (
-                      <Source
-                        key={`${message.id}-source-${index}`}
-                        href={sourcePart.url}
-                        title={sourcePart.title || sourcePart.url}
-                      />
-                    );
-                  })}
-                </SourcesContent>
-              </Sources>
-            </div>
-          )}
-        </>
-      );
-    },
-    [handleCopy, regenerate],
-  );
+        {sourceParts.length > 0 && (
+          <div className="mt-2 w-full">
+            <Sources>
+              <SourcesTrigger count={sourceParts.length} />
+              <SourcesContent>
+                {sourceParts.map((part, index) => {
+                  const sourcePart = part as {
+                    url: string;
+                    title?: string;
+                  };
+                  return (
+                    <Source
+                      key={`${message.id}-source-${index}`}
+                      href={sourcePart.url}
+                      title={sourcePart.title || sourcePart.url}
+                    />
+                  );
+                })}
+              </SourcesContent>
+            </Sources>
+          </div>
+        )}
+      </>
+    );
+  };
 
   const fetchError = isError ? (queryError as Error) : null;
-  const effectiveMessages = messages.length > 0 ? messages : [];
-  const hasMessages = effectiveMessages.length > 0;
+  const hasMessages = messages.length > 0;
   const showInitialLoading =
     Boolean(threadId) &&
     !hasMessages &&
@@ -361,7 +512,12 @@ export function Conversation({
 
   const defaultEmptyState = (
     <ConversationEmptyState
-      icon={<ChatSlashIcon className="size-12 text-muted-foreground" />}
+      icon={
+        <ChatSlashIcon
+          className="size-12 text-muted-foreground"
+          weight="duotone"
+        />
+      }
       title="Start a conversation"
       description="Send a message to begin chatting with the agent."
     />
@@ -377,7 +533,9 @@ export function Conversation({
 
   const defaultErrorState = fetchError && (
     <ConversationEmptyState
-      icon={<ChatSlashIcon className="size-12 text-destructive" />}
+      icon={
+        <ChatSlashIcon className="size-12 text-destructive" weight="duotone" />
+      }
       title="Unable to load messages"
       description={fetchError.message ?? "Please try again."}
     >
@@ -387,27 +545,38 @@ export function Conversation({
     </ConversationEmptyState>
   );
 
+  const resolvedEmptyState = emptyState ?? defaultEmptyState;
+  const resolvedLoadingState = loadingState ?? defaultLoadingState;
+  const resolvedErrorState = fetchError
+    ? (errorState?.(fetchError, () => refetch()) ?? defaultErrorState)
+    : null;
+  const shouldShowStatusIndicators =
+    status === "streaming" || status === "submitted";
+
   return (
-    <BaseConversation
-      className={cn("relative flex w-full flex-col", className)}
+    <StickToBottom
+      className={cn("relative flex size-full flex-col", className)}
+      initial="smooth"
+      resize="smooth"
+      role="log"
       {...props}
     >
-      <ConversationContent
+      <StickToBottom.Content
         className={cn(
           "mx-auto flex flex-1 flex-col gap-4 p-0 sm:min-w-[390px] sm:max-w-3xl",
           contentClassName,
         )}
       >
-        {fetchError ? (
-          (errorState?.(fetchError, refetch) ?? defaultErrorState)
+        {resolvedErrorState ? (
+          resolvedErrorState
         ) : hasMessages ? (
           <div className="flex flex-col gap-4">
-            {effectiveMessages.map((message, index) => {
+            {messages.map((message, index) => {
               if (message.role === "system") {
                 return null;
               }
 
-              const isLastMessage = index === effectiveMessages.length - 1;
+              const isLastMessage = index === messages.length - 1;
               return (
                 <Message
                   from={message.role}
@@ -422,7 +591,7 @@ export function Conversation({
                   <MessageContent
                     className={cn({
                       "space-y-3": message.role === "assistant",
-                      "relative flex items-center overflow-hidden rounded-[12px] border bg-background! p-3 text-base text-foreground! ltr:rounded-br-none rtl:rounded-bl-none dark:border-0":
+                      "text-base ltr:rounded-br-none rtl:rounded-bl-none":
                         message.role === "user",
                     })}
                     variant={
@@ -441,9 +610,7 @@ export function Conversation({
                 </Message>
               );
             })}
-            {["streaming", "submitted"].includes(status) && (
-              <StatusIndicators />
-            )}
+            {shouldShowStatusIndicators && <StatusIndicators />}
             {storeError && (
               <Empty>
                 <EmptyHeader>
@@ -456,7 +623,7 @@ export function Conversation({
                 </EmptyHeader>
                 <EmptyContent>
                   <Button variant="outline" size="sm">
-                    <ArrowsClockwiseIcon className="size-4" />
+                    <ArrowsClockwiseIcon className="size-4" weight="duotone" />
                     Retry
                   </Button>
                 </EmptyContent>
@@ -464,9 +631,9 @@ export function Conversation({
             )}
           </div>
         ) : showInitialLoading ? (
-          (loadingState ?? defaultLoadingState)
+          resolvedLoadingState
         ) : (
-          (emptyState ?? defaultEmptyState)
+          resolvedEmptyState
         )}
 
         <SuggestedPrompts
@@ -475,13 +642,13 @@ export function Conversation({
             "pt-0": !hasMessages,
           })}
         />
-      </ConversationContent>
+      </StickToBottom.Content>
 
       <ConversationScrollButton
         className={cn("bottom-42", {
           "bottom-52": hasQueue,
         })}
       />
-    </BaseConversation>
+    </StickToBottom>
   );
 }

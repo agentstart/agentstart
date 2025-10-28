@@ -1,3 +1,14 @@
+/* agent-frontmatter:start
+AGENT: Conversation message shells
+PURPOSE: Provide styled wrappers for user and assistant messages in transcripts
+USAGE: import { Message, MessageContent, MessageAvatar } from \"@/components/agent/message\"
+EXPORTS: Message, MessageContent, MessageAvatar
+FEATURES:
+  - Variant-aware message body styling
+  - Avatar helper for sender identity
+SEARCHABLE: message layout, avatar, transcript message, agent bubble
+agent-frontmatter:end */
+
 import type { UIMessage } from "ai";
 import { cva, type VariantProps } from "class-variance-authority";
 import type { ComponentProps, HTMLAttributes } from "react";
@@ -20,18 +31,16 @@ export const Message = ({ className, from, ...props }: MessageProps) => (
 );
 
 const messageContentVariants = cva(
-  "is-user:dark flex flex-col gap-2 overflow-hidden rounded-lg text-sm",
+  "is-user:dark flex flex-col gap-2 overflow-hidden rounded-xl text-sm",
   {
     variants: {
       variant: {
         contained: [
           "max-w-[80%] px-4 py-3",
-          "group-[.is-user]:bg-primary group-[.is-user]:text-primary-foreground",
-          "group-[.is-assistant]:bg-secondary group-[.is-assistant]:text-foreground",
+          "group-[.is-user]:bg-secondary group-[.is-user]:text-secondary-foreground",
         ],
         flat: [
           "group-[.is-user]:max-w-[80%] group-[.is-user]:bg-secondary group-[.is-user]:px-4 group-[.is-user]:py-3 group-[.is-user]:text-foreground",
-          "group-[.is-assistant]:text-foreground",
         ],
       },
     },

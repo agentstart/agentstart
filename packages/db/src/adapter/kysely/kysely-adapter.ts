@@ -82,11 +82,7 @@ const createTransform = (
       return value;
     }
     const isJsonField = f.type === "json";
-    if (
-      value !== null &&
-      value !== undefined &&
-      isJsonField
-    ) {
+    if (value !== null && value !== undefined && isJsonField) {
       if (type === "sqlite" || type === "mssql" || type === "mysql") {
         return JSON.stringify(value);
       }

@@ -29,10 +29,10 @@ import type { AgentStartUIMessage } from "@/agent";
 import type { AgentStartAPI } from "@/api";
 import { useDataStateMapper } from "./data-state-mapper";
 import { type AgentStoreWithSync, getAgentStore } from "./store/agent";
-import type { BlobAttachmentList } from "./use-blob-attachments";
+import type { BlobFileList } from "./use-blob-files";
 
 function toSendableFiles(
-  files?: BlobAttachmentList,
+  files?: BlobFileList,
 ): FileList | FileUIPart[] | undefined {
   if (!files) {
     return undefined;

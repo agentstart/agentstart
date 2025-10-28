@@ -1,8 +1,8 @@
 /* agent-frontmatter:start
-AGENT: Blob attachments hook
+AGENT: Blob files hook
 PURPOSE: Handle file validation and upload for blob storage
-USAGE: const { files, setFiles, processFiles, clearFiles, isUploading, uploadTiming } = useBlobAttachments(client)
-EXPORTS: useBlobAttachments, UseBlobAttachmentsResult
+USAGE: const { files, setFiles, processFiles, clearFiles, isUploading, uploadTiming } = useBlobFiles(client)
+EXPORTS: useBlobFiles, UseBlobFilesResult
 FEATURES:
   - Automatic file processing: upload to blob if enabled, return FileList if disabled
   - Built-in validation against blob constraints
@@ -11,7 +11,7 @@ FEATURES:
   - Immediate mode: auto-upload on file selection
   - OnSubmit mode: upload on manual processFiles() call
   - Error handling with clear error messages
-SEARCHABLE: blob attachments, file upload hook, blob validation, processFiles, immediate upload, onSubmit upload
+SEARCHABLE: blob files, file upload hook, blob validation, processFiles, immediate upload, onSubmit upload
 agent-frontmatter:end */
 
 "use client";
@@ -55,20 +55,20 @@ interface FileUploadData {
   type: string; // MIME type;
 }
 
-export type BlobAttachment = File | FileUIPart;
-export type BlobAttachmentList = FileList | BlobAttachment[];
+export type BlobFile = File | FileUIPart;
+export type BlobFileList = FileList | BlobFile[];
 
-export interface UseBlobAttachmentsResult {
+export interface UseBlobFilesResult {
   /**
    * Current files (FileList in onSubmit mode, FileUIPart[] in immediate mode after upload)
    */
-  files: BlobAttachmentList;
+  files: BlobFileList;
   /**
    * Set files to upload
    * - In immediate mode: automatically uploads files
    * - In onSubmit mode: stores files for later upload
    */
-  setFiles: (files: BlobAttachmentList) => void;
+  setFiles: (files: BlobFileList) => void;
   /**
    * Clear all files
    */
@@ -79,7 +79,7 @@ export interface UseBlobAttachmentsResult {
    * - In onSubmit mode: uploads files and returns FileUIPart[]
    * - If blob is disabled: returns original files as-is
    */
-  processFiles: () => Promise<BlobAttachmentList>;
+  processFiles: () => Promise<BlobFileList>;
   /**
    * Whether files are currently being uploaded
    */
@@ -91,11 +91,11 @@ export interface UseBlobAttachmentsResult {
 }
 
 /**
- * Hook to handle blob attachments validation and upload
+ * Hook to handle blob files validation and upload
  *
  * @example
  * ```tsx
- * const { files, setFiles, processFiles, clearFiles, isUploading } = useBlobAttachments(client);
+ * const { files, setFiles, processFiles, clearFiles, isUploading } = useBlobFiles(client);
  *
  * // File selection (automatic upload in immediate mode)
  * const handleFileSelect = (selectedFiles: FileList) => {
@@ -110,9 +110,7 @@ export interface UseBlobAttachmentsResult {
  * };
  * ```
  */
-export function useBlobAttachments(
-  client: AgentStartAPI,
-): UseBlobAttachmentsResult {
+export function useBlobFiles(client: AgentStartAPI): UseBlobFilesResult {
   const orpc = createTanstackQueryUtils(client);
 
   // Fetch blob configuration
@@ -124,9 +122,7 @@ export function useBlobAttachments(
   const uploadTiming = config?.constraints?.uploadTiming ?? "onSubmit";
 
   // Internal state
-  const [files, setFilesState] = useState<BlobAttachmentList>(
-    [] as BlobAttachment[],
-  );
+  const [files, setFilesState] = useState<BlobFileList>([] as BlobFile[]);
 
   const inferFilename = useCallback((url?: string): string => {
     if (!url) {
@@ -147,7 +143,7 @@ export function useBlobAttachments(
     return "attachment";
   }, []);
 
-  const shouldUpload = useCallback((file: BlobAttachment): boolean => {
+  const shouldUpload = useCallback((file: BlobFile): boolean => {
     if (file instanceof File) {
       return true;
     }
@@ -176,7 +172,7 @@ export function useBlobAttachments(
   );
 
   const prepareFilesForUpload = useCallback(
-    async (input: BlobAttachment[]): Promise<File[]> => {
+    async (input: BlobFile[]): Promise<File[]> => {
       if (input.length === 0) {
         return [];
       }
@@ -193,7 +189,7 @@ export function useBlobAttachments(
   );
 
   const mergeUploadResults = useCallback(
-    (original: BlobAttachment[], uploaded: FileUIPart[]): FileUIPart[] => {
+    (original: BlobFile[], uploaded: FileUIPart[]): FileUIPart[] => {
       const expectedUploads = original.reduce(
         (count, item) => (shouldUpload(item) ? count + 1 : count),
         0,
@@ -305,7 +301,7 @@ export function useBlobAttachments(
         throw new Error("Blob storage is not enabled");
       }
 
-      const fileList = Array.from(files as BlobAttachment[]);
+      const fileList = Array.from(files as BlobFile[]);
       const uploadCandidates = fileList.filter((file) => shouldUpload(file));
 
       if (uploadCandidates.length === 0) {
@@ -377,9 +373,7 @@ export function useBlobAttachments(
     }
 
     const fileArray =
-      files instanceof FileList
-        ? Array.from(files)
-        : (files as BlobAttachment[]);
+      files instanceof FileList ? Array.from(files) : (files as BlobFile[]);
 
     if (fileArray.length === 0) {
       return;
@@ -404,7 +398,7 @@ export function useBlobAttachments(
           });
       })
       .catch((error) => {
-        console.error("[useBlobAttachments] Auto-upload failed:", error);
+        console.error("[useBlobFiles] Auto-upload failed:", error);
       });
   }, [
     files,
@@ -420,7 +414,7 @@ export function useBlobAttachments(
   /**
    * Set files to upload
    */
-  const setFiles = useCallback((newFiles: BlobAttachmentList) => {
+  const setFiles = useCallback((newFiles: BlobFileList) => {
     setFilesState(newFiles);
   }, []);
 
@@ -428,21 +422,19 @@ export function useBlobAttachments(
    * Clear all files
    */
   const clearFiles = useCallback(() => {
-    setFilesState([] as BlobAttachment[]);
+    setFilesState([] as BlobFile[]);
   }, []);
 
   /**
    * Process files for submission
    */
-  const processFiles = useCallback(async (): Promise<BlobAttachmentList> => {
+  const processFiles = useCallback(async (): Promise<BlobFileList> => {
     const fileArray =
-      files instanceof FileList
-        ? Array.from(files)
-        : (files as BlobAttachment[]);
+      files instanceof FileList ? Array.from(files) : (files as BlobFile[]);
 
     // If no files, return empty array
     if (fileArray.length === 0) {
-      return [] as BlobAttachment[];
+      return [] as BlobFile[];
     }
 
     // If blob is disabled, return files as-is
@@ -453,13 +445,13 @@ export function useBlobAttachments(
     const uploadCandidates = fileArray.filter((file) => shouldUpload(file));
 
     if (uploadCandidates.length === 0) {
-      return fileArray as BlobAttachment[];
+      return fileArray as BlobFile[];
     }
 
     const uploadableFiles = await prepareFilesForUpload(uploadCandidates);
 
     if (uploadableFiles.length === 0) {
-      return fileArray as BlobAttachment[];
+      return fileArray as BlobFile[];
     }
 
     const uploadedFiles = await uploadMutation.mutateAsync(uploadableFiles);
