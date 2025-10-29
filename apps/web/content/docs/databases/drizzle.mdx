@@ -90,7 +90,7 @@ export const db = drizzle(sql);
 
 ```ts title="lib/agent.ts"
 import { agentStart } from "agentstart";
-import { drizzleAdapter } from "agentstart/db";
+import { drizzleAdapter } from "agentstart/memory";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 
@@ -98,10 +98,7 @@ export const start = agentStart({
   agent,
   memory: drizzleAdapter(db, {
     provider: "pg", // or "mysql" or "sqlite"
-    schema: {
-      thread: schema.threadsTable,
-      message: schema.messagesTable,
-    },
+    schema,
   }),
 });
 ```
@@ -162,7 +159,7 @@ const db = drizzle(sqlite);
 If your schema uses different table names (e.g., plural forms):
 
 ```ts
-import { drizzleAdapter } from "agentstart/db";
+import { drizzleAdapter } from "agentstart/memory";
 
 export const start = agentStart({
   agent,

@@ -12,7 +12,7 @@ agent-frontmatter:end */
 
 import path from "node:path";
 import { logger } from "@agentstart/utils";
-import { getAdapter, getMigrations } from "agentstart/db";
+import { getAdapter, getMigrations } from "agentstart/memory";
 import chalk from "chalk";
 import { Command } from "commander";
 import fs from "fs-extra";
@@ -45,23 +45,23 @@ export async function migrateAction(opts: z.infer<typeof migrateActionSchema>) {
     return;
   }
 
-  const db = await getAdapter(config);
+  const memory = await getAdapter(config);
 
-  if (!db) {
+  if (!memory) {
     logger.error(
       "Invalid database configuration. Make sure you're not using adapters. Migrate command only works with built-in Kysely adapter.",
     );
     process.exit(1);
   }
 
-  if (db.id !== "kysely") {
-    if (db.id === "prisma") {
+  if (memory.id !== "kysely") {
+    if (memory.id === "prisma") {
       logger.error(
         "The migrate command only works with the built-in Kysely adapter. For Prisma, run `npx @agentstart/cli generate` to create the schema, then use Prisma’s migrate or push to apply it.",
       );
       process.exit(0);
     }
-    if (db.id === "drizzle") {
+    if (memory.id === "drizzle") {
       logger.error(
         "The migrate command only works with the built-in Kysely adapter. For Drizzle, run `npx @agentstart/cli generate` to create the schema, then use Drizzle’s migrate or push to apply it.",
       );

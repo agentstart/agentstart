@@ -12,7 +12,7 @@ FEATURES:
 SEARCHABLE: agent run, run orchestrator, message streaming, thread persistence
 agent-frontmatter:end */
 
-import type { DBThread } from "@agentstart/db";
+import type { DBThread } from "@agentstart/memory";
 import type {
   AgentGenerateSuggestionsOptions,
   AgentGenerateTitleOptions,
@@ -74,7 +74,7 @@ type RunOnFinishCallback = (event: RunFinishEvent) => PromiseLike<void> | void;
 
 interface StartOptions {
   input: {
-    message: UIMessage;
+    message: AgentStartUIMessage;
   };
   runtimeContext: Omit<RuntimeContext, "writer">;
   onFinish?: RunOnFinishCallback;
@@ -134,12 +134,12 @@ export class Run {
     });
 
     const uiMessages = (await getCompleteMessages({
-      db: options.runtimeContext.db,
+      memory: options.runtimeContext.memory,
       message: options.input.message,
       threadId: options.runtimeContext.threadId,
     })) ?? [options.input.message];
 
-    const threadRecord = await options.runtimeContext.db.findOne<DBThread>({
+    const threadRecord = await options.runtimeContext.memory.findOne<DBThread>({
       model: "thread",
       where: [{ field: "id", value: options.runtimeContext.threadId }],
     });
@@ -171,7 +171,7 @@ export class Run {
           uiMessages: validatedMessages,
           message: options.input.message,
           threadId: options.runtimeContext.threadId,
-          db: options.runtimeContext.db,
+          memory: options.runtimeContext.memory,
           generateTitle: this.agentStartOptions.advanced?.generateTitle,
         });
 
@@ -208,7 +208,7 @@ export class Run {
               writer,
               threadId: options.runtimeContext.threadId,
               sandbox: options.runtimeContext.sandbox,
-              db: options.runtimeContext.db,
+              memory: options.runtimeContext.memory,
             },
           },
         });
@@ -288,7 +288,7 @@ export class Run {
           setting.responseMessage.parts.length > 0
         ) {
           await upsertMessage({
-            db: options.runtimeContext.db,
+            memory: options.runtimeContext.memory,
             payload: {
               id: setting.responseMessage.id,
               threadId: options.runtimeContext.threadId,
@@ -323,14 +323,14 @@ export class Run {
     uiMessages,
     message,
     threadId,
-    db,
+    memory,
     generateTitle,
   }: {
     writer: UIMessageStreamWriter<AgentStartUIMessage>;
     uiMessages: UIMessage[];
     message: UIMessage;
     threadId: string;
-    db: MemoryAdapter;
+    memory: MemoryAdapter;
     generateTitle?: AgentGenerateTitleOptions;
   }): Promise<void> {
     // Only generate for first message
@@ -356,7 +356,7 @@ export class Run {
 
       // Update database
       await updateThreadTitle({
-        db,
+        memory,
         threadId,
         title,
       });

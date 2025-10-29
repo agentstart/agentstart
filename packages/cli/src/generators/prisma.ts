@@ -14,7 +14,7 @@ import path from "node:path";
 import type { FieldType } from "@agentstart/types";
 import { capitalizeFirstLetter } from "@agentstart/utils";
 import { produceSchema } from "@mrleebo/prisma-ast";
-import { getTables } from "agentstart/db";
+import { getTables } from "agentstart/memory";
 import fs from "fs-extra";
 import type { SchemaGenerator } from "./types";
 

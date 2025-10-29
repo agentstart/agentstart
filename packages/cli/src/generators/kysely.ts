@@ -9,7 +9,7 @@ FEATURES:
 SEARCHABLE: packages, cli, src, generators, kysely, generator, migration
 agent-frontmatter:end */
 
-import { getMigrations } from "agentstart/db";
+import { getMigrations } from "agentstart/memory";
 import type { SchemaGenerator } from "./types";
 
 export const generateMigrations: SchemaGenerator = async ({

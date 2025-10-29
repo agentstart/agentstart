@@ -1,0 +1,24 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "suggested-prompts",
+  "type": "registry:component",
+  "title": "AgentStart Suggested Prompts",
+  "description": "Display AI-generated follow-up suggestions as interactive buttons with animated appearance and dismissal.",
+  "dependencies": [
+    "@phosphor-icons/react",
+    "agentstart",
+    "motion",
+    "react"
+  ],
+  "registryDependencies": [
+    "@coss/button"
+  ],
+  "files": [
+    {
+      "path": "src/registry/agentstart/suggested-prompts.tsx",
+      "content": "/* agent-frontmatter:start\nAGENT: Suggested prompts UI component\nPURPOSE: Display AI-generated follow-up suggestions as interactive buttons\nUSAGE: Import and render in agent conversation UI to show contextual next-step prompts\nEXPORTS: SuggestedPrompts\nFEATURES:\n  - Animated appearance and dismissal with Framer Motion\n  - Automatic data extraction from agent message stream\n  - Click to send suggestion as new message\n  - Auto-clear on interaction\n  - Multi-store support via threadId\nSEARCHABLE: suggested prompts, follow-up suggestions, agent ui, conversation actions\nagent-frontmatter:end */\n\n\"use client\";\n\nimport { ArrowUpRightIcon } from \"@phosphor-icons/react\";\nimport { useAgentStore, useDataPart } from \"agentstart/client\";\nimport type { HTMLMotionProps } from \"motion/react\";\nimport { AnimatePresence, motion } from \"motion/react\";\nimport { Button } from \"@/components/ui/button\";\n\nexport type SuggestionsProps = Omit<HTMLMotionProps<\"div\">, \"children\"> & {\n  threadId?: string;\n};\n\nexport function SuggestedPrompts({\n  threadId,\n  className,\n  ...props\n}: SuggestionsProps) {\n  const storeId = threadId ?? \"default\";\n  const [suggestions, clearSuggestions] = useDataPart(\n    \"data-agentstart-suggestions\",\n    storeId,\n  );\n  const sendMessage = useAgentStore((state) => state.sendMessage, storeId);\n\n  const handlePromptClick = (prompt: string) => {\n    clearSuggestions();\n    sendMessage(\n      { text: prompt },\n      {\n        body: {\n          threadId,\n        },\n      },\n    );\n  };\n\n  if (!suggestions?.prompts || suggestions.prompts.length === 0) {\n    return null;\n  }\n\n  return (\n    <AnimatePresence mode=\"wait\">\n      <motion.div\n        key=\"suggested-prompts\"\n        initial={{ opacity: 0, y: 12 }}\n        animate={{ opacity: 1, y: 0 }}\n        exit={{ opacity: 0, y: 12 }}\n        transition={{ duration: 0.2, ease: \"easeOut\" }}\n        className={className}\n        {...props}\n      >\n        <div className=\"w-fit px-0.5 pt-1 pb-2 text-muted-foreground\">\n          Suggestions\n        </div>\n        <div className=\"flex flex-wrap items-center gap-2\">\n          {suggestions.prompts.map((prompt, index) => (\n            <motion.div\n              key={prompt}\n              initial={{ opacity: 0, y: 10 }}\n              animate={{ opacity: 1, y: 0 }}\n              exit={{ opacity: 0, scale: 0.95 }}\n              transition={{\n                duration: 0.2,\n                delay: index * 0.05,\n                ease: \"easeOut\",\n              }}\n            >\n              <Button\n                variant=\"outline\"\n                size=\"sm\"\n                onClick={() => handlePromptClick(prompt)}\n              >\n                {prompt}\n                <ArrowUpRightIcon className=\"size-3\" weight=\"bold\" />\n              </Button>\n            </motion.div>\n          ))}\n        </div>\n      </motion.div>\n    </AnimatePresence>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "components/agent/suggested-prompts.tsx"
+    }
+  ]
+}

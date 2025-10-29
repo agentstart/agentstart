@@ -6,7 +6,7 @@ export interface RuntimeContext {
   writer: UIMessageStreamWriter<UIMessage>;
   threadId: string;
   sandbox: SandboxAPI;
-  db: MemoryAdapter;
+  memory: MemoryAdapter;
 }
 
 export interface CallOptions {

@@ -16,10 +16,10 @@ import type {
 } from "@agentstart/types";
 import type { UIMessage } from "ai";
 import type { AgentStartUIMessage } from "@/agent/messages";
-import type { DBThread } from "@/db";
+import type { DBThread } from "@/memory";
 
 export interface MemoryAdapterContextOptions {
-  db: MemoryAdapter;
+  memory: MemoryAdapter;
 }
 
 export interface UpdateThreadTitleOptions extends MemoryAdapterContextOptions {
@@ -28,7 +28,7 @@ export interface UpdateThreadTitleOptions extends MemoryAdapterContextOptions {
 }
 
 export async function updateThreadTitle({
-  db,
+  memory,
   threadId,
   title,
 }: UpdateThreadTitleOptions) {
@@ -37,7 +37,7 @@ export async function updateThreadTitle({
     updatedAt: new Date().toISOString(),
   };
 
-  await db.update({
+  await memory.update({
     model: "thread",
     where: [{ field: "id", value: threadId }],
     update: updatePayload,
@@ -56,7 +56,7 @@ export interface UpsertMessageOptions<Message extends UIMessage>
 }
 
 export async function upsertMessage<Message extends UIMessage>({
-  db,
+  memory,
   payload,
 }: UpsertMessageOptions<Message>) {
   if (!payload.message.parts || payload.message.parts.length === 0) {
@@ -88,7 +88,7 @@ export async function upsertMessage<Message extends UIMessage>({
     updatedAt: now,
   };
 
-  await db.upsert({
+  await memory.upsert({
     model: "message",
     where,
     create: {
@@ -108,11 +108,11 @@ export interface DeleteMessagesAfterOptions
 }
 
 export async function deleteMessagesAfter({
-  db,
+  memory,
   threadId,
   messageId,
 }: DeleteMessagesAfterOptions) {
-  const target = (await db.findOne({
+  const target = (await memory.findOne({
     model: "message",
     where: [
       { field: "id", value: messageId },
@@ -126,7 +126,7 @@ export async function deleteMessagesAfter({
     return;
   }
 
-  await db.deleteMany({
+  await memory.deleteMany({
     model: "message",
     where: [
       { field: "threadId", value: threadId },
@@ -140,10 +140,10 @@ export interface LoadThreadOptions extends MemoryAdapterContextOptions {
 }
 
 export async function loadThread<Message extends UIMessage>({
-  db,
+  memory,
   threadId,
 }: LoadThreadOptions): Promise<Message[]> {
-  const records = await db.findMany<Record<string, unknown>>({
+  const records = await memory.findMany<Record<string, unknown>>({
     model: "message",
     where: [{ field: "threadId", value: threadId }],
     sortBy: { field: "createdAt", direction: "asc" },
@@ -231,7 +231,7 @@ export interface GetThreadsOptions extends MemoryAdapterContextOptions {
 }
 
 export const getThreads = async ({
-  db,
+  memory,
   userId,
   limit,
   offset,
@@ -240,7 +240,7 @@ export const getThreads = async ({
     ? ([{ field: "userId", value: userId }] as MemoryAdapterWhere[])
     : undefined;
 
-  const records = await db.findMany<DBThread>({
+  const records = await memory.findMany<DBThread>({
     model: "thread",
     where,
     sortBy: { field: "updatedAt", direction: "desc" },
@@ -260,14 +260,14 @@ export interface GetCompleteMessagesOptions<Message extends UIMessage>
 export async function getCompleteMessages<
   Message extends UIMessage = AgentStartUIMessage,
 >({
-  db,
+  memory,
   message,
   threadId,
 }: GetCompleteMessagesOptions<Message>): Promise<Message[] | undefined> {
-  await deleteMessagesAfter({ db, threadId, messageId: message.id });
+  await deleteMessagesAfter({ memory, threadId, messageId: message.id });
   await upsertMessage({
-    db,
+    memory,
     payload: { threadId, id: message.id, message },
   });
-  return loadThread<Message>({ db, threadId });
+  return loadThread<Message>({ memory, threadId });
 }

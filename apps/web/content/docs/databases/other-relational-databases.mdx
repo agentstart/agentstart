@@ -24,7 +24,7 @@ You can use any custom Kysely dialect to connect to your database:
 ```ts title="lib/agent.ts"
 import { agentStart } from "agentstart";
 import { Kysely } from "kysely";
-import { kyselyAdapter } from "agentstart/db";
+import { kyselyAdapter } from "agentstart/memory";
 import { YourCustomDialect } from "your-dialect-package";
 
 const db = new Kysely({

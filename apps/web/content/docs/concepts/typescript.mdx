@@ -44,7 +44,7 @@ import { Agent } from "agentstart/agent";
 const agent = new Agent({
   model: openrouter("x-ai/grok-4-fast"),
   instructions: "You are a helpful assistant.",
-  tools: { ...innerTools, ...osTools },
+  tools: { ...agentTools },
 });
 
 export const start = agentStart({ agent, memory });

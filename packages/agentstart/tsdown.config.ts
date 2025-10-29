@@ -18,7 +18,7 @@ export default defineConfig({
     "./src/api/index.ts",
     "./src/blob/index.ts",
     "./src/client/index.ts",
-    "./src/db/index.ts",
+    "./src/memory/index.ts",
     "./src/integration/index.ts",
     "./src/sandbox/index.ts",
   ],

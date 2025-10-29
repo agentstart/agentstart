@@ -24,13 +24,13 @@
       "import": "./dist/client/index.js",
       "require": "./dist/client/index.cjs"
     },
-    "./db": {
-      "import": "./dist/db/index.js",
-      "require": "./dist/db/index.cjs"
-    },
     "./integration": {
       "import": "./dist/integration/index.js",
       "require": "./dist/integration/index.cjs"
+    },
+    "./memory": {
+      "import": "./dist/memory/index.js",
+      "require": "./dist/memory/index.cjs"
     },
     "./sandbox": {
       "import": "./dist/sandbox/index.js",
@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "@agentstart/blob": "workspace:*",
-    "@agentstart/db": "workspace:*",
+    "@agentstart/memory": "workspace:*",
     "@agentstart/types": "workspace:*",
     "@agentstart/utils": "workspace:*",
     "@ai-sdk/react": "catalog:",
@@ -123,9 +123,9 @@
         "import": "./dist/usage/index.js",
         "require": "./dist/usage/index.cjs"
       },
-      "./db": {
-        "import": "./dist/db/index.js",
-        "require": "./dist/db/index.cjs"
+      "./memory": {
+        "import": "./dist/memory/index.js",
+        "require": "./dist/memory/index.cjs"
       },
       "./integration": {
         "import": "./dist/integration/index.js",

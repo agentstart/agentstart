@@ -10,7 +10,7 @@ FEATURES:
 SEARCHABLE: agent context, rpc context, memory adapter
 agent-frontmatter:end */
 
-import { memoryAdapter } from "@agentstart/db";
+import { memoryAdapter } from "@agentstart/memory";
 import type { AgentStartOptions } from "@agentstart/types";
 
 export interface Context extends AgentStartOptions {

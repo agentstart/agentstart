@@ -1,12 +1,12 @@
 /* agent-frontmatter:start
-AGENT: Agent runtime tool module
-PURPOSE: Implements Playground tool execution within the AgentStart runtime.
-USAGE: Register the "playground" tool when composing the agent configuration to expose this capability.
+AGENT: Playground memory schema barrel
+PURPOSE: Re-export schema segments used by the sample playground memory layer.
+USAGE: Import from this module to access individual table definitions.
 EXPORTS: Re-exports module symbols
 FEATURES:
-  - Bridges sandbox APIs into the Playground workflow
-  - Streams structured progress updates and normalizes tool output
-SEARCHABLE: playground, next, src, db, schema, index, tool, agent, runtime
+  - Groups schema exports for concise imports
+  - Keeps schema discovery centralized for documentation samples
+SEARCHABLE: playground, next, src, memory, schema, index, drizzle
 agent-frontmatter:end */
 
 export * from "./agent";

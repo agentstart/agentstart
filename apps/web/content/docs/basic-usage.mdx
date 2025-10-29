@@ -11,7 +11,7 @@ An agent consists of a model, instructions, and tools. Here's a basic example:
 
 ```ts title="lib/agent.ts"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { Agent, innerTools, osTools } from "agentstart/agent";
+import { Agent, agentTools } from "agentstart/agent";
 
 const openrouter = createOpenRouter({
   apiKey: process.env.MODEL_PROVIDER_API_KEY!,
@@ -21,15 +21,14 @@ const agent = new Agent({
   model: openrouter("x-ai/grok-4-fast"),
   instructions: "You are a helpful coding assistant.",
   tools: {
-    ...innerTools,  // Task management tools
-    ...osTools,     // File and shell tools
+    ...agentTools,  // Task management tools
   },
 });
 ```
 
 ### Available Tools
 
-**innerTools** provides task management:
+**agentTools** provides task management:
 - `todoRead` - Read the current task list
 - `todoWrite` - Update task list with new tasks
 
@@ -48,7 +47,7 @@ Wrap your agent with `agentStart()` to create an API handler:
 
 ```ts title="lib/agent.ts"
 import { agentStart } from "agentstart";
-import { drizzleAdapter } from "agentstart/db";
+import { drizzleAdapter } from "agentstart/memory";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 
@@ -56,10 +55,7 @@ export const start = agentStart({
   agent,
   memory: drizzleAdapter(db, {
     provider: "pg",
-    schema: {
-      thread: schema.threadsTable,
-      message: schema.messagesTable,
-    },
+    schema,
   }),
   appName: "my-app",
 });
@@ -72,10 +68,10 @@ export const start = agentStart({
     Database adapter for persisting conversations:
     
     ```ts
-    import { drizzleAdapter } from "agentstart/db";
-    import { prismaAdapter } from "agentstart/db";
-    import { kyselyAdapter } from "agentstart/db";
-    import { mongodbAdapter } from "agentstart/db";
+    import { drizzleAdapter } from "agentstart/memory";
+    import { prismaAdapter } from "agentstart/memory";
+    import { kyselyAdapter } from "agentstart/memory";
+    import { mongodbAdapter } from "agentstart/memory";
     
     // Use Drizzle
     memory: drizzleAdapter(db, { provider: "pg", schema })
@@ -226,7 +222,7 @@ const agent = new Agent({
   model,
   instructions: "You are a helpful assistant with weather information.",
   tools: {
-    ...osTools,
+    ...agentTools,
     getWeather: weatherTool,
   },
 });
@@ -248,7 +244,7 @@ Always validate inputs and handle errors in your tools. Never expose sensitive d
 Access agent functionality on the server:
 
 ```ts title="app/api/threads/route.ts"
-import { start } from "@/lib/agent";
+import { start } from "@/lib/agent"; // path to your auth file
 
 export async function GET() {
   // Access the server API

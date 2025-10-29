@@ -9,21 +9,13 @@ AgentStart is a TypeScript AI agent framework. It ships with a full set of tools
 
 Building AI agents often requires piecing together multiple libraries and writing boilerplate code for persistence, tool management, and client-server communication. AgentStart solves this by providing:
 
-- **Unified Agent Runtime**: Built on top of AI SDK with oRPC for type-safe communication
-- **Database Adapters**: First-class support for Drizzle, Prisma, Kysely, and MongoDB
-- **Built-in Tools**: File operations, shell commands, and task management out of the box
-- **React Hooks**: Type-safe client integration with automatic state management
-- **Framework Integration**: Ready-to-use adapters for Next.js, Node.js, and more
-
-## Features
-
 <Cards>
-  <Card title="Agent Class" description="Orchestrate model execution, tool calls, and message streaming" />
-  <Card title="Database Adapters" description="Persist conversations with Drizzle, Prisma, Kysely, or MongoDB" />
-  <Card title="Built-in Tools" description="File operations, shell commands, search, and task management" />
-  <Card title="Type-Safe Client" description="React hooks with automatic state synchronization" />
-  <Card title="Framework Integration" description="Next.js and Node.js adapters included" />
-  <Card title="Extensible" description="Add custom tools and middleware easily" />
+  <Card title="Unified Agent Runtime" description="Built on top of AI SDK with oRPC for type-safe communication" />
+  <Card title="Database Adapters" description="First-class support for Drizzle, Prisma, Kysely, and MongoDB" />
+  <Card title="Built-in Tools" description="File operations, shell commands, and task management out of the box" />
+  <Card title="Built-in Components" description="Pre-built conversation and layout primitives via shadcn-style registry" />
+  <Card title="Type-Safe Client" description="Type-safe client integration with automatic state management" />
+  <Card title="Framework Integration" description="Ready-to-use adapters for Next.js, Node.js, and more" />
 </Cards>
 
 ## Quick Example
@@ -32,14 +24,14 @@ Here's a minimal example of an AgentStart agent:
 
 ```ts
 // Server
-import { Agent, innerTools, osTools } from "agentstart/agent";
+import { Agent, agentTools } from "agentstart/agent";
 import { agentStart } from "agentstart";
-import { drizzleAdapter } from "agentstart/db";
+import { drizzleAdapter } from "agentstart/memory";
 
 const agent = new Agent({
   model: openrouter("x-ai/grok-4-fast"),
   instructions: "You are a helpful assistant.",
-  tools: { ...innerTools, ...osTools },
+  tools: { ...agentTools },
 });
 
 export const start = agentStart({

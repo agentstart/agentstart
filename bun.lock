@@ -34,6 +34,7 @@
         "class-variance-authority": "catalog:",
         "clsx": "catalog:",
         "cmdk": "catalog:",
+        "date-fns": "catalog:",
         "dotenv": "catalog:",
         "drizzle-orm": "catalog:",
         "embla-carousel-react": "catalog:",
@@ -129,7 +130,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@agentstart/blob": "workspace:*",
-        "@agentstart/db": "workspace:*",
+        "@agentstart/memory": "workspace:*",
         "@agentstart/types": "workspace:*",
         "@agentstart/utils": "workspace:*",
         "@ai-sdk/react": "catalog:",
@@ -283,8 +284,8 @@
         "typescript": "catalog:",
       },
     },
-    "packages/db": {
-      "name": "@agentstart/db",
+    "packages/memory": {
+      "name": "@agentstart/memory",
       "version": "0.1.0",
       "dependencies": {
         "@agentstart/types": "workspace:*",
@@ -506,7 +507,7 @@
 
     "@agentstart/components": ["@agentstart/components@workspace:packages/components"],
 
-    "@agentstart/db": ["@agentstart/db@workspace:packages/db"],
+    "@agentstart/memory": ["@agentstart/memory@workspace:packages/memory"],
 
     "@agentstart/tsconfig": ["@agentstart/tsconfig@workspace:tooling/typescript"],
 

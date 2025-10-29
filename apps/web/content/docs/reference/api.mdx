@@ -83,14 +83,13 @@ interface AgentOptions<TContext> {
 **Example:**
 
 ```ts
-import { Agent, innerTools, osTools } from "agentstart/agent";
+import { Agent, agentTools } from "agentstart/agent";
 
 const agent = new Agent({
   model: openrouter("x-ai/grok-4-fast"),
   instructions: "You are a helpful assistant.",
   tools: {
-    ...innerTools,
-    ...osTools,
+    ...agentTools,
   },
 });
 ```
@@ -285,7 +284,7 @@ interface DrizzleAdapterConfig {
 **Example:**
 
 ```ts
-import { drizzleAdapter } from "agentstart/db";
+import { drizzleAdapter } from "agentstart/memory";
 
 const adapter = drizzleAdapter(db, {
   provider: "pg",
@@ -318,7 +317,7 @@ interface PrismaConfig {
 **Example:**
 
 ```ts
-import { prismaAdapter } from "agentstart/db";
+import { prismaAdapter } from "agentstart/memory";
 
 const adapter = prismaAdapter(prisma, {
   provider: "postgresql",
@@ -347,7 +346,7 @@ interface KyselyAdapterConfig {
 **Example:**
 
 ```ts
-import { kyselyAdapter } from "agentstart/db";
+import { kyselyAdapter } from "agentstart/memory";
 
 const adapter = kyselyAdapter(db, {
   type: "postgres",
@@ -365,7 +364,7 @@ function mongodbAdapter(db: Db): Adapter
 **Example:**
 
 ```ts
-import { mongodbAdapter } from "agentstart/db";
+import { mongodbAdapter } from "agentstart/memory";
 
 const adapter = mongodbAdapter(db);
 ```
@@ -454,12 +453,12 @@ const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
 
 ## Tools
 
-### innerTools
+### agentTools
 
 Built-in task management tools.
 
 ```ts
-const innerTools: {
+const agentTools: {
   todoRead: Tool;
   todoWrite: Tool;
 }

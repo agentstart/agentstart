@@ -20,7 +20,7 @@ import {
   WarningCircleIcon,
 } from "@phosphor-icons/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import type { DBThread } from "agentstart/db";
+import type { DBThread } from "agentstart/memory";
 import { type ReactNode, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {

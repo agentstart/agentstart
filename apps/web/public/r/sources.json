@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "sources",
+  "type": "registry:component",
+  "title": "AgentStart Sources",
+  "description": "Source citation accordion that displays expandable citation lists for assistant responses. Features collapsible list of used sources with default trigger and link styling.",
+  "dependencies": [
+    "@phosphor-icons/react",
+    "react"
+  ],
+  "registryDependencies": [
+    "@coss/collapsible"
+  ],
+  "files": [
+    {
+      "path": "src/registry/agentstart/sources.tsx",
+      "content": "/* agent-frontmatter:start\nAGENT: Source citation accordion\nPURPOSE: Display expandable citation lists for assistant responses\nUSAGE: import { Sources, SourcesTrigger, SourcesContent, Source } from \\\"@/components/agent/sources\\\"\nEXPORTS: Sources, SourcesTrigger, SourcesContent, Source\nFEATURES:\n  - Collapsible list of used sources\n  - Provides default trigger and link styling\nSEARCHABLE: citations, sources list, collapsible references, agent sources\nagent-frontmatter:end */\n\n\"use client\";\n\nimport { BookIcon, CaretDownIcon } from \"@phosphor-icons/react\";\nimport type { ComponentProps } from \"react\";\nimport {\n  Collapsible,\n  CollapsibleContent,\n  CollapsibleTrigger,\n} from \"@/components/ui/collapsible\";\nimport { cn } from \"@/lib/utils\";\n\nexport type SourcesProps = ComponentProps<\"div\">;\n\nexport const Sources = ({ className, ...props }: SourcesProps) => (\n  <Collapsible\n    className={cn(\"not-prose mb-4 text-primary text-xs\", className)}\n    {...props}\n  />\n);\n\nexport type SourcesTriggerProps = ComponentProps<typeof CollapsibleTrigger> & {\n  count: number;\n};\n\nexport const SourcesTrigger = ({\n  className,\n  count,\n  children,\n  ...props\n}: SourcesTriggerProps) => (\n  <CollapsibleTrigger\n    className={cn(\"flex items-center gap-2\", className)}\n    {...props}\n  >\n    {children ?? (\n      <>\n        <p className=\"font-medium\">Used {count} sources</p>\n        <CaretDownIcon className=\"size-4\" />\n      </>\n    )}\n  </CollapsibleTrigger>\n);\n\nexport type SourcesContentProps = ComponentProps<typeof CollapsibleContent>;\n\nexport const SourcesContent = ({\n  className,\n  ...props\n}: SourcesContentProps) => (\n  <CollapsibleContent\n    className={cn(\n      \"mt-3 flex w-fit flex-col gap-2\",\n      \"data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 outline-none data-[state=closed]:animate-out data-[state=open]:animate-in\",\n      className,\n    )}\n    {...props}\n  />\n);\n\nexport type SourceProps = ComponentProps<\"a\">;\n\nexport const Source = ({ href, title, children, ...props }: SourceProps) => (\n  <a\n    className=\"flex items-center gap-2\"\n    href={href}\n    rel=\"noreferrer\"\n    target=\"_blank\"\n    {...props}\n  >\n    {children ?? (\n      <>\n        <BookIcon className=\"size-4\" weight=\"duotone\" />\n        <span className=\"block font-medium\">{title}</span>\n      </>\n    )}\n  </a>\n);\n",
+      "type": "registry:component",
+      "target": "components/agent/sources.tsx"
+    }
+  ]
+}

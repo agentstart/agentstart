@@ -13,7 +13,7 @@ import type { StoreApi, UseBoundStore } from "zustand";
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import type { AgentStartUIMessage } from "@/agent";
-import type { DBThread } from "@/db";
+import type { DBThread } from "@/memory";
 import { type AgentStoreWithSync, getAgentStore } from "./agent";
 
 type AgentStoreInstance = UseBoundStore<

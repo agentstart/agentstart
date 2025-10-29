@@ -82,7 +82,7 @@ await start.api.todo.write({
 <Tabs items={["Next.js", "Node.js"]}>
   <Tab value="Next.js">
     ```ts title="app/api/threads/route.ts"
-    import { start } from "@/lib/agent";
+    import { start } from "@/lib/agent"; // path to your auth file
 
     export async function GET() {
       const threads = await start.api.thread.list();

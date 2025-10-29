@@ -12,7 +12,7 @@ AgentStart is organized around a small set of primitives that collaborate to bui
 The `Agent` class uses the AI SDK to coordinate model execution, tool dispatch, and streaming responses.
 
 ```ts
-import { Agent, innerTools, osTools } from "agentstart/agent";
+import { Agent, agentTools } from "agentstart/agent";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 
 const openrouter = createOpenRouter({
@@ -23,8 +23,7 @@ const agent = new Agent({
   model: openrouter("x-ai/grok-4-fast"),
   instructions: "You are a helpful assistant.",
   tools: {
-    ...innerTools,
-    ...osTools,
+    ...agentTools,
   },
 });
 ```
@@ -42,7 +41,7 @@ const agent = new Agent({
 
 ```ts
 import { agentStart } from "agentstart";
-import { drizzleAdapter } from "agentstart/db";
+import { drizzleAdapter } from "agentstart/memory";
 
 export const start = agentStart({
   agent,
@@ -71,7 +70,7 @@ Tools extend the agent with executable capabilities.
 
 AgentStart includes two tool collections:
 
-**innerTools** – task management helpers:
+**agentTools** – task management helpers:
 - `todoRead`: read the todo list
 - `todoWrite`: update tasks
 
@@ -87,14 +86,13 @@ AgentStart includes two tool collections:
 ### Usage
 
 ```ts
-import { innerTools, osTools } from "agentstart/agent";
+import { agentTools } from "agentstart/agent";
 
 const agent = new Agent({
   model,
   instructions,
   tools: {
-    ...innerTools,
-    ...osTools,
+    ...agentTools,
     // Custom tool
     myTool: {
       description: "My custom tool",
@@ -116,7 +114,7 @@ Memory adapters persist conversation state and metadata.
 ### Drizzle Adapter
 
 ```ts
-import { drizzleAdapter } from "agentstart/db";
+import { drizzleAdapter } from "agentstart/memory";
 import { drizzle } from "drizzle-orm/neon-http";
 
 const db = drizzle(process.env.DATABASE_URL!);
@@ -174,7 +172,7 @@ export function ChatPage() {
 ```ts
 // app/api/agent/[...all]/route.ts
 import { toNextJsHandler } from "agentstart/integration";
-import { start } from "@/lib/agent";
+import { start } from "@/lib/agent"; // path to your auth file
 
 export const { POST, GET } = toNextJsHandler(start.handler);
 ```

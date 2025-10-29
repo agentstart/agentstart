@@ -20,7 +20,7 @@ import z from "zod";
 import { getThreads, loadThread, Run } from "@/agent";
 import type { RunFinishEvent } from "@/agent/run";
 import { publicProcedure } from "@/api/procedures";
-import { type DBThread, getAdapter } from "@/db";
+import { type DBThread, getAdapter } from "@/memory";
 import { getSandbox } from "@/sandbox";
 
 /**
@@ -29,7 +29,7 @@ import { getSandbox } from "@/sandbox";
  * @throws FORBIDDEN if user doesn't own the thread
  */
 async function verifyThreadOwnership(options: {
-  db: MemoryAdapter;
+  memory: MemoryAdapter;
   threadId: string;
   userId: string;
   errors: {
@@ -37,7 +37,7 @@ async function verifyThreadOwnership(options: {
     FORBIDDEN: (opts: { message: string }) => Error;
   };
 }): Promise<DBThread> {
-  const thread = await options.db.findOne<DBThread>({
+  const thread = await options.memory.findOne<DBThread>({
     model: "thread",
     where: [{ field: "id", value: options.threadId }],
   });
@@ -89,7 +89,7 @@ export function createThreadRouter(procedure = publicProcedure) {
       )
       .handler(async ({ input, context, errors }) => {
         try {
-          const db = await getAdapter(context);
+          const memory = await getAdapter(context);
           const userId = context.getUserId
             ? await context.getUserId(context.headers)
             : undefined;
@@ -100,12 +100,12 @@ export function createThreadRouter(procedure = publicProcedure) {
 
           const [threads, total] = await Promise.all([
             getThreads({
-              db,
+              memory,
               userId,
               limit: pageSize,
               offset,
             }),
-            db.count({
+            memory.count({
               model: "thread",
               where: userId ? [{ field: "userId", value: userId }] : undefined,
             }),
@@ -135,10 +135,10 @@ export function createThreadRouter(procedure = publicProcedure) {
       .input(z.object({ threadId: z.string() }))
       .handler(async ({ input, context, errors }) => {
         try {
-          const db = await getAdapter(context);
+          const memory = await getAdapter(context);
 
           const messages = await loadThread({
-            db,
+            memory,
             threadId: input.threadId,
           });
           return messages;
@@ -152,12 +152,12 @@ export function createThreadRouter(procedure = publicProcedure) {
       .input(z.object({ threadId: z.string() }))
       .handler(async ({ input, context, errors }) => {
         try {
-          const db = await getAdapter(context);
+          const memory = await getAdapter(context);
           const userId = context.getUserId
             ? await context.getUserId(context.headers)
             : undefined;
 
-          const thread = await db.findOne<DBThread>({
+          const thread = await memory.findOne<DBThread>({
             model: "thread",
             where: [{ field: "id", value: input.threadId }],
           });
@@ -193,13 +193,13 @@ export function createThreadRouter(procedure = publicProcedure) {
       )
       .handler(async ({ input, context, errors }) => {
         try {
-          const db = await getAdapter(context);
+          const memory = await getAdapter(context);
           const now = new Date();
           const userId = context.getUserId
             ? await context.getUserId(context.headers)
             : "anonymous";
 
-          const thread = await db.create({
+          const thread = await memory.create({
             model: "thread",
             data: {
               userId,
@@ -240,14 +240,14 @@ export function createThreadRouter(procedure = publicProcedure) {
       )
       .handler(async ({ input, context, errors }) => {
         try {
-          const db = await getAdapter(context);
+          const memory = await getAdapter(context);
           const userId = context.getUserId
             ? await context.getUserId(context.headers)
             : "anonymous";
 
           // Verify thread ownership
           await verifyThreadOwnership({
-            db,
+            memory,
             threadId: input.threadId,
             userId,
             errors,
@@ -276,7 +276,7 @@ export function createThreadRouter(procedure = publicProcedure) {
 
           updatePayload.updatedAt = new Date();
 
-          const updatedThread = await db.update({
+          const updatedThread = await memory.update({
             model: "thread",
             where: [{ field: "id", value: input.threadId }],
             update: updatePayload,
@@ -293,14 +293,14 @@ export function createThreadRouter(procedure = publicProcedure) {
       .input(z.object({ threadId: z.string() }))
       .handler(async ({ input, context, errors }) => {
         try {
-          const db = await getAdapter(context);
+          const memory = await getAdapter(context);
           const userId = context.getUserId
             ? await context.getUserId(context.headers)
             : "anonymous";
 
           // Verify thread ownership
           await verifyThreadOwnership({
-            db,
+            memory,
             threadId: input.threadId,
             userId,
             errors,
@@ -308,12 +308,12 @@ export function createThreadRouter(procedure = publicProcedure) {
 
           await Promise.all([
             // Delete associated messages first
-            db.deleteMany({
+            memory.deleteMany({
               model: "message",
               where: [{ field: "threadId", value: input.threadId }],
             }),
             // Delete the thread
-            db.delete({
+            memory.delete({
               model: "thread",
               where: [{ field: "id", value: input.threadId }],
             }),
@@ -344,7 +344,7 @@ export function createThreadRouter(procedure = publicProcedure) {
             );
           }
 
-          const db = await getAdapter(context);
+          const memory = await getAdapter(context);
           const sandbox = await getSandbox(context);
 
           const run = new Run(context);
@@ -354,7 +354,7 @@ export function createThreadRouter(procedure = publicProcedure) {
               message: input.message,
             },
             runtimeContext: {
-              db,
+              memory,
               sandbox,
               threadId: input.threadId,
             },
@@ -364,7 +364,7 @@ export function createThreadRouter(procedure = publicProcedure) {
               }
 
               try {
-                await db.update({
+                await memory.update({
                   model: "thread",
                   where: [{ field: "id", value: input.threadId }],
                   update: {

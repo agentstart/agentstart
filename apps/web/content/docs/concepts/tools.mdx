@@ -16,7 +16,7 @@ AgentStart includes two categories of built-in tools:
 Task management tools:
 
 ```ts
-import { innerTools } from "agentstart/agent";
+import { agentTools } from "agentstart/agent";
 
 // Includes:
 // - todoRead: Read current task list
@@ -119,14 +119,13 @@ List directory contents:
 Tools are provided as an object to the Agent constructor:
 
 ```ts
-import { Agent, innerTools, osTools } from "agentstart/agent";
+import { Agent, agentTools } from "agentstart/agent";
 
 const agent = new Agent({
   model,
   instructions: "You are a helpful assistant.",
   tools: {
-    ...innerTools,
-    ...osTools,
+    ...agentTools,
   },
 });
 ```
@@ -156,7 +155,7 @@ const agent = new Agent({
   model,
   instructions,
   tools: {
-    ...osTools,
+    ...agentTools,
     getWeather: weatherTool,
   },
 });

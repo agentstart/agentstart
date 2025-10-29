@@ -26,8 +26,8 @@ Create your agent in `lib/agent.ts`:
 ```ts title="lib/agent.ts"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { agentStart } from "agentstart";
-import { Agent, innerTools, osTools } from "agentstart/agent";
-import { drizzleAdapter } from "agentstart/db";
+import { Agent, agentTools } from "agentstart/agent";
+import { drizzleAdapter } from "agentstart/memory";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 
@@ -39,8 +39,7 @@ const agent = new Agent({
   model: openrouter("x-ai/grok-4-fast"),
   instructions: "You are a helpful coding assistant.",
   tools: {
-    ...innerTools,
-    ...osTools,
+    ...agentTools,
   },
 });
 
@@ -48,10 +47,7 @@ export const start = agentStart({
   agent,
   memory: drizzleAdapter(db, {
     provider: "pg",
-    schema: {
-      thread: schema.threadsTable,
-      message: schema.messagesTable,
-    },
+    schema,
   }),
   appName: "my-app",
 });
@@ -67,7 +63,7 @@ Create a catch-all route handler in `app/api/agent/[...all]/route.ts`:
 
 ```ts title="app/api/agent/[...all]/route.ts"
 import { toNextJsHandler } from "agentstart/integration";
-import { start } from "@/lib/agent";
+import { start } from "@/lib/agent"; // path to your auth file
 
 export const { POST, GET } = toNextJsHandler(start.handler);
 
@@ -167,7 +163,7 @@ Use AgentStart in Server Actions:
 ```tsx title="app/actions.ts"
 "use server";
 
-import { start } from "@/lib/agent";
+import { start } from "@/lib/agent"; // path to your auth file
 
 export async function createThread(title: string) {
   const thread = await start.api.thread.create({ title });
@@ -292,7 +288,7 @@ AgentStart works on Vercel Edge Runtime:
 
 ```ts title="app/api/agent/[...all]/route.ts"
 import { toNextJsHandler } from "agentstart/integration";
-import { start } from "@/lib/agent";
+import { start } from "@/lib/agent"; // path to your auth file
 
 export const runtime = "edge";
 
@@ -324,7 +320,7 @@ const agent = new Agent({
 AgentStart provides full type safety in Next.js:
 
 ```tsx
-import { start } from "@/lib/agent";
+import { start } from "@/lib/agent"; // path to your auth file
 
 // Types are inferred from your agent
 type Thread = Awaited<ReturnType<typeof start.api.thread.get>>;
@@ -362,7 +358,7 @@ If your API is on a different domain, configure CORS:
 
 ```ts
 import { toNextJsHandler } from "agentstart/integration";
-import { start } from "@/lib/agent";
+import { start } from "@/lib/agent"; // path to your auth file
 
 const handler = toNextJsHandler(start.handler);
 

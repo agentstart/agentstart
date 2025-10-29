@@ -18,7 +18,7 @@ Deliver a batteries-included framework that lets developers assemble production-
 Agent Class
 ├─ Prompts (mission, summary, system variants)
 ├─ Tools
-│   ├─ Inner tools (sandbox, evaluator, knowledge retrieval)
+│   ├─ Agent tools (sandbox, evaluator, knowledge retrieval)
 │   └─ Document tools (upload, index, embeddings)
 ├─ Memory
 │   ├─ Mission storage
@@ -48,10 +48,10 @@ The agent class orchestrates prompts, tool execution, and memory updates. Tools 
 
 ### Tools
 
-- **Inner tools**: built-in capabilities (`run_code`, `sandbox_browser`, `search_sources`, `shell_exec`).
+- **Agent tools**: built-in capabilities (`run_code`, `sandbox_browser`, `search_sources`, `shell_exec`).
 - **Document tools**: ingest external files, create embeddings, and expose retrieval actions.
 - Tools share a base interface: `name`, `description`, `schema`, and `handler`.
-- Registration occurs inside `agent.ts`. Use `const tools = [...innerTools, ...documentTools];`
+- Registration occurs inside `agent.ts`. Use `const tools = [...agentTools, ...documentTools];`
 
 ### Memory
 
@@ -268,7 +268,7 @@ The `SEARCHABLE` field should contain comma-separated keywords that describe the
 ## Roadmap Snapshot
 
 - ✅ Agent class core
-- ✅ Inner tools (sandbox, documents)
+- ✅ Agent tools (sandbox, documents)
 - ✅ Memory adapters (PostgreSQL baseline)
 - ⏳ Additional templates (Fastify, Cloudflare Workers)
 - ⏳ Analytics + observability hooks

@@ -13,7 +13,7 @@ agent-frontmatter:end */
 "use client";
 
 import { formatRelativeFromNow } from "@agentstart/utils";
-import type { DBThread } from "agentstart/db";
+import type { DBThread } from "agentstart/memory";
 import type { ReactNode } from "react";
 import { memo, useMemo } from "react";
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";

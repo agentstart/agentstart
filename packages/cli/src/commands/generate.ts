@@ -11,7 +11,7 @@ agent-frontmatter:end */
 
 import path from "node:path";
 import { logger } from "@agentstart/utils";
-import { getAdapter } from "agentstart/db";
+import { getAdapter } from "agentstart/memory";
 import chalk from "chalk";
 import { Command } from "commander";
 import fs from "fs-extra";

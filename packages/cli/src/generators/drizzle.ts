@@ -12,7 +12,7 @@ agent-frontmatter:end */
 
 import type { FieldAttribute } from "@agentstart/types";
 import { convertToSnakeCase } from "@agentstart/utils";
-import { getTables } from "agentstart/db";
+import { getTables } from "agentstart/memory";
 import fs from "fs-extra";
 import type { SchemaGenerator } from "./types";
 

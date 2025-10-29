@@ -11,7 +11,7 @@ agent-frontmatter:end */
 
 "use client";
 
-import type { DBThread } from "agentstart/db";
+import type { DBThread } from "agentstart/memory";
 import { useParams, useRouter } from "next/navigation";
 import type React from "react";
 import { AgentStartProvider } from "@/components/agent/provider";

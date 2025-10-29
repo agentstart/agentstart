@@ -72,8 +72,8 @@ Create `lib/agent.ts`:
 ```ts
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { agentStart } from "agentstart";
-import { Agent, innerTools, osTools } from "agentstart/agent";
-import { drizzleAdapter } from "agentstart/db";
+import { Agent, agentTools } from "agentstart/agent";
+import { drizzleAdapter } from "agentstart/memory";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 
@@ -85,8 +85,7 @@ const agent = new Agent({
   model: openrouter("x-ai/grok-4-fast"),
   instructions: "You are a helpful coding assistant.",
   tools: {
-    ...innerTools,
-    ...osTools,
+    ...agentTools,
   },
 });
 
@@ -94,10 +93,7 @@ export const start = agentStart({
   agent,
   memory: drizzleAdapter(db, {
     provider: "pg",
-    schema: {
-      thread: schema.threadsTable,
-      message: schema.messagesTable,
-    },
+    schema,
   }),
   appName: "my-agent-app",
 });
@@ -113,7 +109,7 @@ Create `app/api/agent/[...all]/route.ts`:
 
 ```ts
 import { toNextJsHandler } from "agentstart/integration";
-import { start } from "@/lib/agent";
+import { start } from "@/lib/agent"; // path to your auth file
 
 export const { POST, GET } = toNextJsHandler(start.handler);
 ```
@@ -160,7 +156,7 @@ const agent = new Agent({
   model,
   instructions,
   tools: {
-    ...osTools,
+    ...agentTools,
     getWeather: weatherTool,
   },
 });

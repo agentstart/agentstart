@@ -17,7 +17,7 @@ import {
   toolInputSchema,
   toolOutputSchema,
 } from "@/agent/messages";
-import type { DBTodo } from "@/db";
+import type { DBTodo } from "@/memory";
 import description from "./description";
 
 export const todoWrite = tool({
@@ -25,7 +25,7 @@ export const todoWrite = tool({
   inputSchema: toolInputSchema.shape["todo-write"],
   outputSchema: toolOutputSchema.shape["todo-write"],
   async *execute({ todos }, { experimental_context: context }) {
-    const { threadId, db } = context as RuntimeContext;
+    const { threadId, memory } = context as RuntimeContext;
 
     // Add IDs to todos that don't have them
     const todosWithIds = todos.map((todo) => ({
@@ -59,7 +59,7 @@ export const todoWrite = tool({
       threadId,
       todos: todosWithIds,
     };
-    await db.upsert({
+    await memory.upsert({
       model: "todo",
       where: [{ field: "threadId", value: threadId }],
       create: {

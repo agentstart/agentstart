@@ -6,6 +6,14 @@ const withMDX = createMDX();
 const config = {
   reactStrictMode: true,
   reactCompiler: true,
+  async rewrites() {
+    return [
+      {
+        source: "/docs/:path*.mdx",
+        destination: "/llms.mdx/:path*",
+      },
+    ];
+  },
 };
 
 export default withMDX(config);

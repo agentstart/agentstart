@@ -16,7 +16,7 @@ import {
   toolInputSchema,
   toolOutputSchema,
 } from "@/agent/messages";
-import type { DBTodo } from "@/db";
+import type { DBTodo } from "@/memory";
 import description from "./description";
 
 export const todoRead = tool({
@@ -24,9 +24,9 @@ export const todoRead = tool({
   inputSchema: toolInputSchema.shape["todo-read"],
   outputSchema: toolOutputSchema.shape["todo-read"],
   async *execute(_, { experimental_context: context }) {
-    const { threadId, db } = context as RuntimeContext;
+    const { threadId, memory } = context as RuntimeContext;
 
-    const todos = await db.findOne<DBTodo>({
+    const todos = await memory.findOne<DBTodo>({
       model: "todo",
       where: [{ field: "threadId", value: threadId }],
     });

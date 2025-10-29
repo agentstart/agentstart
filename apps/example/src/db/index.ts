@@ -1,12 +1,12 @@
 /* agent-frontmatter:start
-AGENT: Agent runtime tool module
-PURPOSE: Implements Playground tool execution within the AgentStart runtime.
-USAGE: Register the "playground" tool when composing the agent configuration to expose this capability.
+AGENT: Playground memory bootstrap
+PURPOSE: Configures the Drizzle connection used by the sample agent memory layer.
+USAGE: Import to obtain the memory persistence client for the playground.
 EXPORTS: db
 FEATURES:
-  - Bridges sandbox APIs into the Playground workflow
-  - Streams structured progress updates and normalizes tool output
-SEARCHABLE: playground, next, src, db, index, tool, agent, runtime
+  - Provides a Neon-backed Drizzle client for persistence
+  - Supplies optional MongoDB example for alternative storage
+SEARCHABLE: playground, next, src, memory, drizzle, persistence, bootstrap
 agent-frontmatter:end */
 
 import { neon } from "@neondatabase/serverless";

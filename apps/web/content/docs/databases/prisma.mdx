@@ -88,7 +88,7 @@ npx prisma db push
 ```ts title="lib/agent.ts"
 import { PrismaClient } from "@prisma/client";
 import { agentStart } from "agentstart";
-import { prismaAdapter } from "agentstart/db";
+import { prismaAdapter } from "agentstart/memory";
 
 const prisma = new PrismaClient();
 

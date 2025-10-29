@@ -37,7 +37,7 @@ MODEL_PROVIDER_API_KEY=your_api_key_here
 
 2. **Database URL**
 
-Connection string for your database:
+Connection string for your memory:
 
 ```txt title=".env"
 DATABASE_URL=postgresql://user:password@localhost:5432/dbname
@@ -81,130 +81,6 @@ Choose and install your preferred AI model provider:
 
 <Step>
 
-### Configure Database
-
-Choose your database adapter and install dependencies:
-
-<Tabs items={["Drizzle", "Prisma", "Kysely", "MongoDB"]}>
-  <Tab value="Drizzle">
-    ```bash
-    npm install drizzle-orm @neondatabase/serverless
-    ```
-    
-    Create your database schema:
-    
-    ```ts title="db/schema/agent.ts"
-    import { pgTable, text, timestamp, jsonb } from "drizzle-orm/pg-core";
-
-    export const threadsTable = pgTable("threads", {
-      id: text("id").primaryKey(),
-      title: text("title"),
-      userId: text("user_id"),
-      createdAt: timestamp("created_at").defaultNow(),
-      metadata: jsonb("metadata"),
-    });
-
-    export const messagesTable = pgTable("messages", {
-      id: text("id").primaryKey(),
-      threadId: text("thread_id").references(() => threadsTable.id),
-      role: text("role"),
-      content: text("content"),
-      createdAt: timestamp("created_at").defaultNow(),
-      metadata: jsonb("metadata"),
-    });
-    ```
-    
-    Initialize Drizzle:
-    
-    ```ts title="db/index.ts"
-    import { drizzle } from "drizzle-orm/neon-http";
-    import { neon } from "@neondatabase/serverless";
-
-    const sql = neon(process.env.DATABASE_URL!);
-    export const db = drizzle(sql);
-    ```
-  </Tab>
-  
-  <Tab value="Prisma">
-    ```bash
-    npm install @prisma/client
-    npm install -D prisma
-    ```
-    
-    Define your schema:
-    
-    ```prisma title="prisma/schema.prisma"
-    model Thread {
-      id        String    @id @default(cuid())
-      title     String?
-      userId    String?
-      createdAt DateTime  @default(now())
-      messages  Message[]
-      metadata  Json?
-    }
-
-    model Message {
-      id        String   @id @default(cuid())
-      threadId  String
-      thread    Thread   @relation(fields: [threadId], references: [id])
-      role      String
-      content   String
-      createdAt DateTime @default(now())
-      metadata  Json?
-    }
-    ```
-    
-    Generate Prisma client:
-    
-    ```bash
-    npx prisma generate
-    npx prisma db push
-    ```
-  </Tab>
-  
-  <Tab value="Kysely">
-    ```bash
-    npm install kysely pg
-    ```
-    
-    Define your types and initialize:
-    
-    ```ts title="db/index.ts"
-    import { Kysely, PostgresDialect } from "kysely";
-    import { Pool } from "pg";
-
-    export const db = new Kysely({
-      dialect: new PostgresDialect({
-        pool: new Pool({
-          connectionString: process.env.DATABASE_URL,
-        }),
-      }),
-    });
-    ```
-  </Tab>
-  
-  <Tab value="MongoDB">
-    ```bash
-    npm install mongodb
-    ```
-    
-    Initialize MongoDB client:
-    
-    ```ts title="db/index.ts"
-    import { MongoClient } from "mongodb";
-
-    const client = new MongoClient(process.env.DATABASE_URL!);
-    await client.connect();
-
-    export const db = client.db("agentstart");
-    ```
-  </Tab>
-</Tabs>
-
-</Step>
-
-<Step>
-
 ### Create Agent Instance
 
 Create a file named `agent.ts` in one of these locations:
@@ -212,13 +88,10 @@ Create a file named `agent.ts` in one of these locations:
 - `src/lib/agent.ts`
 - `server/agent.ts`
 
-```ts title="lib/agent.ts"
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+```ts title="agent.ts"
 import { agentStart } from "agentstart";
-import { Agent, innerTools, osTools } from "agentstart/agent";
-import { drizzleAdapter } from "agentstart/db";
-import { db } from "@/db";
-import * as schema from "@/db/schema";
+import { Agent, agentTools } from "agentstart/agent";
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 
 const openrouter = createOpenRouter({
   apiKey: process.env.MODEL_PROVIDER_API_KEY!,
@@ -228,23 +101,136 @@ const agent = new Agent({
   model: openrouter("x-ai/grok-4-fast"),
   instructions: "You are a helpful assistant.",
   tools: {
-    ...innerTools,
-    ...osTools,
+    ...agentTools,
   },
 });
 
 export const start = agentStart({
-  agent,
-  memory: drizzleAdapter(db, {
-    provider: "pg",
-    schema: {
-      thread: schema.threadsTable,
-      message: schema.messagesTable,
-    },
-  }),
   appName: "my-app",
+  agent,
+  // ...
 });
 ```
+
+</Step>
+
+<Step>
+
+### Configure Database
+
+AgentStart requires a database to store thread/message/todo data. You can easily configure AgentStart to use SQLite, PostgreSQL, or MySQL, and more!
+
+<Tabs items={["sqlite", "postgres", "mysql"]}>
+    <Tab value="sqlite">
+    ```ts title="agent.ts"
+    import { agentStart } from "agentstart";
+    import Database from "better-sqlite3";
+
+    export const start = agentStart({
+        memory: new Database("./sqlite.db"),
+    })
+    ```
+    </Tab>
+    <Tab value="postgres">
+    ```ts title="agent.ts"
+    import { agentStart } from "agentstart";
+    import { Pool } from "pg";
+
+    export const start = agentStart({
+        memory: new Pool({
+            // connection options
+        })
+    })
+    ```
+    </Tab>
+    <Tab value="mysql">
+    ```ts title="agent.ts"
+    import { agentStart } from "agentstart";
+    import { createPool } from "mysql2/promise";
+
+    export const start = agentStart({
+        memory: createPool({
+            // connection options
+        })
+    })
+    ```
+    </Tab>
+</Tabs>
+
+Alternatively, if you prefer to use an ORM, you can use one of the built-in adapters.
+
+<Tabs items={["Drizzle", "Prisma", "MongoDB"]}>
+  <Tab value="Drizzle">
+  ```ts title="agent.ts"
+  import { agentStart } from "agentstart";
+  import { drizzleAdapter } from "agentstart/memory";
+  import { db } from "@/db"; // your drizzle instance
+
+  export const start = agentStart({
+    memory: drizzleAdapter(db, {
+      provider: "pg", // or "mysql", "sqlite"
+    }),
+  })
+  ```
+  </Tab>
+  
+  <Tab value="Prisma">
+  ```ts title="agent.ts"
+  import { agentStart } from "agentstart";
+  import { prismaAdapter } from "agentstart/memory";
+  import { PrismaClient } from "@/generated/prisma/client"; // If your Prisma file is located elsewhere, you can change the path
+
+  const prisma = new PrismaClient();
+
+  export const start = agentStart({
+    memory: prismaAdapter(prisma, {
+      provider: "sqlite", // or "mysql", "postgresql"
+    }),
+  })
+  ```
+  </Tab>
+  
+  <Tab value="MongoDB">
+  ```ts title="agent.ts"
+  import { agentStart } from "agentstart";
+  import { mongodbAdapter } from "agentstart/memory";
+  import { client } from "@/db"; // your mongodb client
+
+  export const start = agentStart({
+    memory: mongodbAdapter(client),
+  })
+  ```
+  </Tab>
+</Tabs>
+
+</Step>
+
+<Step>
+
+### Create Database Tables
+AgentStart includes a CLI tool to help manage the schema required by the library.
+
+- **Generate**: This command generates an ORM schema or SQL migration file.
+
+<Callout>
+If you're using Kysely, you can apply the migration directly with `migrate` command below. Use `generate` only if you plan to apply the migration manually.
+</Callout>
+
+```bash title="Terminal"
+npx @agentstart/cli generate
+```
+
+- **Migrate**: This command creates the required tables directly in the database. (Available only for the built-in Kysely adapter)
+
+```bash title="Terminal"
+npx @agentstart/cli migrate
+```
+
+see the [CLI documentation](/docs/concepts/cli) for more information.
+
+<Callout>
+  If you instead want to create the schema manually, you can find the core schema required in the [database section](/docs/concepts/database#core-schema).
+</Callout>
 
 </Step>
 
@@ -258,7 +244,7 @@ Create an API route to handle agent requests. The route should handle requests f
   <Tab value="Next.js">
     ```ts title="app/api/agent/[...all]/route.ts"
     import { toNextJsHandler } from "agentstart/integration";
-    import { start } from "@/lib/agent";
+    import { start } from "@/lib/agent"; // path to your agent file
 
     export const { POST, GET } = toNextJsHandler(start.handler);
     ```
@@ -268,7 +254,7 @@ Create an API route to handle agent requests. The route should handle requests f
     ```ts title="server.ts"
     import express from "express";
     import { toNodeHandler } from "agentstart/integration";
-    import { start } from "./lib/agent";
+    import { start } from "@/lib/agent"; // path to your agent file
 
     const app = express();
     const handler = toNodeHandler(start.handler);
@@ -285,7 +271,7 @@ Create an API route to handle agent requests. The route should handle requests f
     ```ts title="server.ts"
     import { createServer } from "node:http";
     import { toNodeHandler } from "agentstart/integration";
-    import { start } from "./lib/agent";
+    import { start } from "@/lib/agent"; // path to your agent file
 
     const handler = toNodeHandler(start.handler);
     const server = createServer(handler);
@@ -305,17 +291,16 @@ Create an API route to handle agent requests. The route should handle requests f
 
 Create a client to interact with your agent from the frontend:
 
-```ts title="lib/agent-client.ts"
-import { createAgentClient } from "agentstart/client";
+```ts title="agent-client.ts"
+import {
+  createAgentClient,
+  useAgentStore,
+  useThreadStore,
+} from "agentstart/client";
+export const { client, useThread } = createAgentClient();
 
-export const { client, useThread } = createAgentClient({
-  baseURL: "http://localhost:3000", // optional if same domain
-});
+export { useAgentStore, useThreadStore };
 ```
-
-<Callout type="info">
-If you're running the agent on the same domain as your frontend, you can omit the `baseURL` option.
-</Callout>
 
 </Step>
 
@@ -329,37 +314,8 @@ You're now ready to use AgentStart in your application. Continue to [Basic Usage
 
 </Steps>
 
-## Database Migrations
-
-After setting up your schema, run migrations to create the tables:
-
-<Tabs items={["Drizzle", "Prisma"]}>
-  <Tab value="Drizzle">
-    ```bash
-    npx drizzle-kit generate
-    npx drizzle-kit push
-    ```
-  </Tab>
-  
-  <Tab value="Prisma">
-    ```bash
-    npx prisma generate
-    npx prisma db push
-    ```
-  </Tab>
-</Tabs>
-
-## Example Projects
-
-Check out complete examples:
-
-- **Next.js Example**: See `/apps/example` in the repository
-- **Express Example**: Coming soon
-
 ## Next Steps
 
 <Cards>
   <Card title="Basic Usage" href="/docs/basic-usage" />
-  <Card title="Database" href="/docs/concepts/database" />
-  <Card title="Tools" href="/docs/concepts/tools" />
 </Cards>

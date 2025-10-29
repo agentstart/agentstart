@@ -2,7 +2,7 @@
 AGENT: Agent runtime tool registry
 PURPOSE: Aggregates built-in tool definitions exposed by the AgentStart runtime
 USAGE: Import these exports when wiring tools in agent.ts
-EXPORTS: Tools, AgentStartToolCall, AgentStartToolResult, innerTools, osTools, webTools
+EXPORTS: Tools, AgentStartToolCall, AgentStartToolResult, agentTools, osTools, webTools
 FEATURES:
   - Collects sandbox-aware tool implementations in a single map
   - Organizes tools by category (inner, os, web)
@@ -37,7 +37,7 @@ export type Tools = typeof tools;
 export type AgentStartToolCall = TypedToolCall<Tools>;
 export type AgentStartToolResult = TypedToolResult<Tools>;
 
-export const innerTools = {
+export const agentTools = {
   todoRead,
   todoWrite,
 } as const;

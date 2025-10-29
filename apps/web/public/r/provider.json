@@ -11,7 +11,7 @@
     "react"
   ],
   "registryDependencies": [
-    "tooltip"
+    "@coss/tooltip"
   ],
   "files": [
     {

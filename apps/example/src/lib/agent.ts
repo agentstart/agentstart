@@ -14,8 +14,8 @@ import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { onStart, onSuccess, os } from "@orpc/server";
 import type { BlobOptions } from "agentstart";
 import { agentStart } from "agentstart";
-import { Agent, innerTools, osTools } from "agentstart/agent";
-import { drizzleAdapter } from "agentstart/db";
+import { Agent, agentTools, osTools } from "agentstart/agent";
+import { drizzleAdapter } from "agentstart/memory";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 
@@ -126,7 +126,7 @@ const agent = new Agent({
   model: openrouter("x-ai/grok-4-fast"),
   instructions: "You are a helpful assistant.",
   tools: {
-    ...innerTools,
+    ...agentTools,
     ...osTools,
   },
 });

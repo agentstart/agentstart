@@ -40,7 +40,7 @@ export const db = client.db("agentstart");
 
 ```ts title="lib/agent.ts"
 import { agentStart } from "agentstart";
-import { mongodbAdapter } from "agentstart/db";
+import { mongodbAdapter } from "agentstart/memory";
 import { db } from "@/db";
 
 export const start = agentStart({

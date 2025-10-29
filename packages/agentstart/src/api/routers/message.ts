@@ -14,7 +14,7 @@ agent-frontmatter:end */
 import { z } from "zod";
 import { type AgentStartUIMessage, loadThread } from "@/agent";
 import { publicProcedure } from "@/api/procedures";
-import { getAdapter } from "@/db";
+import { getAdapter } from "@/memory";
 
 /**
  * Create message router with optional custom procedure builder
@@ -29,9 +29,9 @@ export function createMessageRouter(procedure = publicProcedure) {
       )
       .handler(async ({ input, context, errors }) => {
         try {
-          const db = await getAdapter(context);
+          const memory = await getAdapter(context);
           const messages = await loadThread<AgentStartUIMessage>({
-            db,
+            memory,
             threadId: input.threadId,
           });
           return messages;
