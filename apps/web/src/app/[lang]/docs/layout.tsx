@@ -5,10 +5,7 @@ import { source } from "@/lib/source";
 export default async function Layout({
   params,
   children,
-}: {
-  params: Promise<{ lang: string }>;
-  children: React.ReactNode;
-}) {
+}: LayoutProps<"/[lang]/docs">) {
   const { lang } = await params;
 
   return (

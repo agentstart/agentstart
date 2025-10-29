@@ -1,0 +1,187 @@
+---
+title: Blob Storage
+description: Configure file uploads and attachments for AgentStart deployments
+---
+
+# Blob Storage
+
+AgentStart ships with first-class blob storage support so your agents can accept file uploads, persist normalized metadata, and reuse attachments across tools, memory, and UI layers.
+
+<Callout>
+  Blob storage is optional. If you skip configuration the `blob.getConfig` procedure returns `{ enabled: false }` and file uploads are disabled automatically.
+</Callout>
+
+## Enabling Blob Storage
+
+Configure blob storage when you call `agentStart`. The `blob` option mirrors the ergonomics of the memory adapters and surfaces provider credentials plus shared constraints.
+
+```ts title="lib/agent.ts"
+import { agentStart } from "agentstart";
+import type { BlobOptions } from "agentstart/blob";
+
+const blob: BlobOptions = {
+  provider: {
+    provider: "vercelBlob",
+    token: process.env.BLOB_READ_WRITE_TOKEN!,
+  },
+  constraints: {
+    maxFileSize: 10 * 1024 * 1024, // 10 MB
+    allowedMimeTypes: [
+      "image/jpeg",
+      "image/png",
+      "application/pdf",
+      "text/plain",
+      "text/markdown",
+    ],
+    maxFiles: 5,
+  },
+  uploadTiming: "onSubmit", // or "immediate"
+};
+
+export const start = agentStart({
+  agent,
+  memory,
+  blob,
+});
+```
+
+Every request handler can read the resolved adapter through the ORPC context, so tools can stream upload metadata back to your workflows.
+
+## Provider Configuration
+
+AgentStart includes adapters for Vercel Blob, AWS S3 compatible services, and Cloudflare R2. Each adapter exposes the same API surface (`put`, `head`, `list`, multipart helpers) so downstream consumers can stay provider-agnostic.
+
+### Vercel Blob
+
+```ts title="lib/agent.ts"
+const blob: BlobOptions = {
+  provider: {
+    provider: "vercelBlob",
+    token: process.env.BLOB_READ_WRITE_TOKEN!,
+  },
+  constraints: {
+    maxFileSize: 10 * 1024 * 1024,
+    allowedMimeTypes: ["image/*", "application/pdf"],
+    maxFiles: 5,
+  },
+};
+```
+
+Environment variables:
+
+```bash title=".env"
+BLOB_READ_WRITE_TOKEN=vercel_blob_rw_...
+```
+
+### AWS S3 and Compatible Providers
+
+```ts title="lib/agent.ts"
+const blob: BlobOptions = {
+  provider: {
+    provider: "awsS3",
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    },
+    bucket: process.env.AWS_S3_BUCKET!,
+    region: "us-east-1",
+    endpoint: process.env.AWS_S3_ENDPOINT, // optional override
+  },
+  constraints: {
+    maxFileSize: 50 * 1024 * 1024,
+    allowedMimeTypes: ["image/*", "application/pdf"],
+  },
+};
+```
+
+Environment variables:
+
+```bash title=".env"
+AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+AWS_S3_BUCKET=my-agent-uploads
+AWS_S3_ENDPOINT=https://s3.us-east-1.amazonaws.com # optional
+```
+
+### Cloudflare R2
+
+```ts title="lib/agent.ts"
+const blob: BlobOptions = {
+  provider: {
+    provider: "cloudflareR2",
+    credentials: {
+      accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+    },
+    bucket: process.env.R2_BUCKET!,
+    accountId: process.env.R2_ACCOUNT_ID!,
+    endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  },
+  constraints: {
+    maxFileSize: 100 * 1024 * 1024,
+    allowedMimeTypes: ["image/*", "application/pdf", "text/plain"],
+  },
+};
+```
+
+Environment variables:
+
+```bash title=".env"
+R2_ACCESS_KEY_ID=...
+R2_SECRET_ACCESS_KEY=...
+R2_BUCKET=my-r2-bucket
+R2_ACCOUNT_ID=...
+```
+
+## Client Attachments
+
+Use the `useBlobAttachments` hook from `agentstart/client` to validate and upload files before they reach your tools.
+
+```tsx title="components/attachment-input.tsx"
+"use client";
+
+import { useBlobAttachments } from "agentstart/client";
+import { client } from "@/lib/agent-client";
+
+export function AttachmentInput() {
+  const { validateFiles, uploadMutation, isEnabled } = useBlobAttachments(client);
+
+  const handleFiles = async (files: File[]) => {
+    if (!isEnabled) return;
+
+    const errors = validateFiles(files);
+    if (errors.length > 0) {
+      console.error(errors);
+      return;
+    }
+
+    const uploaded = await uploadMutation.mutateAsync(files);
+    console.log("Uploaded files:", uploaded);
+  };
+
+  return <input type="file" multiple onChange={(event) => {
+    const files = Array.from(event.target.files ?? []);
+    void handleFiles(files);
+  }} />;
+}
+```
+
+The hook normalizes browser `File` objects and `FileUIPart` blobs, enforces constraints locally, surfaces upload progress, and merges the resolved metadata back into your message payload.
+
+## Server-Side Validation
+
+The `blob.upload` ORPC procedure performs a second layer of validation—rejecting oversized files, disallowed MIME types, or requests that exceed `maxFiles`. Make sure you set realistic limits to prevent abuse.
+
+## Troubleshooting
+
+- `blob.getConfig` returns `{ enabled: false }`: the `blob` option was omitted or misconfigured. Verify environment variables and restart the server.
+- Upload requests return `403` or `SignatureDoesNotMatch`: double-check provider credentials and bucket permissions.
+- Large uploads stall: switch to `uploadTiming: "immediate"` so files upload while the user composes a message, then confirm the provider supports multipart uploads.
+
+## Related Guides
+
+<Cards>
+  <Card title="Prompt Input Component" href="/docs/components/prompt-input" />
+  <Card title="Next.js Integration" href="/docs/integrations/next" />
+  <Card title="Database Concepts" href="/docs/concepts/database" />
+</Cards>

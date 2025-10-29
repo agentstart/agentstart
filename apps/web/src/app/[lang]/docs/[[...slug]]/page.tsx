@@ -22,9 +22,7 @@ import { getPageImage, source } from "@/lib/source";
 
 export default async function Page({
   params,
-}: {
-  params: Promise<{ lang: string; slug?: string[] }>;
-}) {
+}: PageProps<"/[lang]/docs/[[...slug]]">) {
   const { slug, lang } = await params;
   const page = source.getPage(slug, lang);
   if (!page) notFound();
@@ -70,9 +68,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: {
-  params: Promise<{ lang: string; slug?: string[] }>;
-}): Promise<Metadata> {
+}: PageProps<"/[lang]/docs/[[...slug]]">): Promise<Metadata> {
   const { slug, lang } = await params;
   const page = source.getPage(slug, lang);
   if (!page) notFound();

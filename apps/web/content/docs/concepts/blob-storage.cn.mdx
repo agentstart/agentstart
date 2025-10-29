@@ -1,0 +1,193 @@
+---
+title: Blob 存储
+description: 为 AgentStart 配置文件上传和附件支持
+---
+
+# Blob 存储
+
+AgentStart 原生支持 blob 存储，让智能体可以接收文件上传、持久化标准化的元数据，并在工具、记忆和界面之间复用这些附件。
+
+<Callout>
+  Blob 存储是可选项。如果未配置，`blob.getConfig` 会返回 `{ enabled: false }`，上传入口会自动禁用。
+</Callout>
+
+## 启用 Blob 存储
+
+在调用 `agentStart` 时传入 `blob` 配置。该选项与记忆适配器的 ergonomics 相同，统一声明提供商凭据以及共享约束。
+
+```ts title="lib/agent.ts"
+import { agentStart } from "agentstart";
+import type { BlobOptions } from "agentstart/blob";
+
+const blob: BlobOptions = {
+  provider: {
+    provider: "vercelBlob",
+    token: process.env.BLOB_READ_WRITE_TOKEN!,
+  },
+  constraints: {
+    maxFileSize: 10 * 1024 * 1024, // 10 MB
+    allowedMimeTypes: [
+      "image/jpeg",
+      "image/png",
+      "application/pdf",
+      "text/plain",
+      "text/markdown",
+    ],
+    maxFiles: 5,
+  },
+  uploadTiming: "onSubmit", // 或 "immediate"
+};
+
+export const start = agentStart({
+  agent,
+  memory,
+  blob,
+});
+```
+
+所有请求处理器都可以通过 ORPC 上下文访问解析后的适配器，方便工具将上传元数据回传给业务流程。
+
+## 提供商配置
+
+AgentStart 内置 Vercel Blob、AWS S3 兼容服务以及 Cloudflare R2 的适配器。它们暴露统一的 API（`put`、`head`、`list`、分片上传辅助方法），让下游消费者无需关心具体厂商。
+
+### Vercel Blob
+
+```ts title="lib/agent.ts"
+const blob: BlobOptions = {
+  provider: {
+    provider: "vercelBlob",
+    token: process.env.BLOB_READ_WRITE_TOKEN!,
+  },
+  constraints: {
+    maxFileSize: 10 * 1024 * 1024,
+    allowedMimeTypes: ["image/*", "application/pdf"],
+    maxFiles: 5,
+  },
+};
+```
+
+环境变量：
+
+```bash title=".env"
+BLOB_READ_WRITE_TOKEN=vercel_blob_rw_...
+```
+
+### AWS S3 及兼容服务
+
+```ts title="lib/agent.ts"
+const blob: BlobOptions = {
+  provider: {
+    provider: "awsS3",
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    },
+    bucket: process.env.AWS_S3_BUCKET!,
+    region: "us-east-1",
+    endpoint: process.env.AWS_S3_ENDPOINT, // 可选覆盖
+  },
+  constraints: {
+    maxFileSize: 50 * 1024 * 1024,
+    allowedMimeTypes: ["image/*", "application/pdf"],
+  },
+};
+```
+
+环境变量：
+
+```bash title=".env"
+AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+AWS_S3_BUCKET=my-agent-uploads
+AWS_S3_ENDPOINT=https://s3.us-east-1.amazonaws.com # 可选
+```
+
+### Cloudflare R2
+
+```ts title="lib/agent.ts"
+const blob: BlobOptions = {
+  provider: {
+    provider: "cloudflareR2",
+    credentials: {
+      accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+    },
+    bucket: process.env.R2_BUCKET!,
+    accountId: process.env.R2_ACCOUNT_ID!,
+    endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  },
+  constraints: {
+    maxFileSize: 100 * 1024 * 1024,
+    allowedMimeTypes: ["image/*", "application/pdf", "text/plain"],
+  },
+};
+```
+
+环境变量：
+
+```bash title=".env"
+R2_ACCESS_KEY_ID=...
+R2_SECRET_ACCESS_KEY=...
+R2_BUCKET=my-r2-bucket
+R2_ACCOUNT_ID=...
+```
+
+## 客户端附件处理
+
+使用 `agentstart/client` 导出的 `useBlobAttachments` hook 在提交前校验并上传文件。
+
+```tsx title="components/attachment-input.tsx"
+"use client";
+
+import { useBlobAttachments } from "agentstart/client";
+import { client } from "@/lib/agent-client";
+
+export function AttachmentInput() {
+  const { validateFiles, uploadMutation, isEnabled } = useBlobAttachments(client);
+
+  const handleFiles = async (files: File[]) => {
+    if (!isEnabled) return;
+
+    const errors = validateFiles(files);
+    if (errors.length > 0) {
+      console.error(errors);
+      return;
+    }
+
+    const uploaded = await uploadMutation.mutateAsync(files);
+    console.log("Uploaded files:", uploaded);
+  };
+
+  return (
+    <input
+      type="file"
+      multiple
+      onChange={(event) => {
+        const files = Array.from(event.target.files ?? []);
+        void handleFiles(files);
+      }}
+    />
+  );
+}
+```
+
+该 hook 会规范化浏览器 `File` 对象和 `FileUIPart` blob，执行本地约束校验，暴露上传进度，并将解析后的元数据回填到消息载荷。
+
+## 服务端校验
+
+`blob.upload` ORPC 过程会执行二次校验：拒绝超出大小、MIME 类型不合法或超过 `maxFiles` 的请求。请设置合理的限制以防止滥用。
+
+## 常见问题
+
+- `blob.getConfig` 返回 `{ enabled: false }`：说明没有传入 `blob` 配置或凭据错误。请检查环境变量并重启服务。
+- 上传请求返回 `403` 或 `SignatureDoesNotMatch`：确认提供商凭据、桶权限以及签名配置。
+- 大文件上传卡住：尝试切换到 `uploadTiming: "immediate"`，并确认提供商支持分片上传。
+
+## 相关内容
+
+<Cards>
+  <Card title="Prompt 输入组件" href="/docs/components/prompt-input" />
+  <Card title="Next.js 集成" href="/docs/integrations/next" />
+  <Card title="数据库概念" href="/docs/concepts/database" />
+</Cards>
