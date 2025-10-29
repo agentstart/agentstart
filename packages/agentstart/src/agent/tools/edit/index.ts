@@ -1,12 +1,12 @@
 /* agent-frontmatter:start
 AGENT: Agent runtime tool module
-PURPOSE: Implements Update tool execution within the AgentStart runtime.
-USAGE: Register the "update" tool when composing the agent configuration to expose this capability.
-EXPORTS: update
+PURPOSE: Implements Edit tool execution within the AgentStart runtime.
+USAGE: Register the "edit" tool when composing the agent configuration to expose this capability.
+EXPORTS: edit
 FEATURES:
-  - Bridges sandbox APIs into the Update workflow
+  - Bridges sandbox APIs into the edit workflow
   - Streams structured progress updates and normalizes tool output
-SEARCHABLE: packages, agentstart, src, agent, tools, update, index, tool, runtime
+SEARCHABLE: packages, agentstart, src, agent, tools, edit, index, tool, runtime
 agent-frontmatter:end */
 
 import type { RuntimeContext } from "@agentstart/types";
@@ -21,10 +21,10 @@ import { getRichError } from "@/agent/tools/get-rich-error";
 import description from "./description";
 import { replace } from "./replacers";
 
-export const update = tool({
+export const edit = tool({
   description,
-  inputSchema: toolInputSchema.shape.update,
-  outputSchema: toolOutputSchema.shape.update,
+  inputSchema: toolInputSchema.shape.edit,
+  outputSchema: toolOutputSchema.shape.edit,
   async *execute(
     { filePath, oldString, newString, replaceAll },
     { experimental_context: context },
@@ -33,8 +33,8 @@ export const update = tool({
 
     yield {
       status: "pending" as const,
-      prompt: `Updating file: ${filePath}`,
-    } satisfies AgentStartToolOutput["update"];
+      prompt: `Editing file: ${filePath}`,
+    } satisfies AgentStartToolOutput["edit"];
 
     try {
       // Validate parameters
@@ -60,7 +60,7 @@ export const update = tool({
           metadata: {
             commitHash,
           },
-        } satisfies AgentStartToolOutput["update"];
+        } satisfies AgentStartToolOutput["edit"];
         return;
       }
 
@@ -92,7 +92,7 @@ export const update = tool({
         const commitHash = await commitChanges(
           sandbox,
           filePath,
-          replaceAll && occurrences > 1 ? "updated (replace all)" : "updated",
+          replaceAll && occurrences > 1 ? "edited (replace all)" : "edited",
         );
 
         yield {
@@ -101,7 +101,7 @@ export const update = tool({
           metadata: {
             commitHash,
           },
-        } satisfies AgentStartToolOutput["update"];
+        } satisfies AgentStartToolOutput["edit"];
       } catch (replaceError) {
         // Provide more specific error messages
         const errorMessage =
@@ -110,7 +110,7 @@ export const update = tool({
             : String(replaceError);
 
         const richError = getRichError({
-          action: "update file",
+          action: "edit file",
           args: { filePath, oldString, newString, replaceAll },
           error: errorMessage,
         });
@@ -119,11 +119,11 @@ export const update = tool({
           status: "error" as const,
           prompt: richError.message,
           error: richError.error,
-        } satisfies AgentStartToolOutput["update"];
+        } satisfies AgentStartToolOutput["edit"];
       }
     } catch (error) {
       const richError = getRichError({
-        action: "update file",
+        action: "edit file",
         args: { filePath, oldString, newString, replaceAll },
         error,
       });
@@ -132,7 +132,7 @@ export const update = tool({
         status: "error" as const,
         prompt: richError.message,
         error: richError.error,
-      } satisfies AgentStartToolOutput["update"];
+      } satisfies AgentStartToolOutput["edit"];
     }
   },
   toModelOutput: (output) => {

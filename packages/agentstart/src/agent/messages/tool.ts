@@ -6,7 +6,7 @@ EXPORTS: toolInputSchema, toolOutputSchema, ChatToolInput, AgentStartToolOutput,
 FEATURES:
   - Zod schemas for tool inputs and outputs
   - Type inference for tool invocations
-  - Comprehensive tool definitions for read, write, update, bash, ls, glob, grep, etc.
+  - Comprehensive tool definitions for read, write, edit, bash, ls, glob, grep, etc.
 SEARCHABLE: tool schema, tool types, thread tools, zod schemas
 agent-frontmatter:end */
 
@@ -45,8 +45,8 @@ export const toolInputSchema = z.object({
       ),
     content: z.string().describe("The content to write to the file"),
   }),
-  // update tool
-  update: z.object({
+  // edit tool
+  edit: z.object({
     filePath: z.string().describe("The absolute path to the file to modify"),
     oldString: z.string().describe("The text to replace"),
     newString: z
@@ -257,8 +257,8 @@ export const toolOutputSchema = z.object({
       })
       .optional(),
   }),
-  // updating file
-  update: z.object({
+  // editing file
+  edit: z.object({
     ...baseToolOutputSchema.shape,
     metadata: z
       .object({

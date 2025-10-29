@@ -1,12 +1,12 @@
 /* agent-frontmatter:start
 AGENT: Agent runtime tool helper
-PURPOSE: Supplies text matching generators used by the update tool for fuzzy replacements.
-USAGE: Imported by the update tool pipeline to locate candidate text segments before patching.
+PURPOSE: Supplies text matching generators used by the edit tool for fuzzy replacements.
+USAGE: Imported by the edit tool pipeline to locate candidate text segments before patching.
 EXPORTS: Replacer, SimpleReplacer, LineTrimmedReplacer, WhitespaceNormalizedReplacer, IndentationFlexibleReplacer, EscapeNormalizedReplacer, BlockAnchorReplacer, replace
 FEATURES:
   - Implements Levenshtein-based fuzzy matching strategies
   - Normalizes whitespace and line trimming when seeking replacements
-SEARCHABLE: packages, agentstart, src, agent, tools, update, replacers, tool, replacer, fuzzy, matching
+SEARCHABLE: packages, agentstart, src, agent, tools, edit, replacers, tool, replacer, fuzzy, matching
 agent-frontmatter:end */
 
 /**

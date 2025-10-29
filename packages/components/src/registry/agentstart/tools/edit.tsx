@@ -1,14 +1,14 @@
 /* agent-frontmatter:start
-AGENT: Update file tool UI component
+AGENT: Edit file tool UI component
 PURPOSE: Visualize file edit operations with before/after code snippets
-USAGE: <UpdateFile part={toolPart} />
-EXPORTS: UpdateFile, UpdateFileProps
+USAGE: <EditFile part={toolPart} />
+EXPORTS: EditFile, EditFileProps
 FEATURES:
   - Shows old and new string replacements with syntax highlighting
   - Displays file path and operation type (replace/replaceAll)
   - Conditionally renders code blocks for multiline changes
   - Supports replace_all flag visualization
-SEARCHABLE: update tool, file edit ui, code replacement view
+SEARCHABLE: edit tool, file edit ui, code replacement view
 agent-frontmatter:end */
 
 import { getLanguageFromFilePath } from "@agentstart/utils";
@@ -18,13 +18,13 @@ import type { InferUITools, ToolUIPart } from "ai";
 import { CodeBlock } from "../code-block";
 import { Tool, ToolContent, ToolHeader, ToolOutput } from "./tool";
 
-export interface UpdateFileProps {
-  part: ToolUIPart<InferUITools<Pick<Tools, "update">>>;
+export interface EditFileProps {
+  part: ToolUIPart<InferUITools<Pick<Tools, "edit">>>;
 }
 
-export function UpdateFile({
+export function EditFile({
   part: { type, state, input, errorText },
-}: UpdateFileProps) {
+}: EditFileProps) {
   const fileName = input?.filePath?.split("/").pop() || input?.filePath;
 
   const language = getLanguageFromFilePath(input?.filePath || "");

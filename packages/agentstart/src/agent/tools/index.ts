@@ -12,25 +12,25 @@ agent-frontmatter:end */
 
 import type { TypedToolCall, TypedToolResult } from "ai";
 import { bash } from "./bash";
+import { edit } from "./edit";
 import { glob } from "./glob";
 import { grep } from "./grep";
 import { ls } from "./ls";
 import { read } from "./read";
 import { todoRead } from "./todo-read";
 import { todoWrite } from "./todo-write";
-import { update } from "./update";
 import { write } from "./write";
 
 const tools = {
-  update,
-  read,
-  write,
   bash,
+  edit,
   glob,
   grep,
   ls,
+  read,
   todoRead,
   todoWrite,
+  write,
 } as const;
 
 export type Tools = typeof tools;
@@ -43,11 +43,11 @@ export const agentTools = {
 } as const;
 export const osTools = {
   bash,
+  edit,
   glob,
   grep,
   ls,
   read,
   write,
-  update,
 } as const;
 export const webTools = {} as const;

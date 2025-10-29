@@ -317,9 +317,9 @@
           "target": "components/agent/tools/tool.tsx"
         },
         {
-          "path": "src/registry/agentstart/tools/update.tsx",
+          "path": "src/registry/agentstart/tools/edit.tsx",
           "type": "registry:component",
-          "target": "components/agent/tools/update.tsx"
+          "target": "components/agent/tools/edit.tsx"
         },
         {
           "path": "src/registry/agentstart/tools/write.tsx",

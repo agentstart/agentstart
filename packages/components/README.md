@@ -25,7 +25,7 @@ All components are available in the registry and can be installed via the shadcn
 
 ### Tool Components
 - **message-part-view** - Tool dispatcher routing to specialized renderers
-  - Individual tool renderers: bash, glob, grep, ls, read, todo, tool, update, write
+  - Individual tool renderers: bash, glob, grep, ls, read, todo, tool, edit, write
 
 ## Shadcn Registry Setup
 

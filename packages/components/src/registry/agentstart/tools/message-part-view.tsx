@@ -22,12 +22,12 @@ import {
 import { Response } from "../response";
 import { Shimmer } from "../shimmer";
 import { Bash } from "./bash";
+import { EditFile } from "./edit";
 import { Glob } from "./glob";
 import { Grep } from "./grep";
 import { Ls } from "./ls";
 import { ReadFile } from "./read";
 import { Todo } from "./todo";
-import { UpdateFile } from "./update";
 import { WriteFile } from "./write";
 
 interface Props {
@@ -45,8 +45,8 @@ export const MessagePart = memo(function MessagePart({
     }
     case "tool-write":
       return <WriteFile part={part} />;
-    case "tool-update":
-      return <UpdateFile part={part} />;
+    case "tool-edit":
+      return <EditFile part={part} />;
     case "tool-bash":
       return <Bash part={part} />;
     case "tool-glob":
