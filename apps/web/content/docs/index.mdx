@@ -3,7 +3,7 @@ title: Introduction
 description: Introduction to AgentStart
 ---
 
-AgentStart is a framework-agnostic AI agent framework for TypeScript. It provides a comprehensive set of tools and database adapters out of the box, making it easy to build production-ready agents with persistent memory, tool execution, and type-safe client integration.
+AgentStart is a TypeScript AI agent framework. It ships with a full set of tools and database adapters out of the box, making it easy to build production-ready agents with persistent memory, tool execution, and type-safe client integration.
 
 ## Why AgentStart?
 
@@ -25,24 +25,6 @@ Building AI agents often requires piecing together multiple libraries and writin
   <Card title="Framework Integration" description="Next.js and Node.js adapters included" />
   <Card title="Extensible" description="Add custom tools and middleware easily" />
 </Cards>
-
-## Architecture
-
-AgentStart uses a modern architecture:
-
-```
-┌─────────────────────────────────────────┐
-│          Your Application               │
-├─────────────────────────────────────────┤
-│  React Hooks (useThread, useSession)    │
-├─────────────────────────────────────────┤
-│      oRPC Handler (Type-Safe API)       │
-├─────────────────────────────────────────┤
-│  Agent (Model + Tools + Instructions)   │
-├─────────────────────────────────────────┤
-│  Database Adapter (Threads + Messages)  │
-└─────────────────────────────────────────┘
-```
 
 ## Quick Example
 
@@ -84,5 +66,4 @@ export function Chat() {
 <Cards>
   <Card title="Installation" href="/docs/installation" />
   <Card title="Basic Usage" href="/docs/basic-usage" />
-  <Card title="Components" href="/docs/components/overview" />
 </Cards>
