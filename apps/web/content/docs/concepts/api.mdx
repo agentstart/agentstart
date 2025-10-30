@@ -23,7 +23,6 @@ export const start = agentStart({
 // Calling endpoints on the server
 await start.api.thread.list();
 await start.api.thread.get({ id: "thread-123" });
-await start.api.message.send({ threadId: "thread-123", content: "Hello" });
 ```
 
 ## Available Endpoints
@@ -49,12 +48,6 @@ await start.api.thread.delete({ id: "thread-123" });
 ### Message Operations
 
 ```ts
-// Send message
-const response = await start.api.message.send({
-  threadId: "thread-123",
-  content: "What is TypeScript?",
-});
-
 // Get messages
 const messages = await start.api.message.list({ 
   threadId: "thread-123" 

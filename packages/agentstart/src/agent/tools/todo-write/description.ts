@@ -21,7 +21,7 @@ Use this tool proactively in these scenarios:
 3. User explicitly requests todo list - When the user directly asks you to use the todo list
 4. User provides multiple tasks - When users provide a list of things to be done (numbered or comma-separated)
 5. After receiving new instructions - Immediately capture user requirements as todos
-6. When you start working on a task - Mark it as in_progress BEFORE beginning work. Ideally you should only have one todo as in_progress at a time
+6. When you start working on a task - Mark it as inProgress BEFORE beginning work. Ideally you should only have one todo as inProgress at a time
 7. After completing a task - Mark it as completed and add any new follow-up tasks discovered during implementation
 
 ## When NOT to Use This Tool
@@ -39,19 +39,19 @@ NOTE that you should not use this tool if there is only one trivial task to do. 
 
 1. **Task States**: Use these states to track progress:
    - pending: Task not yet started
-   - in_progress: Currently working on (limit to ONE task at a time)
+   - inProgress: Currently working on (limit to ONE task at a time)
    - completed: Task finished successfully
 
 2. **Task Management**:
    - Update task status in real-time as you work
    - Mark tasks complete IMMEDIATELY after finishing (don't batch completions)
-   - Only have ONE task in_progress at any time
+   - Only have ONE task inProgress at any time
    - Complete current tasks before starting new ones
    - Remove tasks that are no longer relevant from the list entirely
 
 3. **Task Completion Requirements**:
    - ONLY mark a task as completed when you have FULLY accomplished it
-   - If you encounter errors, blockers, or cannot finish, keep the task as in_progress
+   - If you encounter errors, blockers, or cannot finish, keep the task as inProgress
    - When blocked, create a new task describing what needs to be resolved
    - Never mark a task as completed if:
      - Tests are failing
