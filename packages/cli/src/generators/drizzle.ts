@@ -16,7 +16,7 @@ import { getTables } from "agentstart/memory";
 import fs from "fs-extra";
 import type { SchemaGenerator } from "./types";
 
-type DrizzleProvider = "sqlite" | "pg" | "mysql";
+type DrizzleProvider = "sqlite" | "postgresql" | "mysql";
 
 export const generateDrizzleSchema: SchemaGenerator = async ({
   options,
@@ -31,6 +31,7 @@ export const generateDrizzleSchema: SchemaGenerator = async ({
     usePlural: boolean;
   }>;
   const databaseType: DrizzleProvider = adapterOptions.provider ?? "sqlite";
+  const tokenPrefix = databaseType === "postgresql" ? "pg" : databaseType;
   const usePlural = adapterOptions.usePlural ?? false;
 
   const importTokens: string[] = [];
@@ -40,7 +41,7 @@ export const generateDrizzleSchema: SchemaGenerator = async ({
     }
   };
 
-  useToken(`${databaseType}Table`);
+  useToken(`${tokenPrefix}Table`);
 
   const fileExist = fs.existsSync(filePath);
 
@@ -157,7 +158,7 @@ export const generateDrizzleSchema: SchemaGenerator = async ({
     tableBlocks.push(schemaLines.join("\n"));
   }
 
-  const importLine = `import { ${importTokens.join(", ")} } from "drizzle-orm/${databaseType}-core";`;
+  const importLine = `import { ${importTokens.join(", ")} } from "drizzle-orm/${tokenPrefix}-core";`;
   const code = `${importLine}\n\n${tableBlocks.join("\n\n")}\n`;
 
   return {

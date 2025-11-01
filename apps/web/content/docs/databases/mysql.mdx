@@ -3,8 +3,6 @@ title: MySQL
 description: Integrate AgentStart with MySQL
 ---
 
-# MySQL
-
 MySQL is a popular open-source relational database management system (RDBMS) that is widely used for building web applications and other types of software. It provides a flexible and scalable database solution.
 
 ## Example Usage
@@ -13,6 +11,7 @@ Make sure you have MySQL installed and configured. Then, you can connect it dire
 
 ```ts title="lib/agent.ts"
 import { agentStart } from "agentstart";
+import { kyselyAdapter } from "agentstart/memory";
 import { Kysely, MysqlDialect } from "kysely";
 import { createPool } from "mysql2/promise";
 
@@ -45,18 +44,22 @@ export const start = agentStart({
 The AgentStart CLI allows you to generate or migrate your database schema.
 
 <table>
-  <tr className="border-b">
-    <th>
-      <p className="font-bold text-[16px] mb-1">MySQL Schema Generation</p>
-    </th>
-    <th>
-      <p className="font-bold text-[16px] mb-1">MySQL Schema Migration</p>
-    </th>
-  </tr>
-  <tr className="h-10">
-    <td>✅ Supported</td>
-    <td>✅ Supported</td>
-  </tr>
+  <thead>
+    <tr className="border-b">
+      <th>
+        <p className="font-bold text-[16px] mb-1">MySQL Schema Generation</p>
+      </th>
+      <th>
+        <p className="font-bold text-[16px] mb-1">MySQL Schema Migration</p>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr className="h-10">
+      <td>✅ Supported</td>
+      <td>✅ Supported</td>
+    </tr>
+  </tbody>
 </table>
 
 ```bash title="Schema Generation"
@@ -71,8 +74,20 @@ npx @agentstart/cli migrate
 
 For a better development experience, we recommend using the [Drizzle adapter](/docs/databases/drizzle):
 
-```bash
+```bash tab="npm"
 npm install drizzle-orm mysql2
+```
+
+```bash tab="bun"
+bun add drizzle-orm mysql2
+```
+
+```bash tab="pnpm"
+pnpm add drizzle-orm mysql2
+```
+
+```bash tab="yarn"
+yarn add drizzle-orm mysql2
 ```
 
 ```ts title="lib/agent.ts"
@@ -96,6 +111,7 @@ export const start = agentStart({
     schema: {
       thread: threadsTable,
       message: messagesTable,
+      todo: todosTable,
     },
   }),
 });

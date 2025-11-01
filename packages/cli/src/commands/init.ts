@@ -48,7 +48,7 @@ const supportedDatabases = [
   "mssql",
   "postgres",
   // Drizzle
-  "drizzle:pg",
+  "drizzle:postgresql",
   "drizzle:mysql",
   "drizzle:sqlite",
   // Prisma

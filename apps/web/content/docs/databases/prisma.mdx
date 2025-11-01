@@ -3,15 +3,28 @@ title: Prisma Adapter
 description: Integrate AgentStart with Prisma ORM
 ---
 
-# Prisma Adapter
-
 Prisma is a next-generation ORM that makes working with databases easy with type-safe database access, declarative migrations, and auto-completion.
 
 ## Installation
 
-```bash
+```bash tab="npm"
 npm install @prisma/client
 npm install -D prisma
+```
+
+```bash tab="bun"
+bun add @prisma/client
+bun add -D prisma
+```
+
+```bash tab="pnpm"
+pnpm add @prisma/client
+pnpm add -D prisma
+```
+
+```bash tab="yarn"
+yarn add @prisma/client
+yarn add -D prisma
 ```
 
 ## Example Usage
@@ -46,11 +59,15 @@ datasource db {
 
 model Thread {
   id        String    @id @default(cuid())
-  title     String?
-  userId    String?
+  title     String
+  userId    String
+  visibility String   @default("private")
+  lastContext Json?
   createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
   metadata  Json?
   messages  Message[]
+  todos     Todo[]
 
   @@map("threads")
 }
@@ -59,12 +76,25 @@ model Message {
   id        String   @id @default(cuid())
   threadId  String
   role      String
-  content   String
-  createdAt DateTime @default(now())
+  parts     Json
+  attachments Json?
   metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
   thread    Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
 
   @@map("messages")
+}
+
+model Todo {
+  id        String   @id @default(cuid())
+  threadId  String
+  todos     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  thread    Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@map("todos")
 }
 ```
 

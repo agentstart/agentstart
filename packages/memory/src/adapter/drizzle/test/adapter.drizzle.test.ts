@@ -71,7 +71,7 @@ describeFn("Drizzle Adapter Tests", async () => {
     await cleanupDatabase(postgres);
   });
   const db = drizzle(pg);
-  const adapter = drizzleAdapter(db, { provider: "pg", schema });
+  const adapter = drizzleAdapter(db, { provider: "postgresql", schema });
 
   await runAdapterTest({
     getAdapter: async (customOptions = {}) => {

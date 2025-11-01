@@ -1,0 +1,379 @@
+---
+title: "SDK"
+description: Reference for AgentStart SDK endpoints
+---
+
+The endpoints below are generated from the oRPC router. Call them via `await start.api.<namespace>.<endpoint>(input)`.
+
+## Calling API Endpoints on the Server
+
+To call an API endpoint on the server, import your `start` instance and call the endpoint using the `api` object:
+
+```ts title="lib/agent.ts"
+import { agentStart } from "agentstart";
+
+export const start = agentStart({
+  agent,
+  memory,
+  appName: "my-app",
+});
+
+// Calling endpoints on the server
+await start.api.thread.list()
+```
+
+## API Reference
+
+## `thread.list`
+
+_Summary: List threads accessible to the current session_
+
+Retrieves a paginated collection of threads that the requester is allowed to see. Defaults to page 1 with 20 items per page when pagination arguments are omitted.
+
+```ts
+await start.api.thread.list(input);
+```
+
+#### Examples
+
+**Default pagination**
+
+```ts
+await start.api.thread.list();
+```
+
+**Custom page size**
+
+```ts
+await start.api.thread.list({ page: 2, pageSize: 10 });
+```
+
+### Input
+
+<TypeTable
+  type={{
+    page: { type: 'number', description: 'Constraints: ≥ 1, ≤ 9007199254740991', typeDescription: 'integer' },
+    pageSize: { type: 'number', description: 'Constraints: ≥ 1, ≤ 20', typeDescription: 'integer' }
+  }}
+/>
+
+### Output
+
+<TypeTable
+  type={{
+    threads: { type: 'Array<object>', typeDescription: 'Array<{ id: string; title: string; userId: string; visibility: "public" | "private"; lastContext?: unknown; createdAt: string (date-time); updatedAt: string (date-time) }>', required: true },
+    pageInfo: { type: 'object', typeDescription: '{ page: number; pageSize: number; total: number; totalPages: number; hasNextPage: boolean; hasPreviousPage: boolean }', required: true, properties: { page: { type: 'number', required: true }, pageSize: { type: 'number', required: true }, total: { type: 'number', required: true }, totalPages: { type: 'number', required: true }, hasNextPage: { type: 'boolean', required: true }, hasPreviousPage: { type: 'boolean', required: true } } }
+  }}
+/>
+
+## `thread.loadMessages`
+
+_Summary: Load the full message history for a thread_
+
+Returns all persisted AgentStart UI messages for the requested thread so clients can hydrate chat interfaces.
+
+```ts
+await start.api.thread.loadMessages(input);
+```
+
+#### Examples
+
+**Load history**
+
+```ts
+await start.api.thread.loadMessages({ threadId: 'thr_123' });
+```
+
+### Input
+
+<TypeTable
+  type={{
+    threadId: { type: 'string', required: true }
+  }}
+/>
+
+### Output
+
+<TypeTable
+  type={{
+    items: { type: 'Array<UIMessage>', description: 'Array of UI messages. Each message part can be text, tool-call, or tool-result.', typeDescription: 'Array<{ id: string; role: string; parts: MessagePart[]; metadata?: object }>', required: true, properties: { id: { type: 'string', required: true }, role: { type: '"system" | "user" | "assistant"', required: true }, parts: { type: 'Array<MessagePart>', description: 'Message parts (text, tool-call, tool-result)', required: true }, metadata: { type: 'object', description: 'Optional metadata' } } }
+  }}
+/>
+
+## `thread.get`
+
+_Summary: Fetch a single thread by identifier_
+
+Retrieves thread metadata when the caller has permission to view it, enforcing visibility rules for private threads.
+
+```ts
+await start.api.thread.get(input);
+```
+
+#### Examples
+
+**Fetch owned thread**
+
+```ts
+await start.api.thread.get({ threadId: 'thr_123' });
+```
+
+### Input
+
+<TypeTable
+  type={{
+    threadId: { type: 'string', required: true }
+  }}
+/>
+
+### Output
+
+<TypeTable
+  type={{
+    thread: { type: 'object', typeDescription: '{ id: string; title: string; userId: string; visibility: "public" | "private"; lastContext?: unknown; createdAt: string (date-time); updatedAt: string (date-time) }', required: true, properties: { id: { type: 'string', required: true }, title: { type: 'string', required: true }, userId: { type: 'string', required: true }, visibility: { type: '"public" | "private"', description: 'Allowed values: "public", "private"', default: '"private"', required: true }, lastContext: { type: 'unknown' }, createdAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-10-31T13:14:25.722Z"', required: true }, updatedAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-10-31T13:14:25.722Z"', required: true } } }
+  }}
+/>
+
+## `thread.create`
+
+_Summary: Create a new thread_
+
+Creates a thread owned by the current user (or an anonymous placeholder) and returns the assigned identifier along with the persisted record.
+
+```ts
+await start.api.thread.create(input);
+```
+
+#### Examples
+
+**Create with title**
+
+```ts
+await start.api.thread.create({ title: 'Brainstorm' });
+```
+
+**Public thread**
+
+```ts
+await start.api.thread.create({ visibility: 'public' });
+```
+
+### Input
+
+<TypeTable
+  type={{
+    title: { type: 'string' },
+    visibility: { type: '"public" | "private"', description: 'Allowed values: "public", "private"' }
+  }}
+/>
+
+### Output
+
+<TypeTable
+  type={{
+    threadId: { type: 'string', required: true },
+    thread: { type: 'object', typeDescription: '{ id: string; title: string; userId: string; visibility: "public" | "private"; lastContext?: unknown; createdAt: string (date-time); updatedAt: string (date-time) }', required: true, properties: { id: { type: 'string', required: true }, title: { type: 'string', required: true }, userId: { type: 'string', required: true }, visibility: { type: '"public" | "private"', description: 'Allowed values: "public", "private"', default: '"private"', required: true }, lastContext: { type: 'unknown' }, createdAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-10-31T13:14:25.722Z"', required: true }, updatedAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-10-31T13:14:25.722Z"', required: true } } }
+  }}
+/>
+
+## `thread.update`
+
+_Summary: Update an existing thread_
+
+Applies partial updates to thread metadata such as title, visibility, or cached context after verifying ownership.
+
+```ts
+await start.api.thread.update(input);
+```
+
+#### Examples
+
+**Rename a thread**
+
+```ts
+await start.api.thread.update({ threadId: 'thr_123', data: { title: 'Renamed thread' } });
+```
+
+### Input
+
+<TypeTable
+  type={{
+    threadId: { type: 'string', required: true },
+    data: { type: 'object', typeDescription: '{ title?: string; visibility?: "public" | "private"; lastContext?: unknown }', required: true, properties: { title: { type: 'string', description: 'Constraints: min length 1' }, visibility: { type: '"public" | "private"', description: 'Allowed values: "public", "private"' }, lastContext: { type: 'unknown' } } }
+  }}
+/>
+
+### Output
+
+<TypeTable
+  type={{
+    thread: { type: 'object', typeDescription: '{ id: string; title: string; userId: string; visibility: "public" | "private"; lastContext?: unknown; createdAt: string (date-time); updatedAt: string (date-time) }', required: true, properties: { id: { type: 'string', required: true }, title: { type: 'string', required: true }, userId: { type: 'string', required: true }, visibility: { type: '"public" | "private"', description: 'Allowed values: "public", "private"', default: '"private"', required: true }, lastContext: { type: 'unknown' }, createdAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-10-31T13:14:25.722Z"', required: true }, updatedAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-10-31T13:14:25.722Z"', required: true } } }
+  }}
+/>
+
+## `thread.delete`
+
+_Summary: Delete a thread and its messages_
+
+Removes the thread along with all associated messages after confirming the requester owns the resource.
+
+```ts
+await start.api.thread.delete(input);
+```
+
+#### Examples
+
+**Delete a private thread**
+
+```ts
+await start.api.thread.delete({ threadId: 'thr_123' });
+```
+
+### Input
+
+<TypeTable
+  type={{
+    threadId: { type: 'string', required: true }
+  }}
+/>
+
+### Output
+
+<TypeTable
+  type={{
+    success: { type: 'boolean', required: true }
+  }}
+/>
+
+## `thread.stream`
+
+_Summary: Stream agent responses for a thread_
+
+Starts an agent run for the supplied message and streams tokenized events that clients can render incrementally.
+
+```ts
+await start.api.thread.stream(input);
+```
+
+**Returns:** `AsyncIterable<AgentStreamEvent>`
+
+#### Examples
+
+**Consume as async iterable**
+
+```ts
+for await (const event of await start.api.thread.stream({ threadId: 'thr_123', message: 'Hello agent!' })) {
+  console.log(event);
+}
+```
+
+### Input
+
+<TypeTable
+  type={{
+    threadId: { type: 'string', description: 'Constraints: min length 1', required: true },
+    message: { type: 'unknown', required: true },
+    model: { type: 'string' }
+  }}
+/>
+
+## `message.get`
+
+_Summary: Get all persisted messages for a thread_
+
+Fetches the normalized AgentStart UI message sequence so clients can hydrate conversational views.
+
+```ts
+await start.api.message.get(input);
+```
+
+#### Examples
+
+**Load UI messages**
+
+```ts
+await start.api.message.get({ threadId: 'thr_123' });
+```
+
+### Input
+
+<TypeTable
+  type={{
+    threadId: { type: 'string', description: 'Constraints: min length 1', required: true }
+  }}
+/>
+
+### Output
+
+<TypeTable
+  type={{
+    items: { type: 'Array<UIMessage>', description: 'Array of UI messages. Each message part can be text, tool-call, or tool-result.', typeDescription: 'Array<{ id: string; role: string; parts: MessagePart[]; metadata?: object }>', required: true, properties: { id: { type: 'string', required: true }, role: { type: '"system" | "user" | "assistant"', required: true }, parts: { type: 'Array<MessagePart>', description: 'Message parts (text, tool-call, tool-result)', required: true }, metadata: { type: 'object', description: 'Optional metadata' } } }
+  }}
+/>
+
+## `blob.getConfig`
+
+_Summary: Inspect blob storage configuration_
+
+Returns whether blob uploads are enabled along with provider-specific constraints so clients can validate files before uploading.
+
+```ts
+await start.api.blob.getConfig();
+```
+
+#### Examples
+
+**Client-side capability check**
+
+```ts
+const config = await start.api.blob.getConfig();
+if (!config.enabled) {
+  console.log('Uploads are disabled');
+}
+```
+
+### Output
+
+<TypeTable
+  type={{
+    enabled: { type: 'boolean', required: true },
+    constraints: { type: 'object | null', typeDescription: '{ maxFileSize?: number; allowedMimeTypes?: Array<string>; maxFiles?: number; uploadTiming?: "onSubmit" | "immediate" } | null', required: true, properties: { maxFileSize: { type: 'number' }, allowedMimeTypes: { type: 'Array<string>' }, maxFiles: { type: 'number' }, uploadTiming: { type: '"onSubmit" | "immediate"', description: 'Allowed values: "onSubmit", "immediate"' } } },
+    provider: { type: '"vercelBlob" | "awsS3" | "cloudflareR2" | null', description: 'Allowed values: "vercelBlob", "awsS3", "cloudflareR2"\nAccepts null.', required: true }
+  }}
+/>
+
+## `blob.upload`
+
+_Summary: Upload one or more files to the configured blob store_
+
+Validates files against configured constraints and stores them using the active blob adapter, returning public URLs where applicable.
+
+```ts
+await start.api.blob.upload(input);
+```
+
+#### Examples
+
+**Upload a PNG**
+
+```ts
+await start.api.blob.upload({ files: [{ name: 'diagram.png', type: 'image/png', data: base64Data }] });
+```
+
+### Input
+
+<TypeTable
+  type={{
+    files: { type: 'Array<object>', typeDescription: 'Array<{ name: string; data: string; type: string }>', required: true }
+  }}
+/>
+
+### Output
+
+<TypeTable
+  type={{
+    success: { type: 'boolean', required: true },
+    files: { type: 'Array<object>', typeDescription: 'Array<{ name: string; url: string; downloadUrl: string | null; pathname: string; contentType: string | null; contentDisposition: string | null }>', required: true }
+  }}
+/>
+

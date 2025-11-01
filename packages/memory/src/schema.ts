@@ -27,7 +27,7 @@ export type DBThread = z.infer<typeof threadSchema>;
 export const messageSchema = z.object({
   id: z.string(),
   threadId: z.string().describe("The ID of the thread this message belongs to"),
-  role: z.string(),
+  role: z.enum(["system", "user", "assistant"]),
   parts: z.any(),
   attachments: z.any().optional(),
   metadata: z.any().optional(),

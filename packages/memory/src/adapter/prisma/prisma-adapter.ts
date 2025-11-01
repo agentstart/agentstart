@@ -38,7 +38,7 @@ import {
 } from "../shared";
 import { withApplyDefault } from "../utils";
 
-export interface PrismaConfig {
+export interface PrismaAdapterConfig {
   /**
    * Database provider.
    */
@@ -66,7 +66,7 @@ interface PrismaClientInternal {
 }
 
 const createTransform = (
-  _config: PrismaConfig,
+  _config: PrismaAdapterConfig,
   options: Omit<AgentStartOptions, "agent">,
 ) => {
   const schema = getTables(options);
@@ -225,7 +225,7 @@ const createTransform = (
 };
 
 export const prismaAdapter =
-  (prisma: PrismaClient, config: PrismaConfig) =>
+  (prisma: PrismaClient, config: PrismaAdapterConfig) =>
   (options: Omit<AgentStartOptions, "agent">) => {
     const db = prisma as PrismaClientInternal;
     const {

@@ -3,36 +3,88 @@ title: Drizzle ORM Adapter
 description: Integrate AgentStart with Drizzle ORM
 ---
 
-# Drizzle ORM Adapter
-
 Drizzle ORM is a powerful and flexible ORM for Node.js and TypeScript. It provides a simple and intuitive API with full type safety and supports PostgreSQL, MySQL, and SQLite.
 
 ## Installation
 
-```bash
+```bash tab="npm"
 npm install drizzle-orm
+```
+
+```bash tab="bun"
+bun add drizzle-orm
+```
+
+```bash tab="pnpm"
+pnpm add drizzle-orm
+```
+
+```bash tab="yarn"
+yarn add drizzle-orm
 ```
 
 Install your database driver:
 
 <Tabs items={["PostgreSQL", "MySQL", "SQLite"]}>
   <Tab value="PostgreSQL">
-    ```bash
+    ```bash tab="npm"
     npm install @neondatabase/serverless
     # or
     npm install pg
     ```
-  </Tab>
-  
-  <Tab value="MySQL">
-    ```bash
-    npm install mysql2
+
+    ```bash tab="bun"
+    bun add @neondatabase/serverless
+    # or
+    bun add pg
+    ```
+
+    ```bash tab="pnpm"
+    pnpm add @neondatabase/serverless
+    # or
+    pnpm add pg
+    ```
+
+    ```bash tab="yarn"
+    yarn add @neondatabase/serverless
+    # or
+    yarn add pg
     ```
   </Tab>
-  
+
+  <Tab value="MySQL">
+    ```bash tab="npm"
+    npm install mysql2
+    ```
+
+    ```bash tab="bun"
+    bun add mysql2
+    ```
+
+    ```bash tab="pnpm"
+    pnpm add mysql2
+    ```
+
+    ```bash tab="yarn"
+    yarn add mysql2
+    ```
+  </Tab>
+
   <Tab value="SQLite">
-    ```bash
+    ```bash tab="npm"
     npm install better-sqlite3
+    ```
+
+    ```bash tab="bun"
+    bun add better-sqlite3
+    ```
+
+    ```bash tab="pnpm"
+    pnpm add better-sqlite3
+    ```
+
+    ```bash tab="yarn"
+    yarn add better-sqlite3
     ```
   </Tab>
 </Tabs>
@@ -52,19 +104,36 @@ import { pgTable, text, timestamp, jsonb } from "drizzle-orm/pg-core";
 
 export const threadsTable = pgTable("threads", {
   id: text("id").primaryKey(),
-  title: text("title"),
-  userId: text("user_id"),
-  createdAt: timestamp("created_at").defaultNow(),
+  title: text("title").notNull(),
+  userId: text("user_id").notNull(),
+  visibility: text("visibility").notNull().default("private"),
+  lastContext: jsonb("last_context"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
   metadata: jsonb("metadata"),
 });
 
 export const messagesTable = pgTable("messages", {
   id: text("id").primaryKey(),
-  threadId: text("thread_id").references(() => threadsTable.id),
-  role: text("role"),
-  content: text("content"),
-  createdAt: timestamp("created_at").defaultNow(),
+  threadId: text("thread_id")
+    .notNull()
+    .references(() => threadsTable.id, { onDelete: "cascade" }),
+  role: text("role").notNull(),
+  parts: jsonb("parts").notNull(),
+  attachments: jsonb("attachments"),
   metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const todosTable = pgTable("todos", {
+  id: text("id").primaryKey(),
+  threadId: text("thread_id")
+    .notNull()
+    .references(() => threadsTable.id, { onDelete: "cascade" }),
+  todos: jsonb("todos").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 ```
 
@@ -97,7 +166,7 @@ import * as schema from "@/db/schema";
 export const start = agentStart({
   agent,
   memory: drizzleAdapter(db, {
-    provider: "pg", // or "mysql" or "sqlite"
+    provider: "postgresql", // or "mysql" or "sqlite"
     schema,
   }),
 });
@@ -164,7 +233,7 @@ import { drizzleAdapter } from "agentstart/memory";
 export const start = agentStart({
   agent,
   memory: drizzleAdapter(db, {
-    provider: "pg",
+    provider: "postgresql",
     schema: {
       thread: threadsTable,  // maps to "threads" table
       message: messagesTable, // maps to "messages" table

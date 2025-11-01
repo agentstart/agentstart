@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  CaretDownIcon,
+  ChatCircleTextIcon,
+  CheckIcon,
+  CopyIcon,
+  LinkSimpleIcon,
+} from "@phosphor-icons/react";
 import { cva } from "class-variance-authority";
 import {
   Popover,
@@ -7,16 +14,9 @@ import {
   PopoverTrigger,
 } from "fumadocs-ui/components/ui/popover";
 import { useCopyButton } from "fumadocs-ui/utils/use-copy-button";
-import {
-  Check,
-  ChevronDown,
-  Copy,
-  ExternalLinkIcon,
-  MessageCircleIcon,
-} from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 
 const cache = new Map<string, string>();
 
@@ -59,7 +59,7 @@ export function LLMCopyButton({
       size="sm"
       onClick={onClick}
     >
-      {checked ? <Check /> : <Copy />}
+      {checked ? <CheckIcon /> : <CopyIcon />}
       Copy Markdown
     </Button>
   );
@@ -205,7 +205,7 @@ export function ViewOptions({
         href: `https://t3.chat/new?${new URLSearchParams({
           q,
         })}`,
-        icon: <MessageCircleIcon />,
+        icon: <ChatCircleTextIcon />,
       },
     ];
   }, [githubUrl, markdownUrl]);
@@ -215,7 +215,7 @@ export function ViewOptions({
       <PopoverTrigger asChild>
         <Button variant="secondary" size="sm" className="gap-2">
           Open
-          <ChevronDown className="size-3.5 text-fd-muted-foreground" />
+          <CaretDownIcon className="size-3.5 text-fd-muted-foreground" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="flex flex-col">
@@ -229,7 +229,7 @@ export function ViewOptions({
           >
             {item.icon}
             {item.title}
-            <ExternalLinkIcon className="ms-auto size-3.5 text-fd-muted-foreground" />
+            <LinkSimpleIcon className="ms-auto size-3.5 text-fd-muted-foreground" />
           </a>
         ))}
       </PopoverContent>

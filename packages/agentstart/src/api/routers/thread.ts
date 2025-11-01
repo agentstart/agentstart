@@ -17,10 +17,17 @@ import type { MemoryAdapter } from "@agentstart/types";
 import { AgentStartError } from "@agentstart/utils";
 import { streamToEventIterator } from "@orpc/server";
 import z from "zod";
+import type { AgentStartUIMessage } from "@/agent";
 import { getThreads, loadThread, Run } from "@/agent";
+import { metadataSchema } from "@/agent/messages/metadata";
 import type { RunFinishEvent } from "@/agent/run";
 import { publicProcedure } from "@/api/procedures";
-import { type DBThread, getAdapter } from "@/memory";
+import {
+  type DBThread,
+  getAdapter,
+  messageSchema,
+  threadSchema,
+} from "@/memory";
 import { getSandbox } from "@/sandbox";
 
 /**
@@ -77,8 +84,49 @@ function handleRouterError(
  * Create thread router with optional custom procedure builder
  */
 export function createThreadRouter(procedure = publicProcedure) {
+  const uiMessageSchema = messageSchema
+    .omit({
+      threadId: true,
+      attachments: true,
+      createdAt: true,
+      updatedAt: true,
+    })
+    .extend({
+      metadata: metadataSchema.optional(),
+      parts: z.array(z.any()),
+    })
+    .transform((value): AgentStartUIMessage => {
+      const parts = value.parts as AgentStartUIMessage["parts"];
+      const message: AgentStartUIMessage = {
+        id: value.id,
+        role: value.role,
+        parts,
+      };
+      if (value.metadata) {
+        message.metadata = value.metadata;
+      }
+      return message;
+    });
+
   return {
     list: procedure
+      .meta({
+        doc: {
+          summary: "List threads accessible to the current session",
+          description:
+            "Retrieves a paginated collection of threads that the requester is allowed to see. Defaults to page 1 with 20 items per page when pagination arguments are omitted.",
+          examples: [
+            {
+              title: "Default pagination",
+              code: "await start.api.thread.list();",
+            },
+            {
+              title: "Custom page size",
+              code: "await start.api.thread.list({ page: 2, pageSize: 10 });",
+            },
+          ],
+        },
+      })
       .input(
         z
           .object({
@@ -86,6 +134,19 @@ export function createThreadRouter(procedure = publicProcedure) {
             pageSize: z.number().int().min(1).max(20).optional(),
           })
           .optional(),
+      )
+      .output(
+        z.object({
+          threads: z.array(threadSchema),
+          pageInfo: z.object({
+            page: z.number(),
+            pageSize: z.number(),
+            total: z.number(),
+            totalPages: z.number(),
+            hasNextPage: z.boolean(),
+            hasPreviousPage: z.boolean(),
+          }),
+        }),
       )
       .handler(async ({ input, context, errors }) => {
         try {
@@ -132,12 +193,26 @@ export function createThreadRouter(procedure = publicProcedure) {
       }),
 
     loadMessages: procedure
+      .meta({
+        doc: {
+          summary: "Load the full message history for a thread",
+          description:
+            "Returns all persisted AgentStart UI messages for the requested thread so clients can hydrate chat interfaces.",
+          examples: [
+            {
+              title: "Load history",
+              code: "await start.api.thread.loadMessages({ threadId: 'thr_123' });",
+            },
+          ],
+        },
+      })
       .input(z.object({ threadId: z.string() }))
+      .output(z.array(uiMessageSchema))
       .handler(async ({ input, context, errors }) => {
         try {
           const memory = await getAdapter(context);
 
-          const messages = await loadThread({
+          const messages = await loadThread<AgentStartUIMessage>({
             memory,
             threadId: input.threadId,
           });
@@ -149,7 +224,25 @@ export function createThreadRouter(procedure = publicProcedure) {
       }),
 
     get: procedure
+      .meta({
+        doc: {
+          summary: "Fetch a single thread by identifier",
+          description:
+            "Retrieves thread metadata when the caller has permission to view it, enforcing visibility rules for private threads.",
+          examples: [
+            {
+              title: "Fetch owned thread",
+              code: "await start.api.thread.get({ threadId: 'thr_123' });",
+            },
+          ],
+        },
+      })
       .input(z.object({ threadId: z.string() }))
+      .output(
+        z.object({
+          thread: threadSchema,
+        }),
+      )
       .handler(async ({ input, context, errors }) => {
         try {
           const memory = await getAdapter(context);
@@ -175,7 +268,7 @@ export function createThreadRouter(procedure = publicProcedure) {
             });
           }
 
-          return { thread };
+          return { thread: thread as DBThread };
         } catch (error) {
           console.error("Failed to get thread:", error);
           handleRouterError(error, errors);
@@ -183,6 +276,23 @@ export function createThreadRouter(procedure = publicProcedure) {
       }),
 
     create: procedure
+      .meta({
+        doc: {
+          summary: "Create a new thread",
+          description:
+            "Creates a thread owned by the current user (or an anonymous placeholder) and returns the assigned identifier along with the persisted record.",
+          examples: [
+            {
+              title: "Create with title",
+              code: "await start.api.thread.create({ title: 'Brainstorm' });",
+            },
+            {
+              title: "Public thread",
+              code: "await start.api.thread.create({ visibility: 'public' });",
+            },
+          ],
+        },
+      })
       .input(
         z
           .object({
@@ -190,6 +300,12 @@ export function createThreadRouter(procedure = publicProcedure) {
             visibility: z.enum(["public", "private"]).optional(),
           })
           .optional(),
+      )
+      .output(
+        z.object({
+          threadId: z.string(),
+          thread: threadSchema,
+        }),
       )
       .handler(async ({ input, context, errors }) => {
         try {
@@ -199,7 +315,7 @@ export function createThreadRouter(procedure = publicProcedure) {
             ? await context.getUserId(context.headers)
             : "anonymous";
 
-          const thread = await memory.create({
+          const thread = (await memory.create({
             model: "thread",
             data: {
               userId,
@@ -208,7 +324,7 @@ export function createThreadRouter(procedure = publicProcedure) {
               createdAt: now,
               updatedAt: now,
             },
-          });
+          })) as DBThread;
 
           return { threadId: thread.id.toString(), thread };
         } catch (error) {
@@ -218,6 +334,19 @@ export function createThreadRouter(procedure = publicProcedure) {
       }),
 
     update: procedure
+      .meta({
+        doc: {
+          summary: "Update an existing thread",
+          description:
+            "Applies partial updates to thread metadata such as title, visibility, or cached context after verifying ownership.",
+          examples: [
+            {
+              title: "Rename a thread",
+              code: "await start.api.thread.update({ threadId: 'thr_123', data: { title: 'Renamed thread' } });",
+            },
+          ],
+        },
+      })
       .input(
         z.object({
           threadId: z.string(),
@@ -236,6 +365,11 @@ export function createThreadRouter(procedure = publicProcedure) {
                 message: "Provide at least one field to update.",
               },
             ),
+        }),
+      )
+      .output(
+        z.object({
+          thread: threadSchema,
         }),
       )
       .handler(async ({ input, context, errors }) => {
@@ -276,11 +410,11 @@ export function createThreadRouter(procedure = publicProcedure) {
 
           updatePayload.updatedAt = new Date();
 
-          const updatedThread = await memory.update({
+          const updatedThread = (await memory.update({
             model: "thread",
             where: [{ field: "id", value: input.threadId }],
             update: updatePayload,
-          });
+          })) as DBThread;
 
           return { thread: updatedThread };
         } catch (error) {
@@ -290,7 +424,25 @@ export function createThreadRouter(procedure = publicProcedure) {
       }),
 
     delete: procedure
+      .meta({
+        doc: {
+          summary: "Delete a thread and its messages",
+          description:
+            "Removes the thread along with all associated messages after confirming the requester owns the resource.",
+          examples: [
+            {
+              title: "Delete a private thread",
+              code: "await start.api.thread.delete({ threadId: 'thr_123' });",
+            },
+          ],
+        },
+      })
       .input(z.object({ threadId: z.string() }))
+      .output(
+        z.object({
+          success: z.boolean(),
+        }),
+      )
       .handler(async ({ input, context, errors }) => {
         try {
           const memory = await getAdapter(context);
@@ -327,6 +479,20 @@ export function createThreadRouter(procedure = publicProcedure) {
       }),
 
     stream: procedure
+      .meta({
+        doc: {
+          summary: "Stream agent responses for a thread",
+          description:
+            "Starts an agent run for the supplied message and streams tokenized events that clients can render incrementally.",
+          returnType: "AsyncIterable<AgentStreamEvent>",
+          examples: [
+            {
+              title: "Consume as async iterable",
+              code: "for await (const event of await start.api.thread.stream({ threadId: 'thr_123', message: 'Hello agent!' })) {\n  console.log(event);\n}",
+            },
+          ],
+        },
+      })
       .input(
         z.object({
           threadId: z.string().min(1, "Thread ID is required"),

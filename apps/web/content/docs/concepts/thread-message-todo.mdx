@@ -3,8 +3,6 @@ title: Thread, Message & Todo
 description: Understanding core data models in AgentStart
 ---
 
-# Thread, Message & Todo
-
 AgentStart organizes agent interactions using three core data models: Threads, Messages, and Todos.
 
 ## Threads
@@ -16,10 +14,13 @@ A **Thread** represents a conversation session between a user and an agent. Each
 ```ts
 interface Thread {
   id: string;
-  title: string | null;
-  userId: string | null;
+  title: string;
+  userId: string;
+  visibility: "public" | "private";
+  lastContext?: unknown;
   createdAt: Date;
-  metadata: unknown;
+  updatedAt: Date;
+  metadata?: unknown;
 }
 ```
 
@@ -27,13 +28,13 @@ interface Thread {
 
 ```ts
 // Server-side
-const thread = await start.api.thread.create({
+const { threadId, thread } = await start.api.thread.create({
   title: "Help with TypeScript",
-  userId: "user-123",
+  visibility: "private",
 });
 
 // Client-side
-const thread = await client.thread.create({
+const { threadId } = await client.thread.create({
   title: "Help with TypeScript",
 });
 ```
@@ -41,19 +42,17 @@ const thread = await client.thread.create({
 ### Listing Threads
 
 ```ts
-// Get all threads for current user
-const threads = await start.api.thread.list();
+// Get default page of threads for the current session
+const { threads, pageInfo } = await start.api.thread.list();
 
-// Filter by user
-const userThreads = await start.api.thread.list({ 
-  userId: "user-123" 
-});
+// Paginate by requesting a different page size
+const nextPage = await start.api.thread.list({ page: 2, pageSize: 10 });
 ```
 
 ### Deleting Threads
 
 ```ts
-await start.api.thread.delete({ id: "thread-123" });
+await start.api.thread.delete({ threadId: "thread-123" });
 ```
 
 ## Messages
@@ -67,9 +66,15 @@ interface Message {
   id: string;
   threadId: string;
   role: "user" | "assistant" | "system" | "tool";
-  content: string;
+  parts: Array<
+    | { type: "text"; text: string }
+    | { type: "tool-call"; toolName: string; args: unknown }
+    | { type: "tool-result"; toolName: string; result: unknown }
+    | { type: "file"; url: string; mediaType: string; filename?: string }
+  >;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
-  metadata: unknown;
+  updatedAt: Date;
 }
 ```
 
@@ -85,7 +90,7 @@ interface Message {
 ```tsx
 // Client-side with hooks
 const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
-await sendMessage({ content: "What is TypeScript?" });
+await sendMessage({ text: "What is TypeScript?" });
 ```
 
 ### Getting Messages
@@ -95,8 +100,8 @@ await sendMessage({ content: "What is TypeScript?" });
 const messages = useAgentStore((state) => state.messages, threadId);
 
 // Server-side
-const messages = await start.api.message.list({ 
-  threadId: "thread-123" 
+const messages = await start.api.message.get({
+  threadId: "thread-123",
 });
 ```
 
@@ -105,15 +110,104 @@ const messages = await start.api.message.list({
 Messages are streamed in real-time using Server-Sent Events:
 
 ```tsx
-const isStreaming = useAgentStore((state) => state.isStreaming, threadId);
+const status = useAgentStore((state) => state.status, threadId);
 
-{isStreaming && <StreamingIndicator />}
+{status === "streaming" && <StreamingIndicator />}
+```
+
+## Todos
+
+**Todos** are task management items that help agents track progress and organize complex multi-step work within a thread. They're managed internally by agent tools.
+
+### Todo Structure
+
+```ts
+interface Todo {
+  id: string;
+  content: string;
+  status: "pending" | "inProgress" | "completed" | "cancelled";
+  priority: "high" | "medium" | "low";
+}
+
+interface DBTodo {
+  id: string;
+  threadId: string;
+  todos: Todo[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+### Todo Status
+
+- **pending**: Task not yet started
+- **inProgress**: Currently being worked on (only ONE todo can have this status at a time)
+- **completed**: Task finished successfully
+- **cancelled**: Task cancelled or no longer relevant
+
+### Todo Priority
+
+- **high**: Critical or urgent tasks
+- **medium**: Normal priority tasks
+- **low**: Nice-to-have or deferred tasks
+
+### Agent Tools
+
+Todos are managed through built-in agent tools:
+
+#### todo-read
+
+Retrieves the current todo list for a thread:
+
+```ts
+// Agent uses this tool internally
+// Returns the list of todos with their status and priority
+```
+
+#### todo-write
+
+Creates or updates todos for a thread:
+
+```ts
+// Agent uses this tool internally to:
+// - Create new todos when starting complex tasks
+// - Update todo status as work progresses
+// - Mark todos as completed
+// - Add new todos discovered during implementation
+```
+
+### Best Practices
+
+1. **Complex Tasks**: Agents automatically create todos for tasks requiring 3+ steps
+2. **One Active Task**: Only one todo should be `inProgress` at any time
+3. **Real-time Updates**: Agents update todo status immediately after completing steps
+4. **Progress Tracking**: Todos provide visibility into the agent's workflow
+
+### Example Workflow
+
+When you ask an agent to implement a feature:
+
+```
+User: "Add user authentication with email and password"
+
+Agent creates todos:
+1. [inProgress] Research existing auth implementation
+2. [pending] Design authentication schema
+3. [pending] Implement login endpoint
+4. [pending] Create signup endpoint
+5. [pending] Add password hashing
+6. [pending] Write tests
+
+As work progresses, the agent updates status:
+1. [completed] Research existing auth implementation
+2. [inProgress] Design authentication schema
+...
 ```
 
 ## Next Steps
 
 <Cards>
-  <Card title="API" href="/docs/concepts/api" />
+  <Card title="SDK" href="/docs/concepts/sdk" />
   <Card title="Client" href="/docs/concepts/client" />
   <Card title="Database" href="/docs/concepts/database" />
 </Cards>

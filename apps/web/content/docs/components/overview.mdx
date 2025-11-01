@@ -1,9 +1,7 @@
 ---
-title: Components Overview
+title: Overview
 description: Pre-built React components for AgentStart applications
 ---
-
-# Components Overview
 
 AgentStart provides a comprehensive set of pre-built React components that work seamlessly with the AgentStart API. These components are built on top of [shadcn/ui](https://ui.shadcn.com) and can be installed using the shadcn CLI.
 
@@ -21,8 +19,20 @@ The component library includes everything you need to build a complete agent int
 
 ### 1. Install shadcn CLI
 
-```bash
+```bash tab="npm"
 npm install -D shadcn
+```
+
+```bash tab="bun"
+bun add -D shadcn
+```
+
+```bash tab="pnpm"
+pnpm add -D shadcn
+```
+
+```bash tab="yarn"
+yarn add -D shadcn
 ```
 
 ### 2. Initialize shadcn in your project
@@ -88,22 +98,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 import { Conversation } from "@/components/agent/conversation";
 import { PromptInput } from "@/components/agent/prompt-input";
-import { useAgentStore, useThread } from "agentstart/client";
+import { useThread } from "agentstart/client";
 
 export default function ThreadPage({ params }: { params: { threadId: string } }) {
   useThread(params.threadId);
-  const sendMessage = useAgentStore((state) => state.sendMessage, params.threadId);
 
   return (
     <div className="flex h-screen flex-col">
       <Conversation threadId={params.threadId} />
-      
-      <PromptInput
-        threadId={params.threadId}
-        onMessageSubmit={async (message) => {
-          await sendMessage({ text: message.text ?? "" });
-        }}
-      />
+
+      <PromptInput threadId={params.threadId} />
     </div>
   );
 }

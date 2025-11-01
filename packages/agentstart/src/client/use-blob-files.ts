@@ -33,20 +33,6 @@ interface ValidationError {
 }
 
 /**
- * Blob storage configuration
- */
-interface BlobConfig {
-  enabled: boolean;
-  constraints: {
-    maxFileSize?: number;
-    allowedMimeTypes?: string[];
-    maxFiles?: number;
-    uploadTiming?: "immediate" | "onSubmit";
-  } | null;
-  provider: "vercelBlob" | "awsS3" | "cloudflareR2" | null;
-}
-
-/**
  * File data for upload
  */
 interface FileUploadData {
@@ -114,9 +100,7 @@ export function useBlobFiles(client: AgentStartAPI): UseBlobFilesResult {
   const orpc = createTanstackQueryUtils(client);
 
   // Fetch blob configuration
-  const { data: config } = useQuery<BlobConfig>(
-    orpc.blob.getConfig.queryOptions(),
-  );
+  const { data: config } = useQuery(orpc.blob.getConfig.queryOptions());
 
   const isEnabled = Boolean(config?.enabled);
   const uploadTiming = config?.constraints?.uploadTiming ?? "onSubmit";
@@ -345,7 +329,7 @@ export function useBlobFiles(client: AgentStartAPI): UseBlobFilesResult {
         (file): FileUIPart => ({
           type: "file",
           filename: file.name,
-          mediaType: file.contentType,
+          mediaType: file.contentType ?? "application/octet-stream",
           url: file.url,
         }),
       );

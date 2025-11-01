@@ -22,50 +22,108 @@ const uploadFileSchema = z.object({
   type: z.string(), // MIME type
 });
 
+const blobConstraintsSchema = z.object({
+  maxFileSize: z.number().optional(),
+  allowedMimeTypes: z.array(z.string()).optional(),
+  maxFiles: z.number().optional(),
+  uploadTiming: z.enum(["onSubmit", "immediate"]).optional(),
+});
+
+const providerEnum = z.enum(["vercelBlob", "awsS3", "cloudflareR2"]);
+
+const uploadedFileSchema = z.object({
+  name: z.string(),
+  url: z.string(),
+  downloadUrl: z.string().nullable(),
+  pathname: z.string(),
+  contentType: z.string().nullable(),
+  contentDisposition: z.string().nullable(),
+});
+
 /**
  * Create blob router with optional custom procedure builder
  */
 export function createBlobRouter(procedure = publicProcedure) {
   return {
-    getConfig: procedure.handler(async ({ context, errors }) => {
-      try {
-        if (!context.blob) {
-          return {
-            enabled: false,
-            constraints: null,
-            provider: null,
-          };
-        }
+    getConfig: procedure
+      .meta({
+        doc: {
+          summary: "Inspect blob storage configuration",
+          description:
+            "Returns whether blob uploads are enabled along with provider-specific constraints so clients can validate files before uploading.",
+          examples: [
+            {
+              title: "Client-side capability check",
+              code: "const config = await start.api.blob.getConfig();\nif (!config.enabled) {\n  console.log('Uploads are disabled');\n}",
+            },
+          ],
+        },
+      })
+      .output(
+        z.object({
+          enabled: z.boolean(),
+          constraints: blobConstraintsSchema.nullable(),
+          provider: providerEnum.nullable(),
+        }),
+      )
+      .handler(async ({ context, errors }) => {
+        try {
+          if (!context.blob) {
+            return {
+              enabled: false,
+              constraints: null,
+              provider: null,
+            };
+          }
 
-        const adapter = await createBlobAdapter(context.blob);
-        if (!adapter) {
-          return {
-            enabled: false,
-            constraints: null,
-            provider: null,
-          };
-        }
+          const adapter = await createBlobAdapter(context.blob);
+          if (!adapter) {
+            return {
+              enabled: false,
+              constraints: null,
+              provider: null,
+            };
+          }
 
-        const constraints = adapter.getConstraints();
-        return {
-          enabled: true,
-          constraints: constraints ?? null,
-          provider: adapter.provider,
-        };
-      } catch (error) {
-        console.error("Error fetching blob config:", error);
-        throw errors.INTERNAL_SERVER_ERROR({
-          message: error instanceof Error ? error.message : "Unknown error",
-        });
-      }
-    }),
+          const constraints = adapter.getConstraints();
+          return {
+            enabled: true,
+            constraints: constraints ?? null,
+            provider: adapter.provider,
+          };
+        } catch (error) {
+          console.error("Error fetching blob config:", error);
+          throw errors.INTERNAL_SERVER_ERROR({
+            message: error instanceof Error ? error.message : "Unknown error",
+          });
+        }
+      }),
 
     upload: procedure
+      .meta({
+        doc: {
+          summary: "Upload one or more files to the configured blob store",
+          description:
+            "Validates files against configured constraints and stores them using the active blob adapter, returning public URLs where applicable.",
+          examples: [
+            {
+              title: "Upload a PNG",
+              code: "await start.api.blob.upload({ files: [{ name: 'diagram.png', type: 'image/png', data: base64Data }] });",
+            },
+          ],
+        },
+      })
       .input(
         z.object({
           files: z
             .array(uploadFileSchema)
             .min(1, "At least one file is required"),
+        }),
+      )
+      .output(
+        z.object({
+          success: z.boolean(),
+          files: z.array(uploadedFileSchema),
         }),
       )
       .handler(async ({ input, context, errors }) => {

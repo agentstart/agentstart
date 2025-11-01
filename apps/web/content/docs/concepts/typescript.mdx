@@ -3,8 +3,6 @@ title: TypeScript
 description: TypeScript integration with AgentStart
 ---
 
-# TypeScript
-
 AgentStart is designed to be fully type-safe. Both the client and server are built with TypeScript, providing end-to-end type safety.
 
 ## TypeScript Config
@@ -50,8 +48,8 @@ const agent = new Agent({
 export const start = agentStart({ agent, memory });
 
 // Infer types from the start instance
-export type Thread = Awaited<ReturnType<typeof start.api.thread.get>>;
-export type Message = Awaited<ReturnType<typeof start.api.message.list>>[number];
+export type Thread = Awaited<ReturnType<typeof start.api.thread.get>>["thread"];
+export type UIMessage = Awaited<ReturnType<typeof start.api.message.get>>[number];
 ```
 
 ### Client-Side Types
@@ -63,7 +61,7 @@ export const { client, useThread } = createAgentClient();
 
 // The client provides typed hooks and methods
 const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
-//    ^? (params: { content: string }) => Promise<void>
+//    ^? (params: { text?: string; files?: BlobFileList }) => Promise<void>
 ```
 
 ## Tool Types
@@ -112,13 +110,13 @@ import { useAgentStore } from "@/lib/agent-client";
 
 // All state is typed
 const messages = useAgentStore((state) => state.messages, threadId);
-//    ^? Message[]
+//    ^? AgentStartUIMessage[]
 
-const isLoading = useAgentStore((state) => state.isLoading, threadId);
-//    ^? boolean
+const status = useAgentStore((state) => state.status, threadId);
+//    ^? "ready" | "streaming" | "error"
 
 const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
-//    ^? (params: { content: string }) => Promise<void>
+//    ^? (params: { text?: string; files?: BlobFileList }) => Promise<void>
 ```
 
 ## Custom Tool Types
@@ -155,12 +153,12 @@ All API responses are typed:
 
 ```ts
 // Thread type is inferred
-const thread = await start.api.thread.create({ title: "New Thread" });
-//    ^? { id: string; title: string; userId: string | null; createdAt: Date; metadata: unknown }
+const { thread } = await start.api.thread.create({ title: "New Thread" });
+//    ^? { id: string; title: string; visibility: "public" | "private"; createdAt: Date; ... }
 
 // Message type is inferred
-const messages = await start.api.message.list({ threadId: thread.id });
-//    ^? Array<{ id: string; threadId: string; role: string; content: string; ... }>
+const messages = await start.api.message.get({ threadId: thread.id });
+//    ^? Array<AgentStartUIMessage>
 ```
 
 ## Type Guards
@@ -168,11 +166,13 @@ const messages = await start.api.message.list({ threadId: thread.id });
 Use type guards for runtime type checking:
 
 ```ts
-function isTextMessage(message: Message): message is Message & { content: string } {
-  return typeof message.content === "string";
+function isTextMessage(message: UIMessage): message is UIMessage & {
+  parts: [{ type: "text"; text: string }, ...UIMessage["parts"]];
+} {
+  return message.parts?.some((part) => part.type === "text") ?? false;
 }
 
-const messages = await start.api.message.list({ threadId });
+const messages = await start.api.message.get({ threadId });
 const textMessages = messages.filter(isTextMessage);
 ```
 
@@ -194,6 +194,6 @@ import type {
 ## Next Steps
 
 <Cards>
-  <Card title="API" href="/docs/concepts/api" />
+  <Card title="SDK" href="/docs/concepts/sdk" />
   <Card title="Client" href="/docs/concepts/client" />
 </Cards>

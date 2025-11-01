@@ -6,10 +6,9 @@
     "installation",
     "basic-usage",
     "---Concepts---",
-    "concepts/core-concepts",
-    "concepts/api",
-    "concepts/cli",
+    "concepts/sdk",
     "concepts/client",
+    "concepts/cli",
     "concepts/database",
     "concepts/blob-storage",
     "concepts/typescript",
@@ -33,6 +32,7 @@
     "---Integrations---",
     "integrations/next",
     "---Reference---",
-    "reference/api"
+    "reference/options",
+    "contributing"
   ]
 }

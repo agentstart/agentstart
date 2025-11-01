@@ -492,7 +492,7 @@ export interface DrizzleAdapterConfig {
   /**
    * The database provider
    */
-  provider: "pg" | "mysql" | "sqlite";
+  provider: "postgresql" | "mysql" | "sqlite";
   /**
    * If the table names in the schema are plural
    * set this to true. For example, if the schema

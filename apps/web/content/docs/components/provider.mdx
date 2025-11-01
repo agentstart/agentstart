@@ -3,8 +3,6 @@ title: Provider
 description: Context provider for sharing AgentStart client
 ---
 
-# Provider
-
 The `AgentStartProvider` is a React context provider that shares the AgentStart client instance across your application. It must wrap all other AgentStart components.
 
 <ProviderDemo />
@@ -140,7 +138,10 @@ export function MyComponent() {
   const { client, orpc, navigate } = useAgentStartContext();
 
   // Use client directly
-  const threads = await client.thread.list();
+  const loadThreads = async () => {
+    const { threads } = await client.thread.list();
+    console.log(threads);
+  };
 
   // Use orpc for TanStack Query integration
   const { data } = useQuery(orpc.thread.list.queryOptions());
@@ -148,7 +149,7 @@ export function MyComponent() {
   // Navigate programmatically
   navigate("/thread/123");
 
-  return <div>...</div>;
+  return <div onClick={loadThreads}>...</div>;
 }
 ```
 

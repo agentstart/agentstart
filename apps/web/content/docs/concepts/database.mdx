@@ -3,29 +3,58 @@ title: Database
 description: Learn how to use databases with AgentStart
 ---
 
-# Database
+AgentStart requires a primary database to persist threads, messages, and agent metadata. This page explains supported adapters, the CLI workflow to generate tables, optional secondary storage, the core schema, and how to extend with custom tables.
 
-AgentStart requires a database to persist agent conversations, messages, and metadata. It supports multiple database adapters.
+## Adapters
 
-## Supported Databases
+Choose the adapter that matches your stack. AgentStart supports:
 
-AgentStart supports:
+- **PostgreSQL** – Drizzle, Prisma, or Kysely
+- **MySQL** – Drizzle, Prisma, or Kysely
+- **SQLite** – Drizzle, Prisma, or Kysely
+- **MongoDB** – native driver
+- **In‑Memory** – local dev and tests only
 
-- **PostgreSQL** - via Drizzle, Prisma, or Kysely
-- **MySQL** - via Drizzle, Prisma, or Kysely  
-- **SQLite** - via Drizzle, Prisma, or Kysely
-- **MongoDB** - via native driver
-- **In-Memory** - for testing
-
-## Database Adapters
-
-Choose the adapter that matches your stack:
+Adapter guides:
 
 <Cards>
   <Card title="Drizzle" href="/docs/databases/drizzle" />
+
   <Card title="Prisma" href="/docs/databases/prisma" />
+
   <Card title="MongoDB" href="/docs/databases/mongodb" />
 </Cards>
+
+## CLI
+
+Use the CLI to generate and apply the minimal tables AgentStart needs. The CLI reads your agent configuration to tailor output for your stack.
+
+### Generate schema
+
+```bash title="Terminal"
+npx @agentstart/cli generate
+```
+
+- For Drizzle/Prisma: emits ORM schema you can commit and migrate with your toolchain.
+- For Kysely: emits a portable `schema.sql` you can apply directly.
+
+See details and options in the CLI docs: `/docs/concepts/cli`.
+
+### Apply schema
+
+- Kysely users can run `npx @agentstart/cli migrate`.
+- Drizzle/Prisma users should use their ORM’s migration commands.
+
+Refer to the Migration section in `/docs/concepts/cli` for exact commands.
+
+## Secondary Storage
+
+Some agent features rely on storage beyond the primary database:
+
+- Blob storage: persist file uploads and multimodal attachments used by tools and messages. Providers supported: Vercel Blob, AWS S3, Cloudflare R2.
+- Vector storage: back the knowledge base with embeddings for retrieval‑augmented generation (often paired with SQL metadata in the primary DB).
+
+Blob storage is optional and configured in your agent setup. See `/docs/concepts/blob-storage` for providers, constraints, and client utilities. Vector storage is configured via your chosen embedding + vector solution and linked to knowledge metadata in SQL.
 
 ## Core Schema
 
@@ -54,10 +83,17 @@ CREATE TABLE messages (
   id TEXT PRIMARY KEY,
   thread_id TEXT REFERENCES threads(id),
   role TEXT,
-  content TEXT,
+  content TEXT, -- or "parts" JSON depending on adapter
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   metadata JSONB
 );
+```
+
+Recommended indexes for performance:
+
+```sql
+CREATE INDEX idx_messages_thread_id ON messages(thread_id);
+CREATE INDEX idx_threads_user_id ON threads(user_id);
 ```
 
 ## Connection Management
@@ -90,28 +126,49 @@ DATABASE_URL=mysql://user:password@localhost:3306/dbname
 DATABASE_URL=mongodb://localhost:27017/dbname
 ```
 
-## Best Practices
+## Custom Tables
 
-1. **Indexes**: Add indexes on frequently queried fields
-   ```sql
-   CREATE INDEX idx_messages_thread_id ON messages(thread_id);
-   CREATE INDEX idx_threads_user_id ON threads(user_id);
-   ```
+You can extend the schema with application‑specific tables or additional columns. Common patterns:
 
-2. **Cleanup**: Implement periodic cleanup of old data
-   ```sql
-   DELETE FROM threads 
-   WHERE created_at < NOW() - INTERVAL '90 days';
-   ```
+- Add indexes for frequent filters (e.g., `thread_id`, `user_id`, timestamps).
+- Store structured payloads in `metadata` JSONB and index selected keys if needed.
+- Create domain tables (e.g., tasks, todos) that reference `threads(id)`.
 
-3. **Backups**: Set up automated backups for production
+Example custom table:
 
-4. **Monitoring**: Track query performance and connection pool usage
+```sql
+CREATE TABLE todos (
+  id TEXT PRIMARY KEY,
+  thread_id TEXT NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
+  todos JSONB NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+Cleanup and retention:
+
+```sql
+-- Example: remove threads older than 90 days
+DELETE FROM threads WHERE created_at < NOW() - INTERVAL '90 days';
+```
+
+Operational best practices:
+
+- Backups: enable automated backups for production.
+- Monitoring: track query latency and pool utilization.
+- Migrations: manage schema via your ORM or the CLI where applicable.
 
 ## Next Steps
 
 <Cards>
   <Card title="PostgreSQL" href="/docs/databases/postgresql" />
+
   <Card title="MySQL" href="/docs/databases/mysql" />
+
   <Card title="Drizzle Adapter" href="/docs/databases/drizzle" />
+  
+  <Card title="CLI" href="/docs/concepts/cli" />
+  
+  <Card title="Blob Storage" href="/docs/concepts/blob-storage" />
 </Cards>

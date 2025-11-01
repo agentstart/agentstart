@@ -3,8 +3,6 @@ title: PostgreSQL
 description: Integrate AgentStart with PostgreSQL
 ---
 
-# PostgreSQL
-
 PostgreSQL is a powerful, open-source relational database management system known for its advanced features, extensibility, and support for complex queries and large datasets.
 
 ## Example Usage
@@ -13,6 +11,7 @@ Make sure you have PostgreSQL installed and configured. Then, you can connect it
 
 ```ts title="lib/agent.ts"
 import { agentStart } from "agentstart";
+import { kyselyAdapter } from "agentstart/memory";
 import { Kysely, PostgresDialect } from "kysely";
 import { Pool } from "pg";
 
@@ -42,18 +41,22 @@ export const start = agentStart({
 The AgentStart CLI allows you to generate or migrate your database schema based on your configuration.
 
 <table>
-  <tr className="border-b">
-    <th>
-      <p className="font-bold text-[16px] mb-1">PostgreSQL Schema Generation</p>
-    </th>
-    <th>
-      <p className="font-bold text-[16px] mb-1">PostgreSQL Schema Migration</p>
-    </th>
-  </tr>
-  <tr className="h-10">
-    <td>✅ Supported</td>
-    <td>✅ Supported</td>
-  </tr>
+  <thead>
+    <tr className="border-b">
+      <th>
+        <p className="font-bold text-[16px] mb-1">PostgreSQL Schema Generation</p>
+      </th>
+      <th>
+        <p className="font-bold text-[16px] mb-1">PostgreSQL Schema Migration</p>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr className="h-10">
+      <td>✅ Supported</td>
+      <td>✅ Supported</td>
+    </tr>
+  </tbody>
 </table>
 
 ```bash title="Schema Generation"
@@ -68,8 +71,20 @@ npx @agentstart/cli migrate
 
 For a better development experience, we recommend using the [Drizzle adapter](/docs/databases/drizzle) which provides type-safe queries and migrations.
 
-```bash
+```bash tab="npm"
 npm install drizzle-orm @neondatabase/serverless
+```
+
+```bash tab="bun"
+bun add drizzle-orm @neondatabase/serverless
+```
+
+```bash tab="pnpm"
+pnpm add drizzle-orm @neondatabase/serverless
+```
+
+```bash tab="yarn"
+yarn add drizzle-orm @neondatabase/serverless
 ```
 
 ```ts title="lib/agent.ts"
@@ -83,10 +98,11 @@ const db = drizzle(sql);
 export const start = agentStart({
   agent,
   memory: drizzleAdapter(db, {
-    provider: "pg",
+    provider: "postgresql",
     schema: {
       thread: threadsTable,
       message: messagesTable,
+      todo: todosTable,
     },
   }),
 });

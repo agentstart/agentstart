@@ -1,13 +1,15 @@
 /* agent-frontmatter:start
-AGENT: Mock AgentStart client  
+AGENT: Mock AgentStart client
 PURPOSE: Provide mock oRPC client for component demos
 USAGE: import { mockClient, mockNavigate } from './mock-client'
 EXPORTS: mockClient, mockNavigate
 FEATURES:
   - Mock oRPC router client matching AgentStartAPI structure
   - Procedures that are callable functions with proper structure
+  - Mock data for threads, messages, and blob storage
+  - Blob management (getConfig, upload)
   - Console logging for debugging
-SEARCHABLE: mock client, demo utilities, orpc mock
+SEARCHABLE: mock client, demo utilities, orpc mock, blob mock
 agent-frontmatter:end */
 
 import type { AgentStartAPI } from "agentstart/api";
@@ -196,6 +198,49 @@ export const mockClient = {
       "message.get",
       async (_input: { threadId: string }) => {
         return mockMessages;
+      },
+    ),
+  },
+  blob: {
+    getConfig: createMockProcedure("blob.getConfig", async () => {
+      return {
+        enabled: true,
+        constraints: {
+          maxFileSize: 10 * 1024 * 1024, // 10 MB
+          allowedMimeTypes: [
+            "image/jpeg",
+            "image/png",
+            "image/gif",
+            "image/webp",
+            "application/pdf",
+            "text/plain",
+            "text/markdown",
+          ],
+          maxFiles: 5,
+          uploadTiming: "onSubmit" as const,
+        },
+        provider: "vercelBlob" as const,
+      };
+    }),
+    upload: createMockProcedure(
+      "blob.upload",
+      async (input: {
+        files: Array<{ name: string; data: string; type: string }>;
+      }) => {
+        // Simulate file upload with mock URLs
+        const uploadedFiles = input.files.map((file) => ({
+          name: file.name,
+          url: `https://demo.blob.storage/${Date.now()}-${file.name}`,
+          downloadUrl: `https://demo.blob.storage/download/${Date.now()}-${file.name}`,
+          pathname: `uploads/${Date.now()}-${file.name}`,
+          contentType: file.type,
+          contentDisposition: `attachment; filename="${file.name}"`,
+        }));
+
+        return {
+          success: true,
+          files: uploadedFiles,
+        };
       },
     ),
   },

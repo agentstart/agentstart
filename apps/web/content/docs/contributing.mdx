@@ -1,0 +1,133 @@
+---
+title: Contributing
+description: A concise guide to contributing to AgentStart
+---
+
+Thank you for your interest in contributing to AgentStart! This short guide outlines the recommended workflow so you can start shipping improvements quickly and safely.
+
+## Getting Started
+
+Before opening a pull request, skim a few key resources:
+
+- Review open [issues](https://github.com/agentstart/agentstart/issues) and [pull requests](https://github.com/agentstart/agentstart/pulls)
+
+## Development Setup
+
+Get your local workspace ready in a few steps:
+
+<Callout type="warn">
+  Make sure you have the latest [Node.js](https://nodejs.org/en/download) LTS and [Bun](https://bun.com) installed.
+</Callout>
+
+<Steps>
+  <Step>
+    ### 1. Fork the repository
+
+    Visit [https://github.com/agentstart/agentstart](https://github.com/agentstart/agentstart) and click the **Fork** button.
+  </Step>
+
+  <Step>
+    ### 2. Clone your fork
+
+    ```bash
+    # Replace YOUR-USERNAME with your GitHub username
+    git clone https://github.com/YOUR-USERNAME/agentstart.git
+    cd agentstart
+    ```
+  </Step>
+
+  <Step>
+    ### 3. Install dependencies
+
+    AgentStart uses Bun workspaces. Install everything with:
+
+    ```bash
+    bun install
+    ```
+  </Step>
+</Steps>
+
+## Making Changes
+
+Once you have an idea for a contribution, follow this workflow:
+
+<Steps>
+  <Step>
+    ### 1. Create a feature branch
+
+    ```bash
+    git checkout main
+    git pull upstream main
+    git checkout -b feature/your-feature-name
+    ```
+  </Step>
+
+  <Step>
+    ### 2. Start the development servers
+
+    Run the packages you need:
+
+    ```bash
+    # Start all packages in watch mode
+    bun run dev
+
+    # or, start the docs site in isolation
+    bun run dev:web
+    ```
+
+    The documentation lives in `apps/web`; use the second command when iterating on docs-only contributions.
+  </Step>
+
+  <Step>
+    ### 3. Implement your changes
+
+    - Update the relevant packages or docs
+    - Add or adjust tests when behaviour changes
+    - Keep your branch focused on a single change
+  </Step>
+</Steps>
+
+### Issues and Bug Fixes
+
+- Look for `good first issue` labels in [GitHub issues](https://github.com/agentstart/agentstart/issues)
+- When reporting bugs, include reproduction steps, expected behaviour, and environment details
+- Comment on an issue before starting work to avoid duplicate efforts
+
+### Framework Integrations
+
+Contributions that add or expand framework adapters are welcome:
+
+- Prefer framework-agnostic building blocks when possible
+- Keep integration code small and composable
+- All official integrations live in the monorepo under `packages/`
+
+### Memory & Tooling Extensions
+
+- Open an issue first for core memory adapters or runtime tools so we can discuss design details
+- Community tooling (e.g. example scripts) can live outside the monorepo—link to them in the docs if they help others
+
+### Documentation
+
+- Fix typos and clarify existing copy
+- Add runnable examples whenever you introduce new APIs
+- Keep the docs aligned with the current codebase (update both together)
+
+## Testing
+
+AgentStart uses Vitest and Bun-powered scripts. Place test files next to the code they cover and run the shared scripts before submitting changes.
+
+### Testing Best Practices
+
+- Run `bun run lint`, `bun run typecheck`, and `bun run test` before opening a PR
+- Add or update tests alongside feature or bug-fix work
+- Keep commits and pull requests focused
+- Update documentation to reflect behaviour changes
+
+## Need Help?
+
+We're happy to help unblock you:
+
+- Open an [issue](https://github.com/agentstart/agentstart/issues) with questions
+- Mention project maintainers directly if you need a review
+
+Thanks again for contributing to AgentStart!

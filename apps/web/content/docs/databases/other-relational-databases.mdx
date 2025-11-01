@@ -3,8 +3,6 @@ title: Other Relational Databases
 description: Use AgentStart with other relational databases via Kysely
 ---
 
-# Other Relational Databases
-
 AgentStart supports any database that Kysely supports. This includes many relational databases beyond the officially documented ones.
 
 ## Supported Databases
@@ -45,8 +43,20 @@ The Kysely community maintains dialects for various databases:
 
 ### CockroachDB
 
-```bash
+```bash tab="npm"
 npm install kysely @cockroachdb/kysely-adapter
+```
+
+```bash tab="bun"
+bun add kysely @cockroachdb/kysely-adapter
+```
+
+```bash tab="pnpm"
+pnpm add kysely @cockroachdb/kysely-adapter
+```
+
+```bash tab="yarn"
+yarn add kysely @cockroachdb/kysely-adapter
 ```
 
 ```ts
@@ -61,8 +71,20 @@ const db = new Kysely({
 
 ### PlanetScale
 
-```bash
+```bash tab="npm"
 npm install kysely @planetscale/database
+```
+
+```bash tab="bun"
+bun add kysely @planetscale/database
+```
+
+```bash tab="pnpm"
+pnpm add kysely @planetscale/database
+```
+
+```bash tab="yarn"
+yarn add kysely @planetscale/database
 ```
 
 ```ts
@@ -77,8 +99,20 @@ const db = new Kysely({
 
 ### Cloudflare D1
 
-```bash
+```bash tab="npm"
 npm install kysely @cloudflare/d1-dialect
+```
+
+```bash tab="bun"
+bun add kysely @cloudflare/d1-dialect
+```
+
+```bash tab="pnpm"
+pnpm add kysely @cloudflare/d1-dialect
+```
+
+```bash tab="yarn"
+yarn add kysely @cloudflare/d1-dialect
 ```
 
 ```ts
@@ -100,9 +134,12 @@ Regardless of the database, AgentStart requires these tables:
 ```sql
 CREATE TABLE threads (
   id TEXT PRIMARY KEY,
-  title TEXT,
-  user_id TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  title TEXT NOT NULL,
+  user_id TEXT NOT NULL,
+  visibility TEXT NOT NULL DEFAULT 'private',
+  last_context JSON,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   metadata JSON
 );
 ```
@@ -112,11 +149,25 @@ CREATE TABLE threads (
 ```sql
 CREATE TABLE messages (
   id TEXT PRIMARY KEY,
-  thread_id TEXT REFERENCES threads(id),
-  role TEXT,
-  content TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  metadata JSON
+  thread_id TEXT NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
+  role TEXT NOT NULL,
+  parts JSON NOT NULL,
+  attachments JSON,
+  metadata JSON,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### Todos Table
+
+```sql
+CREATE TABLE todos (
+  id TEXT PRIMARY KEY,
+  thread_id TEXT NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
+  todos JSON NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
@@ -138,18 +189,30 @@ Define your database types for full type safety:
 interface Database {
   threads: {
     id: string;
-    title: string | null;
-    user_id: string | null;
+    title: string;
+    user_id: string;
+    visibility: string;
+    last_context: unknown;
     created_at: Date;
+    updated_at: Date;
     metadata: unknown;
   };
   messages: {
     id: string;
     thread_id: string;
     role: string;
-    content: string;
-    created_at: Date;
+    parts: unknown;
+    attachments: unknown;
     metadata: unknown;
+    created_at: Date;
+    updated_at: Date;
+  };
+  todos: {
+    id: string;
+    thread_id: string;
+    todos: unknown;
+    created_at: Date;
+    updated_at: Date;
   };
 }
 

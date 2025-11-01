@@ -11,8 +11,20 @@ description: Learn how to configure AgentStart in your project
 
 Let's start by adding AgentStart to your project:
 
-```bash
+```bash tab="npm"
 npm install agentstart
+```
+
+```bash tab="bun"
+bun add agentstart
+```
+
+```bash tab="pnpm"
+pnpm add agentstart
+```
+
+```bash tab="yarn"
+yarn add agentstart
 ```
 
 <Callout type="info">
@@ -35,9 +47,17 @@ API key from your model provider (OpenRouter, OpenAI, Anthropic, etc.).
 MODEL_PROVIDER_API_KEY=your_api_key_here
 ```
 
-2. **Database URL**
+2. **Execution Sandbox Key**
 
-Connection string for your memory:
+AgentStart shells out to the E2B sandbox for secure tool execution. Provide your key so long-running code can execute.
+
+```txt title=".env"
+E2B_API_KEY=your_e2b_key_here
+```
+
+3. **Database URL**
+
+Connection string for the memory adapter:
 
 ```txt title=".env"
 DATABASE_URL=postgresql://user:password@localhost:5432/dbname
@@ -53,26 +73,62 @@ Choose and install your preferred AI model provider:
 
 <Tabs items={["OpenRouter", "OpenAI", "Anthropic"]}>
   <Tab value="OpenRouter">
-    ```bash
+    ```bash tab="npm"
     npm install @openrouter/ai-sdk-provider
     ```
-    
+
+    ```bash tab="bun"
+    bun add @openrouter/ai-sdk-provider
+    ```
+
+    ```bash tab="pnpm"
+    pnpm add @openrouter/ai-sdk-provider
+    ```
+
+    ```bash tab="yarn"
+    yarn add @openrouter/ai-sdk-provider
+    ```
+
     Get your API key from [OpenRouter](https://openrouter.ai/keys)
   </Tab>
-  
+
   <Tab value="OpenAI">
-    ```bash
+    ```bash tab="npm"
     npm install @ai-sdk/openai
     ```
-    
+
+    ```bash tab="bun"
+    bun add @ai-sdk/openai
+    ```
+
+    ```bash tab="pnpm"
+    pnpm add @ai-sdk/openai
+    ```
+
+    ```bash tab="yarn"
+    yarn add @ai-sdk/openai
+    ```
+
     Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys)
   </Tab>
-  
+
   <Tab value="Anthropic">
-    ```bash
+    ```bash tab="npm"
     npm install @ai-sdk/anthropic
     ```
-    
+
+    ```bash tab="bun"
+    bun add @ai-sdk/anthropic
+    ```
+
+    ```bash tab="pnpm"
+    pnpm add @ai-sdk/anthropic
+    ```
+
+    ```bash tab="yarn"
+    yarn add @ai-sdk/anthropic
+    ```
+
     Get your API key from [Anthropic Console](https://console.anthropic.com/)
   </Tab>
 </Tabs>
@@ -118,46 +174,75 @@ export const start = agentStart({
 
 ### Configure Database
 
-AgentStart requires a database to store thread/message/todo data. You can easily configure AgentStart to use SQLite, PostgreSQL, or MySQL, and more!
+AgentStart ships with adapters for popular ORMs and query builders. Pass the adapter to `agentStart` instead of wiring raw drivers yourself.
 
-<Tabs items={["sqlite", "postgres", "mysql"]}>
-    <Tab value="sqlite">
+<Tabs items={["sqlite", "postgres", "mysql", "mongodb"]}>
+  <Tab value="sqlite">
     ```ts title="agent.ts"
     import { agentStart } from "agentstart";
+    import { drizzleAdapter } from "agentstart/memory";
     import Database from "better-sqlite3";
+    import { drizzle } from "drizzle-orm/better-sqlite3";
+    import * as schema from "@/db/schema";
+
+    const sqlite = new Database("agentstart.db");
+    const db = drizzle(sqlite);
 
     export const start = agentStart({
-        memory: new Database("./sqlite.db"),
-    })
+      agent,
+      memory: drizzleAdapter(db, { provider: "sqlite", schema }),
+    });
     ```
-    </Tab>
-    <Tab value="postgres">
+  </Tab>
+  <Tab value="postgres">
     ```ts title="agent.ts"
     import { agentStart } from "agentstart";
+    import { kyselyAdapter } from "agentstart/memory";
+    import { Kysely, PostgresDialect } from "kysely";
     import { Pool } from "pg";
 
+    const db = new Kysely({
+      dialect: new PostgresDialect({
+        pool: new Pool({ connectionString: process.env.DATABASE_URL }),
+      }),
+    });
+
     export const start = agentStart({
-        memory: new Pool({
-            // connection options
-        })
-    })
+      agent,
+      memory: kyselyAdapter(db, { type: "postgres" }),
+    });
     ```
-    </Tab>
-    <Tab value="mysql">
+  </Tab>
+  <Tab value="mysql">
     ```ts title="agent.ts"
     import { agentStart } from "agentstart";
-    import { createPool } from "mysql2/promise";
+    import { prismaAdapter } from "agentstart/memory";
+    import { PrismaClient } from "@prisma/client";
+
+    const prisma = new PrismaClient();
 
     export const start = agentStart({
-        memory: createPool({
-            // connection options
-        })
-    })
+      agent,
+      memory: prismaAdapter(prisma, { provider: "mysql" }),
+    });
     ```
-    </Tab>
-</Tabs>
+  </Tab>
+  <Tab value="mongodb">
+    ```ts title="agent.ts"
+    import { agentStart } from "agentstart";
+    import { mongodbAdapter } from "agentstart/memory";
+    import { MongoClient } from "mongodb";
 
-Alternatively, if you prefer to use an ORM, you can use one of the built-in adapters.
+    const client = new MongoClient(process.env.DATABASE_URL!);
+    await client.connect();
+
+    export const start = agentStart({
+      agent,
+      memory: mongodbAdapter(client.db("agentstart")),
+    });
+    ```
+  </Tab>
+</Tabs>
 
 <Tabs items={["Drizzle", "Prisma", "MongoDB"]}>
   <Tab value="Drizzle">
@@ -168,7 +253,7 @@ Alternatively, if you prefer to use an ORM, you can use one of the built-in adap
 
   export const start = agentStart({
     memory: drizzleAdapter(db, {
-      provider: "pg", // or "mysql", "sqlite"
+      provider: "postgresql", // or "mysql", "sqlite"
     }),
   })
   ```

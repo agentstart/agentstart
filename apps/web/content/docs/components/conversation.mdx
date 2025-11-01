@@ -3,8 +3,6 @@ title: Conversation
 description: Display thread messages with streaming support
 ---
 
-# Conversation
-
 The `Conversation` component displays messages in a thread with automatic scrolling, streaming support, and tool visualization.
 
 <ConversationDemo />
@@ -196,11 +194,11 @@ The conversation includes:
 
 ## Performance
 
-The conversation is optimized for performance:
+The conversation focuses on smooth playback of streamed responses:
 
-- **Virtual scrolling** - Efficient rendering of large message lists
-- **Message memoization** - Prevents unnecessary re-renders
-- **Lazy loading** - Loads message history on demand
+- **Sticky scroll** - Keeps the latest assistant message in view while streaming
+- **Message memoization** - Prevents unnecessary re-renders as new parts arrive
+- **Incremental fetching** - Loads message history when the component mounts
 
 ## Next Steps
 

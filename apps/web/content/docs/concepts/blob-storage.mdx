@@ -3,8 +3,6 @@ title: Blob Storage
 description: Configure file uploads and attachments for AgentStart deployments
 ---
 
-# Blob Storage
-
 AgentStart ships with first-class blob storage support so your agents can accept file uploads, persist normalized metadata, and reuse attachments across tools, memory, and UI layers.
 
 <Callout>
@@ -135,34 +133,41 @@ R2_ACCOUNT_ID=...
 
 ## Client Attachments
 
-Use the `useBlobAttachments` hook from `agentstart/client` to validate and upload files before they reach your tools.
+Use the `useBlobFiles` hook from `agentstart/client` to validate and upload files before they reach your tools.
 
 ```tsx title="components/attachment-input.tsx"
 "use client";
 
-import { useBlobAttachments } from "agentstart/client";
+import type { ChangeEvent } from "react";
+import { useBlobFiles } from "agentstart/client";
 import { client } from "@/lib/agent-client";
 
 export function AttachmentInput() {
-  const { validateFiles, uploadMutation, isEnabled } = useBlobAttachments(client);
+  const { files, setFiles, processFiles, clearFiles, isUploading, uploadTiming } =
+    useBlobFiles(client);
 
-  const handleFiles = async (files: File[]) => {
-    if (!isEnabled) return;
-
-    const errors = validateFiles(files);
-    if (errors.length > 0) {
-      console.error(errors);
-      return;
-    }
-
-    const uploaded = await uploadMutation.mutateAsync(files);
-    console.log("Uploaded files:", uploaded);
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files) return;
+    setFiles(event.target.files);
   };
 
-  return <input type="file" multiple onChange={(event) => {
-    const files = Array.from(event.target.files ?? []);
-    void handleFiles(files);
-  }} />;
+  const handleSubmit = async () => {
+    const processed = await processFiles();
+    console.log("Ready to send:", processed);
+    clearFiles();
+  };
+
+  return (
+    <div className="grid gap-2">
+      <input type="file" multiple onChange={handleFileChange} />
+      <div className="text-xs text-muted-foreground">
+        Upload timing: {uploadTiming} — {files.length} file(s) selected
+      </div>
+      <button type="button" onClick={handleSubmit} disabled={isUploading}>
+        {isUploading ? "Uploading…" : "Attach"}
+      </button>
+    </div>
+  );
 }
 ```
 

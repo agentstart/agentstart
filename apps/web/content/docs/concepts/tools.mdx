@@ -3,8 +3,6 @@ title: Tools
 description: Built-in and custom tools for extending agent capabilities
 ---
 
-# Tools
-
 Tools are executable functions that extend your agent's capabilities. AgentStart provides built-in tools and makes it easy to create custom ones.
 
 ## Built-in Tools
@@ -38,13 +36,13 @@ import { osTools } from "agentstart/agent";
 // - bash: Execute shell commands
 // - read: Read file contents
 // - write: Write to files
-// - update: Update file sections
+// - edit: Update file sections
 // - glob: Search files by pattern
 // - grep: Search within files
 // - ls: List directory contents
 ```
 
-<Tabs items={["bash", "read/write/update", "glob/grep", "ls"]}>
+<Tabs items={["bash", "read/write/edit", "glob/grep", "ls"]}>
 
 <Tab value="bash">
 
@@ -63,13 +61,13 @@ Execute shell commands safely:
 
 </Tab>
 
-<Tab value="read/write/update">
+<Tab value="read/write/edit">
 
 File operations:
 
 - **read**: Read entire file contents
 - **write**: Create or overwrite files
-- **update**: Modify specific sections using search/replace
+- **edit**: Modify specific sections using structured instructions
 
 ```ts
 // Read a file
@@ -78,8 +76,8 @@ File operations:
 // Write a file
 // "create a new file called hello.ts with a greeting function"
 
-// Update a file
-// "update the port number in config.ts from 3000 to 3001"
+// Edit a file
+// "replace the API base URL in lib/api.ts with /api/agent"
 ```
 
 </Tab>
@@ -249,5 +247,5 @@ const longRunningTool = {
 <Cards>
   <Card title="Thread, Message & Todo" href="/docs/concepts/thread-message-todo" />
   <Card title="Database" href="/docs/concepts/database" />
-  <Card title="API" href="/docs/concepts/api" />
+  <Card title="SDK" href="/docs/concepts/sdk" />
 </Cards>

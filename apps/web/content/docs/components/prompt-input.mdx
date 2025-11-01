@@ -3,8 +3,6 @@ title: Prompt Input
 description: Input component for sending messages and creating threads
 ---
 
-# Prompt Input
-
 The `PromptInput` component provides a rich text input with file attachments, streaming control, and automatic thread creation.
 
 <PromptInputDemo />
@@ -19,19 +17,9 @@ npx shadcn@latest add prompt-input --registry=@agentstart
 
 ```tsx
 import { PromptInput } from "@/components/agent/prompt-input";
-import { useAgentStore } from "agentstart/client";
 
 export default function ChatPage({ threadId }: { threadId: string }) {
-  const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
-
-  return (
-    <PromptInput
-      threadId={threadId}
-      onMessageSubmit={async (message) => {
-        await sendMessage({ text: message.text ?? "" });
-      }}
-    />
-  );
+  return <PromptInput threadId={threadId} />;
 }
 ```
 
@@ -39,8 +27,8 @@ export default function ChatPage({ threadId }: { threadId: string }) {
 
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
-| `threadId` | `string` | - | Thread ID for chat page usage. If not provided, creates a new thread on submit. |
-| `onMessageSubmit` | `(message: { text?: string; files?: FileUIPart[] \| FileList }) => Promise<void>` | - | Custom message submit handler. Called when user sends a message. |
+| `threadId` | `string` | - | Thread ID for chat page usage. If omitted, the component creates a new thread automatically. |
+| `initialUsage` | `AgentUsageSummary` | - | Prefills the usage meter before streaming begins. |
 | `className` | `string` | - | Additional CSS classes for the input container |
 
 ## Features
@@ -58,22 +46,11 @@ export default function ChatPage({ threadId }: { threadId: string }) {
 
 ```tsx
 import { PromptInput } from "@/components/agent/prompt-input";
-import { useAgentStore } from "agentstart/client";
 
 export default function ChatPage({ threadId }: { threadId: string }) {
-  const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
-
   return (
     <div className="p-4">
-      <PromptInput
-        threadId={threadId}
-        onMessageSubmit={async (message) => {
-          await sendMessage({
-            text: message.text ?? "",
-            files: message.files,
-          });
-        }}
-      />
+      <PromptInput threadId={threadId} />
     </div>
   );
 }
@@ -102,15 +79,10 @@ export default function HomePage() {
 import { PromptInput } from "@/components/agent/prompt-input";
 
 export default function StyledInput({ threadId }: { threadId: string }) {
-  const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
-
   return (
     <PromptInput
       threadId={threadId}
       className="border-2 border-primary rounded-2xl shadow-lg"
-      onMessageSubmit={async (message) => {
-        await sendMessage({ text: message.text ?? "" });
-      }}
     />
   );
 }
@@ -120,23 +92,9 @@ export default function StyledInput({ threadId }: { threadId: string }) {
 
 ```tsx
 import { PromptInput } from "@/components/agent/prompt-input";
-import { useAgentStore } from "agentstart/client";
 
 export default function FileUploadExample({ threadId }: { threadId: string }) {
-  const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
-
-  return (
-    <PromptInput
-      threadId={threadId}
-      onMessageSubmit={async (message) => {
-        // Files are automatically included in message.files
-        await sendMessage({
-          text: message.text ?? "",
-          files: message.files,
-        });
-      }}
-    />
-  );
+  return <PromptInput threadId={threadId} />;
 }
 ```
 
@@ -156,22 +114,17 @@ When `threadId` is **not** provided:
 When `threadId` **is** provided:
 
 1. User enters text and clicks send
-2. `onMessageSubmit` is called with the message
-3. Your handler sends the message via AgentStart client
-4. Input is cleared automatically
+2. The component dispatches the request through the active thread
+3. Any existing stream is stopped or the message is queued automatically
+4. Input and attachments are cleared after a successful send
 
 ## Stop Streaming
 
 During streaming, the send button becomes a stop button:
 
 ```tsx
-<PromptInput
-  threadId={threadId}
-  onMessageSubmit={async (message) => {
-    await sendMessage({ text: message.text ?? "" });
-  }}
-/>
-// Automatically shows stop icon during streaming
+<PromptInput threadId={threadId} />
+// Automatically shows a stop icon during streaming
 ```
 
 ## File Attachments
@@ -207,9 +160,7 @@ import type { PromptInputProps } from "@/components/agent/prompt-input";
 const props: PromptInputProps = {
   threadId: "thread-123",
   className: "border rounded-lg",
-  onMessageSubmit: async (message) => {
-    console.log(message.text, message.files);
-  },
+  initialUsage: undefined,
 };
 ```
 
@@ -227,11 +178,10 @@ Works seamlessly with other AgentStart components:
 ```tsx
 import { Conversation } from "@/components/agent/conversation";
 import { PromptInput } from "@/components/agent/prompt-input";
-import { useAgentStore, useThread } from "agentstart/client";
+import { useThread } from "agentstart/client";
 
 export default function ThreadPage({ threadId }: { threadId: string }) {
   useThread(threadId);
-  const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
 
   return (
     <div className="flex h-screen flex-col">
@@ -239,12 +189,7 @@ export default function ThreadPage({ threadId }: { threadId: string }) {
         <Conversation threadId={threadId} />
       </div>
       <div className="border-t p-4">
-        <PromptInput
-          threadId={threadId}
-          onMessageSubmit={async (message) => {
-            await sendMessage({ text: message.text ?? "" });
-          }}
-        />
+        <PromptInput threadId={threadId} />
       </div>
     </div>
   );

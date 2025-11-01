@@ -257,7 +257,7 @@ export async function generateConfig({
       } else if (
         opts.database === "drizzle:mysql" ||
         opts.database === "drizzle:sqlite" ||
-        opts.database === "drizzle:pg"
+        opts.database === "drizzle:postgresql"
       ) {
         await addDb({
           db_code: `drizzleAdapter(db, {\nprovider: "${opts.database.replace(

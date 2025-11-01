@@ -1,11 +1,7 @@
 ---
 title: Client
-description: Using the AgentStart client in your application
+description: The AgentStart client provides type-safe React hooks and store access for building agent UIs.
 ---
-
-# Client
-
-The AgentStart client provides type-safe React hooks and store access for building agent UIs.
 
 ## Creating a Client
 
@@ -15,16 +11,18 @@ Create a client instance to interact with your agent:
 import { createAgentClient } from "agentstart/client";
 
 export const { client, useThread } = createAgentClient({
-  baseURL: "http://localhost:3000", // optional if same domain
+  baseURL: "http://localhost:3000", // The base URL of your agent server, optional if same domain
 });
 ```
 
 ### Options
 
 ```ts
-interface ClientOptions {
+interface CreateAgentClientOptions {
   baseURL?: string;  // Base URL of your agent API
   fetch?: typeof fetch;  // Custom fetch implementation
+  headers?: (() => Record<string, string>) | (() => Promise<Record<string, string>>);  // Custom headers factory
+  loadEnv?: boolean;  // Load environment variables for base URL (default: true)
 }
 ```
 
@@ -59,38 +57,138 @@ import { useAgentStore } from "@/lib/agent-client";
 
 export function Messages() {
   const messages = useAgentStore((state) => state.messages, threadId);
-  const isLoading = useAgentStore((state) => state.isLoading, threadId);
-  
+  const status = useAgentStore((state) => state.status, threadId);
+
   return (
     <div>
       {messages.map(msg => <Message key={msg.id} {...msg} />)}
-      {isLoading && <Spinner />}
+      {status === "streaming" && <Spinner />}
     </div>
   );
 }
 ```
+
+### useBlobFiles
+
+Handle file uploads with automatic validation and cloud storage:
+
+```tsx
+import type { ChangeEvent } from "react";
+import { useBlobFiles, useAgentStore } from "agentstart/client";
+import { Spinner } from "@/components/ui/spinner";
+
+export function FileUpload({ threadId }: { threadId?: string }) {
+  const { files, setFiles, processFiles, clearFiles, isUploading, uploadTiming } =
+    useBlobFiles(client);
+  const sendMessage = useAgentStore((state) => state.sendMessage, threadId ?? "default");
+
+  const handleFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files) return;
+    setFiles(event.target.files);
+    // In "immediate" mode files upload right away.
+  };
+
+  const handleSubmit = async () => {
+    const uploadedFiles = await processFiles();
+
+    await sendMessage({
+      text: "Analyze these files",
+      files: uploadedFiles,
+    });
+
+    clearFiles();
+  };
+
+  return (
+    <div>
+      <input type="file" multiple onChange={handleFileSelect} />
+      <div>Upload timing: {uploadTiming}</div>
+      {isUploading && <Spinner />}
+      <button onClick={handleSubmit} disabled={isUploading || files.length === 0}>
+        Submit
+      </button>
+    </div>
+  );
+}
+```
+
+**Features:**
+- Automatic validation against configured constraints (file size, MIME types, max files)
+- Two upload strategies:
+  - `immediate`: Files upload automatically on selection
+  - `onSubmit`: Files upload when you call `processFiles()`
+- Support for multiple cloud providers (Vercel Blob, AWS S3, Cloudflare R2)
+- Works seamlessly when blob storage is disabled (returns files as-is)
+
+### useDataPart
+
+Extract typed data from AI message streams:
+
+```tsx
+import { useAgentStore, useDataPart } from "agentstart/client";
+
+export function Suggestions({ threadId }: { threadId?: string }) {
+  const [suggestions, clearSuggestions] = useDataPart("data-agentstart-suggestions", threadId ?? "default");
+  const sendMessage = useAgentStore((state) => state.sendMessage, threadId ?? "default");
+
+  if (!suggestions) return null;
+
+  return (
+    <div>
+      {suggestions.prompts.map(prompt => (
+        <button key={prompt} onClick={() => {
+          sendMessage({ text: prompt });
+          clearSuggestions();
+        }}>
+          {prompt}
+        </button>
+      ))}
+    </div>
+  );
+}
+```
+
+**Type Inference:** The hook automatically infers the correct type based on the data part key you provide.
 
 ## Store API
 
 The agent store provides these selectors:
 
 ```ts
-interface AgentState {
-  // Thread data
-  thread: Thread | null;
-  messages: Message[];
-  
-  // Loading states
-  isLoading: boolean;
-  isStreaming: boolean;
-  
-  // Actions
-  sendMessage: (params: { content: string }) => Promise<void>;
+interface AgentStore {
+  // Chat state (from AI SDK)
+  id: string;
+  messages: UIMessage[];
+  status: "ready" | "streaming" | "error";
+  error: Error | undefined;
+
+  // Chat actions
+  sendMessage: (params: { text?: string; files?: BlobFileList }) => Promise<void>;
   regenerate: () => Promise<void>;
   stop: () => void;
-  
-  // Error handling
-  error: Error | null;
+  resumeStream: () => Promise<void>;
+  addToolResult: (params) => Promise<void>;
+  setMessages: (messages: UIMessage[]) => void;
+  clearError: () => void;
+
+  // Thread draft management
+  newThreadDraft: ThreadDraft | null;
+  setNewThreadDraft: (draft: ThreadDraft | null) => void;
+
+  // Message queue management
+  messageQueue: QueuedAgentMessage[];
+  enqueueQueuedMessage: (message: Omit<QueuedAgentMessage, "id" | "createdAt">) => QueuedAgentMessage;
+  dequeueQueuedMessage: () => QueuedAgentMessage | undefined;
+  takeQueuedMessageById: (id: string) => QueuedAgentMessage | undefined;
+  removeQueuedMessage: (id: string) => void;
+  prependQueuedMessage: (message: QueuedAgentMessage) => void;
+  moveQueuedMessage: (id: string, direction: "up" | "down") => void;
+  clearMessageQueue: () => void;
+
+  // Data parts management
+  dataParts: Map<string, any>;
+  setDataPart: (type: string, data: any) => void;
+  removeDataPart: (type: string) => void;
 }
 ```
 
@@ -99,8 +197,35 @@ interface AgentState {
 ```tsx
 const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
 
-const handleSend = async (content: string) => {
-  await sendMessage({ content });
+const handleSend = async (text: string, files?: BlobFileList) => {
+  await sendMessage({ text, files });
+};
+```
+
+## Message Queue
+
+The message queue allows you to batch and manage pending messages:
+
+```tsx
+const enqueueMessage = useAgentStore((state) => state.enqueueQueuedMessage, threadId);
+const messageQueue = useAgentStore((state) => state.messageQueue, threadId);
+const dequeueMessage = useAgentStore((state) => state.dequeueQueuedMessage, threadId);
+
+// Add message to queue
+const queuedMessage = enqueueMessage({
+  text: "Hello",
+  files: uploadedFiles
+});
+
+// Process queue
+const processQueue = async () => {
+  const message = dequeueMessage();
+  if (message) {
+    await sendMessage({
+      text: message.text ?? "",
+      files: message.files
+    });
+  }
 };
 ```
 
@@ -110,13 +235,13 @@ const handleSend = async (content: string) => {
 import { client } from "@/lib/agent-client";
 
 // Create new thread
-const thread = await client.thread.create();
+const { threadId } = await client.thread.create();
 
 // List threads
-const threads = await client.thread.list();
+const { threads } = await client.thread.list();
 
 // Delete thread
-await client.thread.delete({ id: threadId });
+await client.thread.delete({ threadId });
 ```
 
 ## Real-time Updates
@@ -127,17 +252,12 @@ The client automatically handles real-time message streaming using Server-Sent E
 
 ```tsx
 const error = useAgentStore((state) => state.error, threadId);
+const clearError = useAgentStore((state) => state.clearError, threadId);
 
 {error && (
   <Alert variant="error">
     {error.message}
+    <button onClick={clearError}>Dismiss</button>
   </Alert>
 )}
 ```
-
-## Next Steps
-
-<Cards>
-  <Card title="API" href="/docs/concepts/api" />
-  <Card title="Database" href="/docs/concepts/database" />
-</Cards>

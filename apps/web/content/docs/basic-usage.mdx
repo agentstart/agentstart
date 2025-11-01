@@ -21,7 +21,7 @@ const agent = new Agent({
   model: openrouter("x-ai/grok-4-fast"),
   instructions: "You are a helpful coding assistant.",
   tools: {
-    ...agentTools,  // Task management tools
+    ...agentTools, // Task management tools
   },
 });
 ```
@@ -54,7 +54,7 @@ import * as schema from "@/db/schema";
 export const start = agentStart({
   agent,
   memory: drizzleAdapter(db, {
-    provider: "pg",
+    provider: "postgresql",
     schema,
   }),
   appName: "my-app",
@@ -74,7 +74,7 @@ export const start = agentStart({
     import { mongodbAdapter } from "agentstart/memory";
     
     // Use Drizzle
-    memory: drizzleAdapter(db, { provider: "pg", schema })
+    memory: drizzleAdapter(db, { provider: "postgresql", schema })
     
     // Use Prisma
     memory: prismaAdapter(prisma, { provider: "postgresql" })
@@ -128,9 +128,7 @@ Create a client to interact with your agent:
 ```ts title="lib/agent-client.ts"
 import { createAgentClient } from "agentstart/client";
 
-export const { client, useThread } = createAgentClient({
-  baseURL: "http://localhost:3000", // optional if same domain
-});
+export const { client, useThread, useAgentStore } = createAgentClient();
 ```
 
 ### Accessing Thread State
@@ -145,25 +143,33 @@ import { useParams } from "next/navigation";
 
 export default function ThreadPage() {
   const { threadId } = useParams<{ threadId: string }>();
-  
+
   // Sync thread state
   useThread(threadId);
-  
+
   // Access agent state
   const messages = useAgentStore((state) => state.messages, threadId);
+  const status = useAgentStore((state) => state.status, threadId);
   const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
-  
-  const handleSend = async (content: string) => {
-    await sendMessage({ content });
+
+  const handleSend = async (text: string) => {
+    await sendMessage({ text });
   };
-  
+
   return (
     <div>
-      {messages.map((message) => (
-        <div key={message.id}>
-          <strong>{message.role}:</strong> {message.content}
-        </div>
-      ))}
+      {messages.map((message) => {
+        const text = message.parts?.find(
+          (part): part is { type: "text"; text: string } => part.type === "text",
+        )?.text;
+
+        return (
+          <div key={message.id}>
+            <strong>{message.role}:</strong> {text ?? ""}
+          </div>
+        );
+      })}
+      {status === "streaming" && <span>Receiving response…</span>}
       <input
         onKeyDown={(e) => {
           if (e.key === "Enter") {
@@ -187,8 +193,8 @@ import { useAgentStore } from "@/lib/agent-client";
 // Get messages
 const messages = useAgentStore((state) => state.messages, threadId);
 
-// Get loading state
-const isLoading = useAgentStore((state) => state.isLoading, threadId);
+// Get status ("ready" | "streaming" | "error")
+const status = useAgentStore((state) => state.status, threadId);
 
 // Send message
 const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
@@ -248,8 +254,8 @@ import { start } from "@/lib/agent"; // path to your auth file
 
 export async function GET() {
   // Access the server API
-  const threads = await start.api.thread.list();
-  
+  const { threads } = await start.api.thread.list();
+
   return Response.json(threads);
 }
 ```
@@ -282,5 +288,5 @@ export const start = agentStart({
   <Card title="Database" href="/docs/concepts/database" />
   <Card title="Tools" href="/docs/concepts/tools" />
   <Card title="Drizzle Adapter" href="/docs/databases/drizzle" />
-  <Card title="Framework Integration" href="/docs/templates" />
+  <Card title="Next.js Integration" href="/docs/integrations/next" />
 </Cards>

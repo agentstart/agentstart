@@ -87,7 +87,7 @@ describe("generate", () => {
       adapter: drizzleAdapter(
         {},
         {
-          provider: "pg",
+          provider: "postgresql",
           schema: {},
         },
       )({} as AgentStartOptions),
@@ -95,7 +95,7 @@ describe("generate", () => {
         memory: drizzleAdapter(
           {},
           {
-            provider: "pg",
+            provider: "postgresql",
             schema: {},
           },
         ),

@@ -3,8 +3,6 @@ title: MS SQL Server
 description: Integrate AgentStart with Microsoft SQL Server
 ---
 
-# Microsoft SQL Server
-
 Microsoft SQL Server is a relational database management system developed by Microsoft. It supports a wide variety of transaction processing, business intelligence, and analytics applications.
 
 ## Example Usage
@@ -13,6 +11,7 @@ Make sure you have SQL Server installed and configured. Then, you can connect it
 
 ```ts title="lib/agent.ts"
 import { agentStart } from "agentstart";
+import { kyselyAdapter } from "agentstart/memory";
 import { Kysely, MssqlDialect } from "kysely";
 import { Pool } from "tarn";
 import * as Tedious from "tedious";
@@ -45,7 +44,7 @@ const db = new Kysely({
 
 export const start = agentStart({
   agent,
-  memory: kyselyAdapter(db),
+  memory: kyselyAdapter(db, { type: "mssql" }),
 });
 ```
 
@@ -59,18 +58,22 @@ export const start = agentStart({
 The AgentStart CLI allows you to generate or migrate your database schema.
 
 <table>
-  <tr className="border-b">
-    <th>
-      <p className="font-bold text-[16px] mb-1">MSSQL Schema Generation</p>
-    </th>
-    <th>
-      <p className="font-bold text-[16px] mb-1">MSSQL Schema Migration</p>
-    </th>
-  </tr>
-  <tr className="h-10">
-    <td>✅ Supported</td>
-    <td>✅ Supported</td>
-  </tr>
+  <thead>
+    <tr className="border-b">
+      <th>
+        <p className="font-bold text-[16px] mb-1">MSSQL Schema Generation</p>
+      </th>
+      <th>
+        <p className="font-bold text-[16px] mb-1">MSSQL Schema Migration</p>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr className="h-10">
+      <td>✅ Supported</td>
+      <td>✅ Supported</td>
+    </tr>
+  </tbody>
 </table>
 
 ```bash title="Schema Generation"
@@ -85,8 +88,20 @@ npx @agentstart/cli migrate
 
 Install the required dependencies:
 
-```bash
+```bash tab="npm"
 npm install kysely tedious tarn
+```
+
+```bash tab="bun"
+bun add kysely tedious tarn
+```
+
+```bash tab="pnpm"
+pnpm add kysely tedious tarn
+```
+
+```bash tab="yarn"
+yarn add kysely tedious tarn
 ```
 
 ## Connection String Format

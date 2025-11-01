@@ -3,8 +3,6 @@ title: Sidebar
 description: Thread list sidebar with navigation
 ---
 
-# Sidebar
-
 The `Sidebar` component provides a collapsible sidebar that lists all threads with automatic loading, pagination, and thread management.
 
 <SidebarDemo />
@@ -265,14 +263,13 @@ import { Sidebar } from "@/components/agent/sidebar";
 import { Conversation } from "@/components/agent/conversation";
 import { PromptInput } from "@/components/agent/prompt-input";
 import { useParams, useRouter } from "next/navigation";
-import { useAgentStore, useThread } from "agentstart/client";
+import { useThread } from "agentstart/client";
 
 export default function ThreadLayout() {
   const router = useRouter();
   const { threadId } = useParams<{ threadId: string }>();
   
   useThread(threadId);
-  const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
 
   return (
     <Sidebar
@@ -289,12 +286,7 @@ export default function ThreadLayout() {
         </div>
         
         <div className="border-t p-4">
-          <PromptInput
-            threadId={threadId}
-            onMessageSubmit={async (message) => {
-              await sendMessage({ text: message.text ?? "" });
-            }}
-          />
+          <PromptInput threadId={threadId} />
         </div>
       </div>
     </Sidebar>

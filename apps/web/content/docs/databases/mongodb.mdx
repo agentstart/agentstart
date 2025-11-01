@@ -3,14 +3,24 @@ title: MongoDB Adapter
 description: Integrate AgentStart with MongoDB
 ---
 
-# MongoDB Adapter
-
 MongoDB is a popular NoSQL document database. AgentStart provides first-class support for MongoDB through a native adapter.
 
 ## Installation
 
-```bash
+```bash tab="npm"
 npm install mongodb
+```
+
+```bash tab="bun"
+bun add mongodb
+```
+
+```bash tab="pnpm"
+pnpm add mongodb
+```
+
+```bash tab="yarn"
+yarn add mongodb
 ```
 
 ## Example Usage
@@ -77,7 +87,10 @@ The MongoDB adapter creates these collections:
   "_id": "thread-id",
   "title": "My Thread",
   "userId": "user-123",
+  "visibility": "private",
+  "lastContext": null,
   "createdAt": ISODate("2024-01-01T00:00:00Z"),
+  "updatedAt": ISODate("2024-01-01T00:00:00Z"),
   "metadata": {}
 }
 ```
@@ -89,9 +102,27 @@ The MongoDB adapter creates these collections:
   "_id": "message-id",
   "threadId": "thread-id",
   "role": "user",
-  "content": "Hello",
+  "parts": [
+    { "type": "text", "text": "Hello" }
+  ],
+  "attachments": [],
+  "metadata": {},
   "createdAt": ISODate("2024-01-01T00:00:00Z"),
-  "metadata": {}
+  "updatedAt": ISODate("2024-01-01T00:00:00Z")
+}
+```
+
+### Todos Collection
+
+```json
+{
+  "_id": "todo-id",
+  "threadId": "thread-id",
+  "todos": [
+    { "id": "task-1", "content": "Draft spec", "status": "pending", "priority": "medium" }
+  ],
+  "createdAt": ISODate("2024-01-01T00:00:00Z"),
+  "updatedAt": ISODate("2024-01-01T00:00:00Z")
 }
 ```
 

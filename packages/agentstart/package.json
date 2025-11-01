@@ -39,12 +39,13 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "tsdown",
+    "build": "bun run generate:sdk:docs && tsdown",
     "dev": "tsdown --watch",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "lint": "bunx biome check --write --unsafe ./src",
     "typecheck": "tsc --noEmit",
-    "test": "vitest"
+    "test": "vitest",
+    "generate:sdk:docs": "bun run scripts/generate-sdk-docs.ts"
   },
   "dependencies": {
     "@agentstart/blob": "workspace:*",

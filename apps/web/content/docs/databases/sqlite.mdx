@@ -3,8 +3,6 @@ title: SQLite
 description: Integrate AgentStart with SQLite
 ---
 
-# SQLite
-
 SQLite is a lightweight, serverless, self-contained SQL database engine. It's perfect for development, testing, and small to medium-sized applications.
 
 ## Example Usage
@@ -13,6 +11,7 @@ SQLite requires no separate server process, making it ideal for local developmen
 
 ```ts title="lib/agent.ts"
 import { agentStart } from "agentstart";
+import { kyselyAdapter } from "agentstart/memory";
 import { Kysely, SqliteDialect } from "kysely";
 import Database from "better-sqlite3";
 
@@ -40,18 +39,22 @@ export const start = agentStart({
 The AgentStart CLI allows you to generate or migrate your database schema.
 
 <table>
-  <tr className="border-b">
-    <th>
-      <p className="font-bold text-[16px] mb-1">SQLite Schema Generation</p>
-    </th>
-    <th>
-      <p className="font-bold text-[16px] mb-1">SQLite Schema Migration</p>
-    </th>
-  </tr>
-  <tr className="h-10">
-    <td>✅ Supported</td>
-    <td>✅ Supported</td>
-  </tr>
+  <thead>
+    <tr className="border-b">
+      <th>
+        <p className="font-bold text-[16px] mb-1">SQLite Schema Generation</p>
+      </th>
+      <th>
+        <p className="font-bold text-[16px] mb-1">SQLite Schema Migration</p>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr className="h-10">
+      <td>✅ Supported</td>
+      <td>✅ Supported</td>
+    </tr>
+  </tbody>
 </table>
 
 ```bash title="Schema Generation"
@@ -66,8 +69,20 @@ npx @agentstart/cli migrate
 
 For a better development experience, we recommend using the [Drizzle adapter](/docs/databases/drizzle):
 
-```bash
+```bash tab="npm"
 npm install drizzle-orm better-sqlite3
+```
+
+```bash tab="bun"
+bun add drizzle-orm better-sqlite3
+```
+
+```bash tab="pnpm"
+pnpm add drizzle-orm better-sqlite3
+```
+
+```bash tab="yarn"
+yarn add drizzle-orm better-sqlite3
 ```
 
 ```ts title="lib/agent.ts"
@@ -85,6 +100,7 @@ export const start = agentStart({
     schema: {
       thread: threadsTable,
       message: messagesTable,
+      todo: todosTable,
     },
   }),
 });

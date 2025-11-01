@@ -164,13 +164,13 @@ R2_ACCOUNT_ID=...
 
 **Client Usage:**
 
-The `useBlobAttachments` hook handles client-side validation and upload:
+The `useBlobFiles` hook handles client-side validation and upload:
 
 ```typescript
-import { useBlobAttachments } from "agentstart/client";
+import { useBlobFiles } from "agentstart/client";
 
 function MyComponent() {
-  const { uploadMutation, validateFiles, isEnabled } = useBlobAttachments(client);
+  const { uploadMutation, validateFiles, isEnabled } = useBlobFiles(client);
 
   const handleFileSelect = async (files: File[]) => {
     const errors = validateFiles(files);

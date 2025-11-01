@@ -141,7 +141,7 @@ const loggingMiddleware = os.middleware(async ({ next }) => {
 
 export const start = agentStart({
   memory: drizzleAdapter(db, {
-    provider: "pg",
+    provider: "postgresql",
     schema,
   }),
   blob: blobConfig,

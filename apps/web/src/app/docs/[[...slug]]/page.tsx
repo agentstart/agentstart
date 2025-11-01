@@ -1,9 +1,4 @@
-import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
-import { Card, Cards } from "fumadocs-ui/components/card";
-import { File, Files, Folder } from "fumadocs-ui/components/files";
-import { Step, Steps } from "fumadocs-ui/components/steps";
-import { Tab, Tabs } from "fumadocs-ui/components/tabs";
-import defaultMdxComponents, { createRelativeLink } from "fumadocs-ui/mdx";
+import { createRelativeLink } from "fumadocs-ui/mdx";
 import {
   DocsBody,
   DocsDescription,
@@ -12,13 +7,8 @@ import {
 } from "fumadocs-ui/page";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import {
-  ConversationDemo,
-  PromptInputDemo,
-  ProviderDemo,
-  SidebarDemo,
-} from "@/components/demos";
 import { LLMCopyButton, ViewOptions } from "@/components/page-actions";
+import { getMDXComponents } from "@/lib/mdx-components";
 import { getPageImage, source } from "@/lib/source";
 
 export default async function Page({ params }: PageProps<"/docs/[[...slug]]">) {
@@ -43,27 +33,10 @@ export default async function Page({ params }: PageProps<"/docs/[[...slug]]">) {
 
       <DocsBody>
         <MDX
-          components={{
-            ...defaultMdxComponents,
-            Step,
-            Steps,
-            Tab,
-            Tabs,
-            Accordion,
-            Accordions,
-            Card,
-            Cards,
-            File,
-            Folder,
-            Files,
-            // Demo components
-            ProviderDemo,
-            ConversationDemo,
-            PromptInputDemo,
-            SidebarDemo,
+          components={getMDXComponents({
             // this allows you to link to other pages with relative file paths
             a: createRelativeLink(source, page),
-          }}
+          })}
         />
       </DocsBody>
     </DocsPage>
