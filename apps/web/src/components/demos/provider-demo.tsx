@@ -1,6 +1,6 @@
 "use client";
 
-import { AgentStartProvider } from "@/components/agent/provider";
+import { AgentStartProvider } from "agentstart/client";
 import { mockClient, mockNavigate } from "./mock-client";
 
 export function ProviderDemo() {

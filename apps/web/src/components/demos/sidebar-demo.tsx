@@ -1,6 +1,6 @@
 "use client";
 
-import { AgentStartProvider } from "@/components/agent/provider";
+import { AgentStartProvider } from "agentstart/client";
 import { Sidebar } from "@/components/agent/sidebar/sidebar";
 import { mockClient, mockNavigate } from "./mock-client";
 

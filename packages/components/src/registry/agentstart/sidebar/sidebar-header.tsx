@@ -13,6 +13,7 @@ agent-frontmatter:end */
 "use client";
 
 import { NotePencilIcon, SidebarIcon } from "@phosphor-icons/react";
+import { useAgentStartContext } from "agentstart/client";
 import type React from "react";
 import {
   SidebarHeader as ShadcnSidebarHeader,
@@ -22,7 +23,6 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { useAgentStartContext } from "../provider";
 
 export type SidebarHeaderProps = {
   title: React.ReactNode;

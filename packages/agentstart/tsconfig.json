@@ -5,6 +5,7 @@
     "tsBuildInfoFile": ".cache/tsbuildinfo.json",
     "composite": true,
     "baseUrl": ".",
+    "jsx": "react-jsx",
     "paths": {
       "@/*": ["./src/*"]
     }

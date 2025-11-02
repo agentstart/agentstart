@@ -11,10 +11,10 @@ agent-frontmatter:end */
 
 "use client";
 
+import { AgentStartProvider } from "agentstart/client";
 import type { DBThread } from "agentstart/memory";
 import { useParams, useRouter } from "next/navigation";
 import type React from "react";
-import { AgentStartProvider } from "@/components/agent/provider";
 import { Sidebar } from "@/components/agent/sidebar/sidebar";
 import { client } from "@/lib/agent-client";
 

@@ -28,6 +28,7 @@ import type { StoreApi, UseBoundStore } from "zustand";
 import type { AgentStartUIMessage } from "@/agent";
 import type { AgentStartAPI } from "@/api";
 import { useDataStateMapper } from "./data-state-mapper";
+import { useStoreRegistry } from "./provider";
 import { type AgentStoreWithSync, getAgentStore } from "./store/agent";
 import type { BlobFileList } from "./use-blob-files";
 
@@ -72,6 +73,10 @@ function toSendableFiles(
 
 export function createUseThread(client: AgentStartAPI) {
   const hook = (storeId: string = "default") => {
+    const storeInstances = useStoreRegistry();
+    const storeInstancesRef = useRef(storeInstances);
+    storeInstancesRef.current = storeInstances;
+
     const mapDataToState = useDataStateMapper(client, storeId);
     const mapDataToStateRef = useRef(mapDataToState);
     mapDataToStateRef.current = mapDataToState;
@@ -110,7 +115,10 @@ export function createUseThread(client: AgentStartAPI) {
               return;
             }
 
-            const store = getAgentStore<AgentStartUIMessage>(storeId);
+            const store = getAgentStore<AgentStartUIMessage>(
+              storeInstancesRef.current,
+              storeId,
+            );
             const {
               messageQueue,
               dequeueQueuedMessage,
@@ -175,10 +183,11 @@ function useCreateThread<TMessage extends UIMessage = UIMessage>(
     store: customStore,
     ...originalOptions
   } = options;
+  const storeInstances = useStoreRegistry();
   const threadHelpers = useOriginalChat<TMessage>(originalOptions);
 
   // Use custom store if provided, otherwise get/create default store
-  const store = customStore || getAgentStore(storeId);
+  const store = customStore || getAgentStore(storeInstances, storeId);
   const storeRef =
     useRef<UseBoundStore<StoreApi<AgentStoreWithSync<TMessage>>>>(store);
 

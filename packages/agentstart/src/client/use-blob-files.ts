@@ -100,7 +100,11 @@ export function useBlobFiles(client: AgentStartAPI): UseBlobFilesResult {
   const orpc = createTanstackQueryUtils(client);
 
   // Fetch blob configuration
-  const { data: config } = useQuery(orpc.blob.getConfig.queryOptions());
+  const { data: config } = useQuery(
+    orpc.blob.getConfig.queryOptions({
+      input: {},
+    }),
+  );
 
   const isEnabled = Boolean(config?.enabled);
   const uploadTiming = config?.constraints?.uploadTiming ?? "onSubmit";

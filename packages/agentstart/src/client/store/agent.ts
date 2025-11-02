@@ -16,6 +16,7 @@ import { create, type StoreApi, type UseBoundStore } from "zustand";
 import { devtools } from "zustand/middleware";
 import { useShallow } from "zustand/shallow";
 import type { AgentStartDataPart } from "@/agent";
+import { useStoreRegistry } from "../provider";
 import type { BlobFileList } from "../use-blob-files";
 
 export type ThreadDraft =
@@ -64,12 +65,6 @@ export interface AgentStoreWithSync<TMessage extends UIMessage = UIMessage>
   extends AgentStore<TMessage> {
   _syncState: (newState: Partial<AgentStore<TMessage>>) => void;
 }
-
-// Store instances map (using any for simplicity due to generic constraints)
-const storeInstances = new Map<
-  string,
-  UseBoundStore<StoreApi<AgentStoreWithSync<any>>>
->();
 
 function createAgentStore<TMessage extends UIMessage = UIMessage>() {
   return create<AgentStoreWithSync<TMessage>>()(
@@ -246,6 +241,7 @@ function createAgentStore<TMessage extends UIMessage = UIMessage>() {
 }
 
 export function getAgentStore<TMessage extends UIMessage = UIMessage>(
+  storeInstances: Map<string, UseBoundStore<StoreApi<AgentStoreWithSync<any>>>>,
   storeId: string = "default",
 ) {
   if (!storeInstances.has(storeId)) {
@@ -261,6 +257,7 @@ export function useAgentStore<
   selector: (state: AgentStore<TMessage>) => T,
   storeId: string = "default",
 ): T {
-  const useStore = getAgentStore(storeId);
+  const storeInstances = useStoreRegistry();
+  const useStore = getAgentStore<TMessage>(storeInstances, storeId);
   return useStore(useShallow(selector));
 }

@@ -17,7 +17,7 @@ npx shadcn@latest add provider --registry=@agentstart
 
 ```tsx
 import { createAgentClient } from "agentstart/client";
-import { AgentStartProvider } from "@/components/agent/provider";
+import { AgentStartProvider } from "agentstart/client";
 
 const { client } = createAgentClient();
 
@@ -55,7 +55,7 @@ export default function App({ children }: { children: React.ReactNode }) {
 
 ```tsx title="app/layout.tsx"
 import { createAgentClient } from "agentstart/client";
-import { AgentStartProvider } from "@/components/agent/provider";
+import { AgentStartProvider } from "agentstart/client";
 
 const { client } = createAgentClient();
 
@@ -86,7 +86,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import { createAgentClient } from "agentstart/client";
-import { AgentStartProvider } from "@/components/agent/provider";
+import { AgentStartProvider } from "agentstart/client";
 
 const { client } = createAgentClient();
 
@@ -109,7 +109,7 @@ export default function App({ Component, pageProps }: AppProps) {
 ```tsx title="src/App.tsx"
 import { useNavigate } from "react-router-dom";
 import { createAgentClient } from "agentstart/client";
-import { AgentStartProvider } from "@/components/agent/provider";
+import { AgentStartProvider } from "agentstart/client";
 
 const { client } = createAgentClient();
 
@@ -132,7 +132,7 @@ export default function App({ children }: { children: React.ReactNode }) {
 Use the `useAgentStartContext` hook to access the client in child components:
 
 ```tsx
-import { useAgentStartContext } from "@/components/agent/provider";
+import { useAgentStartContext } from "agentstart/client";
 
 export function MyComponent() {
   const { client, orpc, navigate } = useAgentStartContext();
@@ -196,7 +196,7 @@ function GoodComponent() {
 The provider is fully typed:
 
 ```tsx
-import type { AgentStartProviderProps } from "@/components/agent/provider";
+import type { AgentStartProviderProps } from "agentstart/client";
 
 const props: AgentStartProviderProps = {
   client,

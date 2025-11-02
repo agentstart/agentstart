@@ -12,10 +12,12 @@ FEATURES:
 SEARCHABLE: mock client, demo utilities, orpc mock, blob mock
 agent-frontmatter:end */
 
+import type { AgentStartUIMessage } from "agentstart/agent";
 import type { AgentStartAPI } from "agentstart/api";
+import type { DBThread } from "agentstart/memory";
 
 // Mock data matching DBThread schema
-const mockThreads = [
+const mockThreads: Array<DBThread> = [
   {
     id: "thread-1",
     userId: "demo-user",
@@ -37,7 +39,7 @@ const mockThreads = [
 ];
 
 // Mock data matching AgentStartUIMessage type
-const mockMessages = [
+const mockMessages: AgentStartUIMessage[] = [
   {
     id: "msg-1",
     role: "user" as const,
@@ -47,7 +49,6 @@ const mockMessages = [
         text: "Help me create a React component",
       },
     ],
-    createdAt: new Date(),
   },
   {
     id: "msg-2",
@@ -58,7 +59,6 @@ const mockMessages = [
         text: "Sure! I can help you create a React component. What kind of component would you like?",
       },
     ],
-    createdAt: new Date(),
   },
 ];
 

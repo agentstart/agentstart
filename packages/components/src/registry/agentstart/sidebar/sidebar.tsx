@@ -20,6 +20,7 @@ import {
   WarningCircleIcon,
 } from "@phosphor-icons/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useAgentStartContext } from "agentstart/client";
 import type { DBThread } from "agentstart/memory";
 import { type ReactNode, useMemo } from "react";
 import { Button } from "@/components/ui/button";
@@ -45,7 +46,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { useAgentStartContext } from "../provider";
 import { SidebarContent } from "./sidebar-content";
 import { SidebarFooter } from "./sidebar-footer";
 import { SidebarHeader } from "./sidebar-header";

@@ -68,7 +68,7 @@ npx shadcn@latest add prompt-input --registry=@agentstart
 
 ```tsx title="app/layout.tsx"
 import { createAgentClient } from "agentstart/client";
-import { AgentStartProvider } from "@/components/agent/provider";
+import { AgentStartProvider } from "agentstart/client";
 
 const { client } = createAgentClient();
 
@@ -130,7 +130,7 @@ Here's a full example combining all major components:
 "use client";
 
 import { createAgentClient } from "agentstart/client";
-import { AgentStartProvider } from "@/components/agent/provider";
+import { AgentStartProvider } from "agentstart/client";
 import { Sidebar } from "@/components/agent/sidebar";
 import { Conversation } from "@/components/agent/conversation";
 import { PromptInput } from "@/components/agent/prompt-input";

@@ -33,7 +33,12 @@ import type {
   BlobFileList,
   QueuedAgentMessage,
 } from "agentstart/client";
-import { useAgentStore, useBlobFiles, useDataPart } from "agentstart/client";
+import {
+  useAgentStartContext,
+  useAgentStore,
+  useBlobFiles,
+  useDataPart,
+} from "agentstart/client";
 import { type FileUIPart, isFileUIPart } from "ai";
 import { nanoid } from "nanoid";
 import {
@@ -73,7 +78,6 @@ import {
   ContextReasoningUsage,
   ContextTrigger,
 } from "./context";
-import { useAgentStartContext } from "./provider";
 import {
   Queue,
   QueueItem,

@@ -30,7 +30,13 @@ interface ThreadStore {
   upsertThread: (thread: DBThread) => void;
   removeThread: (threadId: string) => void;
 
-  ensureAgentStore: (threadId: string) => AgentStoreInstance;
+  ensureAgentStore: (
+    storeInstances: Map<
+      string,
+      UseBoundStore<StoreApi<AgentStoreWithSync<any>>>
+    >,
+    threadId: string,
+  ) => AgentStoreInstance;
 
   getThread: (threadId: string) => DBThread | undefined;
   getAllThreads: () => DBThread[];
@@ -77,8 +83,8 @@ export const useThreadStore = create<ThreadStore>()(
       });
     },
 
-    ensureAgentStore: (threadId) =>
-      getAgentStore<AgentStartUIMessage>(threadId),
+    ensureAgentStore: (storeInstances, threadId) =>
+      getAgentStore<AgentStartUIMessage>(storeInstances, threadId),
 
     getThread: (threadId) => get().threads.get(threadId),
 

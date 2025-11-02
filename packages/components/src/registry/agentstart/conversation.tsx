@@ -21,7 +21,11 @@ import {
 } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import type { AgentStartUIMessage } from "agentstart/agent";
-import { type AgentStore, useAgentStore } from "agentstart/client";
+import {
+  type AgentStore,
+  useAgentStartContext,
+  useAgentStore,
+} from "agentstart/client";
 import { format, formatDistanceToNow } from "date-fns";
 import type { ComponentProps, ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -38,7 +42,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { Message, MessageContent } from "./message";
-import { useAgentStartContext } from "./provider";
 import { Response } from "./response";
 import { StatusIndicators } from "./shimmer";
 import { Source, Sources, SourcesContent, SourcesTrigger } from "./sources";
@@ -90,6 +93,78 @@ const copyMessageText = (message: AgentStartUIMessage): void => {
   if (!text) return;
   void navigator.clipboard.writeText(text);
 };
+
+// Internal hook: Safe store access with fallback when useThread is not used
+type SetMessagesFn = (
+  messages:
+    | AgentStartUIMessage[]
+    | ((prev: AgentStartUIMessage[]) => AgentStartUIMessage[]),
+) => void;
+
+interface UseSafeStoreReturn {
+  messages: AgentStartUIMessage[];
+  safeSetMessages: SetMessagesFn;
+  isUsingThread: boolean;
+}
+
+/**
+ * Hook that provides safe access to agent store with fallback when useThread is not used.
+ * This hook detects whether useThread has been initialized by checking if store.id is set.
+ * If useThread is active, it uses the official setMessages. Otherwise, it falls back to
+ * using _syncState to update the store directly.
+ */
+function useSafeStore(storeId: string = "default"): UseSafeStoreReturn {
+  // Get current messages
+  const messages = useAgentStore<AgentStartUIMessage, AgentStartUIMessage[]>(
+    (state) => state.messages,
+    storeId,
+  );
+
+  // Get setMessages (will be no-op if useThread is not used)
+  const setMessages = useAgentStore<
+    AgentStartUIMessage,
+    AgentStore<AgentStartUIMessage>["setMessages"]
+  >((state) => state.setMessages, storeId);
+
+  // Get store.id to detect if useThread is active
+  const threadStoreId = useAgentStore<AgentStartUIMessage, string>(
+    (state) => state.id,
+    storeId,
+  );
+
+  // Get _syncState as fallback mechanism
+  const _syncState = useAgentStore<
+    AgentStartUIMessage,
+    ((newState: Partial<AgentStore<AgentStartUIMessage>>) => void) | undefined
+  >((state) => (state as any)._syncState, storeId);
+
+  // Check if useThread has been used (store.id will be set by useThread)
+  const isUsingThread = Boolean(threadStoreId);
+
+  // Create safe setMessages that works with or without useThread
+  const safeSetMessages = useCallback<SetMessagesFn>(
+    (newMessages) => {
+      if (isUsingThread) {
+        // useThread is active, use the official setMessages
+        setMessages(newMessages);
+      } else if (_syncState) {
+        // No useThread, use _syncState to update the store directly
+        const resolvedMessages =
+          typeof newMessages === "function"
+            ? newMessages(messages)
+            : newMessages;
+        _syncState({ messages: resolvedMessages });
+      }
+    },
+    [isUsingThread, setMessages, _syncState, messages],
+  );
+
+  return {
+    messages,
+    safeSetMessages,
+    isUsingThread,
+  };
+}
 
 type RelativeTimeProps = {
   timestamp?: number | Date;
@@ -297,10 +372,9 @@ export function Conversation({
 
   const resolvedStoreId = threadId ?? "default";
 
-  const messages = useAgentStore<AgentStartUIMessage, AgentStartUIMessage[]>(
-    (state) => state.messages,
-    resolvedStoreId,
-  );
+  // Use safe store hook that handles both with and without useThread
+  const { messages, safeSetMessages } = useSafeStore(resolvedStoreId);
+
   const status = useAgentStore<AgentStartUIMessage, UIAgentStore["status"]>(
     (state) => state.status,
     resolvedStoreId,
@@ -309,10 +383,6 @@ export function Conversation({
     (state) => state.error,
     resolvedStoreId,
   );
-  const setMessages = useAgentStore<
-    AgentStartUIMessage,
-    UIAgentStore["setMessages"]
-  >((state) => state.setMessages, resolvedStoreId);
   const regenerate = useAgentStore<
     AgentStartUIMessage,
     UIAgentStore["regenerate"]
@@ -349,7 +419,7 @@ export function Conversation({
     // If no threadId is provided, clear messages
     if (!threadId) {
       if (messages.length > 0) {
-        setMessages([]);
+        safeSetMessages([]);
       }
       return;
     }
@@ -365,8 +435,8 @@ export function Conversation({
     }
 
     // Set the fetched messages into the store
-    setMessages(fetchedMessages);
-  }, [fetchedMessages, messages, setMessages, threadId]);
+    safeSetMessages(fetchedMessages);
+  }, [fetchedMessages, messages, safeSetMessages, threadId]);
 
   const renderAssistantMessage = useCallback(
     (message: AgentStartUIMessage, isLastMessage: boolean) => {
