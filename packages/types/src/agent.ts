@@ -47,4 +47,9 @@ export type AgentCallParameters<CALL_OPTIONS> = ([CALL_OPTIONS] extends [never]
          */
         prompt?: never;
       }
-  );
+  ) & {
+    /**
+     * An optional abort signal that can be used to cancel an ongoing agent call.
+     */
+    abortSignal?: AbortSignal;
+  };

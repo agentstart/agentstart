@@ -10,7 +10,7 @@ FEATURES:
 SEARCHABLE: sandbox api, lifecycle typing, sandbox contracts
 agent-frontmatter:end */
 
-import type { SandboxBaseOptions } from "../options";
+import type { AgentStartOptions, SandboxBaseOptions } from "../options";
 import type { BashAPI } from "./bash";
 import type { FileSystemAPI } from "./file-system";
 import type { GitAPI } from "./git";
@@ -142,3 +142,11 @@ export interface SandboxAPI {
  * Implementations typically surface static helpers (e.g., connectOrCreate, forceCreate);
  * callers should consult concrete classes for those factories.
  */
+
+/**
+ * Factory function that creates a SandboxAPI instance.
+ * Receives AgentStartOptions and returns a SandboxAPI (sync or async).
+ */
+export type SandboxAdapterFactory = (
+  options: AgentStartOptions,
+) => Promise<SandboxAPI> | SandboxAPI;

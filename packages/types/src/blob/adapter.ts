@@ -20,7 +20,8 @@ import type {
   PutCommandOptions,
   UploadPartCommandOptions,
 } from "@vercel/blob";
-import type { BlobConstraints, BlobOptions, BlobProvider } from "./provider";
+import type { AgentStartOptions } from "../options";
+import type { BlobConstraints, BlobProvider } from "./provider";
 
 /**
  * Base options shared by all blob commands
@@ -67,6 +68,10 @@ export interface BlobAdapter {
   ): Promise<PutBlobResult>;
 }
 
+/**
+ * Factory function that creates a BlobAdapter instance.
+ * Receives AgentStartOptions and returns a BlobAdapter (sync or async).
+ */
 export type BlobAdapterFactory = (
-  options: BlobOptions,
+  options: AgentStartOptions,
 ) => Promise<BlobAdapter> | BlobAdapter;

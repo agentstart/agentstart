@@ -9,12 +9,12 @@ FEATURES:
 SEARCHABLE: packages, agentstart, src, sandbox, adapter, nodejs, tests, file, system, test, vitest
 agent-frontmatter:end */
 
-import * as fs from "node:fs/promises";
-import * as os from "node:os";
+import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import type { Dirent } from "@agentstart/types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { FileSystem } from "@/sandbox/adapter/nodejs/file-system";
+import { FileSystem } from "../../../adapter/nodejs/file-system";
 
 describe("FileSystem", () => {
   let fileSystem: FileSystem;

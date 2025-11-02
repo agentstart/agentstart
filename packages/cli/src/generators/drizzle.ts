@@ -93,6 +93,19 @@ export const generateDrizzleSchema: SchemaGenerator = async ({
         useToken("timestamp");
         return `timestamp('${dbName}')`;
       }
+      case "json": {
+        if (databaseType === "postgresql") {
+          useToken("jsonb");
+          return `jsonb('${dbName}')`;
+        }
+        if (databaseType === "mysql") {
+          useToken("json");
+          return `json('${dbName}')`;
+        }
+        // SQLite doesn't have native JSON type, use text
+        useToken("text");
+        return `text('${dbName}')`;
+      }
       default: {
         if (field.type === "string[]") {
           useToken("text");
@@ -147,7 +160,7 @@ export const generateDrizzleSchema: SchemaGenerator = async ({
       .filter(Boolean) as string[];
 
     const schemaLines = [
-      `export const ${modelName} = ${databaseType}Table("${convertToSnakeCase(
+      `export const ${modelName} = ${tokenPrefix}Table("${convertToSnakeCase(
         modelName,
       )}", {`,
       `  id: ${idLine},`,

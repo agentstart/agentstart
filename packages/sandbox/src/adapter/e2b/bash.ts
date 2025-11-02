@@ -19,7 +19,7 @@ import type {
   ShellCommandResult,
 } from "@agentstart/types";
 import type { Sandbox } from "@e2b/code-interpreter";
-import { interpolateTemplate } from "@/sandbox/utils/text";
+import { interpolateTemplate } from "../../utils/text";
 import { DEFAULT_WORKING_DIRECTORY } from "./constants";
 
 /**

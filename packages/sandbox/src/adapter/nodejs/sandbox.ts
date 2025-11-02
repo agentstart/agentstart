@@ -10,6 +10,7 @@ FEATURES:
 SEARCHABLE: nodejs sandbox, local sandbox implementation, adapter lifecycle
 agent-frontmatter:end */
 
+import path from "node:path";
 import type {
   BashAPI,
   FileSystemAPI,
@@ -18,7 +19,6 @@ import type {
   SandboxAPI,
   SandboxStatus,
 } from "@agentstart/types";
-
 import { Bash } from "./bash";
 import { FileSystem } from "./file-system";
 import { Git } from "./git";
@@ -70,7 +70,8 @@ export class NodeSandbox implements SandboxAPI {
   constructor(sandboxId: string, config?: NodeJSSandboxConfig) {
     this.sandboxId = sandboxId;
     this.config = { ...NodeSandbox.DEFAULT_CONFIG, ...config };
-    this.workingDirectory = this.config.workspacePath ?? process.cwd();
+    this.workingDirectory =
+      this.config.workspacePath ?? path.resolve(process.cwd(), ".agentstart");
 
     // Initialize tools (Node.js doesn't need a real sandbox)
     this.fs = new FileSystem(this.workingDirectory);

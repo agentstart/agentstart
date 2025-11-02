@@ -26,6 +26,7 @@ agent-frontmatter:end */
 
 import type {
   AgentStartOptions,
+  FieldAttribute,
   MemoryAdapter,
   Where,
 } from "@agentstart/types";
@@ -89,6 +90,31 @@ const createTransform = (
   }
 
   const useDatabaseGeneratedId = options?.advanced?.generateId === false;
+
+  const normalizeJsonForWrite = (
+    value: unknown,
+    fieldAttr: FieldAttribute | undefined,
+  ) => {
+    if (
+      !fieldAttr ||
+      fieldAttr.type !== "json" ||
+      value === undefined ||
+      value === null
+    ) {
+      return value;
+    }
+    // Ensure JSON values are properly serialized for all Prisma providers
+    // Prisma usually handles this automatically, but we normalize for consistency
+    if (typeof value !== "string" && typeof value === "object") {
+      try {
+        return JSON.stringify(value);
+      } catch {
+        return value;
+      }
+    }
+    return value;
+  };
+
   return {
     transformInput(
       data: Record<string, any>,
@@ -128,8 +154,9 @@ const createTransform = (
         ) {
           continue;
         }
+        const normalizedValue = normalizeJsonForWrite(value, fieldAttr);
         transformedData[fieldAttr.fieldName || field] = withApplyDefault(
-          value,
+          normalizedValue,
           fieldAttr,
           action,
         );

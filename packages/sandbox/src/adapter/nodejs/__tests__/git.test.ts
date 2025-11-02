@@ -9,12 +9,11 @@ FEATURES:
 SEARCHABLE: packages, agentstart, src, sandbox, adapter, nodejs, tests, git, test, vitest
 agent-frontmatter:end */
 
-import * as fs from "node:fs/promises";
-import * as os from "node:os";
+import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-
-import { Git } from "@/sandbox/adapter/nodejs/git";
+import { Git } from "../../../adapter/nodejs/git";
 
 describe("Git", () => {
   let git: Git;

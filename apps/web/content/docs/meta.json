@@ -10,6 +10,7 @@
     "concepts/client",
     "concepts/cli",
     "concepts/database",
+    "concepts/sandbox",
     "concepts/blob-storage",
     "concepts/typescript",
     "concepts/tools",

@@ -11,35 +11,30 @@ AgentStart ships with first-class blob storage support so your agents can accept
 
 ## Enabling Blob Storage
 
-Configure blob storage when you call `agentStart`. The `blob` option mirrors the ergonomics of the memory adapters and surfaces provider credentials plus shared constraints.
+Configure blob storage using adapter factories when you call `agentStart`. The adapter pattern provides a clean, type-safe interface for different storage providers.
 
 ```ts title="lib/agent.ts"
 import { agentStart } from "agentstart";
-import type { BlobOptions } from "agentstart/blob";
-
-const blob: BlobOptions = {
-  provider: {
-    provider: "vercelBlob",
-    token: process.env.BLOB_READ_WRITE_TOKEN!,
-  },
-  constraints: {
-    maxFileSize: 10 * 1024 * 1024, // 10 MB
-    allowedMimeTypes: [
-      "image/jpeg",
-      "image/png",
-      "application/pdf",
-      "text/plain",
-      "text/markdown",
-    ],
-    maxFiles: 5,
-  },
-  uploadTiming: "onSubmit", // or "immediate"
-};
+import { vercelBlobAdapter } from "agentstart/blob";
 
 export const start = agentStart({
   agent,
   memory,
-  blob,
+  blob: vercelBlobAdapter({
+    token: process.env.BLOB_READ_WRITE_TOKEN!,
+    constraints: {
+      maxFileSize: 10 * 1024 * 1024, // 10 MB
+      allowedMimeTypes: [
+        "image/jpeg",
+        "image/png",
+        "application/pdf",
+        "text/plain",
+        "text/markdown",
+      ],
+      maxFiles: 5,
+      uploadTiming: "onSubmit", // or "immediate"
+    },
+  }),
 });
 ```
 
@@ -47,22 +42,26 @@ Every request handler can read the resolved adapter through the ORPC context, so
 
 ## Provider Configuration
 
-AgentStart includes adapters for Vercel Blob, AWS S3 compatible services, and Cloudflare R2. Each adapter exposes the same API surface (`put`, `head`, `list`, multipart helpers) so downstream consumers can stay provider-agnostic.
+AgentStart includes adapter factories for Vercel Blob, AWS S3, and Cloudflare R2. Each adapter exposes the same API surface (`put`, `head`, `list`, multipart helpers) so downstream consumers can stay provider-agnostic.
 
 ### Vercel Blob
 
 ```ts title="lib/agent.ts"
-const blob: BlobOptions = {
-  provider: {
-    provider: "vercelBlob",
+import { vercelBlobAdapter } from "agentstart/blob";
+
+export const start = agentStart({
+  agent,
+  memory,
+  blob: vercelBlobAdapter({
     token: process.env.BLOB_READ_WRITE_TOKEN!,
-  },
-  constraints: {
-    maxFileSize: 10 * 1024 * 1024,
-    allowedMimeTypes: ["image/*", "application/pdf"],
-    maxFiles: 5,
-  },
-};
+    constraints: {
+      maxFileSize: 10 * 1024 * 1024, // 10 MB
+      allowedMimeTypes: ["image/*", "application/pdf"],
+      maxFiles: 5,
+      uploadTiming: "onSubmit",
+    },
+  }),
+});
 ```
 
 Environment variables:
@@ -71,12 +70,15 @@ Environment variables:
 BLOB_READ_WRITE_TOKEN=vercel_blob_rw_...
 ```
 
-### AWS S3 and Compatible Providers
+### AWS S3
 
 ```ts title="lib/agent.ts"
-const blob: BlobOptions = {
-  provider: {
-    provider: "awsS3",
+import { s3BlobAdapter } from "agentstart/blob";
+
+export const start = agentStart({
+  agent,
+  memory,
+  blob: s3BlobAdapter({
     credentials: {
       accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
@@ -84,12 +86,12 @@ const blob: BlobOptions = {
     bucket: process.env.AWS_S3_BUCKET!,
     region: "us-east-1",
     endpoint: process.env.AWS_S3_ENDPOINT, // optional override
-  },
-  constraints: {
-    maxFileSize: 50 * 1024 * 1024,
-    allowedMimeTypes: ["image/*", "application/pdf"],
-  },
-};
+    constraints: {
+      maxFileSize: 50 * 1024 * 1024, // 50 MB
+      allowedMimeTypes: ["image/*", "application/pdf"],
+    },
+  }),
+});
 ```
 
 Environment variables:
@@ -104,9 +106,12 @@ AWS_S3_ENDPOINT=https://s3.us-east-1.amazonaws.com # optional
 ### Cloudflare R2
 
 ```ts title="lib/agent.ts"
-const blob: BlobOptions = {
-  provider: {
-    provider: "cloudflareR2",
+import { r2BlobAdapter } from "agentstart/blob";
+
+export const start = agentStart({
+  agent,
+  memory,
+  blob: r2BlobAdapter({
     credentials: {
       accessKeyId: process.env.R2_ACCESS_KEY_ID!,
       secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
@@ -114,12 +119,13 @@ const blob: BlobOptions = {
     bucket: process.env.R2_BUCKET!,
     accountId: process.env.R2_ACCOUNT_ID!,
     endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  },
-  constraints: {
-    maxFileSize: 100 * 1024 * 1024,
-    allowedMimeTypes: ["image/*", "application/pdf", "text/plain"],
-  },
-};
+    constraints: {
+      maxFileSize: 100 * 1024 * 1024, // 100 MB
+      allowedMimeTypes: ["image/*", "application/pdf", "text/plain"],
+      uploadTiming: "immediate",
+    },
+  }),
+});
 ```
 
 Environment variables:

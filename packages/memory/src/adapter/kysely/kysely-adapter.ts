@@ -83,7 +83,14 @@ const createTransform = (
     }
     const isJsonField = f.type === "json";
     if (value !== null && value !== undefined && isJsonField) {
-      if (type === "sqlite" || type === "mssql" || type === "mysql") {
+      // For all database types, ensure JSON values are properly serialized when they are objects
+      if (typeof value === "object" && !Buffer.isBuffer(value)) {
+        if (type === "postgres") {
+          // PostgreSQL can handle objects directly via pg driver, but we need to ensure
+          // it's a plain object, not already stringified
+          return value;
+        }
+        // For other databases (SQLite, MSSQL, MySQL), always stringify
         return JSON.stringify(value);
       }
       return value;

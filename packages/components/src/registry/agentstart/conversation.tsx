@@ -318,7 +318,7 @@ const CopyButton = ({
   return (
     <Button onClick={handleClick} disabled={disabled || isCopied} {...props}>
       {isCopied ? (
-        <CheckIcon className="size-4" weight="duotone" />
+        <CheckIcon className="size-4" weight="bold" />
       ) : (
         <CopyIcon className="size-4" weight="duotone" />
       )}

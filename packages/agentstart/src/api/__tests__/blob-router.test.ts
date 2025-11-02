@@ -4,22 +4,15 @@ PURPOSE: Validate blob.getConfig and blob.upload behaviours with mocked adapters
 USAGE: Run with vitest to exercise constraint handling and error branches
 EXPORTS: none
 FEATURES:
-  - Mocks adapter resolution per provider
+  - Mocks adapter instances directly in context
   - Covers constraint failures (size, MIME type) and missing configuration
   - Confirms successful uploads invoke adapter.put with expected payload
 SEARCHABLE: blob router test, upload constraints test, getConfig test
 agent-frontmatter:end */
 
-import { createBlobAdapter } from "@agentstart/blob";
-import type { BlobAdapter, BlobOptions } from "@agentstart/types";
+import type { BlobAdapter } from "@agentstart/types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createBlobRouter } from "../routers/blob";
-
-vi.mock("@agentstart/blob", () => ({
-  createBlobAdapter: vi.fn(),
-}));
-
-const mockCreateBlobAdapter = vi.mocked(createBlobAdapter);
 
 function thrower(name: string) {
   return ({ message }: { message?: string }) => {
@@ -39,6 +32,12 @@ function createTestProcedure() {
   };
 
   return {
+    meta() {
+      return this;
+    },
+    output() {
+      return this;
+    },
     handler(resolver: any) {
       return async (args: any) =>
         resolver({
@@ -87,10 +86,9 @@ describe("blob router", () => {
         constraints: null,
         provider: null,
       });
-      expect(mockCreateBlobAdapter).not.toHaveBeenCalled();
     });
 
-    it("returns provider info and constraints when adapter resolves", async () => {
+    it("returns provider info and constraints when adapter is provided", async () => {
       const adapter = createAdapter({
         getConstraints: vi.fn().mockReturnValue({
           maxFileSize: 1024,
@@ -99,11 +97,10 @@ describe("blob router", () => {
         }),
         provider: "awsS3",
       });
-      mockCreateBlobAdapter.mockResolvedValue(adapter);
 
       const result = await router.getConfig({
         context: {
-          blob: { provider: { provider: "awsS3" } } as BlobOptions,
+          blob: adapter,
         },
       });
 
@@ -139,27 +136,6 @@ describe("blob router", () => {
       ).rejects.toThrowError("Blob storage is not configured");
     });
 
-    it("throws when adapter initialization fails", async () => {
-      mockCreateBlobAdapter.mockResolvedValue(null);
-
-      await expect(
-        router.upload({
-          context: {
-            blob: { provider: { provider: "vercelBlob" } } as BlobOptions,
-          },
-          input: {
-            files: [
-              {
-                name: "file.txt",
-                data: base64("hello"),
-                type: "text/plain",
-              },
-            ],
-          },
-        }),
-      ).rejects.toThrowError("Failed to initialize blob adapter");
-    });
-
     it("rejects files exceeding configured max size", async () => {
       const adapter = createAdapter({
         getConstraints: vi.fn().mockReturnValue({
@@ -167,12 +143,11 @@ describe("blob router", () => {
           allowedMimeTypes: ["text/plain"],
         }),
       });
-      mockCreateBlobAdapter.mockResolvedValue(adapter);
 
       await expect(
         router.upload({
           context: {
-            blob: { provider: { provider: "vercelBlob" } } as BlobOptions,
+            blob: adapter,
           },
           input: {
             files: [
@@ -195,12 +170,11 @@ describe("blob router", () => {
           allowedMimeTypes: ["text/plain"],
         }),
       });
-      mockCreateBlobAdapter.mockResolvedValue(adapter);
 
       await expect(
         router.upload({
           context: {
-            blob: { provider: { provider: "vercelBlob" } } as BlobOptions,
+            blob: adapter,
           },
           input: {
             files: [
@@ -215,27 +189,6 @@ describe("blob router", () => {
       ).rejects.toThrowError(
         'File "image.png" type "image/png" is not allowed. Allowed types: text/plain',
       );
-    });
-
-    it("propagates adapter authentication errors", async () => {
-      mockCreateBlobAdapter.mockRejectedValue(new Error("Missing credentials"));
-
-      await expect(
-        router.upload({
-          context: {
-            blob: { provider: { provider: "vercelBlob" } } as BlobOptions,
-          },
-          input: {
-            files: [
-              {
-                name: "file.txt",
-                data: base64("ok"),
-                type: "text/plain",
-              },
-            ],
-          },
-        }),
-      ).rejects.toThrowError("Missing credentials");
     });
 
     it("uploads files when constraints pass", async () => {
@@ -254,11 +207,10 @@ describe("blob router", () => {
           maxFiles: 2,
         }),
       });
-      mockCreateBlobAdapter.mockResolvedValue(adapter);
 
       const result = await router.upload({
         context: {
-          blob: { provider: { provider: "vercelBlob" } } as BlobOptions,
+          blob: adapter,
         },
         input: {
           files: [

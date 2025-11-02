@@ -500,7 +500,7 @@ export function createThreadRouter(procedure = publicProcedure) {
           model: z.string().optional(),
         }),
       )
-      .handler(async ({ input, context, errors }) => {
+      .handler(async ({ input, context, errors, signal }) => {
         try {
           const agent = context.agent;
           if (!agent) {
@@ -546,6 +546,7 @@ export function createThreadRouter(procedure = publicProcedure) {
               console.error("Agent stream error:", error);
               return "An error occurred while processing your request.";
             },
+            abortSignal: signal,
           });
 
           return streamToEventIterator(result);

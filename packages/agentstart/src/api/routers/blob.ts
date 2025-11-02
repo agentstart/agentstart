@@ -12,7 +12,7 @@ FEATURES:
 SEARCHABLE: blob router, blob config, upload constraints api, file upload
 agent-frontmatter:end */
 
-import { createBlobAdapter } from "@agentstart/blob";
+import { getBlob } from "@agentstart/blob";
 import { z } from "zod";
 import { publicProcedure } from "@/api/procedures";
 
@@ -68,15 +68,7 @@ export function createBlobRouter(procedure = publicProcedure) {
       )
       .handler(async ({ context, errors }) => {
         try {
-          if (!context.blob) {
-            return {
-              enabled: false,
-              constraints: null,
-              provider: null,
-            };
-          }
-
-          const adapter = await createBlobAdapter(context.blob);
+          const adapter = await getBlob(context);
           if (!adapter) {
             return {
               enabled: false,
@@ -128,16 +120,10 @@ export function createBlobRouter(procedure = publicProcedure) {
       )
       .handler(async ({ input, context, errors }) => {
         try {
-          if (!context.blob) {
+          const adapter = await getBlob(context);
+          if (!adapter) {
             throw errors.FORBIDDEN({
               message: "Blob storage is not configured",
-            });
-          }
-
-          const adapter = await createBlobAdapter(context.blob);
-          if (!adapter) {
-            throw errors.INTERNAL_SERVER_ERROR({
-              message: "Failed to initialize blob adapter",
             });
           }
 

@@ -74,32 +74,27 @@ Blob storage enables agents to accept multimodal inputs by persisting user file 
 
 ```typescript
 import { agentStart } from "agentstart";
-import type { BlobOptions } from "agentstart/blob";
+import { vercelBlobAdapter } from "agentstart/blob";
 
 // Configure Vercel Blob
-const blobConfig: BlobOptions = {
-  provider: {
-    provider: "vercelBlob",
-    token: process.env.BLOB_READ_WRITE_TOKEN,
-  },
-  constraints: {
-    maxFileSize: 10 * 1024 * 1024, // 10 MB
-    allowedMimeTypes: [
-      "image/jpeg",
-      "image/png",
-      "image/gif",
-      "image/webp",
-      "application/pdf",
-      "text/plain",
-      "text/markdown",
-    ],
-    maxFiles: 5,
-  },
-};
-
 export const start = agentStart({
   memory: /* ... */,
-  blob: blobConfig,
+  blob: vercelBlobAdapter({
+    token: process.env.BLOB_READ_WRITE_TOKEN!,
+    constraints: {
+      maxFileSize: 10 * 1024 * 1024, // 10 MB
+      allowedMimeTypes: [
+        "image/jpeg",
+        "image/png",
+        "image/gif",
+        "image/webp",
+        "application/pdf",
+        "text/plain",
+        "text/markdown",
+      ],
+      maxFiles: 5,
+    },
+  }),
   agent: /* ... */,
 });
 ```
@@ -107,29 +102,34 @@ export const start = agentStart({
 **AWS S3 Configuration:**
 
 ```typescript
-const blobConfig: BlobOptions = {
-  provider: {
-    provider: "awsS3",
+import { s3BlobAdapter } from "agentstart/blob";
+
+export const start = agentStart({
+  memory: /* ... */,
+  blob: s3BlobAdapter({
     credentials: {
       accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
     },
     bucket: process.env.AWS_S3_BUCKET!,
     region: "us-east-1",
-  },
-  constraints: {
-    maxFileSize: 50 * 1024 * 1024, // 50 MB
-    allowedMimeTypes: ["image/*", "application/pdf"],
-  },
-};
+    constraints: {
+      maxFileSize: 50 * 1024 * 1024, // 50 MB
+      allowedMimeTypes: ["image/*", "application/pdf"],
+    },
+  }),
+  agent: /* ... */,
+});
 ```
 
 **Cloudflare R2 Configuration:**
 
 ```typescript
-const blobConfig: BlobOptions = {
-  provider: {
-    provider: "cloudflareR2",
+import { r2BlobAdapter } from "agentstart/blob";
+
+export const start = agentStart({
+  memory: /* ... */,
+  blob: r2BlobAdapter({
     credentials: {
       accessKeyId: process.env.R2_ACCESS_KEY_ID!,
       secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
@@ -137,11 +137,12 @@ const blobConfig: BlobOptions = {
     bucket: process.env.R2_BUCKET!,
     accountId: process.env.R2_ACCOUNT_ID,
     endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  },
-  constraints: {
-    maxFileSize: 100 * 1024 * 1024, // 100 MB
-  },
-};
+    constraints: {
+      maxFileSize: 100 * 1024 * 1024, // 100 MB
+    },
+  }),
+  agent: /* ... */,
+});
 ```
 
 **Environment Variables:**

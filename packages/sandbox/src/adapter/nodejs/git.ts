@@ -36,7 +36,7 @@ import {
   buildGitSyncCommand,
   extractCommitHash,
   parseGitStatusPorcelain,
-} from "@/sandbox/utils/git";
+} from "../../utils/git";
 
 import { Bash } from "./bash";
 

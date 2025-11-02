@@ -118,6 +118,7 @@ export const getTables = (
         threadId: {
           type: "string",
           required: true,
+          unique: true,
           fieldName: options.todo?.fields?.threadId || "threadId",
           references: {
             model: options.thread?.modelName || "thread",

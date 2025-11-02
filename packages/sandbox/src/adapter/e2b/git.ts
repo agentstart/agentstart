@@ -34,7 +34,7 @@ import {
   buildGitSyncCommand,
   extractCommitHash,
   parseGitStatusPorcelain,
-} from "@/sandbox/utils/git";
+} from "../../utils/git";
 import { Bash } from "./bash";
 import { DEFAULT_WORKING_DIRECTORY } from "./constants";
 

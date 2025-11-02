@@ -60,5 +60,9 @@ dist/
 # next-intl
 *.d.json.ts
 
+# databases
 *.sqlite
 *.db
+
+# generated files
+.agentstart/

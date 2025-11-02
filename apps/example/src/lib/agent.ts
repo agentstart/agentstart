@@ -6,15 +6,20 @@ EXPORTS: start
 FEATURES:
   - Configures OpenRouter model provider with API key
   - Connects Drizzle adapter to the playground database schema
-  - Enables blob storage for file attachments
+  - Enables blob storage for file attachments using adapter pattern
 SEARCHABLE: playground, next, src, lib, agent, bootstrap, openrouter, blob storage
 agent-frontmatter:end */
 
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { onStart, onSuccess, os } from "@orpc/server";
-import type { BlobOptions } from "agentstart";
+import type { Blob } from "agentstart";
 import { agentStart } from "agentstart";
 import { Agent, agentTools, osTools } from "agentstart/agent";
+import {
+  r2BlobAdapter,
+  s3BlobAdapter,
+  vercelBlobAdapter,
+} from "agentstart/blob";
 import { drizzleAdapter } from "agentstart/memory";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
@@ -24,15 +29,12 @@ if (!process.env.MODEL_PROVIDER_API_KEY) {
 }
 
 // Configure blob storage (optional - only enabled if credentials are provided)
-let blobConfig: BlobOptions | undefined;
+let blobAdapter: Blob | undefined;
 
 // Vercel Blob configuration
 if (process.env.BLOB_READ_WRITE_TOKEN) {
-  blobConfig = {
-    provider: {
-      provider: "vercelBlob" as const,
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-    },
+  blobAdapter = vercelBlobAdapter({
+    token: process.env.BLOB_READ_WRITE_TOKEN,
     constraints: {
       maxFileSize: 10 * 1024 * 1024, // 10 MB
       allowedMimeTypes: [
@@ -48,7 +50,7 @@ if (process.env.BLOB_READ_WRITE_TOKEN) {
       uploadTiming: "onSubmit", // Upload when user submits (default)
       // uploadTiming: "immediate", // Uncomment to upload immediately after file selection
     },
-  };
+  });
 }
 // Cloudflare R2 configuration
 else if (
@@ -57,17 +59,14 @@ else if (
   process.env.R2_BUCKET_NAME &&
   process.env.R2_ACCOUNT_ID
 ) {
-  blobConfig = {
-    provider: {
-      provider: "cloudflareR2" as const,
-      credentials: {
-        accessKeyId: process.env.R2_ACCESS_KEY_ID,
-        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-      },
-      bucket: process.env.R2_BUCKET_NAME,
-      accountId: process.env.R2_ACCOUNT_ID,
-      endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  blobAdapter = r2BlobAdapter({
+    credentials: {
+      accessKeyId: process.env.R2_ACCESS_KEY_ID,
+      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
     },
+    bucket: process.env.R2_BUCKET_NAME,
+    accountId: process.env.R2_ACCOUNT_ID,
+    endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
     constraints: {
       maxFileSize: 10 * 1024 * 1024, // 10 MB
       allowedMimeTypes: [
@@ -80,10 +79,9 @@ else if (
         "text/markdown",
       ],
       maxFiles: 5,
-      uploadTiming: "onSubmit", // Upload when user submits (default)
-      // uploadTiming: "immediate", // Uncomment to upload immediately after file selection
+      uploadTiming: "onSubmit",
     },
-  };
+  });
 }
 // AWS S3 configuration
 else if (
@@ -91,16 +89,13 @@ else if (
   process.env.AWS_SECRET_ACCESS_KEY &&
   process.env.AWS_S3_BUCKET
 ) {
-  blobConfig = {
-    provider: {
-      provider: "awsS3" as const,
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      },
-      bucket: process.env.AWS_S3_BUCKET,
-      region: process.env.AWS_REGION ?? "us-east-1",
+  blobAdapter = s3BlobAdapter({
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     },
+    bucket: process.env.AWS_S3_BUCKET,
+    region: process.env.AWS_REGION ?? "us-east-1",
     constraints: {
       maxFileSize: 10 * 1024 * 1024, // 10 MB
       allowedMimeTypes: [
@@ -113,10 +108,9 @@ else if (
         "text/markdown",
       ],
       maxFiles: 5,
-      uploadTiming: "onSubmit", // Upload when user submits (default)
-      // uploadTiming: "immediate", // Uncomment to upload immediately after file selection
+      uploadTiming: "onSubmit",
     },
-  };
+  });
 }
 
 const openrouter = createOpenRouter({
@@ -144,7 +138,7 @@ export const start = agentStart({
     provider: "postgresql",
     schema,
   }),
-  blob: blobConfig,
+  blob: blobAdapter,
   appName: "example-nextjs",
   agent,
   middleware: [

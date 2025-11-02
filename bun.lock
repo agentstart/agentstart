@@ -132,16 +132,14 @@
       "dependencies": {
         "@agentstart/blob": "workspace:*",
         "@agentstart/memory": "workspace:*",
+        "@agentstart/sandbox": "workspace:*",
         "@agentstart/types": "workspace:*",
         "@agentstart/utils": "workspace:*",
         "@ai-sdk/react": "catalog:",
-        "@e2b/code-interpreter": "catalog:",
         "@orpc/client": "catalog:",
         "@orpc/server": "catalog:",
         "@orpc/tanstack-query": "catalog:",
         "@tanstack/react-query": "catalog:",
-        "chokidar": "catalog:",
-        "fast-glob": "catalog:",
         "nanoid": "catalog:",
         "pathe": "catalog:",
         "tokenlens": "catalog:",
@@ -307,6 +305,27 @@
         "@types/better-sqlite3": "catalog:",
         "@types/pg": "catalog:",
         "prisma": "catalog:",
+        "tsdown": "catalog:",
+        "typescript": "catalog:",
+        "vitest": "catalog:",
+      },
+    },
+    "packages/sandbox": {
+      "name": "@agentstart/sandbox",
+      "version": "0.1.0",
+      "dependencies": {
+        "@agentstart/types": "workspace:*",
+        "@agentstart/utils": "workspace:*",
+        "@e2b/code-interpreter": "catalog:",
+        "chokidar": "catalog:",
+        "execa": "catalog:",
+        "fast-glob": "catalog:",
+        "pathe": "catalog:",
+      },
+      "devDependencies": {
+        "@agentstart/biome-config": "workspace:*",
+        "@agentstart/tsconfig": "workspace:*",
+        "@biomejs/biome": "catalog:",
         "tsdown": "catalog:",
         "typescript": "catalog:",
         "vitest": "catalog:",
@@ -514,6 +533,8 @@
     "@agentstart/components": ["@agentstart/components@workspace:packages/components"],
 
     "@agentstart/memory": ["@agentstart/memory@workspace:packages/memory"],
+
+    "@agentstart/sandbox": ["@agentstart/sandbox@workspace:packages/sandbox"],
 
     "@agentstart/tsconfig": ["@agentstart/tsconfig@workspace:tooling/typescript"],
 

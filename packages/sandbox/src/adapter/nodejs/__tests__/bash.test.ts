@@ -9,12 +9,11 @@ FEATURES:
 SEARCHABLE: packages, agentstart, src, sandbox, adapter, nodejs, tests, bash, test, vitest
 agent-frontmatter:end */
 
-import * as fs from "node:fs/promises";
-import * as os from "node:os";
+import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-
-import { Bash } from "@/sandbox/adapter/nodejs/bash";
+import { Bash } from "../../../adapter/nodejs/bash";
 
 describe("Bash", () => {
   let bash: Bash;

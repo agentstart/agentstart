@@ -24,8 +24,9 @@ export function generateId() {
  * @returns A UUID v5 string
  */
 export function generateUuidFromData(data: unknown): string {
-  // Using a custom namespace for this application
-  const NAMESPACE = "agentstart";
+  // Using a custom namespace UUID for this application
+  // This is a valid UUID v4 generated specifically for AgentStart
+  const NAMESPACE = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"; // RFC 4122 DNS namespace UUID
 
   // Serialize the input data to a string
   const serialized = typeof data === "string" ? data : JSON.stringify(data);

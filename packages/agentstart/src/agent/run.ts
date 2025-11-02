@@ -79,6 +79,7 @@ interface StartOptions {
   runtimeContext: Omit<RuntimeContext, "writer">;
   onFinish?: RunOnFinishCallback;
   onError?: (error: unknown) => string;
+  abortSignal?: AbortSignal;
 }
 
 /**
@@ -211,6 +212,7 @@ export class Run {
               memory: options.runtimeContext.memory,
             },
           },
+          abortSignal: options.abortSignal,
         });
 
         const usageMetricsPromise = result.totalUsage

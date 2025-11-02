@@ -2,23 +2,29 @@
 AGENT: Agent options contract
 PURPOSE: Provide the shared Agent Start configuration surface needed across packages without introducing circular dependencies
 USAGE: import type { AgentStartOptions } from "@agentstart/types"
-EXPORTS: AgentStartOptions, AgentAdvancedOptions, AgentGenerateTitleOptions, AgentGenerateSuggestionsOptions, SandboxOptions, SandboxProvider, SandboxBaseOptions
+EXPORTS: AgentStartOptions, AgentAdvancedOptions, AgentGenerateTitleOptions, AgentGenerateSuggestionsOptions, Blob, Sandbox, SandboxBaseOptions
 FEATURES:
   - Encapsulates the option fields required by adapters and runtime helpers
+  - Uses adapter pattern for blob and sandbox configuration
   - Uses generics so runtimes can supply concrete Agent and model types
-SEARCHABLE: agent options, sandbox configuration, advanced options
+SEARCHABLE: agent options, sandbox configuration, blob configuration, advanced options
 agent-frontmatter:end */
 import type { AnyMiddleware } from "@orpc/server";
 import type { Agent, LanguageModel } from "ai";
 import type { CallOptions } from "./agent";
-import type { BlobOptions } from "./blob";
+import type { BlobAdapter, BlobAdapterFactory } from "./blob";
 import type {
   FieldAttribute,
   Memory,
   ModelOptions,
   SecondaryMemory,
 } from "./memory";
+import type { SandboxAdapterFactory, SandboxAPI } from "./sandbox";
 
+/**
+ * Base options shared by all sandbox implementations.
+ * Used internally by sandbox adapters.
+ */
 export interface SandboxBaseOptions {
   sandboxId?: string;
   timeout?: number;
@@ -26,26 +32,38 @@ export interface SandboxBaseOptions {
   secondaryMemory?: SecondaryMemory;
 }
 
-export interface NodeSandboxOptions extends SandboxBaseOptions {
-  provider: "nodejs";
-  workspacePath?: string;
-}
+/**
+ * Blob storage configuration type.
+ * Accepts either a BlobAdapter instance or a BlobAdapterFactory function.
+ *
+ * @example
+ * ```ts
+ * import { vercelBlobAdapter } from "agentstart/blob";
+ *
+ * blob: vercelBlobAdapter({
+ *   token: process.env.BLOB_TOKEN!,
+ *   constraints: { maxFileSize: 10MB },
+ * })
+ * ```
+ */
+export type Blob = BlobAdapter | BlobAdapterFactory;
 
-export interface E2BSandboxOptions extends SandboxBaseOptions {
-  provider: "e2b";
-  apiKey: string;
-  githubToken?: string;
-  ports?: number[];
-  runtime?: string;
-  resources?: {
-    vcpus?: number;
-  };
-  autoStopDelay?: number;
-}
-
-export type SandboxOptions = NodeSandboxOptions | E2BSandboxOptions;
-
-export type SandboxProvider = SandboxOptions["provider"];
+/**
+ * Sandbox configuration type.
+ * Accepts either a SandboxAPI instance or a SandboxAdapterFactory function.
+ *
+ * @example
+ * ```ts
+ * import { nodeSandboxAdapter, e2bSandboxAdapter } from "agentstart/sandbox";
+ *
+ * // Node.js sandbox
+ * sandbox: nodeSandboxAdapter({ workspacePath: "/tmp/agentstart" })
+ *
+ * // E2B sandbox
+ * sandbox: e2bSandboxAdapter({ apiKey: process.env.E2B_API_KEY! })
+ * ```
+ */
+export type Sandbox = SandboxAPI | SandboxAdapterFactory;
 
 export interface AgentGenerateTitleOptions {
   model: LanguageModel;
@@ -138,18 +156,21 @@ export interface AgentStartOptions {
    */
   agent: Agent<CallOptions, any, any>;
   /**
-   * Sandbox configuration controlling code execution providers and limits.
-   * @type {SandboxOptions | undefined}
+   * Sandbox configuration controlling code execution environment.
+   * @type {Sandbox | undefined}
    *
    * @example
    * ```ts
-   * sandbox: {
-   *   provider: "nodejs",
-   *   workspacePath: "/tmp/agentstart",
-   * };
+   * import { nodeSandboxAdapter, e2bSandboxAdapter } from "agentstart/sandbox";
+   *
+   * // Node.js sandbox (local)
+   * sandbox: nodeSandboxAdapter({ workspacePath: "/tmp/agentstart" })
+   *
+   * // E2B sandbox (cloud)
+   * sandbox: e2bSandboxAdapter({ apiKey: process.env.E2B_API_KEY! })
    * ```
    */
-  sandbox?: SandboxOptions;
+  sandbox?: Sandbox;
   /**
    * Extracts a stable user identifier from inbound request headers.
    * @type {((headers: Headers) => string | Promise<string>) | undefined}
@@ -177,9 +198,26 @@ export interface AgentStartOptions {
   advanced?: AgentAdvancedOptions;
   /**
    * Blob storage configuration controlling storage provider selection and constraints.
-   * @type {BlobOptions | undefined}
+   * @type {Blob | undefined}
+   *
+   * @example
+   * ```ts
+   * import { vercelBlobAdapter, s3BlobAdapter } from "agentstart/blob";
+   *
+   * // Vercel Blob
+   * blob: vercelBlobAdapter({
+   *   token: process.env.BLOB_TOKEN!,
+   *   constraints: { maxFileSize: 10MB },
+   * })
+   *
+   * // AWS S3
+   * blob: s3BlobAdapter({
+   *   credentials: { accessKeyId, secretAccessKey },
+   *   bucket: "my-bucket",
+   * })
+   * ```
    */
-  blob?: BlobOptions;
+  blob?: Blob;
   /**
    * Model defaults applied to thread-level reasoning tasks.
    * @type {ModelOptions | undefined}

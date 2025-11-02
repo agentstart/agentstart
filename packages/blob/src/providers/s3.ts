@@ -241,10 +241,10 @@ function createClient(provider: S3LikeProvider) {
   return new S3Client(config);
 }
 
-export async function createS3BlobAdapter(
+export function createS3BlobAdapter(
   blobOptions: BlobOptions,
   provider: S3LikeProvider,
-): Promise<BlobAdapter> {
+): BlobAdapter {
   const constraints: BlobConstraints | undefined = blobOptions.constraints;
   const client = createClient(provider);
 

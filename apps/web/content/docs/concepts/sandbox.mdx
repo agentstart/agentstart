@@ -1,0 +1,398 @@
+---
+title: Sandbox
+description: Configure code execution environments for AgentStart deployments
+---
+
+AgentStart provides first-class sandbox support so your agents can execute code, manage files, and run git operations in isolated environments. The framework supports both local Node.js sandboxes for development and E2B cloud sandboxes for production deployments.
+
+<Callout>
+  Sandbox is optional. If you skip configuration, AgentStart will use a default Node.js sandbox with the current working directory as workspace. For production deployments with code isolation requirements, E2B cloud sandboxes are recommended.
+</Callout>
+
+## Enabling Sandbox
+
+Configure sandbox using adapter factories when you call `agentStart`. The adapter pattern provides a clean, type-safe interface for different sandbox providers.
+
+```ts title="lib/agent.ts"
+import { agentStart } from "agentstart";
+import { nodeSandboxAdapter } from "agentstart/sandbox";
+
+export const start = agentStart({
+  agent,
+  memory,
+  sandbox: nodeSandboxAdapter({
+    workspacePath: "/path/to/project",
+    timeout: 120000, // 2 minutes
+  }),
+});
+```
+
+Every request handler can access the resolved sandbox through the agent context, so tools can execute commands, manage files, and interact with git repositories.
+
+## Provider Configuration
+
+AgentStart includes adapter factories for Node.js (local) and E2B (cloud) sandboxes. Each adapter exposes the same API surface (`fs`, `bash`, `git`) so downstream tools remain provider-agnostic.
+
+### Node.js Sandbox
+
+The Node.js sandbox runs code locally in your Node.js process. This is ideal for development and scenarios where full code isolation is not required.
+
+```ts title="lib/agent.ts"
+import { nodeSandboxAdapter } from "agentstart/sandbox";
+
+export const start = agentStart({
+  agent,
+  memory,
+  sandbox: nodeSandboxAdapter({
+    workspacePath: "/path/to/project",
+    timeout: 120000, // 2 minutes
+    maxLifetime: 3600000, // 1 hour
+  }),
+});
+```
+
+**Configuration Options:**
+
+- `sandboxId` (optional): Unique identifier for reusing sandbox instances
+- `workspacePath` (optional): Local directory for file operations (defaults to current working directory)
+- `timeout` (optional): Command execution timeout in milliseconds (default: 120000)
+- `maxLifetime` (optional): Maximum sandbox lifetime in milliseconds
+
+Environment variables:
+
+```bash title=".env"
+# Node.js sandbox runs locally, no API keys required
+```
+
+### E2B Cloud Sandbox
+
+The E2B sandbox runs code in isolated cloud environments with full system access. This is recommended for production deployments where security and isolation are critical.
+
+```ts title="lib/agent.ts"
+import { e2bSandboxAdapter } from "agentstart/sandbox";
+
+export const start = agentStart({
+  agent,
+  memory,
+  secondaryMemory, // Required for E2B
+  sandbox: e2bSandboxAdapter({
+    apiKey: process.env.E2B_API_KEY!,
+    timeout: 300000, // 5 minutes
+    runtime: "node22",
+    ports: [3000, 8080],
+  }),
+});
+```
+
+**Configuration Options:**
+
+- `apiKey` (required): E2B API key for authentication
+- `sandboxId` (optional): Existing sandbox ID to reconnect (for sandbox reuse)
+- `githubToken` (optional): GitHub personal access token for git operations
+- `timeout` (optional): Command execution timeout in milliseconds (default: 120000)
+- `maxLifetime` (optional): Maximum sandbox lifetime in milliseconds
+- `ports` (optional): Array of ports to expose from the sandbox
+- `runtime` (optional): Runtime environment (e.g., `"node22"`, `"python3.13"`)
+- `resources` (optional): CPU resources configuration
+  - `vcpus` (optional): Number of virtual CPUs
+- `autoStopDelay` (optional): Auto-stop delay in milliseconds after inactivity
+
+**Important:** E2B sandboxes require `secondaryMemory` to be configured for heartbeat tracking and cross-instance sandbox reuse. The secondary memory stores sandbox heartbeat information to determine if a sandbox is still alive across different agent instances.
+
+Environment variables:
+
+```bash title=".env"
+E2B_API_KEY=e2b_...
+GITHUB_TOKEN=ghp_... # Optional, for git operations
+```
+
+## Sandbox APIs
+
+All sandbox providers expose three consistent APIs regardless of implementation:
+
+### File System API (`sandbox.fs`)
+
+Perform file operations within the sandbox workspace:
+
+```ts
+// Read file
+const content = await sandbox.fs.readFile("/path/to/file.ts", {
+  encoding: "utf-8",
+});
+
+// Write file
+await sandbox.fs.writeFile("/path/to/output.json", JSON.stringify(data), {
+  encoding: "utf-8",
+  recursive: true, // Create parent directories
+});
+
+// List directory
+const entries = await sandbox.fs.readdir("/src", {
+  recursive: true,
+  ignores: ["node_modules", ".git"],
+});
+
+// Glob search
+const files = await sandbox.fs.glob("**/*.ts", {
+  cwd: "/src",
+  exclude: ["**/*.test.ts"],
+});
+
+// Check existence
+const exists = await sandbox.fs.exists("/path/to/file");
+
+// Get file stats
+const stats = await sandbox.fs.stat("/path/to/file");
+
+// Create directory
+await sandbox.fs.mkdir("/new/directory", { recursive: true });
+
+// Remove files/directories
+await sandbox.fs.rm("/path/to/remove", {
+  recursive: true,
+  force: true,
+});
+
+// Rename/move
+await sandbox.fs.rename("/old/path", "/new/path");
+
+// Watch for changes
+const watcher = await sandbox.fs.watch(
+  "/src",
+  (event) => {
+    console.log(`${event.type}: ${event.path}`);
+  },
+  {
+    recursive: true,
+    ignore: ["node_modules/**"],
+    debounceMs: 100,
+  }
+);
+```
+
+### Bash API (`sandbox.bash`)
+
+Execute shell commands within the sandbox:
+
+```ts
+// Execute command
+const result = await sandbox.bash`ls -la`;
+console.log(result.stdout);
+console.log(result.exitCode);
+
+// Execute with options
+const result = await sandbox.bash({
+  cwd: "/project",
+  env: { NODE_ENV: "production" },
+  timeout: 60000,
+  onStdout: (data) => console.log("Output:", data),
+  onStderr: (data) => console.error("Error:", data),
+})`npm install`;
+
+// Search with grep
+const results = await sandbox.bash.grep("TODO", {
+  path: "/src",
+  include: "**/*.ts",
+  ignoreCase: true,
+  showLineNumbers: true,
+  recursive: true,
+});
+
+for (const file of results.files) {
+  console.log(`${file.filename} (${file.matchCount} matches)`);
+  for (const match of file.matches || []) {
+    console.log(`  ${match.lineNumber}: ${match.line}`);
+  }
+}
+```
+
+### Git API (`sandbox.git`)
+
+Perform git operations within the sandbox:
+
+```ts
+// Initialize repository
+await sandbox.git.init("/project", {
+  initialBranch: "main",
+});
+
+// Clone repository
+await sandbox.git.clone("https://github.com/user/repo.git", {
+  directory: "/project",
+  branch: "main",
+  depth: 1,
+  auth: {
+    token: process.env.GITHUB_TOKEN,
+  },
+});
+
+// Set authentication token (for E2B)
+await sandbox.git.setAuthToken(process.env.GITHUB_TOKEN);
+
+// Check status
+const status = await sandbox.git.status("/project");
+console.log(`Branch: ${status.branch}`);
+console.log(`Clean: ${status.clean}`);
+console.log(`Modified files: ${status.modified.join(", ")}`);
+
+// Stage files
+await sandbox.git.add(["src/**/*.ts", "package.json"], {
+  force: false,
+});
+
+// Commit changes
+const { hash } = await sandbox.git.commit({
+  message: "feat: add new feature",
+  all: true,
+  author: {
+    name: "Agent",
+    email: "agent@example.com",
+  },
+});
+
+// Push to remote
+await sandbox.git.push({
+  remote: "origin",
+  branch: "main",
+  setUpstream: true,
+});
+
+// Pull from remote
+await sandbox.git.pull({
+  remote: "origin",
+  branch: "main",
+  rebase: true,
+});
+
+// Get commit history
+const commits = await sandbox.git.log({
+  limit: 10,
+  since: "2025-01-01",
+});
+
+for (const commit of commits) {
+  console.log(`${commit.hash}: ${commit.message} (${commit.author})`);
+}
+
+// Create branch
+await sandbox.git.branch("feature-branch", {
+  from: "main",
+});
+
+// Checkout branch
+await sandbox.git.checkout("feature-branch");
+
+// Show diff
+const diff = await sandbox.git.diff({
+  staged: true,
+  nameOnly: false,
+});
+console.log(diff);
+
+// Manage remotes
+await sandbox.git.remote("origin", "https://github.com/user/repo.git", {
+  add: true,
+});
+
+// Stash changes
+await sandbox.git.stash({
+  message: "WIP: work in progress",
+  includeUntracked: true,
+});
+```
+
+## Lifecycle Management
+
+### Sandbox Reuse (E2B)
+
+E2B sandboxes support reuse across agent instances to avoid cold starts:
+
+```ts
+// First request - creates sandbox
+const sandbox = await e2bSandboxAdapter({
+  apiKey: process.env.E2B_API_KEY!,
+  // sandboxId will be auto-generated
+})(options);
+
+const sandboxId = sandbox.getSandboxId();
+// Store sandboxId in database/memory for later reuse
+
+// Later request - reuses existing sandbox
+const sandbox = await e2bSandboxAdapter({
+  apiKey: process.env.E2B_API_KEY!,
+  sandboxId: storedSandboxId, // Reconnects if still alive
+})(options);
+```
+
+The adapter automatically checks if the sandbox is still alive using `secondaryMemory` heartbeat tracking. If the sandbox expired, it creates a new one.
+
+### Sandbox Status
+
+Check sandbox health and activity:
+
+```ts
+const status = await sandbox.getStatus();
+console.log(`Active: ${status.active}`);
+console.log(`Sandbox ID: ${status.sandboxId}`);
+console.log(`Uptime: ${status.uptime}ms`);
+console.log(`Last Activity: ${status.lastActivity}ms ago`);
+console.log(`Reusable: ${status.reusable}`);
+```
+
+### Keep Alive
+
+Refresh the sandbox heartbeat to prevent auto-stop:
+
+```ts
+await sandbox.keepAlive();
+```
+
+### Refresh Sandbox
+
+Restart the sandbox with optional new configuration:
+
+```ts
+await sandbox.refresh({
+  timeout: 600000, // 10 minutes
+});
+```
+
+### Dispose Sandbox
+
+Clean up sandbox resources:
+
+```ts
+await sandbox.dispose();
+```
+
+## Troubleshooting
+
+### Node.js Sandbox
+
+- **File not found errors**: Verify `workspacePath` is correctly set and the path exists
+- **Permission errors**: Ensure the Node.js process has read/write permissions for the workspace directory
+- **Command timeout**: Increase the `timeout` configuration value
+
+### E2B Sandbox
+
+- **Connection errors**: Verify `E2B_API_KEY` is set correctly and the API key is valid
+- **Sandbox not found**: The sandbox may have expired. The adapter will automatically create a new one.
+- **Git authentication failures**: Set `githubToken` in the adapter config or use `sandbox.git.setAuthToken()`
+- **Secondary memory required**: E2B sandboxes require `secondaryMemory` to be configured in `agentStart()` options
+- **Heartbeat tracking**: If sandbox reuse fails, check that `secondaryMemory` is properly configured and the heartbeat TTL matches `timeout` or `autoStopDelay`
+
+### Performance Tips
+
+1. **Reuse sandboxes**: For E2B, store `sandboxId` and reuse across requests to avoid cold starts
+2. **Keep alive**: Use `keepAlive()` during long-running operations to prevent auto-stop
+3. **Choose appropriate timeouts**: Set `timeout` based on your workload (development: 2min, production: 5-10min)
+4. **Use Node.js for development**: Local sandboxes are faster and don't incur cloud costs
+5. **Monitor uptime**: Check `sandbox.getStatus()` to track sandbox health and lifecycle
+
+## Related Guides
+
+<Cards>
+  <Card title="Agent Tools" href="/docs/concepts/agent-tools" />
+  <Card title="Memory Adapters" href="/docs/concepts/database" />
+  <Card title="Environment Setup" href="/docs/getting-started/environment" />
+</Cards>

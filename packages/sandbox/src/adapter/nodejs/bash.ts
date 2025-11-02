@@ -10,7 +10,7 @@ FEATURES:
 SEARCHABLE: nodejs sandbox bash, command runner, grep implementation, shell adapter
 agent-frontmatter:end */
 
-import * as fs from "node:fs/promises";
+import fs from "node:fs/promises";
 import path from "node:path";
 import type {
   BashAPI,
@@ -23,7 +23,7 @@ import type {
 } from "@agentstart/types";
 import { type Options as ExecaOptions, execa } from "execa";
 import glob from "fast-glob";
-import { chunkToString, interpolateTemplate } from "@/sandbox/utils/text";
+import { chunkToString, interpolateTemplate } from "../../utils/text";
 
 /**
  * Node.js implementation of BashAPI

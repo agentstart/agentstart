@@ -112,7 +112,9 @@ const createTransform = (
     ) {
       return value;
     }
-    if (isSqliteProvider && typeof value !== "string") {
+    // Always stringify objects for JSON fields, regardless of provider
+    // This ensures compatibility with all drivers including Neon HTTP client
+    if (typeof value !== "string" && typeof value === "object") {
       try {
         return JSON.stringify(value);
       } catch {
