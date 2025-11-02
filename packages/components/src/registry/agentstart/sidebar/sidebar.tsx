@@ -242,7 +242,9 @@ export function Sidebar({
         <SidebarFooter footer={footer} />
         <SidebarRail />
       </ShadcnSidebar>
-      <SidebarInset className="h-screen bg-background">{children}</SidebarInset>
+      <SidebarInset className="h-screen overflow-hidden bg-background">
+        {children}
+      </SidebarInset>
     </SidebarProvider>
   );
 }
