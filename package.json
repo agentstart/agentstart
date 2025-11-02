@@ -8,7 +8,7 @@
     "clean": "git clean -xdf node_modules",
     "clean:workspaces": "turbo run clean",
     "dev": "turbo dev --filter {./packages/*}",
-    "dev:example": "turbo dev --filter {./packages/*} --filter example",
+    "dev:example": "turbo dev --filter {./packages/*} --filter example-nextjs",
     "dev:web": "turbo dev --filter {./packages/*} --filter web",
     "test": "turbo run test",
     "lint": "turbo run lint",

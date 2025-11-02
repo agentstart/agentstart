@@ -143,6 +143,52 @@ const createTransform = (options: Omit<AgentStartOptions, "agent">) => {
               recordValue.endsWith(value)
             );
           }
+          if (operator === "ne") {
+            if (recordValue instanceof Date && value instanceof Date) {
+              return recordValue.getTime() !== value.getTime();
+            }
+            return recordValue !== value;
+          }
+          if (operator === "gt") {
+            if (recordValue instanceof Date && value instanceof Date) {
+              return recordValue.getTime() > value.getTime();
+            }
+            return (
+              typeof recordValue === "number" &&
+              typeof value === "number" &&
+              recordValue > value
+            );
+          }
+          if (operator === "gte") {
+            if (recordValue instanceof Date && value instanceof Date) {
+              return recordValue.getTime() >= value.getTime();
+            }
+            return (
+              typeof recordValue === "number" &&
+              typeof value === "number" &&
+              recordValue >= value
+            );
+          }
+          if (operator === "lt") {
+            if (recordValue instanceof Date && value instanceof Date) {
+              return recordValue.getTime() < value.getTime();
+            }
+            return (
+              typeof recordValue === "number" &&
+              typeof value === "number" &&
+              recordValue < value
+            );
+          }
+          if (operator === "lte") {
+            if (recordValue instanceof Date && value instanceof Date) {
+              return recordValue.getTime() <= value.getTime();
+            }
+            return (
+              typeof recordValue === "number" &&
+              typeof value === "number" &&
+              recordValue <= value
+            );
+          }
           if (recordValue instanceof Date && value instanceof Date) {
             return recordValue.getTime() === value.getTime();
           }

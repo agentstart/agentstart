@@ -72,6 +72,21 @@ export async function runAdapterTest(opts: AdapterTestOptions) {
     expect(res?.title).toBe(thread.title);
   });
 
+  test("should return Date objects for date fields", async () => {
+    const res = await adapter.findOne<DBThread>({
+      model: "thread",
+      where: [
+        {
+          field: "id",
+          value: thread.id,
+        },
+      ],
+    });
+    expect(res).not.toBeNull();
+    expect(res?.createdAt).toBeInstanceOf(Date);
+    expect(res?.updatedAt).toBeInstanceOf(Date);
+  });
+
   test("create additional threads for filtering", async () => {
     const alpha = await adapter.create<DBThread>({
       model: "thread",
@@ -320,6 +335,37 @@ export async function runAdapterTest(opts: AdapterTestOptions) {
           value: secondMessageId,
         },
       ],
+    });
+  });
+
+  test("should return Date objects in findMany results", async () => {
+    const res = await adapter.findMany<DBThread>({
+      model: "thread",
+      limit: 1,
+    });
+    expect(res.length).toBeGreaterThan(0);
+    expect(res[0]?.createdAt).toBeInstanceOf(Date);
+    expect(res[0]?.updatedAt).toBeInstanceOf(Date);
+  });
+
+  test("should query by date fields", async () => {
+    const now = new Date();
+    const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+    const res = await adapter.findMany<DBThread>({
+      model: "thread",
+      where: [
+        {
+          field: "createdAt",
+          operator: "gt",
+          value: yesterday,
+        },
+      ],
+    });
+    expect(res.length).toBeGreaterThan(0);
+    res.forEach((thread) => {
+      expect(thread.createdAt).toBeInstanceOf(Date);
+      expect(thread.createdAt.getTime()).toBeGreaterThan(yesterday.getTime());
     });
   });
 

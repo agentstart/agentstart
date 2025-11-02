@@ -33,6 +33,8 @@ import {
   count,
   desc,
   eq,
+  gt,
+  gte,
   inArray,
   like,
   lt,
@@ -183,7 +185,13 @@ const createTransform = (
       return value;
     }
     if (value instanceof Date) {
-      return value.toISOString();
+      return value;
+    }
+    if (typeof value === "string" || typeof value === "number") {
+      const parsed = new Date(value);
+      if (!Number.isNaN(parsed.getTime())) {
+        return parsed;
+      }
     }
     return value;
   };
@@ -290,6 +298,26 @@ const createTransform = (
         return [lte(schemaModel[field], normalizedValue)];
       }
 
+      if (w.operator === "gt") {
+        const withDates = normalizeDateForQuery(w.value, model, w.field);
+        const normalizedValue = normalizeJsonForQuery(
+          withDates,
+          model,
+          w.field,
+        );
+        return [gt(schemaModel[field], normalizedValue)];
+      }
+
+      if (w.operator === "gte") {
+        const withDates = normalizeDateForQuery(w.value, model, w.field);
+        const normalizedValue = normalizeJsonForQuery(
+          withDates,
+          model,
+          w.field,
+        );
+        return [gte(schemaModel[field], normalizedValue)];
+      }
+
       const withDates = normalizeDateForQuery(w.value, model, w.field);
       const normalizedValue = normalizeJsonForQuery(withDates, model, w.field);
       return [eq(schemaModel[field], normalizedValue)];
@@ -297,43 +325,49 @@ const createTransform = (
     const andGroup = where.filter((w) => w.connector === "AND" || !w.connector);
     const orGroup = where.filter((w) => w.connector === "OR");
 
-    const andClause = and(
-      ...andGroup.map((w) => {
-        const field = getField(model, w.field);
-        if (w.operator === "in") {
-          if (!Array.isArray(w.value)) {
-            throw new AgentStartError(
-              "DRIZZLE_INVALID_OPERATOR",
-              `The value for the field "${w.field}" must be an array when using the "in" operator.`,
-            );
-          }
-          const normalizedValues = w.value.map((entry: unknown) => {
-            const withDates = normalizeDateForQuery(entry, model, w.field);
-            return normalizeJsonForQuery(withDates, model, w.field);
-          });
-          return inArray(schemaModel[field], normalizedValues);
+    const buildCondition = (w: Where) => {
+      const field = getField(model, w.field);
+      if (w.operator === "in") {
+        if (!Array.isArray(w.value)) {
+          throw new AgentStartError(
+            "DRIZZLE_INVALID_OPERATOR",
+            `The value for the field "${w.field}" must be an array when using the "in" operator.`,
+          );
         }
-        const withDates = normalizeDateForQuery(w.value, model, w.field);
-        const normalizedValue = normalizeJsonForQuery(
-          withDates,
-          model,
-          w.field,
-        );
-        return eq(schemaModel[field], normalizedValue);
-      }),
-    );
-    const orClause = or(
-      ...orGroup.map((w) => {
-        const field = getField(model, w.field);
-        const withDates = normalizeDateForQuery(w.value, model, w.field);
-        const normalizedValue = normalizeJsonForQuery(
-          withDates,
-          model,
-          w.field,
-        );
-        return eq(schemaModel[field], normalizedValue);
-      }),
-    );
+        const normalizedValues = w.value.map((entry: unknown) => {
+          const withDates = normalizeDateForQuery(entry, model, w.field);
+          return normalizeJsonForQuery(withDates, model, w.field);
+        });
+        return inArray(schemaModel[field], normalizedValues);
+      }
+      if (w.operator === "contains") {
+        return like(schemaModel[field], `%${w.value}%`);
+      }
+      if (w.operator === "starts_with") {
+        return like(schemaModel[field], `${w.value}%`);
+      }
+      if (w.operator === "ends_with") {
+        return like(schemaModel[field], `%${w.value}`);
+      }
+      const withDates = normalizeDateForQuery(w.value, model, w.field);
+      const normalizedValue = normalizeJsonForQuery(withDates, model, w.field);
+      if (w.operator === "lt") {
+        return lt(schemaModel[field], normalizedValue);
+      }
+      if (w.operator === "lte") {
+        return lte(schemaModel[field], normalizedValue);
+      }
+      if (w.operator === "gt") {
+        return gt(schemaModel[field], normalizedValue);
+      }
+      if (w.operator === "gte") {
+        return gte(schemaModel[field], normalizedValue);
+      }
+      return eq(schemaModel[field], normalizedValue);
+    };
+
+    const andClause = and(...andGroup.map(buildCondition));
+    const orClause = or(...orGroup.map(buildCondition));
 
     const clause: SQL<unknown>[] = [];
 
