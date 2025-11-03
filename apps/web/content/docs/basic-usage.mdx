@@ -11,7 +11,7 @@ An agent consists of a model, instructions, and tools. Here's a basic example:
 
 ```ts title="lib/agent.ts"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { Agent, agentTools } from "agentstart/agent";
+import { Agent, agentTools, osTools } from "agentstart/agent";
 
 const openrouter = createOpenRouter({
   apiKey: process.env.MODEL_PROVIDER_API_KEY!,
@@ -22,6 +22,7 @@ const agent = new Agent({
   instructions: "You are a helpful coding assistant.",
   tools: {
     ...agentTools, // Task management tools
+    ...osTools,    // File system and shell operations
   },
 });
 ```
@@ -41,19 +42,44 @@ const agent = new Agent({
 - `grep` - Search file contents
 - `ls` - List directory contents
 
+You can import and use them together or separately:
+
+```ts
+import { Agent, agentTools, osTools } from "agentstart/agent";
+
+// Use both tool sets
+const agent = new Agent({
+  model,
+  instructions: "You are a helpful coding assistant.",
+  tools: {
+    ...agentTools,
+    ...osTools,
+  },
+});
+
+// Or use only task management tools
+const agent = new Agent({
+  model,
+  instructions: "You are a task-focused assistant.",
+  tools: {
+    ...agentTools,
+  },
+});
+```
+
 ## Starting the Agent Runtime
 
 Wrap your agent with `agentStart()` to create an API handler:
 
 ```ts title="lib/agent.ts"
 import { agentStart } from "agentstart";
-import { drizzleAdapter } from "agentstart/memory";
+import { drizzleMemoryAdapter } from "agentstart/memory";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 
 export const start = agentStart({
   agent,
-  memory: drizzleAdapter(db, {
+  memory: drizzleMemoryAdapter(db, {
     provider: "postgresql",
     schema,
   }),
@@ -66,24 +92,24 @@ export const start = agentStart({
 <Tabs items={["memory", "basePath", "middleware"]}>
   <Tab value="memory">
     Database adapter for persisting conversations:
-    
+
     ```ts
-    import { drizzleAdapter } from "agentstart/memory";
-    import { prismaAdapter } from "agentstart/memory";
-    import { kyselyAdapter } from "agentstart/memory";
-    import { mongodbAdapter } from "agentstart/memory";
-    
+    import { drizzleMemoryAdapter } from "agentstart/memory";
+    import { prismaMemoryAdapter } from "agentstart/memory";
+    import { kyselyMemoryAdapter } from "agentstart/memory";
+    import { mongodbMemoryAdapter } from "agentstart/memory";
+
     // Use Drizzle
-    memory: drizzleAdapter(db, { provider: "postgresql", schema })
-    
+    memory: drizzleMemoryAdapter(db, { provider: "postgresql", schema })
+
     // Use Prisma
-    memory: prismaAdapter(prisma, { provider: "postgresql" })
-    
+    memory: prismaMemoryAdapter(prisma, { provider: "postgresql" })
+
     // Use Kysely
-    memory: kyselyAdapter(db)
-    
+    memory: kyselyMemoryAdapter(db)
+
     // Use MongoDB
-    memory: mongodbAdapter(db)
+    memory: mongodbMemoryAdapter(db)
     ```
   </Tab>
   

@@ -12,7 +12,7 @@ agent-frontmatter:end */
 
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { onStart, onSuccess, os } from "@orpc/server";
-import type { Blob } from "agentstart";
+import type { Blob, SecondaryMemoryAdapter } from "agentstart";
 import { agentStart } from "agentstart";
 import { Agent, agentTools, osTools } from "agentstart/agent";
 import {
@@ -20,7 +20,11 @@ import {
   s3BlobAdapter,
   vercelBlobAdapter,
 } from "agentstart/blob";
-import { drizzleAdapter } from "agentstart/memory";
+import {
+  drizzleMemoryAdapter,
+  inMemorySecondaryMemoryAdapter,
+  redisSecondaryMemoryAdapter,
+} from "agentstart/memory";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 
@@ -113,6 +117,26 @@ else if (
   });
 }
 
+// Configure secondary memory (used for E2B sandbox heartbeats and lifecycle tracking)
+let secondaryMemory: SecondaryMemoryAdapter;
+
+if (process.env.REDIS_URL || process.env.REDIS_HOST) {
+  // Redis adapter for production (persistent, scalable)
+  secondaryMemory = redisSecondaryMemoryAdapter({
+    url: process.env.REDIS_URL,
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : undefined,
+    password: process.env.REDIS_PASSWORD,
+    maxRetriesPerRequest: 3,
+  });
+} else {
+  // In-memory adapter for development (data lost on process restart)
+  console.warn(
+    "Using in-memory secondary memory adapter. Data will be lost on restart. Configure REDIS_URL for production.",
+  );
+  secondaryMemory = inMemorySecondaryMemoryAdapter();
+}
+
 const openrouter = createOpenRouter({
   apiKey: process.env.MODEL_PROVIDER_API_KEY,
 });
@@ -134,10 +158,11 @@ const loggingMiddleware = os.middleware(async ({ next }) => {
 });
 
 export const start = agentStart({
-  memory: drizzleAdapter(db, {
+  memory: drizzleMemoryAdapter(db, {
     provider: "postgresql",
     schema,
   }),
+  secondaryMemory: secondaryMemory,
   blob: blobAdapter,
   appName: "example-nextjs",
   agent,

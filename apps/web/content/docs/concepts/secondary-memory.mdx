@@ -1,0 +1,352 @@
+---
+title: Secondary Memory
+description: Configure fast key-value storage for agent runtime data and sandbox coordination
+---
+
+Secondary memory provides a fast, ephemeral key-value store for AgentStart runtime data. It's primarily used for:
+
+- **Sandbox heartbeat tracking**: E2B sandboxes require secondary memory to track which sandboxes are still alive across agent instances
+- **Session state**: Temporary data that doesn't need persistent storage
+- **Distributed coordination**: Share runtime state across multiple agent instances
+
+<Callout>
+  Secondary memory is **required** when using E2B cloud sandboxes for sandbox reuse and heartbeat tracking. It's optional for other use cases.
+</Callout>
+
+## Enabling Secondary Memory
+
+Configure secondary memory using adapter factories when you call `agentStart`:
+
+```ts title="lib/agent.ts"
+import { agentStart } from "agentstart";
+import { redisSecondaryMemoryAdapter } from "agentstart/memory";
+
+export const start = agentStart({
+  agent,
+  memory,
+  secondaryMemory: redisSecondaryMemoryAdapter({
+    url: process.env.REDIS_URL!,
+  }),
+});
+```
+
+## Available Adapters
+
+AgentStart includes adapters for popular key-value stores:
+
+### Redis (Production)
+
+Standard Redis adapter using ioredis:
+
+```ts title="lib/agent.ts"
+import { redisSecondaryMemoryAdapter } from "agentstart/memory";
+
+export const start = agentStart({
+  agent,
+  memory,
+  secondaryMemory: redisSecondaryMemoryAdapter({
+    url: "redis://localhost:6379",
+    // or individual options
+    host: "localhost",
+    port: 6379,
+    password: process.env.REDIS_PASSWORD,
+  }),
+});
+```
+
+Install the dependency:
+
+```bash tab="npm"
+npm install ioredis
+```
+
+```bash tab="bun"
+bun add ioredis
+```
+
+```bash tab="pnpm"
+pnpm add ioredis
+```
+
+```bash tab="yarn"
+yarn add ioredis
+```
+
+Environment variables:
+
+```bash title=".env"
+REDIS_URL=redis://localhost:6379
+REDIS_PASSWORD=your-password
+```
+
+### Upstash Redis (Serverless)
+
+Edge-compatible Redis adapter for serverless environments:
+
+```ts title="lib/agent.ts"
+import { upstashSecondaryMemoryAdapter } from "agentstart/memory";
+
+export const start = agentStart({
+  agent,
+  memory,
+  secondaryMemory: upstashSecondaryMemoryAdapter({
+    url: process.env.UPSTASH_REDIS_REST_URL!,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+  }),
+});
+```
+
+Install the dependency:
+
+```bash tab="npm"
+npm install @upstash/redis
+```
+
+```bash tab="bun"
+bun add @upstash/redis
+```
+
+```bash tab="pnpm"
+pnpm add @upstash/redis
+```
+
+```bash tab="yarn"
+yarn add @upstash/redis
+```
+
+Environment variables:
+
+```bash title=".env"
+UPSTASH_REDIS_REST_URL=https://your-endpoint.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your-token
+```
+
+**Features:**
+- REST API (edge-compatible)
+- Global low-latency
+- Serverless-friendly pricing
+- No connection pooling needed
+
+### Vercel KV (Vercel Deployments)
+
+Optimized for Vercel deployments:
+
+```ts title="lib/agent.ts"
+import { vercelKVSecondaryMemoryAdapter } from "agentstart/memory";
+
+export const start = agentStart({
+  agent,
+  memory,
+  secondaryMemory: vercelKVSecondaryMemoryAdapter({
+    url: process.env.KV_REST_API_URL!,
+    token: process.env.KV_REST_API_TOKEN!,
+  }),
+});
+```
+
+Install the dependency:
+
+```bash tab="npm"
+npm install @vercel/kv
+```
+
+```bash tab="bun"
+bun add @vercel/kv
+```
+
+```bash tab="pnpm"
+pnpm add @vercel/kv
+```
+
+```bash tab="yarn"
+yarn add @vercel/kv
+```
+
+Environment variables (auto-configured on Vercel):
+
+```bash title=".env"
+KV_REST_API_URL=https://your-kv.vercel-storage.com
+KV_REST_API_TOKEN=your-token
+```
+
+**Features:**
+- Automatic configuration on Vercel
+- Edge-compatible
+- Built-in metrics
+- Regional replication
+
+### In-Memory (Development)
+
+For local development and testing:
+
+```ts title="lib/agent.ts"
+import { inMemorySecondaryMemoryAdapter } from "agentstart/memory";
+
+export const start = agentStart({
+  agent,
+  memory,
+  secondaryMemory: inMemorySecondaryMemoryAdapter(),
+});
+```
+
+**Features:**
+- Zero configuration
+- Fast local development
+- Automatic cleanup
+- **Not suitable for production** (data lost on restart)
+
+<Callout type="warn">
+  The in-memory adapter is not suitable for production deployments. Use Redis, Upstash, or Vercel KV for production.
+</Callout>
+
+### Custom Adapter
+
+Create your own adapter for other key-value stores:
+
+```ts title="lib/custom-secondary-memory.ts"
+import { customSecondaryMemoryAdapter } from "agentstart/memory";
+
+export const myAdapter = customSecondaryMemoryAdapter({
+  async get(key: string): Promise<string | null> {
+    // Fetch value from your store
+    return await yourStore.get(key);
+  },
+
+  async set(key: string, value: string, ttl?: number): Promise<void> {
+    // Store value with optional TTL (in seconds)
+    if (ttl) {
+      await yourStore.set(key, value, { expireAfter: ttl });
+    } else {
+      await yourStore.set(key, value);
+    }
+  },
+
+  async delete(key: string): Promise<void> {
+    // Delete value
+    await yourStore.delete(key);
+  },
+});
+```
+
+Then use it in your agent configuration:
+
+```ts title="lib/agent.ts"
+import { myAdapter } from "./custom-secondary-memory";
+
+export const start = agentStart({
+  agent,
+  memory,
+  secondaryMemory: myAdapter,
+});
+```
+
+## Use with E2B Sandboxes
+
+Secondary memory is **required** when using E2B cloud sandboxes:
+
+```ts title="lib/agent.ts"
+import { agentStart } from "agentstart";
+import { e2bSandboxAdapter } from "agentstart/sandbox";
+import { redisSecondaryMemoryAdapter } from "agentstart/memory";
+
+export const start = agentStart({
+  agent,
+  memory,
+  secondaryMemory: redisSecondaryMemoryAdapter({
+    url: process.env.REDIS_URL!,
+  }),
+  sandbox: e2bSandboxAdapter({
+    apiKey: process.env.E2B_API_KEY!,
+    timeout: 300000,
+  }),
+});
+```
+
+The secondary memory stores heartbeat data to determine if a sandbox is still alive across different agent instances. This enables:
+
+1. **Sandbox reuse**: Reconnect to existing sandboxes instead of creating new ones
+2. **Cross-instance coordination**: Multiple agent instances can share the same sandbox
+3. **Automatic cleanup**: Expired sandboxes are detected and cleaned up
+
+## TTL (Time to Live)
+
+All adapters support optional TTL for automatic expiration:
+
+```ts
+// Store value that expires in 1 hour (3600 seconds)
+await secondaryMemory.set("sandbox:heartbeat:xyz", "alive", 3600);
+
+// Store value without expiration
+await secondaryMemory.set("config:key", "value");
+```
+
+## Troubleshooting
+
+### E2B Connection Issues
+
+**Problem**: "Secondary memory required for E2B sandboxes"
+
+**Solution**: Configure a secondary memory adapter:
+
+```ts
+export const start = agentStart({
+  agent,
+  memory,
+  secondaryMemory: redisSecondaryMemoryAdapter({
+    url: process.env.REDIS_URL!,
+  }),
+  sandbox: e2bSandboxAdapter({
+    apiKey: process.env.E2B_API_KEY!,
+  }),
+});
+```
+
+### Sandbox Reuse Failures
+
+**Problem**: Sandboxes are recreated on every request
+
+**Solution**: Verify TTL is longer than your sandbox timeout:
+
+```ts
+sandbox: e2bSandboxAdapter({
+  apiKey: process.env.E2B_API_KEY!,
+  timeout: 300000, // 5 minutes
+  autoStopDelay: 600000, // 10 minutes
+})
+```
+
+Ensure secondary memory TTL matches or exceeds `autoStopDelay`.
+
+### Edge Runtime Compatibility
+
+**Problem**: Redis connection fails on Vercel Edge Functions
+
+**Solution**: Use edge-compatible adapters (Upstash or Vercel KV):
+
+```ts
+import { upstashSecondaryMemoryAdapter } from "agentstart/memory";
+
+export const start = agentStart({
+  agent,
+  memory,
+  secondaryMemory: upstashSecondaryMemoryAdapter({
+    url: process.env.UPSTASH_REDIS_REST_URL!,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+  }),
+});
+```
+
+## Best Practices
+
+1. **Use Redis/Upstash/Vercel KV for production**: In-memory adapter loses data on restart
+2. **Set appropriate TTLs**: Match sandbox timeouts and auto-stop delays
+3. **Monitor connection pools**: For Redis adapter, tune `maxRetriesPerRequest` and pool size
+4. **Use edge-compatible adapters**: For serverless and edge deployments
+
+## Next Steps
+
+<Cards>
+  <Card title="Sandbox Configuration" href="/docs/concepts/sandbox" />
+  <Card title="Database Adapters" href="/docs/concepts/database" />
+  <Card title="Blob Storage" href="/docs/concepts/blob-storage" />
+</Cards>

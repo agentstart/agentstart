@@ -55,6 +55,35 @@ export class Git implements GitAPI {
     this.bash = new Bash(this.workingDirectory);
   }
 
+  /**
+   * Check if the working directory is a git repository
+   */
+  private async isGitRepository(cwd?: string): Promise<boolean> {
+    const targetDir = cwd || this.workingDirectory;
+    try {
+      const gitDir = path.join(targetDir, ".git");
+      await fs.access(gitDir);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Ensure the working directory is a git repository
+   * If not, initialize it automatically
+   */
+  private async ensureGitRepository(cwd?: string): Promise<void> {
+    const targetDir = cwd || this.workingDirectory;
+    const isRepo = await this.isGitRepository(targetDir);
+
+    if (!isRepo) {
+      // Initialize git repository to prevent git commands from
+      // traversing up to parent directories
+      await this.init(undefined, { initialBranch: "main" });
+    }
+  }
+
   private async getGitCommandOptions(
     cwd?: string,
   ): Promise<ShellCommandOptions> {
@@ -121,6 +150,17 @@ export class Git implements GitAPI {
     command: string,
     cwd?: string,
   ): Promise<ShellCommandResult> {
+    // Skip repository check for certain commands that don't require a repository
+    const isInitOrClone =
+      command.startsWith("init") || command.startsWith("clone");
+    const isGlobalOrSystemConfig =
+      command.startsWith("config --global") ||
+      command.startsWith("config --system");
+
+    if (!isInitOrClone && !isGlobalOrSystemConfig) {
+      await this.ensureGitRepository(cwd);
+    }
+
     const options = await this.getGitCommandOptions(cwd);
     return this.bash.$(options)`git ${command}`;
   }
@@ -130,21 +170,6 @@ export class Git implements GitAPI {
       await fs.rm(this.askpassScriptPath).catch(() => {});
       this.askpassScriptPath = undefined;
     }
-  }
-
-  /**
-   * Execute a git command
-   */
-  private async executeGitCommand(
-    command: string,
-    cwd?: string,
-  ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
-    const result = await this.runGitCommand(command, cwd);
-    return {
-      stdout: result.stdout,
-      stderr: result.stderr || result.error || "",
-      exitCode: result.exitCode,
-    };
   }
 
   /**
@@ -162,7 +187,7 @@ export class Git implements GitAPI {
       : this.workingDirectory;
     const command = buildGitInitCommand(options);
 
-    const result = await this.executeGitCommand(command, resolvedPath);
+    const result = await this.runGitCommand(command, resolvedPath);
 
     return {
       success: result.exitCode === 0,
@@ -178,7 +203,7 @@ export class Git implements GitAPI {
   async clone(url: string, options?: GitCloneOptions): Promise<GitResult> {
     const command = buildGitCloneCommand(url, options);
 
-    const result = await this.executeGitCommand(command);
+    const result = await this.runGitCommand(command);
 
     return {
       success: result.exitCode === 0,
@@ -206,7 +231,8 @@ export class Git implements GitAPI {
     const resolvedPath = targetPath
       ? path.join(this.workingDirectory, targetPath)
       : this.workingDirectory;
-    const result = await this.executeGitCommand(
+
+    const result = await this.runGitCommand(
       "status --porcelain=v1 --branch",
       resolvedPath,
     );
@@ -225,7 +251,7 @@ export class Git implements GitAPI {
     },
   ): Promise<GitResult> {
     const command = buildGitAddCommand(files, options);
-    const result = await this.executeGitCommand(command);
+    const result = await this.runGitCommand(command);
 
     return {
       success: result.exitCode === 0,
@@ -242,7 +268,7 @@ export class Git implements GitAPI {
     options: GitCommitOptions,
   ): Promise<GitResult & { hash?: string }> {
     const command = buildGitCommitCommand(options);
-    const result = await this.executeGitCommand(command);
+    const result = await this.runGitCommand(command);
     const hash = extractCommitHash(result.stdout);
 
     return {
@@ -259,7 +285,7 @@ export class Git implements GitAPI {
    */
   async push(options?: GitSyncOptions): Promise<GitResult> {
     const command = buildGitSyncCommand("push", options);
-    const result = await this.executeGitCommand(command);
+    const result = await this.runGitCommand(command);
 
     return {
       success: result.exitCode === 0,
@@ -274,7 +300,7 @@ export class Git implements GitAPI {
    */
   async pull(options?: GitSyncOptions): Promise<GitResult> {
     const command = buildGitSyncCommand("pull", options);
-    const result = await this.executeGitCommand(command);
+    const result = await this.runGitCommand(command);
 
     return {
       success: result.exitCode === 0,
@@ -295,7 +321,7 @@ export class Git implements GitAPI {
     tags?: boolean;
   }): Promise<GitResult> {
     const command = buildGitFetchCommand(options);
-    const result = await this.executeGitCommand(command);
+    const result = await this.runGitCommand(command);
 
     return {
       success: result.exitCode === 0,
@@ -317,7 +343,7 @@ export class Git implements GitAPI {
     },
   ): Promise<GitResult> {
     const command = buildGitCheckoutCommand(target, options);
-    const result = await this.executeGitCommand(command);
+    const result = await this.runGitCommand(command);
 
     return {
       success: result.exitCode === 0,
@@ -340,7 +366,7 @@ export class Git implements GitAPI {
     },
   ): Promise<GitResult | GitBranch[]> {
     if (options?.list || !name) {
-      const result = await this.executeGitCommand("branch -v");
+      const result = await this.runGitCommand("branch -v");
       if (result.exitCode !== 0) {
         return {
           success: false,
@@ -385,7 +411,7 @@ export class Git implements GitAPI {
       }
     }
 
-    const result = await this.executeGitCommand(command);
+    const result = await this.runGitCommand(command);
 
     return {
       success: result.exitCode === 0,
@@ -422,7 +448,7 @@ export class Git implements GitAPI {
       command += ` -m "${options.message.replace(/"/g, '\\"')}"`;
     }
 
-    const result = await this.executeGitCommand(command);
+    const result = await this.runGitCommand(command);
 
     return {
       success: result.exitCode === 0,
@@ -459,7 +485,7 @@ export class Git implements GitAPI {
       command += ` ${onto}`;
     }
 
-    const result = await this.executeGitCommand(command);
+    const result = await this.runGitCommand(command);
 
     return {
       success: result.exitCode === 0,
@@ -514,7 +540,7 @@ export class Git implements GitAPI {
       command += ` -- ${options.file}`;
     }
 
-    const result = await this.executeGitCommand(command);
+    const result = await this.runGitCommand(command);
 
     if (result.exitCode !== 0 || !result.stdout) {
       return [];
@@ -582,7 +608,7 @@ export class Git implements GitAPI {
       command += ` -- ${options.files.join(" ")}`;
     }
 
-    const result = await this.executeGitCommand(command);
+    const result = await this.runGitCommand(command);
     return result.stdout;
   }
 
@@ -598,7 +624,7 @@ export class Git implements GitAPI {
     list?: boolean;
   }): Promise<GitResult | string[]> {
     if (options?.list) {
-      const result = await this.executeGitCommand("stash list");
+      const result = await this.runGitCommand("stash list");
       if (result.exitCode !== 0) {
         return {
           success: false,
@@ -627,7 +653,7 @@ export class Git implements GitAPI {
       }
     }
 
-    const result = await this.executeGitCommand(command);
+    const result = await this.runGitCommand(command);
 
     return {
       success: result.exitCode === 0,
@@ -651,7 +677,7 @@ export class Git implements GitAPI {
     },
   ): Promise<GitResult | string[]> {
     if (options?.list || (!name && !options)) {
-      const result = await this.executeGitCommand("tag");
+      const result = await this.runGitCommand("tag");
       if (result.exitCode !== 0) {
         return {
           success: false,
@@ -676,10 +702,10 @@ export class Git implements GitAPI {
       }
     }
 
-    const result = await this.executeGitCommand(command);
+    const result = await this.runGitCommand(command);
 
     if (options?.push && result.exitCode === 0) {
-      await this.executeGitCommand(`push origin ${name}`);
+      await this.runGitCommand(`push origin ${name}`);
     }
 
     return {
@@ -706,7 +732,7 @@ export class Git implements GitAPI {
   ): Promise<GitResult | GitRemote[]> {
     if (options?.list || (!name && !options)) {
       const command = options?.verbose ? "remote -v" : "remote";
-      const result = await this.executeGitCommand(command);
+      const result = await this.runGitCommand(command);
 
       if (result.exitCode !== 0) {
         return {
@@ -760,7 +786,7 @@ export class Git implements GitAPI {
       command += ` add ${name} ${url}`;
     }
 
-    const result = await this.executeGitCommand(command);
+    const result = await this.runGitCommand(command);
 
     return {
       success: result.exitCode === 0,
@@ -800,7 +826,7 @@ export class Git implements GitAPI {
       command += ` -- ${options.files.join(" ")}`;
     }
 
-    const result = await this.executeGitCommand(command);
+    const result = await this.runGitCommand(command);
 
     return {
       success: result.exitCode === 0,
@@ -829,7 +855,7 @@ export class Git implements GitAPI {
       command += ` --mainline ${options.mainline}`;
     }
 
-    const result = await this.executeGitCommand(command);
+    const result = await this.runGitCommand(command);
 
     return {
       success: result.exitCode === 0,
@@ -859,7 +885,7 @@ export class Git implements GitAPI {
       command += ` --mainline ${options.mainline}`;
     }
 
-    const result = await this.executeGitCommand(command);
+    const result = await this.runGitCommand(command);
 
     return {
       success: result.exitCode === 0,
@@ -893,7 +919,7 @@ export class Git implements GitAPI {
       command += " -x";
     }
 
-    const result = await this.executeGitCommand(command);
+    const result = await this.runGitCommand(command);
 
     return {
       success: result.exitCode === 0,
@@ -929,7 +955,7 @@ export class Git implements GitAPI {
 
     if (options?.list) {
       command += " --list";
-      const result = await this.executeGitCommand(command);
+      const result = await this.runGitCommand(command);
 
       if (result.exitCode !== 0) {
         return {
@@ -956,11 +982,11 @@ export class Git implements GitAPI {
       command += ` ${key} "${value.replace(/"/g, '\\"')}"`;
     } else if (key) {
       command += ` --get ${key}`;
-      const result = await this.executeGitCommand(command);
+      const result = await this.runGitCommand(command);
       return result.exitCode === 0 ? result.stdout.trim() : "";
     }
 
-    const result = await this.executeGitCommand(command);
+    const result = await this.runGitCommand(command);
 
     return {
       success: result.exitCode === 0,

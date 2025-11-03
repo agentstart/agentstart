@@ -159,13 +159,13 @@ export const db = drizzle(sql);
 
 ```ts title="lib/agent.ts"
 import { agentStart } from "agentstart";
-import { drizzleAdapter } from "agentstart/memory";
+import { drizzleMemoryAdapter } from "agentstart/memory";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 
 export const start = agentStart({
   agent,
-  memory: drizzleAdapter(db, {
+  memory: drizzleMemoryAdapter(db, {
     provider: "postgresql", // or "mysql" or "sqlite"
     schema,
   }),
@@ -228,11 +228,11 @@ const db = drizzle(sqlite);
 If your schema uses different table names (e.g., plural forms):
 
 ```ts
-import { drizzleAdapter } from "agentstart/memory";
+import { drizzleMemoryAdapter } from "agentstart/memory";
 
 export const start = agentStart({
   agent,
-  memory: drizzleAdapter(db, {
+  memory: drizzleMemoryAdapter(db, {
     provider: "postgresql",
     schema: {
       thread: threadsTable,  // maps to "threads" table
@@ -256,7 +256,9 @@ await db.insert(messagesTable).values({
   id: "msg-1",
   threadId: "thread-1",
   role: "user",
-  content: "Hello",
+  parts: [{ type: "text", text: "Hello" }],
+  createdAt: new Date(),
+  updatedAt: new Date(),
 });
 ```
 

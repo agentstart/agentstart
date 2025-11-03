@@ -11,7 +11,7 @@ Make sure you have MySQL installed and configured. Then, you can connect it dire
 
 ```ts title="lib/agent.ts"
 import { agentStart } from "agentstart";
-import { kyselyAdapter } from "agentstart/memory";
+import { kyselyMemoryAdapter } from "agentstart/memory";
 import { Kysely, MysqlDialect } from "kysely";
 import { createPool } from "mysql2/promise";
 
@@ -28,7 +28,7 @@ const db = new Kysely({
 
 export const start = agentStart({
   agent,
-  memory: kyselyAdapter(db, {
+  memory: kyselyMemoryAdapter(db, {
     type: "mysql", // optional config
   }),
 });
@@ -93,7 +93,7 @@ yarn add drizzle-orm mysql2
 ```ts title="lib/agent.ts"
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
-import { drizzleAdapter } from "agentstart/memory";
+import { drizzleMemoryAdapter } from "agentstart/memory";
 
 const pool = mysql.createPool({
   host: "localhost",
@@ -106,7 +106,7 @@ const db = drizzle(pool);
 
 export const start = agentStart({
   agent,
-  memory: drizzleAdapter(db, {
+  memory: drizzleMemoryAdapter(db, {
     provider: "mysql",
     schema: {
       thread: threadsTable,

@@ -10,7 +10,7 @@ FEATURES:
 SEARCHABLE: agent context, rpc context, memory adapter
 agent-frontmatter:end */
 
-import { memoryAdapter } from "@agentstart/memory";
+import { inMemoryAdapter } from "@agentstart/memory";
 import type { AgentStartOptions } from "@agentstart/types";
 
 export interface Context extends AgentStartOptions {
@@ -26,7 +26,7 @@ export function createContext(opts: CreateContextOptions): Context {
   return {
     ...opts,
     getUserId: opts.getUserId ?? (() => "anonymous"),
-    memory: opts.memory ?? memoryAdapter(),
+    memory: opts.memory ?? inMemoryAdapter(),
     blob: opts.blob,
   };
 }

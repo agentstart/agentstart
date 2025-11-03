@@ -16,11 +16,11 @@ import type {
   GitAPI,
   SandboxAPI,
   SandboxStatus,
-  SecondaryMemory,
+  SecondaryMemoryAdapter,
 } from "@agentstart/types";
 import { Sandbox, type SandboxOpts } from "@e2b/code-interpreter";
 import { Bash } from "./bash";
-import { DEFAULT_CONFIG } from "./constants";
+import { DEFAULT_CONFIG, DEFAULT_WORKING_DIRECTORY } from "./constants";
 import { FileSystem } from "./file-system";
 import { Git } from "./git";
 
@@ -33,6 +33,13 @@ import { Git } from "./git";
  *
  * Usage pattern:
  * ```typescript
+ * import { redisAdapter } from '@agentstart/secondary-memory/redis';
+ * import Redis from 'ioredis';
+ *
+ * // Setup secondary memory (for sandbox heartbeat tracking)
+ * const redis = new Redis();
+ * const secondaryMemory = redisAdapter({ client: redis });
+ *
  * // In Agent initialization
  * const sandbox = await E2BSandbox.connectOrCreate({
  *   sandboxId: cachedSandboxId, // from previous thread
@@ -54,7 +61,7 @@ export class E2BSandbox implements SandboxAPI {
   fs!: FileSystemAPI;
   bash!: BashAPI;
   git!: GitAPI;
-  secondaryMemory: SecondaryMemory;
+  secondaryMemory: SecondaryMemoryAdapter;
 
   private sandbox: Sandbox | null = null;
   private sandboxId: string | null = null;
@@ -83,12 +90,18 @@ export class E2BSandbox implements SandboxAPI {
    *
    * @param options - Configuration options
    * @param options.sandboxId - Optional existing sandbox ID to reconnect
-   * @param options.secondaryMemory - Required secondary memory for heartbeat tracking
+   * @param options.secondaryMemory - Required secondary memory for heartbeat tracking (use redisAdapter from @agentstart/secondary-memory)
    * @param options.githubToken - Optional GitHub token for git operations
    * @returns Initialized E2BSandbox instance
    *
    * @example
    * ```typescript
+   * import { redisAdapter } from '@agentstart/secondary-memory/redis';
+   * import Redis from 'ioredis';
+   *
+   * const redis = new Redis();
+   * const secondaryMemory = redisAdapter({ client: redis });
+   *
    * const manager = await E2BSandbox.connectOrCreate({
    *   sandboxId: previousSandboxId,
    *   secondaryMemory: secondaryMemory,
@@ -109,20 +122,18 @@ export class E2BSandbox implements SandboxAPI {
     if (sandboxId) {
       // Check if sandbox is still alive
       const isAlive = await manager.isSandboxAliveInStore(sandboxId);
+
       if (isAlive) {
         try {
           await manager.connect(sandboxId, githubToken);
+          console.log(`[E2B] Connected to existing sandbox ${sandboxId}`);
           return manager;
         } catch (error) {
           console.warn(
-            `Failed to connect to sandbox ${sandboxId}, creating new one...`,
+            `[E2B] Failed to connect to sandbox ${sandboxId}:`,
             error,
           );
         }
-      } else {
-        console.log(
-          `Sandbox ${sandboxId} expired (secondaryMemory heartbeat missing), creating new one...`,
-        );
       }
     }
 
@@ -138,12 +149,18 @@ export class E2BSandbox implements SandboxAPI {
    * whether a previous one exists. Most use cases should use connectOrCreate() instead.
    *
    * @param options - Configuration options
-   * @param options.secondaryMemory - Required secondary memory for heartbeat tracking
+   * @param options.secondaryMemory - Required secondary memory for heartbeat tracking (use redisAdapter from @agentstart/secondary-memory)
    * @param options.githubToken - Optional GitHub token for git operations
    * @returns New E2BSandbox instance
    *
    * @example
    * ```typescript
+   * import { redisAdapter } from '@agentstart/secondary-memory/redis';
+   * import Redis from 'ioredis';
+   *
+   * const redis = new Redis();
+   * const secondaryMemory = redisAdapter({ client: redis });
+   *
    * const manager = await E2BSandbox.forceCreate({
    *   secondaryMemory: secondaryMemory,
    *   timeout: 300000 // 5 minutes
@@ -180,6 +197,18 @@ export class E2BSandbox implements SandboxAPI {
     this.bash = new Bash(this.sandbox, this);
     this.git = new Git(this.sandbox, this);
 
+    // Ensure default working directory exists
+    try {
+      await this.sandbox.commands.run(`mkdir -p ${DEFAULT_WORKING_DIRECTORY}`, {
+        cwd: "/home/user",
+      });
+    } catch (error) {
+      console.warn(
+        `[E2B] Failed to create working directory ${DEFAULT_WORKING_DIRECTORY}:`,
+        error,
+      );
+    }
+
     // Set GitHub token if provided
     if (githubToken) {
       await this.git.setAuthToken(githubToken);
@@ -208,16 +237,13 @@ export class E2BSandbox implements SandboxAPI {
   async stop(): Promise<void> {
     if (this.sandbox && this.active) {
       try {
-        console.log(`Stopping E2B sandbox: ${this.sandboxId}`);
         await this.sandbox.kill();
-        console.log(`E2B sandbox stopped: ${this.sandboxId}`);
-
         // Remove the heartbeat from secondaryMemory
         if (this.sandboxId) {
           await this.clearSandboxHeartbeat(this.sandboxId);
         }
       } catch (error) {
-        console.error(`Error stopping E2B sandbox: ${this.sandboxId}`, error);
+        console.error(`[E2B] Error stopping sandbox ${this.sandboxId}:`, error);
       }
     }
 
@@ -274,10 +300,27 @@ export class E2BSandbox implements SandboxAPI {
   }
 
   /**
-   * Update activity timestamp
+   * Update activity timestamp and extend sandbox timeout
    */
   async keepAlive(): Promise<void> {
-    await this.refreshHeartbeat();
+    if (!this.sandbox || !this.active) return;
+
+    try {
+      // Extend E2B sandbox timeout
+      const extendedTimeout = this.config.timeout || DEFAULT_CONFIG.timeout;
+      await this.sandbox.setTimeout(extendedTimeout);
+
+      // Refresh heartbeat in secondary memory
+      await this.refreshHeartbeat();
+    } catch (error) {
+      console.warn(
+        `[E2B] Failed to extend timeout for sandbox ${this.sandboxId}:`,
+        error,
+      );
+      // Mark sandbox as inactive if timeout extension fails
+      this.active = false;
+      throw error;
+    }
   }
 
   /**
@@ -302,8 +345,6 @@ export class E2BSandbox implements SandboxAPI {
     await this.stop();
 
     try {
-      console.log(`Creating E2B Sandbox...`);
-
       // Convert config to E2B format
       const timeoutMs = Math.floor(
         this.config.timeout || DEFAULT_CONFIG.timeout,
@@ -323,10 +364,27 @@ export class E2BSandbox implements SandboxAPI {
       this.createdAt = Date.now();
       this.lastActivityTime = Date.now();
 
+      console.log(`[E2B] Sandbox created: ${this.sandboxId}`);
+
       // Initialize tools with sandbox and manager reference for auto-keepAlive
       this.fs = new FileSystem(this.sandbox, this);
       this.bash = new Bash(this.sandbox, this);
       this.git = new Git(this.sandbox, this);
+
+      // Create default working directory if it doesn't exist
+      try {
+        await this.sandbox.commands.run(
+          `mkdir -p ${DEFAULT_WORKING_DIRECTORY}`,
+          {
+            cwd: "/home/user",
+          },
+        );
+      } catch (error) {
+        console.warn(
+          `[E2B] Failed to create working directory ${DEFAULT_WORKING_DIRECTORY}:`,
+          error,
+        );
+      }
 
       // Set GitHub token if provided
       if (githubToken) {
@@ -335,10 +393,8 @@ export class E2BSandbox implements SandboxAPI {
 
       // Set initial heartbeat in secondaryMemory
       await this.markSandboxAlive(this.sandboxId);
-
-      console.log(`E2B Sandbox created: ${this.sandboxId}`);
     } catch (error) {
-      console.error(`Failed to create E2B sandbox: ${this.sandboxId}`, error);
+      console.error(`[E2B] Failed to create sandbox:`, error);
       this.sandbox = null;
       this.active = false;
       throw error;
@@ -360,20 +416,44 @@ export class E2BSandbox implements SandboxAPI {
   }
 
   private async isSandboxAliveInStore(sandboxId: string): Promise<boolean> {
-    const key = this.getHeartbeatKey(sandboxId);
-    const value = await this.secondaryMemory.get(key);
-    return value !== null;
+    try {
+      const key = this.getHeartbeatKey(sandboxId);
+      const value = await this.secondaryMemory.get(key);
+      return value !== null;
+    } catch (error) {
+      console.error(
+        `[E2B] Error checking heartbeat for sandbox ${sandboxId}:`,
+        error,
+      );
+      return false;
+    }
   }
 
   private async markSandboxAlive(sandboxId: string): Promise<void> {
-    const key = this.getHeartbeatKey(sandboxId);
-    const ttl = this.getHeartbeatTtlMs();
-    await this.secondaryMemory.set(key, Date.now().toString(), ttl);
+    try {
+      const key = this.getHeartbeatKey(sandboxId);
+      const ttl = this.getHeartbeatTtlMs();
+      const timestamp = Date.now();
+      await this.secondaryMemory.set(key, timestamp.toString(), ttl);
+    } catch (error) {
+      console.error(
+        `[E2B] Error marking sandbox ${sandboxId} as alive:`,
+        error,
+      );
+      throw error;
+    }
   }
 
   private async clearSandboxHeartbeat(sandboxId: string): Promise<void> {
-    const key = this.getHeartbeatKey(sandboxId);
-    await this.secondaryMemory.delete(key);
+    try {
+      const key = this.getHeartbeatKey(sandboxId);
+      await this.secondaryMemory.delete(key);
+    } catch (error) {
+      console.error(
+        `[E2B] Error clearing heartbeat for sandbox ${sandboxId}:`,
+        error,
+      );
+    }
   }
 
   private async refreshHeartbeat(): Promise<void> {

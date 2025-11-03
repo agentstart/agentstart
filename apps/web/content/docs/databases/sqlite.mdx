@@ -11,7 +11,7 @@ SQLite requires no separate server process, making it ideal for local developmen
 
 ```ts title="lib/agent.ts"
 import { agentStart } from "agentstart";
-import { kyselyAdapter } from "agentstart/memory";
+import { kyselyMemoryAdapter } from "agentstart/memory";
 import { Kysely, SqliteDialect } from "kysely";
 import Database from "better-sqlite3";
 
@@ -23,7 +23,7 @@ const db = new Kysely({
 
 export const start = agentStart({
   agent,
-  memory: kyselyAdapter(db, {
+  memory: kyselyMemoryAdapter(db, {
     type: "sqlite", // optional config
   }),
 });
@@ -88,14 +88,14 @@ yarn add drizzle-orm better-sqlite3
 ```ts title="lib/agent.ts"
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import Database from "better-sqlite3";
-import { drizzleAdapter } from "agentstart/memory";
+import { drizzleMemoryAdapter } from "agentstart/memory";
 
 const sqlite = new Database("agentstart.db");
 const db = drizzle(sqlite);
 
 export const start = agentStart({
   agent,
-  memory: drizzleAdapter(db, {
+  memory: drizzleMemoryAdapter(db, {
     provider: "sqlite",
     schema: {
       thread: threadsTable,

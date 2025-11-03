@@ -10,7 +10,7 @@ SEARCHABLE: packages, cli, src, test, generate, vitest
 agent-frontmatter:end */
 
 import type { AgentStartOptions } from "agentstart";
-import { drizzleAdapter, prismaAdapter } from "agentstart/memory";
+import { drizzleMemoryAdapter, prismaMemoryAdapter } from "agentstart/memory";
 import Database from "better-sqlite3";
 import { describe, expect, it } from "vitest";
 import { generateDrizzleSchema } from "../generators/drizzle";
@@ -21,14 +21,14 @@ describe("generate", () => {
   it("should generate prisma schema", async () => {
     const schema = await generatePrismaSchema({
       file: "test.prisma",
-      adapter: prismaAdapter(
+      adapter: prismaMemoryAdapter(
         {},
         {
           provider: "postgresql",
         },
       )({} as AgentStartOptions),
       options: {
-        memory: prismaAdapter(
+        memory: prismaMemoryAdapter(
           {},
           {
             provider: "postgresql",
@@ -42,14 +42,14 @@ describe("generate", () => {
   it("should generate prisma schema for mongodb", async () => {
     const schema = await generatePrismaSchema({
       file: "test.prisma",
-      adapter: prismaAdapter(
+      adapter: prismaMemoryAdapter(
         {},
         {
           provider: "mongodb",
         },
       )({} as AgentStartOptions),
       options: {
-        memory: prismaAdapter(
+        memory: prismaMemoryAdapter(
           {},
           {
             provider: "mongodb",
@@ -63,14 +63,14 @@ describe("generate", () => {
   it("should generate prisma schema for mysql", async () => {
     const schema = await generatePrismaSchema({
       file: "test.prisma",
-      adapter: prismaAdapter(
+      adapter: prismaMemoryAdapter(
         {},
         {
           provider: "mysql",
         },
       )({} as AgentStartOptions),
       options: {
-        memory: prismaAdapter(
+        memory: prismaMemoryAdapter(
           {},
           {
             provider: "mongodb",
@@ -84,7 +84,7 @@ describe("generate", () => {
   it("should generate drizzle schema", async () => {
     const schema = await generateDrizzleSchema({
       file: "test.drizzle",
-      adapter: drizzleAdapter(
+      adapter: drizzleMemoryAdapter(
         {},
         {
           provider: "postgresql",
@@ -92,7 +92,7 @@ describe("generate", () => {
         },
       )({} as AgentStartOptions),
       options: {
-        memory: drizzleAdapter(
+        memory: drizzleMemoryAdapter(
           {},
           {
             provider: "postgresql",

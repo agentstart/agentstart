@@ -26,7 +26,7 @@ Here's a minimal example of an AgentStart agent:
 // Server
 import { agentStart } from "agentstart";
 import { Agent, agentTools } from "agentstart/agent";
-import { drizzleAdapter } from "agentstart/memory";
+import { drizzleMemoryAdapter } from "agentstart/memory";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 
 const openrouter = createOpenRouter({
@@ -41,7 +41,7 @@ const agent = new Agent({
 
 export const start = agentStart({
   agent,
-  memory: drizzleAdapter(db, { provider: "postgresql", schema }),
+  memory: drizzleMemoryAdapter(db, { provider: "postgresql", schema }),
   appName: "my-app",
 });
 ```

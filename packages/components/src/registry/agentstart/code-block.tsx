@@ -31,6 +31,7 @@ type CodeBlockProps = HTMLAttributes<HTMLDivElement> & {
   code: string;
   language: BundledLanguage;
   showLineNumbers?: boolean;
+  showCopyButton?: boolean;
 };
 
 type CodeBlockContextType = {
@@ -74,12 +75,12 @@ export async function highlightCode(
   return await Promise.all([
     codeToHtml(code, {
       lang: language,
-      theme: "one-light",
+      theme: "vitesse-light",
       transformers,
     }),
     codeToHtml(code, {
       lang: language,
-      theme: "one-dark-pro",
+      theme: "vesper",
       transformers,
     }),
   ]);
@@ -89,6 +90,7 @@ export const CodeBlock = ({
   code,
   language,
   showLineNumbers = false,
+  showCopyButton = true,
   className,
   children,
   ...props
@@ -120,21 +122,22 @@ export const CodeBlock = ({
         )}
         {...props}
       >
-        <div className="relative">
-          <div
-            className="overflow-hidden dark:hidden [&>pre]:m-0 [&>pre]:bg-background! [&>pre]:p-4 [&>pre]:text-foreground! [&>pre]:text-sm [&_code]:font-mono [&_code]:text-sm"
-            dangerouslySetInnerHTML={{ __html: html }}
-          />
-          <div
-            className="hidden overflow-hidden dark:block [&>pre]:m-0 [&>pre]:bg-background! [&>pre]:p-4 [&>pre]:text-foreground! [&>pre]:text-sm [&_code]:font-mono [&_code]:text-sm"
-            dangerouslySetInnerHTML={{ __html: darkHtml }}
-          />
-          {children && (
-            <div className="absolute top-2 right-2 flex items-center gap-2">
-              {children}
-            </div>
-          )}
-        </div>
+        <div
+          className="dark:hidden [&>pre]:m-0 [&>pre]:bg-background! [&>pre]:px-4 [&>pre]:py-2.5 [&>pre]:text-foreground! [&>pre]:text-sm [&_code]:font-mono [&_code]:text-sm"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+        <div
+          className="hidden overflow-hidden dark:block [&>pre]:m-0 [&>pre]:bg-background! [&>pre]:px-4 [&>pre]:py-2.5 [&>pre]:text-foreground! [&>pre]:text-sm [&_code]:font-mono [&_code]:text-sm"
+          dangerouslySetInnerHTML={{ __html: darkHtml }}
+        />
+        {children && (
+          <div className="absolute top-2 right-2 flex items-center gap-2">
+            {children}
+          </div>
+        )}
+        {showCopyButton && (
+          <CodeBlockCopyButton className="absolute top-1 right-1 opacity-0 transition-opacity group-hover:opacity-100" />
+        )}
       </div>
     </CodeBlockContext.Provider>
   );
@@ -173,7 +176,11 @@ export const CodeBlockCopyButton = ({
     }
   };
 
-  const Icon = isCopied ? CheckIcon : CopyIcon;
+  const Icon = isCopied ? (
+    <CheckIcon weight="bold" />
+  ) : (
+    <CopyIcon weight="duotone" />
+  );
 
   return (
     <Button
@@ -183,7 +190,7 @@ export const CodeBlockCopyButton = ({
       variant="ghost"
       {...props}
     >
-      {children ?? <Icon size={14} weight="duotone" />}
+      {children ?? Icon}
     </Button>
   );
 };

@@ -78,7 +78,7 @@ export const SidebarItem = memo(function SidebarItem({
               }
             />
             {computedSecondaryText && (
-              <TooltipContent>
+              <TooltipContent className="max-w-xs">
                 <span className="space-x-1">
                   <span>{thread.title || "Untitled thread"}</span>
                   <span className="text-[10px] text-muted-foreground">

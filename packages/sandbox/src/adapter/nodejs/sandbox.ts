@@ -19,6 +19,7 @@ import type {
   SandboxAPI,
   SandboxStatus,
 } from "@agentstart/types";
+import fs from "fs-extra";
 import { Bash } from "./bash";
 import { FileSystem } from "./file-system";
 import { Git } from "./git";
@@ -72,6 +73,7 @@ export class NodeSandbox implements SandboxAPI {
     this.config = { ...NodeSandbox.DEFAULT_CONFIG, ...config };
     this.workingDirectory =
       this.config.workspacePath ?? path.resolve(process.cwd(), ".agentstart");
+    fs.ensureDir(this.workingDirectory);
 
     // Initialize tools (Node.js doesn't need a real sandbox)
     this.fs = new FileSystem(this.workingDirectory);

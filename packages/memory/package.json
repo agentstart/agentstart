@@ -14,7 +14,7 @@
     "lint": "bunx biome check --write --unsafe ./src",
     "typecheck": "tsc --noEmit",
     "test": "bun run prisma:push && vitest",
-    "prisma:push": "prisma db push --schema src/adapter/prisma/test/schema.prisma",
+    "prisma:push": "prisma db push --schema src/memory/prisma/test/schema.prisma",
     "test:adapters": "bun run prisma:push && vitest adapters"
   },
   "dependencies": {
@@ -29,12 +29,31 @@
     "pg": "catalog:",
     "zod": "catalog:"
   },
+  "peerDependencies": {
+    "ioredis": "^5.0.0",
+    "@vercel/kv": "^3.0.0",
+    "@upstash/redis": "^1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "ioredis": {
+      "optional": true
+    },
+    "@vercel/kv": {
+      "optional": true
+    },
+    "@upstash/redis": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@agentstart/biome-config": "workspace:*",
     "@agentstart/tsconfig": "workspace:*",
     "@biomejs/biome": "catalog:",
     "@types/better-sqlite3": "catalog:",
     "@types/pg": "catalog:",
+    "@upstash/redis": "^1.0.0",
+    "@vercel/kv": "^3.0.0",
+    "ioredis": "catalog:",
     "prisma": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:",

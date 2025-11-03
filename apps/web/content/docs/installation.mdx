@@ -180,7 +180,7 @@ AgentStart ships with adapters for popular ORMs and query builders. Pass the ada
   <Tab value="sqlite">
     ```ts title="agent.ts"
     import { agentStart } from "agentstart";
-    import { drizzleAdapter } from "agentstart/memory";
+    import { drizzleMemoryAdapter } from "agentstart/memory";
     import Database from "better-sqlite3";
     import { drizzle } from "drizzle-orm/better-sqlite3";
     import * as schema from "@/db/schema";
@@ -190,14 +190,14 @@ AgentStart ships with adapters for popular ORMs and query builders. Pass the ada
 
     export const start = agentStart({
       agent,
-      memory: drizzleAdapter(db, { provider: "sqlite", schema }),
+      memory: drizzleMemoryAdapter(db, { provider: "sqlite", schema }),
     });
     ```
   </Tab>
   <Tab value="postgres">
     ```ts title="agent.ts"
     import { agentStart } from "agentstart";
-    import { kyselyAdapter } from "agentstart/memory";
+    import { kyselyMemoryAdapter } from "agentstart/memory";
     import { Kysely, PostgresDialect } from "kysely";
     import { Pool } from "pg";
 
@@ -209,28 +209,28 @@ AgentStart ships with adapters for popular ORMs and query builders. Pass the ada
 
     export const start = agentStart({
       agent,
-      memory: kyselyAdapter(db, { type: "postgres" }),
+      memory: kyselyMemoryAdapter(db, { type: "postgres" }),
     });
     ```
   </Tab>
   <Tab value="mysql">
     ```ts title="agent.ts"
     import { agentStart } from "agentstart";
-    import { prismaAdapter } from "agentstart/memory";
+    import { prismaMemoryAdapter } from "agentstart/memory";
     import { PrismaClient } from "@prisma/client";
 
     const prisma = new PrismaClient();
 
     export const start = agentStart({
       agent,
-      memory: prismaAdapter(prisma, { provider: "mysql" }),
+      memory: prismaMemoryAdapter(prisma, { provider: "mysql" }),
     });
     ```
   </Tab>
   <Tab value="mongodb">
     ```ts title="agent.ts"
     import { agentStart } from "agentstart";
-    import { mongodbAdapter } from "agentstart/memory";
+    import { mongodbMemoryAdapter } from "agentstart/memory";
     import { MongoClient } from "mongodb";
 
     const client = new MongoClient(process.env.DATABASE_URL!);
@@ -238,7 +238,7 @@ AgentStart ships with adapters for popular ORMs and query builders. Pass the ada
 
     export const start = agentStart({
       agent,
-      memory: mongodbAdapter(client.db("agentstart")),
+      memory: mongodbMemoryAdapter(client.db("agentstart")),
     });
     ```
   </Tab>
@@ -248,11 +248,11 @@ AgentStart ships with adapters for popular ORMs and query builders. Pass the ada
   <Tab value="Drizzle">
   ```ts title="agent.ts"
   import { agentStart } from "agentstart";
-  import { drizzleAdapter } from "agentstart/memory";
+  import { drizzleMemoryAdapter } from "agentstart/memory";
   import { db } from "@/db"; // your drizzle instance
 
   export const start = agentStart({
-    memory: drizzleAdapter(db, {
+    memory: drizzleMemoryAdapter(db, {
       provider: "postgresql", // or "mysql", "sqlite"
     }),
   })
@@ -262,13 +262,13 @@ AgentStart ships with adapters for popular ORMs and query builders. Pass the ada
   <Tab value="Prisma">
   ```ts title="agent.ts"
   import { agentStart } from "agentstart";
-  import { prismaAdapter } from "agentstart/memory";
+  import { prismaMemoryAdapter } from "agentstart/memory";
   import { PrismaClient } from "@/generated/prisma/client"; // If your Prisma file is located elsewhere, you can change the path
 
   const prisma = new PrismaClient();
 
   export const start = agentStart({
-    memory: prismaAdapter(prisma, {
+    memory: prismaMemoryAdapter(prisma, {
       provider: "sqlite", // or "mysql", "postgresql"
     }),
   })
@@ -278,11 +278,11 @@ AgentStart ships with adapters for popular ORMs and query builders. Pass the ada
   <Tab value="MongoDB">
   ```ts title="agent.ts"
   import { agentStart } from "agentstart";
-  import { mongodbAdapter } from "agentstart/memory";
+  import { mongodbMemoryAdapter } from "agentstart/memory";
   import { client } from "@/db"; // your mongodb client
 
   export const start = agentStart({
-    memory: mongodbAdapter(client),
+    memory: mongodbMemoryAdapter(client),
   })
   ```
   </Tab>

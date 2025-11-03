@@ -31,6 +31,7 @@
     "drizzle-orm": "catalog:",
     "embla-carousel-react": "catalog:",
     "input-otp": "catalog:",
+    "ioredis": "^5.0.0",
     "lucide-react": "catalog:",
     "mongodb": "catalog:",
     "motion": "catalog:",

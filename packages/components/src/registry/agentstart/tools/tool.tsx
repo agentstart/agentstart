@@ -38,7 +38,10 @@ export type ToolProps = ComponentProps<typeof Collapsible>;
 
 export const Tool = ({ className, ...props }: ToolProps) => (
   <Collapsible
-    className={cn("not-prose mb-4 w-full rounded-md border", className)}
+    className={cn(
+      "not-prose mb-4 w-full overflow-hidden rounded-md border border-border/60",
+      className,
+    )}
     {...props}
   />
 );
@@ -98,7 +101,7 @@ export const ToolHeader = ({
 }: ToolHeaderProps) => (
   <CollapsibleTrigger
     className={cn(
-      "flex w-full items-center justify-between gap-4 p-3",
+      "group flex w-full items-center justify-between gap-4 px-3 py-1.5",
       className,
     )}
     {...props}
@@ -111,8 +114,8 @@ export const ToolHeader = ({
       {getStatusBadge(state)}
     </div>
     <CaretDownIcon
-      className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180"
-      weight="duotone"
+      className="size-3 text-muted-foreground transition-transform group-data-panel-open:rotate-180"
+      weight="bold"
     />
   </CollapsibleTrigger>
 );
@@ -170,16 +173,14 @@ export const ToolOutput = ({
   }
 
   return (
-    <div className={cn("space-y-2 p-4", className)} {...props}>
+    <div className={cn("w-full space-y-2 p-4", className)} {...props}>
       <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
         {errorText ? "Error" : "Result"}
       </h4>
       <div
         className={cn(
           "overflow-x-auto rounded-md text-xs [&_table]:w-full",
-          errorText
-            ? "bg-destructive/10 text-destructive"
-            : "bg-muted/50 text-foreground",
+          errorText ? "text-destructive" : "text-foreground",
         )}
       >
         {errorText && <div>{errorText}</div>}

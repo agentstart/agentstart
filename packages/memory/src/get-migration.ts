@@ -20,8 +20,8 @@ import type {
   CreateTableBuilder,
 } from "kysely";
 import { sql } from "kysely";
-import { createKyselyAdapter } from "./adapter/kysely/dialect";
 import { getSchema } from "./get-schema";
+import { createKyselyAdapter } from "./memory/kysely/dialect";
 
 const postgresMap = {
   string: ["character varying", "text"],

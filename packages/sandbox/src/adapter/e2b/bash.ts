@@ -69,8 +69,20 @@ export class Bash implements BashAPI {
     command: string,
     options: ShellCommandOptions = {},
   ): Promise<ShellCommandResult> {
-    // Auto-refresh heartbeat before operation
-    await this.manager?.keepAlive();
+    // Auto-refresh heartbeat and extend timeout before operation
+    try {
+      await this.manager?.keepAlive();
+    } catch (_error) {
+      // Sandbox may have timed out
+      return {
+        exitCode: 1,
+        stdout: "",
+        stderr: "Sandbox is no longer available. Please reinitialize.",
+        error: "Sandbox timeout - reinitialize required",
+        command,
+        duration: 0,
+      };
+    }
 
     if (options.background) {
       throw new Error(
@@ -118,6 +130,23 @@ export class Bash implements BashAPI {
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
+
+      // Check if error is related to sandbox being stopped
+      if (
+        message.includes("probably not running") ||
+        message.includes("sandbox") ||
+        message.includes("timeout")
+      ) {
+        return {
+          exitCode: 1,
+          stdout,
+          stderr: stderr || "Sandbox is no longer available",
+          error: "Sandbox timeout - reinitialize required",
+          command,
+          duration: Date.now() - start,
+        };
+      }
+
       return {
         exitCode: 1,
         stdout,

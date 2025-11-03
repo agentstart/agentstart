@@ -11,7 +11,7 @@ Make sure you have SQL Server installed and configured. Then, you can connect it
 
 ```ts title="lib/agent.ts"
 import { agentStart } from "agentstart";
-import { kyselyAdapter } from "agentstart/memory";
+import { kyselyMemoryAdapter } from "agentstart/memory";
 import { Kysely, MssqlDialect } from "kysely";
 import { Pool } from "tarn";
 import * as Tedious from "tedious";
@@ -44,7 +44,7 @@ const db = new Kysely({
 
 export const start = agentStart({
   agent,
-  memory: kyselyAdapter(db, { type: "mssql" }),
+  memory: kyselyMemoryAdapter(db, { type: "mssql" }),
 });
 ```
 

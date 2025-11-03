@@ -11,7 +11,7 @@ SEARCHABLE: sandbox resolver, getSandbox, sandbox initialization
 agent-frontmatter:end */
 
 import type { AgentStartOptions, SandboxAPI } from "@agentstart/types";
-import { nodeSandboxAdapter } from "./adapters/nodejs";
+import { nodeSandboxAdapter } from "./factory/nodejs";
 
 const sandboxCache = new WeakMap<
   (options: AgentStartOptions) => Promise<SandboxAPI> | SandboxAPI,

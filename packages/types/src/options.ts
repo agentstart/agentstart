@@ -17,7 +17,7 @@ import type {
   FieldAttribute,
   Memory,
   ModelOptions,
-  SecondaryMemory,
+  SecondaryMemoryAdapter,
 } from "./memory";
 import type { SandboxAdapterFactory, SandboxAPI } from "./sandbox";
 
@@ -29,7 +29,7 @@ export interface SandboxBaseOptions {
   sandboxId?: string;
   timeout?: number;
   maxLifetime?: number;
-  secondaryMemory?: SecondaryMemory;
+  secondaryMemory?: SecondaryMemoryAdapter;
 }
 
 /**
@@ -147,9 +147,9 @@ export interface AgentStartOptions {
   memory?: Memory;
   /**
    * Optional secondary memory channel for long-lived artifacts.
-   * @type {SecondaryMemory | undefined}
+   * @type {SecondaryMemoryAdapter | undefined}
    */
-  secondaryMemory?: SecondaryMemory;
+  secondaryMemory?: SecondaryMemoryAdapter;
   /**
    * Agent instance responsible for handling conversations and tool calls.
    * @type {Agent}

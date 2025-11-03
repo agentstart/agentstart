@@ -625,7 +625,10 @@ export function Conversation({
 
   return (
     <StickToBottom
-      className={cn("relative flex size-full flex-col", className)}
+      className={cn(
+        "relative flex size-full flex-col [scrollbar-color:var(--accent)_transparent] [scrollbar-width:thin]",
+        className,
+      )}
       initial="smooth"
       resize="smooth"
       role="log"
@@ -661,7 +664,7 @@ export function Conversation({
                   <MessageContent
                     className={cn({
                       "space-y-3": message.role === "assistant",
-                      "text-base ltr:rounded-br-none rtl:rounded-bl-none":
+                      "text-base ltr:rounded-br-none! rtl:rounded-bl-none!":
                         message.role === "user",
                     })}
                     variant={

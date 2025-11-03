@@ -11,6 +11,7 @@
     "concepts/cli",
     "concepts/database",
     "concepts/sandbox",
+    "concepts/secondary-memory",
     "concepts/blob-storage",
     "concepts/typescript",
     "concepts/tools",

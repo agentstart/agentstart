@@ -16,9 +16,9 @@ import type {
 } from "@agentstart/types";
 import { AgentStartError } from "@agentstart/utils";
 import { getTables } from ".";
-import { kyselyAdapter } from "./adapter/kysely";
-import { createKyselyAdapter } from "./adapter/kysely/dialect";
-import { memoryAdapter } from "./adapter/memory";
+import { inMemoryAdapter } from "./memory/in-memory";
+import { kyselyMemoryAdapter } from "./memory/kysely";
+import { createKyselyAdapter } from "./memory/kysely/dialect";
 
 export async function getAdapter(
   options: AgentStartOptions,
@@ -33,7 +33,7 @@ export async function getAdapter(
     console.warn(
       "No database configuration provided. Using memory adapter in development",
     );
-    return memoryAdapter(memoryDB)(options);
+    return inMemoryAdapter(memoryDB)(options);
   }
 
   if (typeof options.memory === "function") {
@@ -47,7 +47,7 @@ export async function getAdapter(
       "Failed to initialize database adapter",
     );
   }
-  return kyselyAdapter(kysely, {
+  return kyselyMemoryAdapter(kysely, {
     type: databaseType || "sqlite",
   })(options);
 }

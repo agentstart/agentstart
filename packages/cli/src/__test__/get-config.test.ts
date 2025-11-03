@@ -46,12 +46,12 @@ const createAgentModuleSource = (
   options?: { defaultExport?: boolean },
 ) => {
   return `import { agentStart } from "agentstart";
-import { prismaAdapter } from "agentstart/memory";
+import { prismaMemoryAdapter } from "agentstart/memory";
 import { db } from "${dbImportPath}";
 
 ${options?.defaultExport ? "export default" : "export const start ="} agentStart({
   agent: {} as any,
-  memory: prismaAdapter(db, {
+  memory: prismaMemoryAdapter(db, {
     provider: "sqlite"
   })
 })`;
@@ -345,12 +345,12 @@ describe("getConfig", async () => {
     await fs.writeFile(
       path.join(agentPath, "agent.ts"),
       `import { agentStart } from "agentstart";
-import { prismaAdapter } from "agentstart/memory";
+import { prismaMemoryAdapter } from "agentstart/memory";
 import { db } from "prismaDbClient";
 
 export const invalidName = agentStart({
   agent: {} as any,
-  memory: prismaAdapter(db, {
+  memory: prismaMemoryAdapter(db, {
     provider: "sqlite"
   })
 })`,

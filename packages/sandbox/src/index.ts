@@ -12,6 +12,6 @@ agent-frontmatter:end */
 
 export * from "./adapter";
 // Adapter factories (recommended usage)
-export { e2bSandboxAdapter } from "./adapters/e2b";
-export { nodeSandboxAdapter } from "./adapters/nodejs";
+export { e2bSandboxAdapter } from "./factory/e2b";
+export { nodeSandboxAdapter } from "./factory/nodejs";
 export { getSandbox } from "./get-sandbox";

@@ -97,7 +97,7 @@ export const start = agentStart({
   - `vcpus` (optional): Number of virtual CPUs
 - `autoStopDelay` (optional): Auto-stop delay in milliseconds after inactivity
 
-**Important:** E2B sandboxes require `secondaryMemory` to be configured for heartbeat tracking and cross-instance sandbox reuse. The secondary memory stores sandbox heartbeat information to determine if a sandbox is still alive across different agent instances.
+**Important:** E2B sandboxes require `secondaryMemory` to be configured for heartbeat tracking and cross-instance sandbox reuse. The secondary memory stores sandbox heartbeat information to determine if a sandbox is still alive across different agent instances. See the [Secondary Memory documentation](/docs/concepts/secondary-memory) for configuration options (Redis, Upstash, Vercel KV, etc.).
 
 Environment variables:
 
@@ -392,7 +392,7 @@ await sandbox.dispose();
 ## Related Guides
 
 <Cards>
+  <Card title="Secondary Memory" href="/docs/concepts/secondary-memory" />
   <Card title="Agent Tools" href="/docs/concepts/agent-tools" />
   <Card title="Memory Adapters" href="/docs/concepts/database" />
-  <Card title="Environment Setup" href="/docs/getting-started/environment" />
 </Cards>

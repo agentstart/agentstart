@@ -260,7 +260,7 @@ export async function generateConfig({
         opts.database === "drizzle:postgresql"
       ) {
         await addDb({
-          db_code: `drizzleAdapter(db, {\nprovider: "${opts.database.replace(
+          db_code: `drizzleMemoryAdapter(db, {\nprovider: "${opts.database.replace(
             "drizzle:",
             "",
           )}",\n})`,
@@ -271,7 +271,7 @@ export async function generateConfig({
               path: "agentstart/memory",
               variables: [
                 {
-                  name: "drizzleAdapter",
+                  name: "drizzleMemoryAdapter",
                 },
               ],
             },
@@ -291,7 +291,7 @@ export async function generateConfig({
         opts.database === "prisma:postgresql"
       ) {
         await addDb({
-          db_code: `prismaAdapter(client, {\nprovider: "${opts.database.replace(
+          db_code: `prismaMemoryAdapter(client, {\nprovider: "${opts.database.replace(
             "prisma:",
             "",
           )}",\n})`,
@@ -303,7 +303,7 @@ export async function generateConfig({
               path: "agentstart/memory",
               variables: [
                 {
-                  name: "prismaAdapter",
+                  name: "prismaMemoryAdapter",
                 },
               ],
             },
@@ -319,7 +319,7 @@ export async function generateConfig({
         });
       } else if (opts.database === "mongodb") {
         await addDb({
-          db_code: `mongodbAdapter(db)`,
+          db_code: `mongodbMemoryAdapter(db)`,
           dependencies: ["mongodb"],
           envs: [`DATABASE_URL`],
           code_before_agentStart: [
@@ -331,7 +331,7 @@ export async function generateConfig({
               path: "agentstart/memory",
               variables: [
                 {
-                  name: "mongodbAdapter",
+                  name: "mongodbMemoryAdapter",
                 },
               ],
             },

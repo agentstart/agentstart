@@ -89,16 +89,6 @@ export type MemoryAdapterInstance = (
   options: AgentStartOptions,
 ) => MemoryAdapter;
 
-export interface SecondaryMemory {
-  get: (key: string) => Promise<string | null> | string | null;
-  set: (
-    key: string,
-    value: string,
-    ttl?: number,
-  ) => Promise<undefined | string | null> | undefined;
-  delete: (key: string) => Promise<undefined | string | null> | undefined;
-}
-
 type SqlitePoolLike = { prepare: (...args: unknown[]) => unknown };
 type MysqlPoolLike = { getConnection: (...args: unknown[]) => unknown };
 type PostgresPoolLike = { connect: (...args: unknown[]) => unknown };

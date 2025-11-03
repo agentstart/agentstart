@@ -118,13 +118,13 @@ npx prisma db push
 ```ts title="lib/agent.ts"
 import { PrismaClient } from "@prisma/client";
 import { agentStart } from "agentstart";
-import { prismaAdapter } from "agentstart/memory";
+import { prismaMemoryAdapter } from "agentstart/memory";
 
 const prisma = new PrismaClient();
 
 export const start = agentStart({
   agent,
-  memory: prismaAdapter(prisma, {
+  memory: prismaMemoryAdapter(prisma, {
     provider: "postgresql", // or "mysql", "sqlite", "mongodb"
   }),
 });
