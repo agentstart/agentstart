@@ -14,7 +14,10 @@ agent-frontmatter:end */
 "use client";
 
 import { CheckIcon, CopyIcon } from "@phosphor-icons/react";
-import { transformerNotationDiff } from "@shikijs/transformers";
+import {
+  transformerNotationDiff,
+  transformerNotationHighlight,
+} from "@shikijs/transformers";
 import {
   type ComponentProps,
   createContext,
@@ -71,7 +74,7 @@ export async function highlightCode(
   showLineNumbers = false,
   showDiff = false,
 ) {
-  const transformers: ShikiTransformer[] = [];
+  const transformers: ShikiTransformer[] = [transformerNotationHighlight()];
 
   if (showLineNumbers) {
     transformers.push(lineNumberTransformer);
@@ -130,7 +133,9 @@ export const CodeBlock = ({
       <div
         className={cn(
           "group relative w-full overflow-hidden rounded-md border bg-background text-foreground",
+          "[&_.highlighted]:bg-background!",
           "[&_.diff.add]:bg-green-500/10 [&_.diff.add]:text-green-600",
+          "[&_.diff.remove]:bg-red-500/10 [&_.diff.remove]:text-red-600 [&_.diff.remove]:opacity-70",
           "[&_.diff.remove]:bg-red-500/10 [&_.diff.remove]:text-red-600 [&_.diff.remove]:opacity-70",
           "dark:[&_.diff.add]:bg-green-500/20 dark:[&_.diff.add]:text-green-400",
           "dark:[&_.diff.remove]:bg-red-500/20 dark:[&_.diff.remove]:text-red-400",
@@ -139,11 +144,23 @@ export const CodeBlock = ({
         {...props}
       >
         <div
-          className="overflow-auto dark:hidden [&>pre]:m-0 [&>pre]:bg-background! [&>pre]:px-4 [&>pre]:py-2.5 [&>pre]:text-foreground! [&>pre]:text-sm [&_code]:font-mono [&_code]:text-sm"
+          className={cn(
+            "overflow-auto",
+            "[&>pre]:m-0 [&>pre]:bg-background! [&>pre]:text-foreground! [&>pre]:text-sm",
+            "[&_code]:wrap-break-word [&_code]:block [&_code]:w-full [&_code]:font-mono [&_code]:text-sm [&_code]:leading-normal",
+            "[&_.line]:inline-block [&_.line]:w-full [&_.line]:px-4",
+            "dark:hidden",
+          )}
           dangerouslySetInnerHTML={{ __html: html }}
         />
         <div
-          className="hidden overflow-auto dark:block [&>pre]:m-0 [&>pre]:bg-background! [&>pre]:px-4 [&>pre]:py-2.5 [&>pre]:text-foreground! [&>pre]:text-sm [&_code]:font-mono [&_code]:text-sm"
+          className={cn(
+            "overflow-auto",
+            "[&>pre]:m-0 [&>pre]:bg-background! [&>pre]:text-foreground! [&>pre]:text-sm",
+            "[&_code]:wrap-break-word [&_code]:block [&_code]:w-full [&_code]:font-mono [&_code]:text-sm [&_code]:leading-normal",
+            "[&_.line]:inline-block [&_.line]:w-full [&_.line]:px-4",
+            "hidden dark:block",
+          )}
           dangerouslySetInnerHTML={{ __html: darkHtml }}
         />
         {children && (
