@@ -111,6 +111,7 @@ export function Glob({ part: { state, input, output } }: GlobProps) {
           <FileMagnifyingGlassIcon weight="duotone" className="size-4" />
         }
         loading={isLoading}
+        error={output?.status === "error" || Boolean(output?.error)}
       >
         <div className="flex items-center gap-2">
           <span>Glob pattern: </span>

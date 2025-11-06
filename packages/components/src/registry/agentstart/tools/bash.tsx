@@ -91,6 +91,7 @@ export function Bash({ part: { state, input, output } }: BashProps) {
     <Steps data-tool-bash>
       <StepsTrigger
         loading={isLoading}
+        error={output?.status === "error" || Boolean(output?.error)}
         leftIcon={<CommandIcon weight="duotone" className="size-4" />}
       >
         {title}

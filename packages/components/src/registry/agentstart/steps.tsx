@@ -1,6 +1,6 @@
 "use client";
 
-import { CaretRightIcon } from "@phosphor-icons/react";
+import { CaretRightIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -27,6 +27,7 @@ export type StepsTriggerProps = React.ComponentProps<
   leftIcon?: React.ReactNode;
   swapIconOnHover?: boolean;
   loading?: boolean;
+  error?: boolean;
 };
 
 export const StepsTrigger = ({
@@ -35,14 +36,17 @@ export const StepsTrigger = ({
   leftIcon,
   swapIconOnHover = true,
   loading = false,
+  error = false,
   ...props
 }: StepsTriggerProps) => {
   const iconNode = loading ? (
     <Spinner className="size-4 text-muted-foreground" />
+  ) : error ? (
+    <WarningCircleIcon weight="duotone" className="size-4 text-red-600" />
   ) : (
     leftIcon
   );
-  const shouldSwapIconOnHover = swapIconOnHover && !loading;
+  const shouldSwapIconOnHover = swapIconOnHover && !loading && !error;
 
   return (
     <CollapsibleTrigger

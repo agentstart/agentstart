@@ -86,6 +86,7 @@ export function ReadFile({ part: { state, input, output } }: ReadFileProps) {
       <StepsTrigger
         leftIcon={<SunglassesIcon weight="duotone" className="size-4" />}
         loading={isLoading}
+        error={output?.status === "error" || Boolean(output?.error)}
       >
         {title}
       </StepsTrigger>

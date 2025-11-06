@@ -91,6 +91,7 @@ export function Ls({ part: { state, input, output } }: LsProps) {
       <StepsTrigger
         leftIcon={<FolderIcon weight="duotone" className="size-4" />}
         loading={isLoading}
+        error={output?.status === "error" || Boolean(output?.error)}
       >
         <div className="flex items-center gap-2">
           <span>Directory: </span>

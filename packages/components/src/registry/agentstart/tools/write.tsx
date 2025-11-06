@@ -78,6 +78,7 @@ export function WriteFile({ part: { state, input, output } }: WriteFileProps) {
       <StepsTrigger
         leftIcon={<NotePencilIcon weight="duotone" className="size-4" />}
         loading={isLoading}
+        error={output?.status === "error" || Boolean(output?.error)}
       >
         {title}
       </StepsTrigger>

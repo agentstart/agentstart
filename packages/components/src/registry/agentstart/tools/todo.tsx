@@ -152,6 +152,7 @@ export function Todo({ part: { state, output, errorText } }: TodoProps) {
       <StepsTrigger
         leftIcon={<KanbanIcon weight="duotone" className="size-4" />}
         loading={isLoading}
+        error={output?.status === "error" || Boolean(output?.error)}
       >
         <span>Task List</span>
       </StepsTrigger>
