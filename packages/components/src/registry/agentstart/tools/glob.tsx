@@ -11,19 +11,25 @@ FEATURES:
 SEARCHABLE: glob tool, file pattern match ui, file search results
 agent-frontmatter:end */
 
-import { FileIcon, FolderIcon } from "@phosphor-icons/react";
+import {
+  FileIcon,
+  FileMagnifyingGlassIcon,
+  FolderIcon,
+} from "@phosphor-icons/react";
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
-import { Tool, ToolContent, ToolHeader, ToolOutput } from "./tool";
+import { useCallback, useMemo } from "react";
+import { Shimmer } from "../shimmer";
+import { Steps, StepsContent, StepsItem, StepsTrigger } from "../steps";
 
 export interface GlobProps {
   part: ToolUIPart<InferUITools<Pick<Tools, "glob">>>;
 }
 
-export function Glob({
-  part: { type, state, input, output, errorText },
-}: GlobProps) {
-  const renderMatch = (match: string) => {
+export function Glob({ part: { state, input, output } }: GlobProps) {
+  const isLoading = ["input-streaming", "input-available"].includes(state);
+
+  const renderMatch = useCallback((match: string) => {
     const isDirectory = match.endsWith("/");
     const cleanPath = isDirectory ? match.slice(0, -1) : match;
     const parts = cleanPath.split("/");
@@ -43,9 +49,9 @@ export function Glob({
         </span>
       </div>
     );
-  };
+  }, []);
 
-  const renderResults = () => {
+  const results = useMemo(() => {
     if (!Array.isArray(output?.metadata?.matches)) return null;
 
     const matches = output.metadata.matches as string[];
@@ -96,14 +102,36 @@ export function Glob({
         </div>
       </div>
     );
-  };
+  }, [input?.path, input?.pattern, output?.metadata, renderMatch]);
 
   return (
-    <Tool>
-      <ToolHeader type={type} state={state} />
-      <ToolContent>
-        <ToolOutput output={renderResults()} errorText={errorText} />
-      </ToolContent>
-    </Tool>
+    <Steps data-tool-glob>
+      <StepsTrigger
+        leftIcon={
+          <FileMagnifyingGlassIcon weight="duotone" className="size-4" />
+        }
+        loading={isLoading}
+      >
+        <div className="flex items-center gap-2">
+          <span>Glob pattern: </span>
+          <code className="rounded bg-muted/50 px-1 py-0.5 font-mono text-xs">
+            {input?.pattern}
+          </code>
+        </div>
+      </StepsTrigger>
+      <StepsContent>
+        {isLoading && (
+          <StepsItem className="flex items-center gap-2 text-muted-foreground text-xs">
+            <Shimmer>Searching files...</Shimmer>
+          </StepsItem>
+        )}
+        {results && <StepsItem>{results}</StepsItem>}
+        {output?.error?.message && (
+          <StepsItem className="text-red-600 text-xs">
+            {output.error.message}
+          </StepsItem>
+        )}
+      </StepsContent>
+    </Steps>
   );
 }

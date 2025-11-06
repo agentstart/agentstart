@@ -34,6 +34,7 @@ import {
   buildGitSyncCommand,
   extractCommitHash,
   parseGitStatusPorcelain,
+  shouldSkipRemoteOperation,
 } from "../../utils/git";
 import { Bash } from "./bash";
 import { DEFAULT_WORKING_DIRECTORY } from "./constants";
@@ -269,6 +270,13 @@ NODE
    * Push to remote
    */
   async push(options?: GitSyncOptions): Promise<GitResult> {
+    // Check if remote is configured when not explicitly specified
+    if (!options?.remote) {
+      const remoteResult = await this.git("remote");
+      const skipResult = shouldSkipRemoteOperation(remoteResult, "push");
+      if (skipResult) return skipResult;
+    }
+
     const command = buildGitSyncCommand("push", options);
     return this.git(command);
   }
@@ -277,6 +285,13 @@ NODE
    * Pull from remote
    */
   async pull(options?: GitSyncOptions): Promise<GitResult> {
+    // Check if remote is configured when not explicitly specified
+    if (!options?.remote) {
+      const remoteResult = await this.git("remote");
+      const skipResult = shouldSkipRemoteOperation(remoteResult, "pull");
+      if (skipResult) return skipResult;
+    }
+
     const command = buildGitSyncCommand("pull", options);
     return this.git(command);
   }

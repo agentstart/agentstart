@@ -43,14 +43,10 @@ function useControllableState<T>({
   return [state, setValue] as const;
 }
 
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
-import { Response } from "./response";
-import { Shimmer } from "./shimmer";
+import { Response } from "../response";
+import { Shimmer } from "../shimmer";
+import { Steps, StepsContent, StepsItem, StepsTrigger } from "../steps";
 
 type ReasoningContextValue = {
   isStreaming: boolean;
@@ -69,7 +65,7 @@ const useReasoning = () => {
   return context;
 };
 
-export type ReasoningProps = ComponentProps<typeof Collapsible> & {
+export type ReasoningProps = ComponentProps<typeof Steps> & {
   isStreaming?: boolean;
   open?: boolean;
   defaultOpen?: boolean;
@@ -137,22 +133,23 @@ export const Reasoning = memo(
       <ReasoningContext.Provider
         value={{ isStreaming, isOpen, setIsOpen, duration }}
       >
-        <Collapsible
+        <Steps
+          data-tool-reasoning
           className={cn("not-prose mb-4", className)}
           onOpenChange={handleOpenChange}
           open={isOpen}
           {...props}
         >
           {children}
-        </Collapsible>
+        </Steps>
       </ReasoningContext.Provider>
     );
   },
 );
 
-export type ReasoningTriggerProps = ComponentProps<typeof CollapsibleTrigger>;
+export type ReasoningTriggerProps = ComponentProps<typeof StepsTrigger>;
 
-const getThinkingMessage = (isStreaming: boolean, duration?: number) => {
+export const getThinkingMessage = (isStreaming: boolean, duration?: number) => {
   if (isStreaming || duration === 0) {
     return <Shimmer duration={1}>Thinking...</Shimmer>;
   }
@@ -167,7 +164,9 @@ export const ReasoningTrigger = memo(
     const { isStreaming, isOpen, duration } = useReasoning();
 
     return (
-      <CollapsibleTrigger
+      <StepsTrigger
+        leftIcon={<BrainIcon className="size-4" weight="duotone" />}
+        loading={isStreaming}
         className={cn(
           "flex w-full items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground",
           className,
@@ -176,7 +175,6 @@ export const ReasoningTrigger = memo(
       >
         {children ?? (
           <>
-            <BrainIcon className="size-4" weight="duotone" />
             {getThinkingMessage(isStreaming, duration)}
             <CaretDownIcon
               className={cn(
@@ -186,29 +184,28 @@ export const ReasoningTrigger = memo(
             />
           </>
         )}
-      </CollapsibleTrigger>
+      </StepsTrigger>
     );
   },
 );
 
-export type ReasoningContentProps = ComponentProps<
-  typeof CollapsibleContent
-> & {
+export type ReasoningContentProps = ComponentProps<typeof StepsContent> & {
   children: string;
 };
 
 export const ReasoningContent = memo(
   ({ className, children, ...props }: ReasoningContentProps) => (
-    <CollapsibleContent
+    <StepsContent
       className={cn(
-        "mt-4 text-sm",
-        "data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 text-muted-foreground outline-none data-[state=closed]:animate-out data-[state=open]:animate-in",
+        "data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 text-muted-foreground text-sm outline-none data-[state=closed]:animate-out data-[state=open]:animate-in",
         className,
       )}
       {...props}
     >
-      <Response className="grid gap-2">{children}</Response>
-    </CollapsibleContent>
+      <StepsItem>
+        <Response className="grid gap-2">{children}</Response>
+      </StepsItem>
+    </StepsContent>
   ),
 );
 

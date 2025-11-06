@@ -520,7 +520,7 @@ export function Conversation({
 
     return (
       <>
-        <div className="mt-2 flex w-full items-center justify-start gap-1 opacity-0 group-hover:opacity-100">
+        <div className="flex w-full items-center justify-start gap-1 opacity-0 group-hover:opacity-100">
           <Button
             className="size-7"
             size="icon-sm"

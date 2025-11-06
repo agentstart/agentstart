@@ -123,11 +123,11 @@ export const CodeBlock = ({
         {...props}
       >
         <div
-          className="dark:hidden [&>pre]:m-0 [&>pre]:bg-background! [&>pre]:px-4 [&>pre]:py-2.5 [&>pre]:text-foreground! [&>pre]:text-sm [&_code]:font-mono [&_code]:text-sm"
+          className="overflow-auto dark:hidden [&>pre]:m-0 [&>pre]:bg-background! [&>pre]:px-4 [&>pre]:py-2.5 [&>pre]:text-foreground! [&>pre]:text-sm [&_code]:font-mono [&_code]:text-sm"
           dangerouslySetInnerHTML={{ __html: html }}
         />
         <div
-          className="hidden overflow-hidden dark:block [&>pre]:m-0 [&>pre]:bg-background! [&>pre]:px-4 [&>pre]:py-2.5 [&>pre]:text-foreground! [&>pre]:text-sm [&_code]:font-mono [&_code]:text-sm"
+          className="hidden overflow-auto dark:block [&>pre]:m-0 [&>pre]:bg-background! [&>pre]:px-4 [&>pre]:py-2.5 [&>pre]:text-foreground! [&>pre]:text-sm [&_code]:font-mono [&_code]:text-sm"
           dangerouslySetInnerHTML={{ __html: darkHtml }}
         />
         {children && (

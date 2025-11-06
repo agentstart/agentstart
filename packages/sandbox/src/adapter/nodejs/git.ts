@@ -36,6 +36,7 @@ import {
   buildGitSyncCommand,
   extractCommitHash,
   parseGitStatusPorcelain,
+  shouldSkipRemoteOperation,
 } from "../../utils/git";
 
 import { Bash } from "./bash";
@@ -250,7 +251,21 @@ export class Git implements GitAPI {
       update?: boolean;
     },
   ): Promise<GitResult> {
-    const command = buildGitAddCommand(files, options);
+    // Convert absolute paths to relative paths
+    const fileList = Array.isArray(files) ? files : [files];
+    const relativePaths = fileList.map((file) => {
+      // If it's an absolute path, make it relative to workingDirectory
+      if (path.isAbsolute(file)) {
+        return path.relative(this.workingDirectory, file);
+      }
+      return file;
+    });
+
+    const command = buildGitAddCommand(
+      relativePaths.length === 1 ? relativePaths[0]! : relativePaths,
+      options,
+      (file) => `"${file.replace(/"/g, '\\"')}"`,
+    );
     const result = await this.runGitCommand(command);
 
     return {
@@ -284,6 +299,13 @@ export class Git implements GitAPI {
    * Push commits to remote repository
    */
   async push(options?: GitSyncOptions): Promise<GitResult> {
+    // Check if remote is configured when not explicitly specified
+    if (!options?.remote) {
+      const remoteResult = await this.runGitCommand("remote");
+      const skipResult = shouldSkipRemoteOperation(remoteResult, "push");
+      if (skipResult) return skipResult;
+    }
+
     const command = buildGitSyncCommand("push", options);
     const result = await this.runGitCommand(command);
 
@@ -299,6 +321,13 @@ export class Git implements GitAPI {
    * Pull changes from remote repository
    */
   async pull(options?: GitSyncOptions): Promise<GitResult> {
+    // Check if remote is configured when not explicitly specified
+    if (!options?.remote) {
+      const remoteResult = await this.runGitCommand("remote");
+      const skipResult = shouldSkipRemoteOperation(remoteResult, "pull");
+      if (skipResult) return skipResult;
+    }
+
     const command = buildGitSyncCommand("pull", options);
     const result = await this.runGitCommand(command);
 

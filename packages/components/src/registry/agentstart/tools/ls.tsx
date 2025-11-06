@@ -15,16 +15,18 @@ import { formatDate, formatSize } from "@agentstart/utils";
 import { FileIcon, FolderIcon, LinkIcon } from "@phosphor-icons/react";
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
-import { Tool, ToolContent, ToolHeader, ToolOutput } from "./tool";
+import { useCallback, useMemo } from "react";
+import { Shimmer } from "../shimmer";
+import { Steps, StepsContent, StepsItem, StepsTrigger } from "../steps";
 
 export interface LsProps {
   part: ToolUIPart<InferUITools<Pick<Tools, "ls">>>;
 }
 
-export function Ls({
-  part: { type, state, input, output, errorText },
-}: LsProps) {
-  const getIcon = (entryType: "file" | "directory" | "symlink") => {
+export function Ls({ part: { state, input, output } }: LsProps) {
+  const isLoading = ["input-streaming", "input-available"].includes(state);
+
+  const getIcon = useCallback((entryType: "file" | "directory" | "symlink") => {
     switch (entryType) {
       case "directory":
         return <FolderIcon className="size-4" weight="duotone" />;
@@ -33,9 +35,9 @@ export function Ls({
       default:
         return <FileIcon className="size-4" weight="duotone" />;
     }
-  };
+  }, []);
 
-  const renderEntries = () => {
+  const entries = useMemo(() => {
     if (!Array.isArray(output?.metadata?.entries)) return null;
     type LsEntry = {
       type: "file" | "directory" | "symlink";
@@ -46,13 +48,9 @@ export function Ls({
     const entries = output.metadata.entries as LsEntry[];
 
     return (
-      <div className="mt-1">
-        <div className="mb-1 text-muted-foreground text-xs">
-          {output.metadata?.count || 0} item
-          {(output.metadata?.count || 0) !== 1 && "s"}
-        </div>
+      <div>
         {entries.length > 0 ? (
-          <div className="max-h-[400px] space-y-0.5 overflow-y-auto font-mono text-xs">
+          <div className="space-y-0.5 font-mono text-xs">
             {entries.map((entry, index) => (
               <div
                 key={`${entry.name}-${index}`}
@@ -68,8 +66,8 @@ export function Ls({
                 <span
                   className={
                     entry.type === "directory"
-                      ? "font-medium text-blue-600"
-                      : ""
+                      ? "font-medium text-muted-foreground"
+                      : "text-foreground"
                   }
                 >
                   {entry.name}
@@ -86,25 +84,36 @@ export function Ls({
         )}
       </div>
     );
-  };
+  }, [getIcon, output?.metadata]);
 
   return (
-    <Tool>
-      <ToolHeader type={type} state={state} />
-      <ToolContent>
-        <ToolOutput
-          output={
-            <div>
-              <div className="mb-2 text-xs">
-                <span className="text-muted-foreground">Directory: </span>
-                <code className="font-mono">{input?.path || "/"}</code>
-              </div>
-              {renderEntries()}
-            </div>
-          }
-          errorText={errorText}
-        />
-      </ToolContent>
-    </Tool>
+    <Steps data-tool-ls>
+      <StepsTrigger
+        leftIcon={<FolderIcon weight="duotone" className="size-4" />}
+        loading={isLoading}
+      >
+        <div className="flex items-center gap-2">
+          <span>Directory: </span>
+          <code className="font-mono text-xs">{input?.path || "/"}</code>
+          <div className="text-muted-foreground text-xs">
+            {output?.metadata?.count || 0} item
+            {(output?.metadata?.count || 0) !== 1 && "s"}
+          </div>
+        </div>
+      </StepsTrigger>
+      <StepsContent>
+        {isLoading && (
+          <StepsItem className="flex items-center gap-2 text-muted-foreground text-xs">
+            <Shimmer>Listing directory...</Shimmer>
+          </StepsItem>
+        )}
+        <StepsItem>{entries}</StepsItem>
+        {output?.error?.message && (
+          <StepsItem className="text-red-600 text-xs">
+            {output.error.message}
+          </StepsItem>
+        )}
+      </StepsContent>
+    </Steps>
   );
 }

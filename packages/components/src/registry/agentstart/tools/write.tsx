@@ -12,66 +12,88 @@ SEARCHABLE: write tool, file creation ui, save file view
 agent-frontmatter:end */
 
 import { getLanguageFromFilePath } from "@agentstart/utils";
-import { FileIcon } from "@phosphor-icons/react";
+import { NotePencilIcon } from "@phosphor-icons/react";
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
+import { useMemo } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { CodeBlock } from "../code-block";
-import { Tool, ToolContent, ToolHeader, ToolOutput } from "./tool";
+import { Shimmer } from "../shimmer";
+import { Steps, StepsContent, StepsItem, StepsTrigger } from "../steps";
 
 export interface WriteFileProps {
   part: ToolUIPart<InferUITools<Pick<Tools, "write">>>;
 }
 
-export function WriteFile({
-  part: { type, state, input, errorText },
-}: WriteFileProps) {
+export function WriteFile({ part: { state, input, output } }: WriteFileProps) {
   const fileName = input?.filePath?.split("/").pop() || input?.filePath;
+  const fileContent = input?.content?.replace(/\\n/g, "\n");
+  const isLoading = ["input-streaming", "input-available"].includes(state);
 
-  const previewContent = () => {
-    if (!input?.content) return null;
-    const lines = input.content.split("\n");
+  const preview = useMemo(() => {
+    if (!input || !fileContent) return null;
+    const lines = fileContent.split("\n");
     const maxLines = 10;
     const preview = lines.slice(0, maxLines).join("\n");
     const hasMore = lines.length > maxLines;
     const language = getLanguageFromFilePath(input.filePath);
 
     return (
-      <div className="mt-2">
+      <>
         <CodeBlock
           code={preview}
           language={language}
-          className="max-h-[200px] overflow-auto text-xs"
+          className="max-h-[200px] text-xs"
         />
         {hasMore && (
           <span className="mt-1 block text-muted-foreground text-xs">
             ... and {lines.length - maxLines} more lines
           </span>
         )}
+      </>
+    );
+  }, [input, fileContent]);
+
+  const title = useMemo(() => {
+    if (!input || !fileContent) return null;
+
+    const lineNumber = fileContent.split("\n").length ?? 0;
+    return (
+      <div className="flex items-center gap-2">
+        <Tooltip>
+          <TooltipTrigger render={<span>{fileName}</span>} />
+          {input?.filePath && <TooltipContent>{input.filePath}</TooltipContent>}
+        </Tooltip>
+        <span className="text-green-600">(new) +{lineNumber}</span>
       </div>
     );
-  };
+  }, [input, fileName, fileContent]);
 
   return (
-    <Tool>
-      <ToolHeader type={type} state={state} />
-      <ToolContent>
-        <ToolOutput
-          output={
-            <div>
-              <div className="mb-2 flex items-center gap-2">
-                <FileIcon className="size-4" weight="duotone" />
-                <code className="text-xs">{fileName}</code>
-                {/* {state === "output-available" &&
-                  output?.metadata?.commitHash && (
-                    <CommitHash hash={output?.metadata?.commitHash} />
-                  )} */}
-              </div>
-              {previewContent()}
-            </div>
-          }
-          errorText={errorText}
-        />
-      </ToolContent>
-    </Tool>
+    <Steps data-tool-write>
+      <StepsTrigger
+        leftIcon={<NotePencilIcon weight="duotone" className="size-4" />}
+        loading={isLoading}
+      >
+        {title}
+      </StepsTrigger>
+      <StepsContent>
+        {isLoading && (
+          <StepsItem className="flex items-center gap-2 text-muted-foreground text-xs">
+            <Shimmer>Writing file...</Shimmer>
+          </StepsItem>
+        )}
+        {preview && <StepsItem>{preview}</StepsItem>}
+        {output?.error?.message && (
+          <StepsItem className="text-red-600 text-xs">
+            {output.error.message}
+          </StepsItem>
+        )}
+      </StepsContent>
+    </Steps>
   );
 }

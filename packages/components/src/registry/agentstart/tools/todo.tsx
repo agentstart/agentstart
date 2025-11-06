@@ -15,13 +15,16 @@ import {
   CheckIcon,
   CircleIcon,
   ClockIcon,
+  KanbanIcon,
   WarningIcon,
 } from "@phosphor-icons/react";
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
 import type React from "react";
+import { useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { Tool, ToolContent, ToolHeader, ToolOutput } from "./tool";
+import { Shimmer } from "../shimmer";
+import { Steps, StepsContent, StepsItem, StepsTrigger } from "../steps";
 
 const statusOrder = ["inProgress", "pending", "completed"];
 
@@ -60,39 +63,45 @@ export interface TodoProps {
     | ToolUIPart<InferUITools<Pick<Tools, "todoWrite">>>;
 }
 
-export function Todo({ part: { type, state, output, errorText } }: TodoProps) {
-  if (!output) {
-    return (
-      <Tool>
-        <ToolHeader type={type} state={state} />
-        <ToolContent>
-          <ToolOutput output={null} errorText={errorText} />
-        </ToolContent>
-      </Tool>
-    );
-  }
+export function Todo({ part: { state, output, errorText } }: TodoProps) {
+  const isLoading = ["input-streaming", "input-available"].includes(state);
 
-  const todos = output.metadata?.todos || [];
+  const todos = output?.metadata?.todos || [];
 
   const groupedTodos = todos.reduce(
     (acc, todo) => {
-      if (!acc[todo.status]) {
-        acc[todo.status] = [];
-      }
-      acc[todo.status]!.push(todo);
-      return acc;
+      const group = acc[todo.status] || [];
+      return {
+        ...acc,
+        [todo.status]: [...group, todo],
+      };
     },
     {} as Record<string, typeof todos>,
   );
 
-  const todoListContent = errorText ? (
-    <div className="flex items-center gap-2 text-red-600">
-      <WarningIcon className="size-4" weight="duotone" />
-      <span className="text-xs">{errorText}</span>
-    </div>
-  ) : (
-    <>
-      {/* Todo Items */}
+  const todoListContent = useMemo(() => {
+    if (output?.error) {
+      return (
+        <div className="flex items-center gap-2 text-red-600">
+          <WarningIcon className="size-4" weight="duotone" />
+          <span className="text-xs">{output.prompt}</span>
+        </div>
+      );
+    }
+
+    if (!output) {
+      return null;
+    }
+
+    if (todos.length === 0) {
+      return (
+        <div className="text-muted-foreground text-xs italic">
+          No tasks in the list
+        </div>
+      );
+    }
+
+    return (
       <div className="space-y-3">
         {statusOrder.map((status) => {
           const statusTodos = groupedTodos[status];
@@ -135,21 +144,30 @@ export function Todo({ part: { type, state, output, errorText } }: TodoProps) {
           );
         })}
       </div>
-
-      {todos.length === 0 && (
-        <div className="text-muted-foreground text-xs italic">
-          No tasks in the list
-        </div>
-      )}
-    </>
-  );
+    );
+  }, [output, todos.length, groupedTodos]);
 
   return (
-    <Tool>
-      <ToolHeader type={type} state={state} />
-      <ToolContent>
-        <ToolOutput output={todoListContent} errorText={errorText} />
-      </ToolContent>
-    </Tool>
+    <Steps data-tool-todo>
+      <StepsTrigger
+        leftIcon={<KanbanIcon weight="duotone" className="size-4" />}
+        loading={isLoading}
+      >
+        <span>Task List</span>
+      </StepsTrigger>
+      <StepsContent>
+        {isLoading && (
+          <StepsItem className="flex items-center gap-2 text-muted-foreground text-xs">
+            <Shimmer>
+              {output ? "Updating tasks..." : "Loading tasks..."}
+            </Shimmer>
+          </StepsItem>
+        )}
+        {errorText && (
+          <StepsItem className="text-red-600 text-xs">{errorText}</StepsItem>
+        )}
+        {todoListContent && <StepsItem>{todoListContent}</StepsItem>}
+      </StepsContent>
+    </Steps>
   );
 }

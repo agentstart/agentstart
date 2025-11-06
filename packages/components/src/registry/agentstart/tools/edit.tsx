@@ -15,24 +15,31 @@ import { getLanguageFromFilePath } from "@agentstart/utils";
 import { SwapIcon } from "@phosphor-icons/react";
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
+import { useMemo } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { CodeBlock } from "../code-block";
-import { Tool, ToolContent, ToolHeader, ToolOutput } from "./tool";
+import { Shimmer } from "../shimmer";
+import { Steps, StepsContent, StepsItem, StepsTrigger } from "../steps";
 
 export interface EditFileProps {
   part: ToolUIPart<InferUITools<Pick<Tools, "edit">>>;
 }
 
-export function EditFile({
-  part: { type, state, input, errorText },
-}: EditFileProps) {
+export function EditFile({ part: { state, input, output } }: EditFileProps) {
   const fileName = input?.filePath?.split("/").pop() || input?.filePath;
 
   const language = getLanguageFromFilePath(input?.filePath || "");
 
+  const isLoading = ["input-streaming", "input-available"].includes(state);
+
   const shouldShowCodeBlock = (str: string | undefined) =>
     Boolean(str && (str.includes("\n") || str.length > 50));
 
-  const renderChanges = () => {
+  const changes = useMemo(() => {
     if (!input) return null;
 
     return (
@@ -46,7 +53,7 @@ export function EditFile({
               <CodeBlock
                 code={input.oldString}
                 language={language}
-                className="max-h-[150px] overflow-auto text-xs opacity-60"
+                className="max-h-[150px] text-xs opacity-60"
               />
             ) : (
               <div className="rounded bg-muted/50 p-2 text-muted-foreground text-xs">
@@ -63,7 +70,7 @@ export function EditFile({
               <CodeBlock
                 code={input.newString}
                 language={language}
-                className="max-h-[150px] overflow-auto text-xs"
+                className="max-h-[150px] text-xs"
               />
             ) : (
               <div className="rounded bg-green-50 p-2 text-green-600 text-xs dark:bg-green-900/20">
@@ -74,34 +81,51 @@ export function EditFile({
         )}
       </div>
     );
-  };
+  }, [input, language]);
 
   return (
-    <Tool>
-      <ToolHeader type={type} state={state} />
-      <ToolContent>
-        <ToolOutput
-          output={
-            <div>
-              <div className="mb-2 flex items-center gap-2">
-                <SwapIcon className="size-4" weight="duotone" />
-                <code className="text-xs">{fileName}</code>
-                {input?.replaceAll && (
-                  <span className="text-muted-foreground text-xs">
-                    (replace all)
-                  </span>
-                )}
-                {/* {state === "output-available" &&
-                  output?.metadata?.commitHash && (
-                    <CommitHash hash={output?.metadata?.commitHash} />
-                  )} */}
-              </div>
-              {renderChanges()}
-            </div>
-          }
-          errorText={errorText}
-        />
-      </ToolContent>
-    </Tool>
+    <Steps data-tool-edit>
+      <StepsTrigger
+        leftIcon={<SwapIcon weight="duotone" className="size-4" />}
+        loading={isLoading}
+      >
+        <div className="flex items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger
+              render={<code className="text-xs">{fileName}</code>}
+            />
+            {input?.filePath && (
+              <TooltipContent>{input.filePath}</TooltipContent>
+            )}
+          </Tooltip>
+          {input?.replaceAll && (
+            <span className="text-muted-foreground text-xs">(replace all)</span>
+          )}
+        </div>
+      </StepsTrigger>
+      <StepsContent>
+        {isLoading && (
+          <StepsItem className="flex items-center gap-2 text-muted-foreground text-xs">
+            <Shimmer>Editing file...</Shimmer>
+          </StepsItem>
+        )}
+        <StepsItem>
+          <div className="flex items-center gap-2">
+            <code className="text-xs">{fileName}</code>
+            {input?.replaceAll && (
+              <span className="text-muted-foreground text-xs">
+                (replace all)
+              </span>
+            )}
+          </div>
+        </StepsItem>
+        {changes && <StepsItem>{changes}</StepsItem>}
+        {output?.error?.message && (
+          <StepsItem className="text-red-600 text-xs">
+            {output.error.message}
+          </StepsItem>
+        )}
+      </StepsContent>
+    </Steps>
   );
 }

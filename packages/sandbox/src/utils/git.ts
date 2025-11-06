@@ -2,17 +2,19 @@
 AGENT: Sandbox git helpers
 PURPOSE: Share git command builders and parsers across sandbox adapters
 USAGE: Import to construct common git CLI strings or parse porcelain output
-EXPORTS: buildGitAddCommand, buildGitCheckoutCommand, buildGitCloneCommand, buildGitCommitCommand, buildGitFetchCommand, buildGitInitCommand, buildGitSyncCommand, extractCommitHash, parseGitStatusPorcelain
+EXPORTS: buildGitAddCommand, buildGitCheckoutCommand, buildGitCloneCommand, buildGitCommitCommand, buildGitFetchCommand, buildGitInitCommand, buildGitSyncCommand, extractCommitHash, parseGitStatusPorcelain, shouldSkipRemoteOperation
 FEATURES:
   - Normalizes git command string construction
   - Provides porcelain status parsing utilities
   - Shares commit hash extraction helpers
+  - Validates remote configuration for push/pull operations
 SEARCHABLE: sandbox git utils, git command builder, porcelain status parser
 agent-frontmatter:end */
 
 import type {
   GitCloneOptions,
   GitCommitOptions,
+  GitResult,
   GitStatus,
   GitSyncOptions,
 } from "@agentstart/types";
@@ -102,7 +104,43 @@ export const buildGitCommitCommand = (options: GitCommitOptions): string => {
     command += ` --author="${options.author.name} <${options.author.email}>"`;
   }
 
-  command += ` -m "${escapeDoubleQuotes(options.message)}"`;
+  // Split message into paragraphs (separated by double newlines)
+  // This allows Git to format the commit message properly
+  const MAX_MESSAGE_LENGTH = 5000; // Total message length limit
+  const MAX_SUBJECT_LENGTH = 72; // First line (subject) length limit
+
+  let message = options.message;
+
+  // Truncate if message is too long
+  if (message.length > MAX_MESSAGE_LENGTH) {
+    message = message.substring(0, MAX_MESSAGE_LENGTH);
+    console.warn(
+      `Commit message truncated to ${MAX_MESSAGE_LENGTH} characters`,
+    );
+  }
+
+  // Split into paragraphs by double newlines
+  const paragraphs = message
+    .split(/\n\n+/) // Split by one or more empty lines
+    .map((p) => p.trim())
+    .filter((p) => p.length > 0);
+
+  // Use multiple -m flags for better formatting
+  // Git will automatically add blank lines between paragraphs
+  for (let i = 0; i < paragraphs.length; i++) {
+    const paragraph = paragraphs[i]!;
+
+    // For the first paragraph (subject line), enforce stricter limit
+    if (i === 0 && paragraph.length > MAX_SUBJECT_LENGTH) {
+      const truncated = `${paragraph.substring(0, MAX_SUBJECT_LENGTH - 3)}...`;
+      command += ` -m "${escapeDoubleQuotes(truncated)}"`;
+      console.warn(
+        `Commit subject line truncated to ${MAX_SUBJECT_LENGTH} characters`,
+      );
+    } else {
+      command += ` -m "${escapeDoubleQuotes(paragraph)}"`;
+    }
+  }
 
   return command;
 };
@@ -258,4 +296,49 @@ export const parseGitStatusPorcelain = (output: string): GitStatus => {
   }
 
   return status;
+};
+
+/**
+ * Determines whether a remote operation (push/pull) should be skipped
+ * based on the result of checking for configured remotes.
+ *
+ * This helper function provides a consistent way to handle missing remote
+ * configuration across different git adapters (nodejs, e2b, etc.).
+ *
+ * Usage:
+ * ```typescript
+ * const remoteResult = await this.runGitCommand("remote");
+ * const skipResult = shouldSkipRemoteOperation(remoteResult, "push");
+ * if (skipResult) return skipResult;
+ * ```
+ *
+ * @param remoteCheckResult - Result from executing `git remote` command
+ * @param operation - Type of operation being attempted ("push" or "pull")
+ * @returns GitResult with skip message if no remote configured, undefined otherwise
+ */
+export const shouldSkipRemoteOperation = (
+  remoteCheckResult: {
+    success?: boolean;
+    exitCode?: number;
+    stdout?: string;
+    message?: string;
+  },
+  operation: "push" | "pull",
+): GitResult | undefined => {
+  // Check if remote check succeeded and has output
+  const hasRemote =
+    (remoteCheckResult.success ||
+      remoteCheckResult.exitCode === 0 ||
+      remoteCheckResult.exitCode === undefined) &&
+    (remoteCheckResult.stdout?.trim().length ?? 0) > 0;
+
+  if (!hasRemote) {
+    return {
+      success: true,
+      message: `Skipped ${operation}: No remote repository configured. Use git.addRemote() or git.remote() to add one.`,
+      exitCode: 0,
+    };
+  }
+
+  return undefined;
 };

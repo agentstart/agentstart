@@ -15,15 +15,16 @@ import { FileIcon, HashIcon } from "@phosphor-icons/react";
 import type { Tools } from "agentstart/agent";
 import type { InferUITools, ToolUIPart } from "ai";
 import { CodeBlock } from "../code-block";
-import { Tool, ToolContent, ToolHeader, ToolOutput } from "./tool";
+import { Shimmer } from "../shimmer";
+import { Steps, StepsContent, StepsItem, StepsTrigger } from "../steps";
 
 export interface GrepProps {
   part: ToolUIPart<InferUITools<Pick<Tools, "grep">>>;
 }
 
-export function Grep({
-  part: { type, state, input, output, errorText },
-}: GrepProps) {
+export function Grep({ part: { state, input, output } }: GrepProps) {
+  const isLoading = ["input-streaming", "input-available"].includes(state);
+
   const getOutputModeLabel = () => {
     switch (input?.outputMode) {
       case "content":
@@ -137,7 +138,7 @@ export function Grep({
         <CodeBlock
           code={content}
           language="markdown"
-          className="max-h-[400px] overflow-auto text-xs"
+          className="max-h-[400px] text-xs"
         />
       </div>
     );
@@ -181,11 +182,31 @@ export function Grep({
   };
 
   return (
-    <Tool>
-      <ToolHeader type={type} state={state} />
-      <ToolContent>
-        <ToolOutput output={renderResults()} errorText={errorText} />
-      </ToolContent>
-    </Tool>
+    <Steps data-tool-grep>
+      <StepsTrigger
+        leftIcon={<HashIcon weight="duotone" className="size-4" />}
+        loading={isLoading}
+      >
+        <div className="flex items-center gap-2">
+          <span>Search pattern: </span>
+          <code className="rounded bg-muted/50 px-1 py-0.5 font-mono text-xs">
+            {input?.pattern}
+          </code>
+        </div>
+      </StepsTrigger>
+      <StepsContent>
+        {isLoading && (
+          <StepsItem className="flex items-center gap-2 text-muted-foreground text-xs">
+            <Shimmer>Searching code...</Shimmer>
+          </StepsItem>
+        )}
+        <StepsItem>{renderResults()}</StepsItem>
+        {output?.error?.message && (
+          <StepsItem className="text-red-600 text-xs">
+            {output.error.message}
+          </StepsItem>
+        )}
+      </StepsContent>
+    </Steps>
   );
 }

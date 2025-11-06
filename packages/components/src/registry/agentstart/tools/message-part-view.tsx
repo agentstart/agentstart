@@ -11,22 +11,21 @@ FEATURES:
 SEARCHABLE: message view, tool renderer, part dispatcher, ui orchestrator
 agent-frontmatter:end */
 
-import { BrainIcon } from "@phosphor-icons/react";
 import type { AgentStartMessagePart } from "agentstart/agent";
 import { memo } from "react";
-import {
-  Reasoning as BaseReasoning,
-  ReasoningContent,
-  ReasoningTrigger,
-} from "../reasoning";
 import { Response } from "../response";
-import { Shimmer } from "../shimmer";
 import { Bash } from "./bash";
 import { EditFile } from "./edit";
 import { Glob } from "./glob";
 import { Grep } from "./grep";
 import { Ls } from "./ls";
 import { ReadFile } from "./read";
+import {
+  Reasoning as BaseReasoning,
+  getThinkingMessage,
+  ReasoningContent,
+  ReasoningTrigger,
+} from "./reasoning";
 import { Todo } from "./todo";
 import { WriteFile } from "./write";
 
@@ -83,27 +82,13 @@ function Reasoning({
   text: string;
   isStreaming: boolean;
 }) {
-  const getThinkingMessage = (isStreaming: boolean, duration?: number) => {
-    if (isStreaming || duration === 0) {
-      return <Shimmer duration={1}>Thinking...</Shimmer>;
-    }
-    return duration === undefined ? (
-      <p>Thought for a few seconds</p>
-    ) : (
-      <p>Thought for {duration} seconds</p>
-    );
-  };
-
   return (
     <BaseReasoning
       className={className}
       isStreaming={isStreaming}
       defaultOpen={false}
     >
-      <ReasoningTrigger>
-        <BrainIcon className="size-4" weight="duotone" />
-        {getThinkingMessage(isStreaming)}
-      </ReasoningTrigger>
+      <ReasoningTrigger>{getThinkingMessage(isStreaming)}</ReasoningTrigger>
       <ReasoningContent>{text}</ReasoningContent>
     </BaseReasoning>
   );

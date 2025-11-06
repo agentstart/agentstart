@@ -456,7 +456,8 @@ function PromptInputTextarea({
     <textarea
       data-slot="textarea"
       className={cn(
-        "field-sizing-content min-h-17.5 w-full resize-none rounded-[inherit] px-[calc(--spacing(3)-1px)] py-[calc(--spacing(1.5)-1px)] outline-none max-sm:min-h-20.5",
+        "field-sizing-content min-h-17.5 w-full resize-none rounded-[inherit] px-[calc(--spacing(3)-1px)] py-[calc(--spacing(1.5)-1px)] outline-none [scrollbar-color:var(--accent)_transparent] [scrollbar-width:thin] max-sm:min-h-20.5",
+        className,
       )}
       name="message"
       onCompositionEnd={() => setIsComposing(false)}
@@ -1065,13 +1066,13 @@ export function PromptInput({
         <div
           data-slot="textarea-control"
           className={cn(
-            "field-sizing-content relative inline-flex max-h-60 min-h-24 w-full flex-col rounded-[18px] border border-input bg-background bg-clip-padding p-2! text-base shadow-xs transition-all duration-300 has-focus-visible:has-aria-invalid:border-destructive/64 has-aria-invalid:border-destructive/36 has-focus-visible:border-ring has-disabled:opacity-64 sm:text-sm dark:bg-input/32 dark:bg-clip-border [&:has(:disabled,:focus-visible,[aria-invalid])]:shadow-none",
+            "field-sizing-content relative inline-flex max-h-60 min-h-24 w-full flex-col overflow-hidden rounded-[18px] border border-input bg-background bg-clip-padding text-base shadow-xs transition-all duration-300 has-focus-visible:has-aria-invalid:border-destructive/64 has-aria-invalid:border-destructive/36 has-focus-visible:border-ring has-disabled:opacity-64 sm:text-sm dark:bg-input/32 dark:bg-clip-border [&:has(:disabled,:focus-visible,[aria-invalid])]:shadow-none",
             className,
           )}
         >
           {/* Textarea */}
           <PromptInputTextarea
-            className="rounded-inherit bg-background px-4"
+            className="px-4 pt-2"
             placeholder="Ask anything"
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -1081,7 +1082,7 @@ export function PromptInput({
             autoFocus
           />
           {/* Addon */}
-          <div className="flex items-center justify-between gap-1 px-2 pb-1">
+          <div className="flex items-center justify-between gap-1 px-4 pb-3">
             <AddAttachmentsMenu onOpenFileDialog={openFileDialog} />
             <div className="flex items-center gap-2">
               {showUsage && usageSummary ? (
