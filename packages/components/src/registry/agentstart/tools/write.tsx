@@ -38,23 +38,27 @@ export function WriteFile({ part: { state, input, output } }: WriteFileProps) {
     if (!input || !fileContent) return null;
     const lines = fileContent.split("\n");
     const maxLines = 10;
-    const preview = lines.slice(0, maxLines).join("\n");
     const hasMore = lines.length > maxLines;
     const language = getLanguageFromFilePath(input.filePath);
 
+    const previewLines = lines.slice(0, maxLines);
+
+    // Generate diff code with all lines marked as additions
+    const diffLines = previewLines.map((line) => `${line} // [!code ++]`);
+    if (hasMore) {
+      diffLines.push(
+        `// ... and ${lines.length - maxLines} more lines // [!code highlight]`,
+      );
+    }
+    const diffCode = diffLines.join("\n");
+
     return (
-      <>
-        <CodeBlock
-          code={preview}
-          language={language}
-          className="max-h-[200px] text-xs"
-        />
-        {hasMore && (
-          <span className="mt-1 block text-muted-foreground text-xs">
-            ... and {lines.length - maxLines} more lines
-          </span>
-        )}
-      </>
+      <CodeBlock
+        code={diffCode}
+        language={language}
+        showDiff
+        className="max-h-[200px] text-xs"
+      />
     );
   }, [input, fileContent]);
 

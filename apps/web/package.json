@@ -17,6 +17,7 @@
     "@hookform/resolvers": "catalog:",
     "@orpc/tanstack-query": "catalog:",
     "@phosphor-icons/react": "catalog:",
+    "@shikijs/transformers": "catalog:",
     "@tanstack/react-query": "catalog:",
     "agentstart": "workspace:*",
     "ai": "catalog:",

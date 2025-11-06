@@ -1,14 +1,14 @@
 /* agent-frontmatter:start
 AGENT: Edit file tool UI component
-PURPOSE: Visualize file edit operations with before/after code snippets
+PURPOSE: Visualize file edit operations with unified diff view
 USAGE: <EditFile part={toolPart} />
 EXPORTS: EditFile, EditFileProps
 FEATURES:
-  - Shows old and new string replacements with syntax highlighting
+  - Shows unified diff with syntax highlighting
   - Displays file path and operation type (replace/replaceAll)
-  - Conditionally renders code blocks for multiline changes
+  - Uses [!code --] and [!code ++] markers for changes
   - Supports replace_all flag visualization
-SEARCHABLE: edit tool, file edit ui, code replacement view
+SEARCHABLE: edit tool, file edit ui, code replacement view, diff view
 agent-frontmatter:end */
 
 import { getLanguageFromFilePath } from "@agentstart/utils";
@@ -36,50 +36,24 @@ export function EditFile({ part: { state, input, output } }: EditFileProps) {
 
   const isLoading = ["input-streaming", "input-available"].includes(state);
 
-  const shouldShowCodeBlock = (str: string | undefined) =>
-    Boolean(str && (str.includes("\n") || str.length > 50));
-
   const changes = useMemo(() => {
-    if (!input) return null;
+    if (!input || !input.oldString || !input.newString) return null;
+
+    // Always show as unified diff
+    const oldLines = input.oldString.split("\n");
+    const newLines = input.newString.split("\n");
+    const diffCode = [
+      ...oldLines.map((line) => `${line} // [!code --]`),
+      ...newLines.map((line) => `${line} // [!code ++]`),
+    ].join("\n");
 
     return (
-      <div className="space-y-3">
-        {input.oldString && (
-          <div>
-            <span className="mb-1 block text-muted-foreground text-xs">
-              Before:
-            </span>
-            {shouldShowCodeBlock(input.oldString) ? (
-              <CodeBlock
-                code={input.oldString}
-                language={language}
-                className="max-h-[150px] text-xs opacity-60"
-              />
-            ) : (
-              <div className="rounded bg-muted/50 p-2 text-muted-foreground text-xs">
-                <span className="line-through">{input.oldString}</span>
-              </div>
-            )}
-          </div>
-        )}
-
-        {input.newString && (
-          <div>
-            <span className="mb-1 block text-green-600 text-xs">After:</span>
-            {shouldShowCodeBlock(input.newString) ? (
-              <CodeBlock
-                code={input.newString}
-                language={language}
-                className="max-h-[150px] text-xs"
-              />
-            ) : (
-              <div className="rounded bg-green-50 p-2 text-green-600 text-xs dark:bg-green-900/20">
-                {input.newString}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      <CodeBlock
+        code={diffCode}
+        language={language}
+        showDiff
+        className="max-h-[300px] text-xs"
+      />
     );
   }, [input, language]);
 
@@ -112,7 +86,6 @@ export function EditFile({ part: { state, input, output } }: EditFileProps) {
         )}
         <StepsItem>
           <div className="flex items-center gap-2">
-            <code className="text-xs">{fileName}</code>
             {input?.replaceAll && (
               <span className="text-muted-foreground text-xs">
                 (replace all)

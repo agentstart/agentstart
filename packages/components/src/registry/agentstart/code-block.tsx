@@ -14,6 +14,7 @@ agent-frontmatter:end */
 "use client";
 
 import { CheckIcon, CopyIcon } from "@phosphor-icons/react";
+import { transformerNotationDiff } from "@shikijs/transformers";
 import {
   type ComponentProps,
   createContext,
@@ -32,6 +33,7 @@ type CodeBlockProps = HTMLAttributes<HTMLDivElement> & {
   language: BundledLanguage;
   showLineNumbers?: boolean;
   showCopyButton?: boolean;
+  showDiff?: boolean;
 };
 
 type CodeBlockContextType = {
@@ -67,10 +69,17 @@ export async function highlightCode(
   code: string,
   language: BundledLanguage,
   showLineNumbers = false,
+  showDiff = false,
 ) {
-  const transformers: ShikiTransformer[] = showLineNumbers
-    ? [lineNumberTransformer]
-    : [];
+  const transformers: ShikiTransformer[] = [];
+
+  if (showLineNumbers) {
+    transformers.push(lineNumberTransformer);
+  }
+
+  if (showDiff) {
+    transformers.push(transformerNotationDiff());
+  }
 
   return await Promise.all([
     codeToHtml(code, {
@@ -91,6 +100,7 @@ export const CodeBlock = ({
   language,
   showLineNumbers = false,
   showCopyButton = true,
+  showDiff = false,
   className,
   children,
   ...props
@@ -100,24 +110,30 @@ export const CodeBlock = ({
   const mounted = useRef(false);
 
   useEffect(() => {
-    highlightCode(code, language, showLineNumbers).then(([light, dark]) => {
-      if (!mounted.current) {
-        setHtml(light);
-        setDarkHtml(dark);
-        mounted.current = true;
-      }
-    });
+    highlightCode(code, language, showLineNumbers, showDiff).then(
+      ([light, dark]) => {
+        if (!mounted.current) {
+          setHtml(light);
+          setDarkHtml(dark);
+          mounted.current = true;
+        }
+      },
+    );
 
     return () => {
       mounted.current = false;
     };
-  }, [code, language, showLineNumbers]);
+  }, [code, language, showLineNumbers, showDiff]);
 
   return (
     <CodeBlockContext.Provider value={{ code }}>
       <div
         className={cn(
           "group relative w-full overflow-hidden rounded-md border bg-background text-foreground",
+          "[&_.diff.add]:bg-green-500/10 [&_.diff.add]:text-green-600",
+          "[&_.diff.remove]:bg-red-500/10 [&_.diff.remove]:text-red-600 [&_.diff.remove]:opacity-70",
+          "dark:[&_.diff.add]:bg-green-500/20 dark:[&_.diff.add]:text-green-400",
+          "dark:[&_.diff.remove]:bg-red-500/20 dark:[&_.diff.remove]:text-red-400",
           className,
         )}
         {...props}

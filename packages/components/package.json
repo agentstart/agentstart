@@ -22,6 +22,7 @@
     "@orpc/tanstack-query": "catalog:",
     "@phosphor-icons/react": "catalog:",
     "@tanstack/react-query": "catalog:",
+    "@shikijs/transformers": "catalog:",
     "agentstart": "workspace:*",
     "ai": "catalog:",
     "class-variance-authority": "catalog:",

@@ -439,7 +439,7 @@ export const ConversationScrollButton = ({
       variant="outline"
       {...props}
     >
-      <CaretDownIcon className="size-4" weight="duotone" />
+      <CaretDownIcon className="size-4" />
     </Button>
   );
 };
@@ -636,7 +636,7 @@ export function Conversation({
         </div>
 
         {sourceParts.length > 0 && (
-          <div className="mt-2 w-full">
+          <div className="w-full">
             <Sources>
               <SourcesTrigger count={sourceParts.length} />
               <SourcesContent>
@@ -724,7 +724,7 @@ export function Conversation({
     >
       <StickToBottom.Content
         className={cn(
-          "mx-auto flex flex-1 flex-col gap-4 p-0 sm:min-w-[390px] sm:max-w-3xl",
+          "mx-auto flex flex-1 flex-col gap-4 p-0 px-4 sm:min-w-[390px] sm:max-w-3xl",
           contentClassName,
         )}
       >
@@ -751,7 +751,7 @@ export function Conversation({
 
                   <MessageContent
                     className={cn({
-                      "space-y-3": message.role === "assistant",
+                      "space-y-2": message.role === "assistant",
                       "text-base ltr:rounded-br-none! rtl:rounded-bl-none!":
                         message.role === "user",
                     })}
@@ -783,7 +783,17 @@ export function Conversation({
                   </EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent>
-                  <Button variant="outline" size="sm">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      regenerate({
+                        body: {
+                          threadId,
+                        },
+                      })
+                    }
+                  >
                     <ArrowsClockwiseIcon className="size-4" weight="duotone" />
                     Retry
                   </Button>

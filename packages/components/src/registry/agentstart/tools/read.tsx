@@ -44,23 +44,23 @@ export function ReadFile({ part: { state, input, output } }: ReadFileProps) {
     if (!output?.metadata?.content) return null;
     const lines = output.metadata.content.split("\n");
     const maxLines = 10;
-    const preview = lines.slice(0, maxLines).join("\n");
     const hasMore = lines.length > maxLines;
     const language = getLanguageFromFilePath(input?.filePath);
 
+    const previewLines = lines.slice(0, maxLines);
+    const preview = hasMore
+      ? [
+          ...previewLines,
+          `// ... and ${lines.length - maxLines} more lines`,
+        ].join("\n")
+      : previewLines.join("\n");
+
     return (
-      <div className="mt-2">
-        <CodeBlock
-          code={preview}
-          language={language}
-          className="max-h-[300px] p-0 text-xs"
-        />
-        {hasMore && (
-          <span className="mt-1 block text-muted-foreground text-xs">
-            ... and {lines.length - maxLines} more lines
-          </span>
-        )}
-      </div>
+      <CodeBlock
+        code={preview}
+        language={language}
+        className="max-h-[300px] p-0 text-xs"
+      />
     );
   }, [output?.metadata?.content, input?.filePath]);
 
@@ -71,7 +71,9 @@ export function ReadFile({ part: { state, input, output } }: ReadFileProps) {
           render={
             <div className="flex items-center gap-2">
               <span>{fileName}</span>
-              {readingRange && <span>{readingRange}</span>}
+              {readingRange && (
+                <span className="text-muted-foreground/60">{readingRange}</span>
+              )}
             </div>
           }
         />
@@ -96,18 +98,7 @@ export function ReadFile({ part: { state, input, output } }: ReadFileProps) {
             <Shimmer>Reading file...</Shimmer>
           </StepsItem>
         )}
-        {readingRange && (
-          <StepsItem>
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <span className="text-muted-foreground text-xs">
-                  ({readingRange})
-                </span>
-              </div>
-              {preview}
-            </div>
-          </StepsItem>
-        )}
+        {preview && <StepsItem>{preview}</StepsItem>}
         {output?.error?.message && (
           <StepsItem className="text-red-600 text-xs">
             {output.error.message}

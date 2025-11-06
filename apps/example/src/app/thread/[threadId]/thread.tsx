@@ -23,7 +23,7 @@ export default function Thread({
       <Conversation
         threadId={threadId}
         initialMessages={initialMessages}
-        contentClassName="p-4 pb-48"
+        contentClassName="pb-48"
       />
 
       <div className="sticky inset-x-0 bottom-0 pb-4">

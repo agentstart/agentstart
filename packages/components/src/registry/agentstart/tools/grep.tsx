@@ -49,6 +49,10 @@ export function Grep({ part: { state, input, output } }: GrepProps) {
       );
     }
 
+    const maxFiles = 100;
+    const displayFiles = files.slice(0, maxFiles);
+    const hasMore = files.length > maxFiles;
+
     return (
       <div className="mt-2">
         <div className="mb-1 text-muted-foreground text-xs">
@@ -56,7 +60,7 @@ export function Grep({ part: { state, input, output } }: GrepProps) {
           {(output?.metadata?.fileCount ?? files.length) !== 1 && "s"}
         </div>
         <div className="max-h-[300px] overflow-y-auto border-muted border-l-2 pl-2">
-          {files.slice(0, 100).map((file, index) => (
+          {displayFiles.map((file, index) => (
             <div
               key={`${file}-${index}`}
               className="flex items-center gap-2 py-0.5 text-xs"
@@ -65,9 +69,9 @@ export function Grep({ part: { state, input, output } }: GrepProps) {
               <span className="font-mono">{file}</span>
             </div>
           ))}
-          {files.length > 100 && (
+          {hasMore && (
             <div className="mt-2 text-muted-foreground text-xs">
-              ... and {files.length - 100} more
+              {`// ... and ${files.length - maxFiles} more`}
             </div>
           )}
         </div>

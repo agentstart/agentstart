@@ -135,7 +135,7 @@ export const Reasoning = memo(
       >
         <Steps
           data-tool-reasoning
-          className={cn("not-prose mb-4", className)}
+          className={cn("not-prose", className)}
           onOpenChange={handleOpenChange}
           open={isOpen}
           {...props}
