@@ -107,7 +107,7 @@ export function Ls({ part: { state, input, output } }: LsProps) {
             <Shimmer>Listing directory...</Shimmer>
           </StepsItem>
         )}
-        <StepsItem>{entries}</StepsItem>
+        {entries && <StepsItem>{entries}</StepsItem>}
         {output?.error?.message && (
           <StepsItem className="text-red-600 text-xs">
             {output.error.message}

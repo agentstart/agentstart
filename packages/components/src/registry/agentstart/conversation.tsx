@@ -89,9 +89,97 @@ const hasNewThreadDraftContent = (draft: unknown): boolean => {
 const copyMessageText = (message: AgentStartUIMessage): void => {
   const parts = message.parts ?? [];
   if (parts.length === 0) return;
-  const text = parts.find((part) => part.type === "text")?.text ?? "";
-  if (!text) return;
-  void navigator.clipboard.writeText(text);
+
+  const contentParts: string[] = [];
+  const sources: Array<{ url: string; title?: string }> = [];
+
+  for (const part of parts) {
+    // Text content
+    if (part.type === "text" && (part as any).text) {
+      contentParts.push((part as any).text);
+    }
+    // Reasoning blocks
+    else if (part.type === "reasoning" && (part as any).text) {
+      contentParts.push(`[Thinking]\n${(part as any).text}`);
+    }
+    // Tool executions
+    else if (part.type.startsWith("tool-")) {
+      const toolPart = part as any;
+      const toolName = part.type.replace("tool-", "");
+      let toolSection = `[Tool: ${toolName}]`;
+
+      // Format tool input based on type
+      if (toolPart.input) {
+        if (toolName === "bash" && toolPart.input.command) {
+          toolSection += `\nCommand: ${toolPart.input.command}`;
+        } else if (toolName === "read" && toolPart.input.filePath) {
+          toolSection += `\nFile: ${toolPart.input.filePath}`;
+        } else if (toolName === "write" && toolPart.input.filePath) {
+          toolSection += `\nFile: ${toolPart.input.filePath}`;
+        } else if (toolName === "edit" && toolPart.input.filePath) {
+          toolSection += `\nFile: ${toolPart.input.filePath}`;
+        } else if (toolName === "glob" && toolPart.input.pattern) {
+          toolSection += `\nPattern: ${toolPart.input.pattern}`;
+        } else if (toolName === "grep" && toolPart.input.pattern) {
+          toolSection += `\nPattern: ${toolPart.input.pattern}`;
+        } else if (toolName === "ls" && toolPart.input.path) {
+          toolSection += `\nPath: ${toolPart.input.path}`;
+        } else {
+          // Generic fallback for other tools
+          toolSection += `\nInput: ${JSON.stringify(toolPart.input)}`;
+        }
+      }
+
+      // Format tool output
+      if (toolPart.output?.metadata) {
+        const meta = toolPart.output.metadata;
+        if (toolName === "bash") {
+          if (meta.stdout) toolSection += `\nOutput:\n${meta.stdout}`;
+          if (meta.stderr) toolSection += `\nError:\n${meta.stderr}`;
+        } else if (toolName === "read" && meta.content) {
+          toolSection += `\nContent:\n${meta.content}`;
+        } else if (
+          toolName === "grep" &&
+          (meta.files || meta.matches || meta.counts)
+        ) {
+          if (meta.files) {
+            toolSection += `\nFiles:\n${meta.files.join("\n")}`;
+          } else if (meta.matches) {
+            toolSection += `\nMatches:\n${meta.matches.join("\n")}`;
+          } else if (meta.counts) {
+            toolSection += `\nCounts:\n${meta.counts.map((c: any) => `${c.filename}: ${c.count}`).join("\n")}`;
+          }
+        } else if (toolName === "glob" && meta.matches) {
+          toolSection += `\nMatches:\n${meta.matches.join("\n")}`;
+        } else if (toolPart.output.prompt) {
+          toolSection += `\nResult: ${toolPart.output.prompt}`;
+        }
+      } else if (toolPart.output?.prompt) {
+        toolSection += `\nResult: ${toolPart.output.prompt}`;
+      }
+
+      contentParts.push(toolSection);
+    }
+    // Source URLs
+    else if (part.type === "source-url") {
+      const sourcePart = part as any;
+      sources.push({
+        url: sourcePart.url,
+        title: sourcePart.title,
+      });
+    }
+  }
+
+  // Add sources at the end
+  if (sources.length > 0) {
+    const sourceLines = sources.map((s) => `- [${s.title || s.url}](${s.url})`);
+    contentParts.push(`\nSources:\n${sourceLines.join("\n")}`);
+  }
+
+  if (contentParts.length === 0) return;
+
+  const fullText = contentParts.join("\n\n");
+  void navigator.clipboard.writeText(fullText);
 };
 
 // Internal hook: Safe store access with fallback when useThread is not used
