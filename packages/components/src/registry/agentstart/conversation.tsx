@@ -26,6 +26,7 @@ import {
   type AgentStore,
   useAgentStartContext,
   useAgentStore,
+  useThinkingExtractor,
 } from "agentstart/client";
 import { format, formatDistanceToNow } from "date-fns";
 import type { ComponentProps, ReactNode } from "react";
@@ -474,6 +475,9 @@ export function Conversation({
   // Use safe store hook that handles both with and without useThread
   const { messages, safeSetMessages } = useSafeStore(resolvedStoreId);
 
+  // Extract thinking status from reasoning parts
+  useThinkingExtractor(resolvedStoreId);
+
   const status = useAgentStore<AgentStartUIMessage, UIAgentStore["status"]>(
     (state) => state.status,
     resolvedStoreId,
@@ -494,6 +498,10 @@ export function Conversation({
     AgentStartUIMessage,
     UIAgentStore["messageQueue"]
   >((state) => state.messageQueue);
+  const thinkingStatus = useAgentStore<
+    AgentStartUIMessage,
+    UIAgentStore["thinkingStatus"]
+  >((state) => state.thinkingStatus, resolvedStoreId);
   const hasQueue = messageQueue.length > 0;
   const hasNewThreadDraft = hasNewThreadDraftContent(newThreadDraft);
 
@@ -781,7 +789,12 @@ export function Conversation({
                   </Message>
                 );
               })}
-              {shouldShowStatusIndicators && <StatusIndicators />}
+              {shouldShowStatusIndicators && (
+                <StatusIndicators
+                  text={thinkingStatus ?? undefined}
+                  randomText={!thinkingStatus}
+                />
+              )}
               {storeError && (
                 <Empty>
                   <EmptyHeader>

@@ -59,6 +59,8 @@ export interface AgentStore<TMessage extends UIMessage = UIMessage>
     data: DataUIPart<AgentStartDataPart>["data"],
   ) => void;
   removeDataPart: (type: DataUIPart<AgentStartDataPart>["type"]) => void;
+  thinkingStatus: string | null;
+  setThinkingStatus: (status: string | null) => void;
 }
 // Internal sync method for connecting with useThread
 export interface AgentStoreWithSync<TMessage extends UIMessage = UIMessage>
@@ -226,6 +228,16 @@ function createAgentStore<TMessage extends UIMessage = UIMessage>() {
             },
             false,
             "removeDataPart",
+          ),
+
+        thinkingStatus: null,
+        setThinkingStatus: (status) =>
+          set(
+            {
+              thinkingStatus: status,
+            },
+            false,
+            "setThinkingStatus",
           ),
 
         // Internal sync method for useThread integration
