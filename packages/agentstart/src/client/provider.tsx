@@ -30,6 +30,7 @@ import {
 import type { StoreApi, UseBoundStore } from "zustand";
 import type { AgentStartAPI } from "../api";
 import type { AgentStoreWithSync } from "./store/agent";
+import { ThemeProvider } from "./theme-provider";
 
 // Store registry context for managing Zustand store instances
 interface StoreRegistryContextState {
@@ -95,13 +96,15 @@ export function AgentStartProvider({
   }, []);
 
   return (
-    <StoreRegistryContext.Provider value={storeRegistryState}>
-      <AgentStartClientContext.Provider value={clientState}>
-        <QueryClientProvider client={queryClient}>
-          {children}
-        </QueryClientProvider>
-      </AgentStartClientContext.Provider>
-    </StoreRegistryContext.Provider>
+    <ThemeProvider defaultTheme="system" storageKey="agentstart-theme">
+      <StoreRegistryContext.Provider value={storeRegistryState}>
+        <AgentStartClientContext.Provider value={clientState}>
+          <QueryClientProvider client={queryClient}>
+            {children}
+          </QueryClientProvider>
+        </AgentStartClientContext.Provider>
+      </StoreRegistryContext.Provider>
+    </ThemeProvider>
   );
 }
 

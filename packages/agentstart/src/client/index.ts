@@ -14,6 +14,7 @@ export * from "./agent-client";
 export * from "./config";
 export * from "./provider";
 export * from "./store";
+export * from "./theme-provider";
 export * from "./use-blob-files";
 export * from "./use-data-parts";
 export * from "./use-thread";

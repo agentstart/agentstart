@@ -46,6 +46,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { SimpleThemeSwitch } from "../theme-switch";
 import { SidebarContent } from "./sidebar-content";
 import { SidebarFooter } from "./sidebar-footer";
 import { SidebarHeader } from "./sidebar-header";
@@ -85,7 +86,7 @@ export function Sidebar({
   onSelectThread,
   pageSize = 20,
   header,
-  footer,
+  footer = <SimpleThemeSwitch />,
   emptyState,
   errorState,
   sidebar,
@@ -308,7 +309,7 @@ function MoreOptions({
           render={
             <TooltipTrigger
               render={
-                <div className="flex size-5 cursor-pointer items-center justify-center rounded-md hover:bg-gray-200">
+                <div className="flex size-5 cursor-pointer items-center justify-center rounded-md hover:bg-gray-200 dark:hover:bg-neutral-700">
                   <DotsThreeIcon className="size-4" />
                 </div>
               }

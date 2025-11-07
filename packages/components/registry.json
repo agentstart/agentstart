@@ -329,6 +329,21 @@
       ],
       "dependencies": ["@phosphor-icons/react", "agentstart", "react"],
       "registryDependencies": []
+    },
+    {
+      "name": "theme-switch",
+      "type": "registry:component",
+      "title": "AgentStart Theme Switch",
+      "description": "Theme switcher components for toggling between light/dark/system themes. Includes SimpleThemeSwitch (icon button) and ThemeSwitch (tab-based selector).",
+      "files": [
+        {
+          "path": "src/registry/agentstart/theme-switch.tsx",
+          "type": "registry:component",
+          "target": "components/agent/theme-switch.tsx"
+        }
+      ],
+      "dependencies": ["@phosphor-icons/react", "agentstart", "react"],
+      "registryDependencies": ["@coss/button", "@coss/tabs"]
     }
   ]
 }
