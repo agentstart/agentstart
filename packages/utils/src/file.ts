@@ -9,7 +9,7 @@ FEATURES:
 SEARCHABLE: packages, utils, src, file, language, mapping
 agent-frontmatter:end */
 
-import type { BundledLanguage } from "shiki";
+import type { BundledLanguage } from "shiki/bundle/web";
 
 export function getFileExtension(filePath: string): string {
   const ext = filePath.split(".").pop()?.toLowerCase();

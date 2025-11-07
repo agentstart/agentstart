@@ -12,7 +12,7 @@ agent-frontmatter:end */
 "use client";
 
 import { type ComponentProps, memo } from "react";
-import type { BundledLanguage } from "shiki";
+import type { BundledLanguage } from "shiki/bundle/web";
 import { Streamdown } from "streamdown";
 import { cn } from "@/lib/utils";
 import { CodeBlock } from "./code-block";
@@ -59,7 +59,6 @@ export const Response = memo(
                 className="my-4"
                 code={children as string}
                 language={lang as BundledLanguage}
-                showLineNumbers={false}
               />
             </pre>
           );

@@ -5,35 +5,35 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
+      "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     },
     "./agent": {
-      "import": "./dist/agent/index.js",
+      "import": "./dist/agent/index.mjs",
       "require": "./dist/agent/index.cjs"
     },
     "./api": {
-      "import": "./dist/api/index.js",
+      "import": "./dist/api/index.mjs",
       "require": "./dist/api/index.cjs"
     },
     "./blob": {
-      "import": "./dist/blob/index.js",
+      "import": "./dist/blob/index.mjs",
       "require": "./dist/blob/index.cjs"
     },
     "./client": {
-      "import": "./dist/client/index.js",
+      "import": "./dist/client/index.mjs",
       "require": "./dist/client/index.cjs"
     },
     "./integration": {
-      "import": "./dist/integration/index.js",
+      "import": "./dist/integration/index.mjs",
       "require": "./dist/integration/index.cjs"
     },
     "./memory": {
-      "import": "./dist/memory/index.js",
+      "import": "./dist/memory/index.mjs",
       "require": "./dist/memory/index.cjs"
     },
     "./sandbox": {
-      "import": "./dist/sandbox/index.js",
+      "import": "./dist/sandbox/index.mjs",
       "require": "./dist/sandbox/index.cjs"
     },
     "./package.json": "./package.json"
@@ -91,7 +91,7 @@
     "react": "^19"
   },
   "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.cts",
   "typesVersions": {
     "*": {

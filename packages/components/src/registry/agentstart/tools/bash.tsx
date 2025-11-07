@@ -116,11 +116,7 @@ export function Bash({ part: { state, input, output } }: BashProps) {
         {/* Standard output */}
         {output?.metadata?.stdout && (
           <StepsItem>
-            <CodeBlock
-              code={output.metadata.stdout}
-              language="bash"
-              className="max-h-[400px] text-xs"
-            />
+            <CodeBlock code={output.metadata.stdout} language="bash" />
           </StepsItem>
         )}
 
@@ -135,7 +131,7 @@ export function Bash({ part: { state, input, output } }: BashProps) {
             <CodeBlock
               code={output.metadata.stderr}
               language="bash"
-              className="max-h-[200px] border-red-200 text-xs dark:border-red-900"
+              className="border-red-200 text-xs dark:border-red-900"
             />
           </StepsItem>
         )}

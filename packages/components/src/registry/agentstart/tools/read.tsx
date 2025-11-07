@@ -58,8 +58,8 @@ export function ReadFile({ part: { state, input, output } }: ReadFileProps) {
     return (
       <CodeBlock
         code={preview}
+        copyCode={output.metadata.content}
         language={language}
-        className="max-h-[300px] p-0 text-xs"
       />
     );
   }, [output?.metadata?.content, input?.filePath]);

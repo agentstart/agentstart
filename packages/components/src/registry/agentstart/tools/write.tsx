@@ -44,20 +44,20 @@ export function WriteFile({ part: { state, input, output } }: WriteFileProps) {
     const previewLines = lines.slice(0, maxLines);
 
     // Generate diff code with all lines marked as additions
-    const diffLines = previewLines.map((line) => `${line} // [!code ++]`);
+    const diffLines = previewLines.map((line) =>
+      line.trim() ? `${line} // [!code ++]` : "",
+    );
     if (hasMore) {
-      diffLines.push(
-        `// ... and ${lines.length - maxLines} more lines // [!code highlight]`,
-      );
+      diffLines.push(`// ... and ${lines.length - maxLines} more lines`);
     }
     const diffCode = diffLines.join("\n");
 
     return (
       <CodeBlock
         code={diffCode}
+        copyCode={fileContent}
         language={language}
         showDiff
-        className="max-h-[200px] text-xs"
       />
     );
   }, [input, fileContent]);

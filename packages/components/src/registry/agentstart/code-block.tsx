@@ -1,23 +1,21 @@
 /* agent-frontmatter:start
 AGENT: Code block component with syntax highlighting
 PURPOSE: Render syntax-highlighted code snippets with line numbers and copy functionality
-USAGE: <CodeBlock code={code} language="typescript" showLineNumbers />
+USAGE: <CodeBlock code={code} language="typescript" showLineNumbers copyCode={originalCode} />
 EXPORTS: CodeBlock, CodeBlockCopyButton, highlightCode
 FEATURES:
   - Dual-theme syntax highlighting (light/dark) using Shiki
   - Optional line number display
   - Copy-to-clipboard button with success feedback
-  - Supports all Shiki bundled languages
-SEARCHABLE: code block, syntax highlighting, shiki, copy button
+  - Separate copyCode prop to copy original content without diff markers
+  - Supports all Shiki bundled languages and diff notation
+SEARCHABLE: code block, syntax highlighting, shiki, copy button, diff
 agent-frontmatter:end */
 
 "use client";
 
 import { CheckIcon, CopyIcon } from "@phosphor-icons/react";
-import {
-  transformerNotationDiff,
-  transformerNotationHighlight,
-} from "@shikijs/transformers";
+import { transformerNotationDiff } from "@shikijs/transformers";
 import {
   type ComponentProps,
   createContext,
@@ -27,8 +25,13 @@ import {
   useRef,
   useState,
 } from "react";
-import { type BundledLanguage, codeToHtml, type ShikiTransformer } from "shiki";
+import {
+  type BundledLanguage,
+  codeToHtml,
+  type ShikiTransformer,
+} from "shiki/bundle/web";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 type CodeBlockProps = HTMLAttributes<HTMLDivElement> & {
@@ -37,14 +40,18 @@ type CodeBlockProps = HTMLAttributes<HTMLDivElement> & {
   showLineNumbers?: boolean;
   showCopyButton?: boolean;
   showDiff?: boolean;
+  /** Original code without diff markers for copying */
+  copyCode?: string;
 };
 
 type CodeBlockContextType = {
   code: string;
+  copyCode: string;
 };
 
 const CodeBlockContext = createContext<CodeBlockContextType>({
   code: "",
+  copyCode: "",
 });
 
 const lineNumberTransformer: ShikiTransformer = {
@@ -68,13 +75,18 @@ const lineNumberTransformer: ShikiTransformer = {
   },
 };
 
-export async function highlightCode(
-  code: string,
-  language: BundledLanguage,
+export async function highlightCode({
+  code,
+  language,
   showLineNumbers = false,
   showDiff = false,
-) {
-  const transformers: ShikiTransformer[] = [transformerNotationHighlight()];
+}: {
+  code: string;
+  language: BundledLanguage;
+  showLineNumbers: boolean;
+  showDiff: boolean;
+}) {
+  const transformers: ShikiTransformer[] = [];
 
   if (showLineNumbers) {
     transformers.push(lineNumberTransformer);
@@ -104,6 +116,7 @@ export const CodeBlock = ({
   showLineNumbers = false,
   showCopyButton = true,
   showDiff = false,
+  copyCode,
   className,
   children,
   ...props
@@ -113,7 +126,7 @@ export const CodeBlock = ({
   const mounted = useRef(false);
 
   useEffect(() => {
-    highlightCode(code, language, showLineNumbers, showDiff).then(
+    highlightCode({ code, language, showLineNumbers, showDiff }).then(
       ([light, dark]) => {
         if (!mounted.current) {
           setHtml(light);
@@ -129,47 +142,45 @@ export const CodeBlock = ({
   }, [code, language, showLineNumbers, showDiff]);
 
   return (
-    <CodeBlockContext.Provider value={{ code }}>
-      <div
-        className={cn(
-          "group relative w-full overflow-hidden rounded-md border bg-background text-foreground",
-          "[&_.highlighted]:bg-background!",
-          "[&_.diff.add]:bg-green-500/10 [&_.diff.add]:text-green-600",
-          "[&_.diff.remove]:bg-red-500/10 [&_.diff.remove]:text-red-600 [&_.diff.remove]:opacity-70",
-          "[&_.diff.remove]:bg-red-500/10 [&_.diff.remove]:text-red-600 [&_.diff.remove]:opacity-70",
-          "dark:[&_.diff.add]:bg-green-500/20 dark:[&_.diff.add]:text-green-400",
-          "dark:[&_.diff.remove]:bg-red-500/20 dark:[&_.diff.remove]:text-red-400",
-          className,
-        )}
-        {...props}
-      >
-        <div
+    <CodeBlockContext.Provider value={{ code, copyCode: copyCode ?? code }}>
+      <div className="group/code-block relative max-h-[200px]">
+        <ScrollArea
           className={cn(
-            "overflow-auto",
-            "[&>pre]:m-0 [&>pre]:bg-background! [&>pre]:text-foreground! [&>pre]:text-sm",
-            "[&_code]:wrap-break-word [&_code]:block [&_code]:w-full [&_code]:font-mono [&_code]:text-sm [&_code]:leading-normal",
-            "[&_.line]:inline-block [&_.line]:w-full [&_.line]:px-4",
-            "dark:hidden",
+            "relative max-h-[200px] w-full overflow-hidden rounded-md border bg-background text-foreground",
+            "[&_.diff.add]:bg-green-500/10 [&_.diff.add]:text-green-600 [&_.diff.add]:before:absolute [&_.diff.add]:before:left-1 [&_.diff.add]:before:content-['+']",
+            "[&_.diff.remove]:bg-red-500/10 [&_.diff.remove]:text-red-600 [&_.diff.remove]:opacity-70 [&_.diff.remove]:before:absolute [&_.diff.remove]:before:left-1 [&_.diff.remove]:before:content-['-']",
+            "dark:[&_.diff.add]:bg-green-500/20 dark:[&_.diff.add]:text-green-400",
+            "dark:[&_.diff.remove]:bg-red-500/20 dark:[&_.diff.remove]:text-red-400",
+            className,
           )}
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
-        <div
-          className={cn(
-            "overflow-auto",
-            "[&>pre]:m-0 [&>pre]:bg-background! [&>pre]:text-foreground! [&>pre]:text-sm",
-            "[&_code]:wrap-break-word [&_code]:block [&_code]:w-full [&_code]:font-mono [&_code]:text-sm [&_code]:leading-normal",
-            "[&_.line]:inline-block [&_.line]:w-full [&_.line]:px-4",
-            "hidden dark:block",
+          {...props}
+        >
+          <div
+            className={cn(
+              "[&>pre]:m-0 [&>pre]:bg-background! [&>pre]:text-foreground! [&>pre]:text-sm",
+              "[&_code]:wrap-break-word [&_code]:block [&_code]:w-full [&_code]:font-mono [&_code]:text-sm [&_code]:leading-normal",
+              "[&_.line]:relative [&_.line]:inline-block [&_.line]:w-full [&_.line]:px-4",
+              "dark:hidden",
+            )}
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+          <div
+            className={cn(
+              "[&>pre]:m-0 [&>pre]:bg-background! [&>pre]:text-foreground! [&>pre]:text-sm",
+              "[&_code]:wrap-break-word [&_code]:block [&_code]:w-full [&_code]:font-mono [&_code]:text-sm [&_code]:leading-normal",
+              "[&_.line]:relative [&_.line]:inline-block [&_.line]:w-full [&_.line]:px-4",
+              "hidden dark:block",
+            )}
+            dangerouslySetInnerHTML={{ __html: darkHtml }}
+          />
+          {children && (
+            <div className="absolute top-2 right-2 flex items-center gap-2">
+              {children}
+            </div>
           )}
-          dangerouslySetInnerHTML={{ __html: darkHtml }}
-        />
-        {children && (
-          <div className="absolute top-2 right-2 flex items-center gap-2">
-            {children}
-          </div>
-        )}
+        </ScrollArea>
         {showCopyButton && (
-          <CodeBlockCopyButton className="absolute top-1 right-1 opacity-0 transition-opacity group-hover:opacity-100" />
+          <CodeBlockCopyButton className="absolute top-2 right-2 opacity-0 transition-opacity group-hover/code-block:opacity-100" />
         )}
       </div>
     </CodeBlockContext.Provider>
@@ -191,7 +202,7 @@ export const CodeBlockCopyButton = ({
   ...props
 }: CodeBlockCopyButtonProps) => {
   const [isCopied, setIsCopied] = useState(false);
-  const { code } = useContext(CodeBlockContext);
+  const { copyCode } = useContext(CodeBlockContext);
 
   const copyToClipboard = async () => {
     if (typeof window === "undefined" || !navigator?.clipboard?.writeText) {
@@ -200,7 +211,7 @@ export const CodeBlockCopyButton = ({
     }
 
     try {
-      await navigator.clipboard.writeText(code);
+      await navigator.clipboard.writeText(copyCode);
       setIsCopied(true);
       onCopy?.();
       setTimeout(() => setIsCopied(false), timeout);

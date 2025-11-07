@@ -50,9 +50,9 @@ export function EditFile({ part: { state, input, output } }: EditFileProps) {
     return (
       <CodeBlock
         code={diffCode}
+        copyCode={input.newString}
         language={language}
         showDiff
-        className="max-h-[300px] text-xs"
       />
     );
   }, [input, language]);

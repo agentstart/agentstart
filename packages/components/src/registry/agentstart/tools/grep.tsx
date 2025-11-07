@@ -139,11 +139,7 @@ export function Grep({ part: { state, input, output } }: GrepProps) {
           {output?.metadata?.fileCount || 0} file
           {(output?.metadata?.fileCount || 0) !== 1 && "s"}
         </div>
-        <CodeBlock
-          code={content}
-          language="markdown"
-          className="max-h-[400px] text-xs"
-        />
+        <CodeBlock code={content} language="markdown" />
       </div>
     );
   };

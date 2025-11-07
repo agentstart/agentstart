@@ -12,6 +12,7 @@ agent-frontmatter:end */
 
 "use client";
 
+import { ScrollArea as ScrollAreaPrimitive } from "@base-ui-components/react/scroll-area";
 import {
   ArrowsClockwiseIcon,
   CaretDownIcon,
@@ -29,7 +30,7 @@ import {
 import { format, formatDistanceToNow } from "date-fns";
 import type { ComponentProps, ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
+import { useStickToBottom } from "use-stick-to-bottom";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -303,7 +304,7 @@ const RelativeTime = ({ timestamp }: RelativeTimeProps) => {
 };
 
 export type ConversationProps = Omit<
-  ComponentProps<typeof StickToBottom>,
+  ComponentProps<typeof ScrollAreaPrimitive.Root>,
   "children"
 > & {
   contentClassName?: string;
@@ -329,13 +330,13 @@ export type ConversationProps = Omit<
   errorState?: (error: Error, retry: () => void) => ReactNode;
 };
 
-export type ConversationEmptyStateProps = ComponentProps<"div"> & {
+type ConversationEmptyStateProps = ComponentProps<"div"> & {
   title?: string;
   description?: string;
   icon?: ReactNode;
 };
 
-export const ConversationEmptyState = ({
+const ConversationEmptyState = ({
   className,
   title = "No messages yet",
   description = "Start a conversation to see messages here",
@@ -415,14 +416,17 @@ const CopyButton = ({
   );
 };
 
-export type ConversationScrollButtonProps = ComponentProps<typeof Button>;
+type ConversationScrollButtonProps = ComponentProps<typeof Button> & {
+  isAtBottom: boolean;
+  scrollToBottom: () => void;
+};
 
-export const ConversationScrollButton = ({
+const ConversationScrollButton = ({
   className,
+  isAtBottom,
+  scrollToBottom,
   ...props
 }: ConversationScrollButtonProps) => {
-  const { isAtBottom, scrollToBottom } = useStickToBottomContext();
-
   if (isAtBottom) {
     return null;
   }
@@ -457,6 +461,13 @@ export function Conversation({
   ...props
 }: ConversationProps) {
   const { orpc } = useAgentStartContext();
+
+  const { scrollRef, contentRef, isAtBottom, scrollToBottom } =
+    useStickToBottom({
+      initial: "instant",
+      resize: "instant",
+    });
+  console.log({ isAtBottom });
 
   const resolvedStoreId = threadId ?? "default";
 
@@ -712,114 +723,129 @@ export function Conversation({
     status === "streaming" || status === "submitted";
 
   return (
-    <StickToBottom
-      className={cn(
-        "relative flex size-full flex-col [scrollbar-color:var(--accent)_transparent] [scrollbar-width:thin]",
-        className,
-      )}
-      initial="smooth"
-      resize="smooth"
-      role="log"
+    <ScrollAreaPrimitive.Root
+      className={cn("relative flex size-full flex-col", className)}
       {...props}
     >
-      <StickToBottom.Content
+      <ScrollAreaPrimitive.Viewport
         className={cn(
-          "mx-auto flex flex-1 flex-col gap-4 p-0 px-4 sm:min-w-[390px] sm:max-w-3xl",
+          "size-full overscroll-contain rounded-[inherit] outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background",
           contentClassName,
         )}
+        ref={scrollRef}
       >
-        {resolvedErrorState ? (
-          resolvedErrorState
-        ) : hasMessages ? (
-          <div className="flex flex-col gap-4">
-            {messages.map((message, index) => {
-              if (message.role === "system") {
-                return null;
-              }
+        <ScrollAreaPrimitive.Content
+          ref={contentRef}
+          className="mx-auto flex flex-col gap-4 p-0 px-4 sm:min-w-[390px]! sm:max-w-3xl"
+        >
+          {resolvedErrorState ? (
+            resolvedErrorState
+          ) : hasMessages ? (
+            <div className="flex flex-col gap-2">
+              {messages.map((message, index) => {
+                if (message.role === "system") {
+                  return null;
+                }
 
-              const isLastMessage = index === messages.length - 1;
-              return (
-                <Message
-                  from={message.role}
-                  key={message.id}
-                  className={cn("flex-col", {
-                    "items-start": message.role === "assistant",
-                    "items-end": message.role === "user",
-                  })}
-                >
-                  {message.role === "user" && renderUserActions(message)}
-
-                  <MessageContent
-                    className={cn({
-                      "space-y-2": message.role === "assistant",
-                      "text-base ltr:rounded-br-none! rtl:rounded-bl-none!":
-                        message.role === "user",
+                const isLastMessage = index === messages.length - 1;
+                return (
+                  <Message
+                    from={message.role}
+                    key={message.id}
+                    className={cn("flex-col", {
+                      "items-start": message.role === "assistant",
+                      "items-end": message.role === "user",
                     })}
-                    variant={
-                      message.role === "assistant" ? "flat" : "contained"
-                    }
                   >
-                    {message.role === "assistant"
-                      ? renderAssistantMessage(message, isLastMessage)
-                      : renderUserMessage(message)}
-                  </MessageContent>
+                    {message.role === "user" && renderUserActions(message)}
 
-                  {message.role === "assistant" &&
-                  ["ready", "error"].includes(status)
-                    ? renderAssistantActions(message)
-                    : null}
-                </Message>
-              );
+                    <MessageContent
+                      className={cn({
+                        "space-y-2": message.role === "assistant",
+                        "text-base ltr:rounded-br-none! rtl:rounded-bl-none!":
+                          message.role === "user",
+                      })}
+                      variant={
+                        message.role === "assistant" ? "flat" : "contained"
+                      }
+                    >
+                      {message.role === "assistant"
+                        ? renderAssistantMessage(message, isLastMessage)
+                        : renderUserMessage(message)}
+                    </MessageContent>
+
+                    {message.role === "assistant" &&
+                    ["ready", "error"].includes(status)
+                      ? renderAssistantActions(message)
+                      : null}
+                  </Message>
+                );
+              })}
+              {shouldShowStatusIndicators && <StatusIndicators />}
+              {storeError && (
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyTitle className="text-destructive">
+                      Error Occurred
+                    </EmptyTitle>
+                    <EmptyDescription className="overflow-hidden sm:min-w-[390px] sm:max-w-3xl">
+                      {storeError.message ?? "Unexpected error"}
+                    </EmptyDescription>
+                  </EmptyHeader>
+                  <EmptyContent>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        regenerate({
+                          body: {
+                            threadId,
+                          },
+                        })
+                      }
+                    >
+                      <ArrowsClockwiseIcon
+                        className="size-4"
+                        weight="duotone"
+                      />
+                      Retry
+                    </Button>
+                  </EmptyContent>
+                </Empty>
+              )}
+            </div>
+          ) : showInitialLoading ? (
+            resolvedLoadingState
+          ) : (
+            resolvedEmptyState
+          )}
+
+          <SuggestedPrompts
+            threadId={threadId}
+            className={cn({
+              "pt-0": !hasMessages,
             })}
-            {shouldShowStatusIndicators && <StatusIndicators />}
-            {storeError && (
-              <Empty>
-                <EmptyHeader>
-                  <EmptyTitle className="text-destructive">
-                    Error Occurred
-                  </EmptyTitle>
-                  <EmptyDescription className="overflow-hidden sm:min-w-[390px] sm:max-w-3xl">
-                    {storeError.message ?? "Unexpected error"}
-                  </EmptyDescription>
-                </EmptyHeader>
-                <EmptyContent>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      regenerate({
-                        body: {
-                          threadId,
-                        },
-                      })
-                    }
-                  >
-                    <ArrowsClockwiseIcon className="size-4" weight="duotone" />
-                    Retry
-                  </Button>
-                </EmptyContent>
-              </Empty>
-            )}
-          </div>
-        ) : showInitialLoading ? (
-          resolvedLoadingState
-        ) : (
-          resolvedEmptyState
-        )}
-
-        <SuggestedPrompts
-          threadId={threadId}
-          className={cn({
-            "pt-0": !hasMessages,
-          })}
+          />
+        </ScrollAreaPrimitive.Content>
+      </ScrollAreaPrimitive.Viewport>
+      <ScrollAreaPrimitive.Scrollbar
+        data-slot="scroll-area-scrollbar"
+        orientation="vertical"
+        className="m-0.5 flex opacity-0 transition-opacity delay-300 data-[orientation=horizontal]:h-1.5 data-[orientation=vertical]:w-1.5 data-[orientation=horizontal]:flex-col data-hovering:opacity-100 data-scrolling:opacity-100 data-hovering:delay-0 data-scrolling:delay-0 data-hovering:duration-100 data-scrolling:duration-100"
+      >
+        <ScrollAreaPrimitive.Thumb
+          data-slot="scroll-area-thumb"
+          className="relative flex-1 rounded-full bg-foreground/20"
         />
-      </StickToBottom.Content>
+      </ScrollAreaPrimitive.Scrollbar>
 
       <ConversationScrollButton
         className={cn("bottom-42", {
           "bottom-52": hasQueue,
         })}
+        isAtBottom={isAtBottom}
+        scrollToBottom={scrollToBottom}
       />
-    </StickToBottom>
+    </ScrollAreaPrimitive.Root>
   );
 }
