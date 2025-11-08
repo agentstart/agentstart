@@ -56,7 +56,7 @@ export const ls = tool({
   inputSchema: toolInputSchema.shape.ls,
   outputSchema: toolOutputSchema.shape.ls,
   async *execute(
-    { path: targetPath, ignore },
+    { path: targetPath, ignore, recursive = false },
     { experimental_context: context },
   ) {
     const { sandbox } = context as RuntimeContext;
@@ -66,7 +66,7 @@ export const ls = tool({
 
     yield {
       status: "pending" as const,
-      prompt: `Listing directory: ${resolvedPath}`,
+      prompt: `Listing directory: ${resolvedPath}${recursive ? " (recursive)" : ""}`,
     } satisfies AgentStartToolOutput["ls"];
 
     try {
@@ -76,7 +76,7 @@ export const ls = tool({
       if (!stats.isDirectory()) {
         const richError = getRichError({
           action: "list directory",
-          args: { path: resolvedPath, ignore },
+          args: { path: resolvedPath, ignore, recursive },
           error: `Path "${resolvedPath}" is not a directory`,
         });
 
@@ -92,6 +92,7 @@ export const ls = tool({
 
       // List all files and directories with ignore patterns
       const entries = await sandbox.fs.readdir(resolvedPath, {
+        recursive,
         ignores: allIgnorePatterns,
       });
 
@@ -100,36 +101,45 @@ export const ls = tool({
       let truncated = false;
 
       for (const entry of entries) {
-        // Check result limit
-        if (fileInfos.length >= RESULT_LIMIT) {
+        // Check result limit (only apply in non-recursive mode or first 500 items in recursive)
+        const limit = recursive ? 500 : RESULT_LIMIT;
+        if (fileInfos.length >= limit) {
           truncated = true;
           break;
         }
 
-        const fullPath = path.join(resolvedPath, entry.name);
+        const fullPath = entry.path || path.join(resolvedPath, entry.name);
 
         try {
           const stat = await sandbox.fs.stat(fullPath);
+          const isDir = entry.isDirectory();
+          const isSym = stat.isSymbolicLink();
 
           fileInfos.push({
             name: entry.name,
-            type: stat.isDirectory()
+            path: fullPath,
+            parentPath: entry.parentPath || resolvedPath,
+            type: isDir
               ? ("directory" as const)
-              : stat.isSymbolicLink()
+              : isSym
                 ? ("symlink" as const)
                 : ("file" as const),
             size: stat.size,
             modifiedTime: stat.mtime.getTime(),
             permissions: 0, // Permissions not easily available
+            isFile: entry.isFile(),
+            isDirectory: isDir,
           });
         } catch {}
       }
 
-      // Sort: directories first, then alphabetically
+      // Sort: directories first, then alphabetically by path
       fileInfos.sort((a, b) => {
         if (a.type === "directory" && b.type !== "directory") return -1;
         if (a.type !== "directory" && b.type === "directory") return 1;
-        return a.name.localeCompare(b.name);
+        return recursive
+          ? a.path.localeCompare(b.path)
+          : a.name.localeCompare(b.name);
       });
 
       // Format output
@@ -137,32 +147,63 @@ export const ls = tool({
       if (fileInfos.length === 0) {
         prompt = "No files found";
       } else {
-        // Format output similar to ls command
-        const lines = fileInfos.map((info) => {
-          const typeIndicator =
-            info.type === "directory"
-              ? "/"
-              : info.type === "symlink"
-                ? "@"
-                : "";
-          const size = info.type === "directory" ? "-" : formatSize(info.size);
-          const date = formatDate(info.modifiedTime);
+        if (recursive) {
+          // For recursive mode, show tree-like structure summary
+          const fileCount = fileInfos.filter((e) => e.isFile).length;
+          const dirCount = fileInfos.filter((e) => e.isDirectory).length;
 
-          return `${info.type[0]}  ${size.padStart(6)}  ${date}  ${
-            info.name
-          }${typeIndicator}`;
-        });
+          const lines = [
+            `Total ${fileInfos.length} items (${fileCount} files, ${dirCount} directories)`,
+          ];
 
-        const outputLines = [`Total ${fileInfos.length} items`, ...lines];
+          // Show top-level items
+          const topLevel = fileInfos
+            .filter((entry) => entry.parentPath === resolvedPath)
+            .slice(0, 20);
 
-        if (truncated) {
-          outputLines.push("");
-          outputLines.push(
-            "(Results are truncated. Consider using more specific ignore patterns.)",
-          );
+          if (topLevel.length > 0) {
+            lines.push("\nTop-level items:");
+            for (const entry of topLevel) {
+              const icon = entry.isDirectory ? "📁" : "📄";
+              lines.push(`  ${icon} ${entry.name}`);
+            }
+          }
+
+          if (truncated) {
+            lines.push("");
+            lines.push("(Results are truncated to 500 items)");
+          }
+
+          prompt = lines.join("\n");
+        } else {
+          // Format output similar to ls command for non-recursive
+          const lines = fileInfos.map((info) => {
+            const typeIndicator =
+              info.type === "directory"
+                ? "/"
+                : info.type === "symlink"
+                  ? "@"
+                  : "";
+            const size =
+              info.type === "directory" ? "-" : formatSize(info.size);
+            const date = formatDate(info.modifiedTime);
+
+            return `${info.type[0]}  ${size.padStart(6)}  ${date}  ${
+              info.name
+            }${typeIndicator}`;
+          });
+
+          const outputLines = [`Total ${fileInfos.length} items`, ...lines];
+
+          if (truncated) {
+            outputLines.push("");
+            outputLines.push(
+              "(Results are truncated. Consider using more specific ignore patterns.)",
+            );
+          }
+
+          prompt = outputLines.join("\n");
         }
-
-        prompt = outputLines.join("\n");
       }
 
       yield {
@@ -171,14 +212,14 @@ export const ls = tool({
           entries: fileInfos,
           count: fileInfos.length,
           truncated,
-          path: resolvedPath,
+          rootPath: resolvedPath,
         },
         prompt,
       } satisfies AgentStartToolOutput["ls"];
     } catch (error) {
       const richError = getRichError({
         action: "list directory",
-        args: { path: resolvedPath, ignore },
+        args: { path: resolvedPath, ignore, recursive },
         error,
       });
 

@@ -41,6 +41,7 @@ export class FileSystem implements FileSystemAPI {
 
   /**
    * Resolves a relative path to an absolute path
+   * All paths are resolved relative to the workspace directory for security
    */
   resolvePath(filePath: string): string {
     const trimmedInput = filePath.trim();
@@ -51,23 +52,27 @@ export class FileSystem implements FileSystemAPI {
     const normalizedWorkspace = path.normalize(this.workingDirectory);
     const normalizedInput = path.normalize(trimmedInput);
 
-    if (path.isAbsolute(normalizedInput)) {
-      return path.resolve(normalizedInput);
-    }
-
+    // Treat "/" as workspace root for sandbox isolation
     if (normalizedInput === path.sep) {
       return normalizedWorkspace;
     }
 
-    const candidate = path.resolve(normalizedWorkspace, normalizedInput);
+    // Resolve all paths (absolute or relative) against workspace
+    // This prevents absolute paths from escaping the sandbox
+    const candidate = path.isAbsolute(normalizedInput)
+      ? normalizedInput
+      : path.resolve(normalizedWorkspace, normalizedInput);
     const normalizedCandidate = path.normalize(candidate);
 
+    // Verify the resolved path is within workspace
     const isWithinWorkspace =
       normalizedCandidate === normalizedWorkspace ||
       normalizedCandidate.startsWith(`${normalizedWorkspace}${path.sep}`);
 
     if (!isWithinWorkspace) {
-      throw new Error(`Path '${filePath}' escapes the sandbox workspace`);
+      throw new Error(
+        `Path '${filePath}' is outside the sandbox workspace '${normalizedWorkspace}'`,
+      );
     }
 
     return normalizedCandidate;

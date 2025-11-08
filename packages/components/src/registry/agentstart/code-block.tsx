@@ -146,7 +146,7 @@ export const CodeBlock = ({
       <div className="group/code-block relative max-h-[200px]">
         <ScrollArea
           className={cn(
-            "relative max-h-[200px] w-full overflow-hidden rounded-md border bg-background text-foreground",
+            "relative max-h-[200px] w-full overflow-hidden rounded-lg border bg-background text-foreground",
             "[&_.diff.add]:bg-green-500/10 [&_.diff.add]:text-green-600 [&_.diff.add]:before:absolute [&_.diff.add]:before:left-1 [&_.diff.add]:before:content-['+']",
             "[&_.diff.remove]:bg-red-500/10 [&_.diff.remove]:text-red-600 [&_.diff.remove]:opacity-70 [&_.diff.remove]:before:absolute [&_.diff.remove]:before:left-1 [&_.diff.remove]:before:content-['-']",
             "dark:[&_.diff.add]:bg-green-500/20 dark:[&_.diff.add]:text-green-400",
@@ -157,7 +157,7 @@ export const CodeBlock = ({
         >
           <div
             className={cn(
-              "[&>pre]:m-0 [&>pre]:bg-background! [&>pre]:text-foreground! [&>pre]:text-sm",
+              "[&>pre]:m-0 [&>pre]:bg-background! [&>pre]:py-5 [&>pre]:text-foreground! [&>pre]:text-sm",
               "[&_code]:wrap-break-word [&_code]:block [&_code]:w-full [&_code]:font-mono [&_code]:text-sm [&_code]:leading-normal",
               "[&_.line]:relative [&_.line]:inline-block [&_.line]:w-full [&_.line]:px-4",
               "dark:hidden",
@@ -166,7 +166,7 @@ export const CodeBlock = ({
           />
           <div
             className={cn(
-              "[&>pre]:m-0 [&>pre]:bg-background! [&>pre]:text-foreground! [&>pre]:text-sm",
+              "[&>pre]:m-0 [&>pre]:bg-background! [&>pre]:py-5 [&>pre]:text-foreground! [&>pre]:text-sm",
               "[&_code]:wrap-break-word [&_code]:block [&_code]:w-full [&_code]:font-mono [&_code]:text-sm [&_code]:leading-normal",
               "[&_.line]:relative [&_.line]:inline-block [&_.line]:w-full [&_.line]:px-4",
               "hidden dark:block",

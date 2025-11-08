@@ -15,6 +15,7 @@ import { z } from "zod";
 import { type AgentStartUIMessage, loadThread } from "@/agent";
 import { metadataSchema } from "@/agent/messages/metadata";
 import { publicProcedure } from "@/api/procedures";
+import { handleRouterError } from "@/api/utils/error-handler";
 import { getAdapter, messageSchema } from "@/memory";
 
 /**
@@ -76,9 +77,7 @@ export function createMessageRouter(procedure = publicProcedure) {
           return messages;
         } catch (error) {
           console.error("Error loading thread messages:", error);
-          throw errors.INTERNAL_SERVER_ERROR({
-            message: error instanceof Error ? error.message : "Unknown error",
-          });
+          handleRouterError(error, errors);
         }
       }),
   };

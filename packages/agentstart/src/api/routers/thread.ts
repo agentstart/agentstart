@@ -22,6 +22,7 @@ import { getThreads, loadThread, Run } from "@/agent";
 import { metadataSchema } from "@/agent/messages/metadata";
 import type { RunFinishEvent } from "@/agent/run";
 import { publicProcedure } from "@/api/procedures";
+import { handleRouterError } from "@/api/utils/error-handler";
 import {
   type DBThread,
   getAdapter,
@@ -62,22 +63,6 @@ async function verifyThreadOwnership(options: {
   }
 
   return thread;
-}
-
-/**
- * Handle errors consistently across all endpoints
- * Re-throws errors with 'code' property, wraps others in INTERNAL_SERVER_ERROR
- */
-function handleRouterError(
-  error: unknown,
-  errors: { INTERNAL_SERVER_ERROR: (opts: { message: string }) => Error },
-): never {
-  if (error instanceof Error && "code" in error) {
-    throw error;
-  }
-  throw errors.INTERNAL_SERVER_ERROR({
-    message: error instanceof Error ? error.message : "Unknown error",
-  });
 }
 
 /**

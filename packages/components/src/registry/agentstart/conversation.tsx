@@ -468,7 +468,6 @@ export function Conversation({
       initial: "instant",
       resize: "instant",
     });
-  console.log({ isAtBottom });
 
   const resolvedStoreId = threadId ?? "default";
 
@@ -853,8 +852,8 @@ export function Conversation({
       </ScrollAreaPrimitive.Scrollbar>
 
       <ConversationScrollButton
-        className={cn("bottom-42", {
-          "bottom-52": hasQueue,
+        className={cn("bottom-52", {
+          "bottom-62": hasQueue,
         })}
         isAtBottom={isAtBottom}
         scrollToBottom={scrollToBottom}

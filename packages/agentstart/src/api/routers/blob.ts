@@ -15,6 +15,7 @@ agent-frontmatter:end */
 import { getBlob } from "@agentstart/blob";
 import { z } from "zod";
 import { publicProcedure } from "@/api/procedures";
+import { handleRouterError } from "@/api/utils/error-handler";
 
 const uploadFileSchema = z.object({
   name: z.string().min(1),
@@ -85,9 +86,7 @@ export function createBlobRouter(procedure = publicProcedure) {
           };
         } catch (error) {
           console.error("Error fetching blob config:", error);
-          throw errors.INTERNAL_SERVER_ERROR({
-            message: error instanceof Error ? error.message : "Unknown error",
-          });
+          handleRouterError(error, errors);
         }
       }),
 
@@ -197,9 +196,7 @@ export function createBlobRouter(procedure = publicProcedure) {
           };
         } catch (error) {
           console.error("Error uploading files:", error);
-          throw errors.INTERNAL_SERVER_ERROR({
-            message: error instanceof Error ? error.message : "Upload failed",
-          });
+          handleRouterError(error, errors);
         }
       }),
   };

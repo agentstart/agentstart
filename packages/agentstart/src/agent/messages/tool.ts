@@ -81,6 +81,11 @@ export const toolInputSchema = z.object({
       .describe(
         "The absolute path to the directory to list (must be absolute, not relative)",
       ),
+    recursive: z
+      .boolean()
+      .optional()
+      .default(false)
+      .describe("Whether to recursively list subdirectories (default: false)"),
     ignore: z
       .array(z.string())
       .optional()
@@ -321,15 +326,19 @@ export const toolOutputSchema = z.object({
           .array(
             z.object({
               name: z.string(),
+              path: z.string(),
+              parentPath: z.string(),
               type: z.enum(["file", "directory", "symlink"]),
               size: z.number(),
               modifiedTime: z.number(),
               permissions: z.number(),
+              isFile: z.boolean(),
+              isDirectory: z.boolean(),
             }),
           )
           .optional(),
         count: z.number().optional(),
-        path: z.string().optional(),
+        rootPath: z.string().optional(),
         truncated: z.boolean().optional(),
       })
       .optional(),
