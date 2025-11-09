@@ -31,6 +31,7 @@ export default function Thread({
       >
         {isSidebarOpen && (
           <FileExplorer
+            threadId={threadId}
             query={{
               path: "/",
               recursive: true,

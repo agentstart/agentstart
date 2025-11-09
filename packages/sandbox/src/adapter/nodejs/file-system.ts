@@ -97,7 +97,8 @@ export class FileSystem implements FileSystemAPI {
     const prefix = `${this.normalizedWorkingDirectory}/`;
     if (normalizedTarget.startsWith(prefix)) {
       const relative = normalizedTarget.slice(prefix.length);
-      return relative || "/";
+      // Always return workspace-relative paths with leading "/" for consistency
+      return relative ? `/${relative}` : "/";
     }
 
     return normalizedTarget;
@@ -150,7 +151,11 @@ export class FileSystem implements FileSystemAPI {
     if (!rules.length) {
       return false;
     }
-    const normalized = this.normalizeForMatch(inputPath);
+    // Remove leading "/" to match ignore patterns which are typically relative
+    const pathToMatch = inputPath.startsWith("/")
+      ? inputPath.slice(1)
+      : inputPath;
+    const normalized = this.normalizeForMatch(pathToMatch);
     return rules.some((rule) => rule.test(normalized));
   }
 
@@ -428,10 +433,21 @@ export class FileSystem implements FileSystemAPI {
           const stat = await fs.stat(absolutePath);
           const parentDir = path.dirname(relative);
 
+          // Normalize paths to workspace-relative format with leading "/"
+          const normalizedPath = relative.startsWith("/")
+            ? relative
+            : `/${relative}`;
+          const normalizedParentPath =
+            parentDir === "."
+              ? "/"
+              : parentDir.startsWith("/")
+                ? parentDir
+                : `/${parentDir}`;
+
           dirents.push({
             name: path.basename(relative),
-            path: relative,
-            parentPath: parentDir === "." ? "" : parentDir,
+            path: normalizedPath,
+            parentPath: normalizedParentPath,
             isFile: () => stat.isFile(),
             isDirectory: () => stat.isDirectory(),
           });

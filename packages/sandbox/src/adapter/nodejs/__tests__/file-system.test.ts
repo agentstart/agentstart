@@ -35,10 +35,17 @@ describe("FileSystem", () => {
       expect(result).toBe(path.join(tempDir, "test.txt"));
     });
 
-    it("should return absolute paths unchanged", () => {
-      const absolutePath = "/usr/local/bin";
+    it("should allow absolute paths within workspace", () => {
+      const absolutePath = path.join(tempDir, "subdir");
       const result = fileSystem.resolvePath(absolutePath);
       expect(result).toBe(absolutePath);
+    });
+
+    it("should reject absolute paths outside workspace", () => {
+      const outsidePath = "/usr/local/bin";
+      expect(() => fileSystem.resolvePath(outsidePath)).toThrow(
+        "outside the sandbox workspace",
+      );
     });
   });
 

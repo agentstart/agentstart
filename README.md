@@ -265,6 +265,33 @@ The `SEARCHABLE` field should contain comma-separated keywords that describe the
 - Prefer precise TypeScript types and `unknown` over `any`. Unless a spec explicitly allows it, `any` is off limits.
 - When a function needs more than two parameters, wrap them in a single options object so call sites remain readable and extensible.
 - Do not introduce redundant wrapper callbacks (e.g. `const handleX = useCallback(() => doX())`); invoke the underlying function directly to keep the code concise.
+- **Path normalization**: Always normalize file paths at the system entry point to ensure consistent format across the entire data flow. This is critical for Map/Set lookups and parent-child relationships. Use a standard format (e.g., always include leading `/` for absolute paths) and apply it uniformly to both `path` and `parentPath` fields before any downstream processing.
+
+### Path Handling Best Practices
+
+When working with file paths across API boundaries:
+
+1. **Normalize at the source**: Convert all paths to a consistent format as early as possible (typically in the API handler before returning data)
+2. **Choose one format**: Decide on absolute paths with leading `/` OR relative paths without it, never mix both
+3. **Apply uniformly**: Ensure both `path` and `parentPath` (or similar relationship fields) use the same format
+4. **Document the convention**: Add comments explaining the expected path format in type definitions
+
+**Example:**
+```typescript
+// ❌ Bad: Inconsistent path formats cause lookup failures
+{
+  path: "/folder/file.txt",  // has leading /
+  parentPath: "folder"       // missing leading /
+}
+
+// ✅ Good: Consistent formats enable reliable Map/Set operations
+{
+  path: "/folder/file.txt",
+  parentPath: "/folder"
+}
+```
+
+This prevents hard-to-debug issues where data exists but cannot be found due to string mismatch in lookups.
 
 ## Roadmap Snapshot
 

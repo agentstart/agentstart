@@ -41,6 +41,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -71,6 +72,12 @@ export interface FileNode {
   isFile: boolean;
   isDirectory: boolean;
   children?: Map<string, FileNode>;
+  /** Git change information for the file */
+  changes?: {
+    status: "added" | "modified" | "deleted" | "renamed" | "untracked";
+    additions: number;
+    deletions: number;
+  };
 }
 
 interface FileTreeState {
@@ -106,6 +113,8 @@ export interface FileExplorerProps {
     /** Glob patterns to ignore */
     ignore?: string[];
   };
+  /** Thread ID to extract file changes from agent operations */
+  threadId?: string;
   /** Custom empty state */
   emptyState?: ReactNode;
   /** Custom error state */
@@ -316,6 +325,7 @@ export function FileExplorer({
   onFileClick,
   className,
   query,
+  threadId,
   emptyState,
   errorState,
   showSearch = true,
@@ -339,6 +349,7 @@ export function FileExplorer({
         path: query?.path || "/",
         recursive: query?.recursive || false,
         ignore: query?.ignore,
+        threadId,
       },
     }),
     enabled: !entries, // Only fetch if entries not provided
@@ -432,6 +443,45 @@ function FileExplorerInitializer({ entries }: { entries: FileNode[] }) {
   }, [entries, setFileTree]);
 
   return null;
+}
+
+// ============================================================================
+// File Badge Component
+// ============================================================================
+
+interface FileBadgeProps {
+  status: "added" | "modified" | "deleted" | "renamed" | "untracked";
+  additions: number;
+  deletions: number;
+}
+
+function FileBadge({ status, additions, deletions }: FileBadgeProps) {
+  // Only show if there are actual changes
+  if (additions === 0 && deletions === 0 && status === "untracked") {
+    return null;
+  }
+
+  return (
+    <div className="flex shrink-0 items-center gap-1">
+      {/* Show additions */}
+      {additions > 0 && (
+        <Badge
+          variant="success"
+          size="sm"
+          className="bg-green-500/10 font-mono"
+        >
+          +{additions}
+        </Badge>
+      )}
+
+      {/* Show deletions */}
+      {deletions > 0 && (
+        <Badge variant="error" size="sm" className="font-mono">
+          -{deletions}
+        </Badge>
+      )}
+    </div>
+  );
 }
 
 // ============================================================================
@@ -546,22 +596,38 @@ export const FileTreeNode = memo(function FileTreeNode({
           )}
         </motion.div>
 
-        {/* File/folder icon */}
-        <motion.div
-          className="flex size-4 items-center justify-center text-muted-foreground"
-          whileHover={{ scale: 1.1 }}
-          transition={{ duration: 0.1 }}
-        >
-          {node.isDirectory ? (
-            isExpanded ? (
-              <FolderOpenIcon className="size-4" weight="duotone" />
+        {/* File/folder icon with status indicator */}
+        <div className="relative">
+          <motion.div
+            className="flex size-4 items-center justify-center text-muted-foreground"
+            whileHover={{ scale: 1.1 }}
+            transition={{ duration: 0.1 }}
+          >
+            {node.isDirectory ? (
+              isExpanded ? (
+                <FolderOpenIcon className="size-4" weight="duotone" />
+              ) : (
+                <FolderIcon className="size-4" weight="duotone" />
+              )
             ) : (
-              <FolderIcon className="size-4" weight="duotone" />
-            )
-          ) : (
-            <FileIcon className="size-4" weight="duotone" />
+              <FileIcon className="size-4" weight="duotone" />
+            )}
+          </motion.div>
+
+          {/* Status indicator dot */}
+          {node.changes && (
+            <div
+              className={cn(
+                "-top-0.5 -right-0.5 absolute size-2 rounded-full border border-background",
+                node.changes.status === "added" && "bg-green-500",
+                node.changes.status === "modified" && "bg-orange-500",
+                node.changes.status === "deleted" && "bg-red-500",
+                node.changes.status === "renamed" && "bg-blue-500",
+                node.changes.status === "untracked" && "bg-gray-500",
+              )}
+            />
           )}
-        </motion.div>
+        </div>
 
         {/* File/folder name */}
         <span
@@ -572,6 +638,15 @@ export const FileTreeNode = memo(function FileTreeNode({
         >
           {node.name}
         </span>
+
+        {/* Git change statistics */}
+        {node.changes && (
+          <FileBadge
+            status={node.changes.status}
+            additions={node.changes.additions}
+            deletions={node.changes.deletions}
+          />
+        )}
       </motion.div>
 
       {/* Render children if directory is expanded */}
