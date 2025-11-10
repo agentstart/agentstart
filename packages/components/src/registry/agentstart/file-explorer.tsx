@@ -18,17 +18,25 @@ agent-frontmatter:end */
 
 "use client";
 
+import { ContextMenu } from "@base-ui-components/react/context-menu";
 import {
+  ArrowClockwiseIcon,
   CaretRightIcon,
+  CopyIcon,
+  DownloadIcon,
   EmptyIcon,
   FileIcon,
+  FilePlusIcon,
   FolderIcon,
   FolderOpenIcon,
+  FolderPlusIcon,
   MagnifyingGlassIcon,
+  PencilSimpleIcon,
+  TrashIcon,
   WarningCircleIcon,
   XIcon,
 } from "@phosphor-icons/react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAgentStartContext } from "agentstart/client";
 import { AnimatePresence, motion } from "motion/react";
 import {
@@ -228,12 +236,28 @@ export function useFileTree(): FileTreeState {
 
 function FileExplorerContent({
   onFileClick,
+  onRename,
+  onDelete,
+  onCreateFile,
+  onCreateFolder,
+  onDownload,
+  onRefresh,
   showSearch = true,
   searchPlaceholder = "Search files...",
   showLines = true,
   indent = 20,
   animateExpand = true,
-}: Omit<FileExplorerProps, "entries" | "className" | "query">) {
+}: Omit<
+  FileExplorerProps,
+  "entries" | "className" | "query" | "threadId" | "emptyState" | "errorState"
+> & {
+  onRename?: (node: FileNode, newName: string) => void;
+  onDelete?: (node: FileNode) => void;
+  onCreateFile?: (node: FileNode) => void;
+  onCreateFolder?: (node: FileNode) => void;
+  onDownload?: (node: FileNode) => void;
+  onRefresh?: () => void;
+}) {
   const { fileTree } = useFileTree();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -254,6 +278,15 @@ function FileExplorerContent({
   const handleClearSearch = useCallback(() => {
     setSearchQuery("");
   }, []);
+
+  // Create a root node for context menu on empty space
+  const rootNode: FileNode = {
+    name: "/",
+    path: "/",
+    parentPath: "",
+    isFile: false,
+    isDirectory: true,
+  };
 
   return (
     <div className="flex h-full flex-col">
@@ -290,31 +323,101 @@ function FileExplorerContent({
       )}
 
       {/* File tree */}
-      <ScrollArea className="flex-1">
-        <motion.div
-          className="p-2"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.15, ease: "easeOut" }}
-        >
-          {filteredRoots.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground text-sm">
-              {searchQuery ? "No files found" : "No files to display"}
-            </div>
-          ) : (
-            filteredRoots.map((node, index) => (
-              <FileTreeNode
-                key={node.path}
-                node={node}
-                onFileClick={onFileClick}
-                isLast={index === filteredRoots.length - 1}
-                showLines={showLines}
-                indent={indent}
-                animateExpand={animateExpand}
-              />
-            ))
-          )}
-        </motion.div>
+      <ScrollArea style={{ flex: 1 }}>
+        <ContextMenu.Root>
+          <ContextMenu.Trigger className="min-h-full">
+            <motion.div
+              className="min-h-full p-2"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+            >
+              {filteredRoots.length === 0 ? (
+                <div className="py-8 text-center text-muted-foreground text-sm">
+                  {searchQuery ? "No files found" : "No files to display"}
+                </div>
+              ) : (
+                filteredRoots.map((node, index) => (
+                  <FileTreeNode
+                    key={node.path}
+                    node={node}
+                    onFileClick={onFileClick}
+                    onRename={onRename}
+                    onDelete={onDelete}
+                    onCreateFile={onCreateFile}
+                    onCreateFolder={onCreateFolder}
+                    onDownload={onDownload}
+                    onRefresh={onRefresh}
+                    isLast={index === filteredRoots.length - 1}
+                    showLines={showLines}
+                    indent={indent}
+                    animateExpand={animateExpand}
+                  />
+                ))
+              )}
+            </motion.div>
+          </ContextMenu.Trigger>
+
+          <ContextMenu.Portal>
+            <ContextMenu.Positioner className="z-50" sideOffset={4}>
+              <ContextMenu.Popup
+                className={cn(
+                  "min-w-48 rounded-lg border bg-popover p-1 shadow-lg",
+                  "data-[state=closed]:animate-out data-[state=open]:animate-in",
+                  "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+                  "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+                )}
+              >
+                {/* New File */}
+                {onCreateFile && (
+                  <ContextMenu.Item
+                    className={cn(
+                      "flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1 text-sm outline-none",
+                      "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+                    )}
+                    onClick={() => onCreateFile(rootNode)}
+                  >
+                    <FilePlusIcon className="size-4" weight="duotone" />
+                    <span>New File</span>
+                  </ContextMenu.Item>
+                )}
+
+                {/* New Folder */}
+                {onCreateFolder && (
+                  <ContextMenu.Item
+                    className={cn(
+                      "flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1 text-sm outline-none",
+                      "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+                    )}
+                    onClick={() => onCreateFolder(rootNode)}
+                  >
+                    <FolderPlusIcon className="size-4" weight="duotone" />
+                    <span>New Folder</span>
+                  </ContextMenu.Item>
+                )}
+
+                {/* Separator */}
+                {(onCreateFile || onCreateFolder) && onRefresh && (
+                  <ContextMenu.Separator className="my-1 h-px bg-border" />
+                )}
+
+                {/* Refresh */}
+                {onRefresh && (
+                  <ContextMenu.Item
+                    className={cn(
+                      "flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1 text-sm outline-none",
+                      "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+                    )}
+                    onClick={onRefresh}
+                  >
+                    <ArrowClockwiseIcon className="size-4" weight="duotone" />
+                    <span>Refresh</span>
+                  </ContextMenu.Item>
+                )}
+              </ContextMenu.Popup>
+            </ContextMenu.Positioner>
+          </ContextMenu.Portal>
+        </ContextMenu.Root>
       </ScrollArea>
     </div>
   );
@@ -357,6 +460,92 @@ export function FileExplorer({
 
   // Use provided entries or fetched entries
   const effectiveEntries = entries || fetchedEntries || [];
+
+  // Rename mutation
+  const renameMutation = useMutation(
+    orpc.sandbox.rename.mutationOptions({
+      onSuccess: () => {
+        refetch();
+      },
+    }),
+  );
+
+  // Delete mutation
+  const deleteMutation = useMutation(
+    orpc.sandbox.delete.mutationOptions({
+      onSuccess: () => {
+        refetch();
+      },
+    }),
+  );
+
+  // Create file mutation
+  const createFileMutation = useMutation(
+    orpc.sandbox.createFile.mutationOptions({
+      onSuccess: () => {
+        refetch();
+      },
+    }),
+  );
+
+  // Create folder mutation
+  const createFolderMutation = useMutation(
+    orpc.sandbox.createFolder.mutationOptions({
+      onSuccess: () => {
+        refetch();
+      },
+    }),
+  );
+
+  // Download mutation
+  const downloadMutation = useMutation(
+    orpc.sandbox.download.mutationOptions({
+      onSuccess: (data) => {
+        // Create a blob and trigger download
+        const blob = new Blob([data.content], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = data.filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      },
+    }),
+  );
+
+  const handleRename = (node: FileNode, newName: string) => {
+    renameMutation.mutate({ path: node.path, newName });
+  };
+
+  const handleDelete = (node: FileNode) => {
+    deleteMutation.mutate({ path: node.path });
+  };
+
+  const handleCreateFile = (parentNode: FileNode) => {
+    const fileName = window.prompt("Enter file name:");
+    if (fileName) {
+      const newPath = `${parentNode.path}/${fileName}`;
+      createFileMutation.mutate({ path: newPath, content: "" });
+    }
+  };
+
+  const handleCreateFolder = (parentNode: FileNode) => {
+    const folderName = window.prompt("Enter folder name:");
+    if (folderName) {
+      const newPath = `${parentNode.path}/${folderName}`;
+      createFolderMutation.mutate({ path: newPath });
+    }
+  };
+
+  const handleDownload = (node: FileNode) => {
+    downloadMutation.mutate({ path: node.path });
+  };
+
+  const handleRefresh = () => {
+    refetch();
+  };
 
   // Default empty state
   const defaultEmptyState = (
@@ -418,6 +607,12 @@ export function FileExplorer({
             <FileExplorerInitializer entries={effectiveEntries} />
             <FileExplorerContent
               onFileClick={onFileClick}
+              onRename={handleRename}
+              onDelete={handleDelete}
+              onCreateFile={handleCreateFile}
+              onCreateFolder={handleCreateFolder}
+              onDownload={handleDownload}
+              onRefresh={handleRefresh}
               showSearch={showSearch}
               searchPlaceholder={searchPlaceholder}
               showLines={showLines}
@@ -492,6 +687,12 @@ export interface FileTreeNodeProps {
   node: FileNode;
   level?: number;
   onFileClick?: (node: FileNode) => void;
+  onRename?: (node: FileNode, newName: string) => void | Promise<void>;
+  onDelete?: (node: FileNode) => void | Promise<void>;
+  onCreateFile?: (node: FileNode) => void | Promise<void>;
+  onCreateFolder?: (node: FileNode) => void | Promise<void>;
+  onDownload?: (node: FileNode) => void | Promise<void>;
+  onRefresh?: () => void | Promise<void>;
   isLast?: boolean;
   parentPath?: boolean[];
   showLines?: boolean;
@@ -503,6 +704,12 @@ export const FileTreeNode = memo(function FileTreeNode({
   node,
   level = 0,
   onFileClick,
+  onRename,
+  onDelete,
+  onCreateFile,
+  onCreateFolder,
+  onDownload,
+  onRefresh,
   isLast = false,
   parentPath = [],
   showLines = true,
@@ -533,121 +740,269 @@ export const FileTreeNode = memo(function FileTreeNode({
     }
   };
 
+  const handleCopyPath = async () => {
+    try {
+      await navigator.clipboard.writeText(node.path);
+    } catch (err) {
+      console.error("Failed to copy path:", err);
+    }
+  };
+
+  const handleRename = () => {
+    const newName = window.prompt("Enter new name:", node.name);
+    if (newName && newName !== node.name) {
+      onRename?.(node, newName);
+    }
+  };
+
+  const handleDelete = () => {
+    const confirmMessage = node.isDirectory
+      ? `Are you sure you want to delete the folder "${node.name}" and all its contents?`
+      : `Are you sure you want to delete "${node.name}"?`;
+
+    if (window.confirm(confirmMessage)) {
+      onDelete?.(node);
+    }
+  };
+
   return (
     <div>
-      <motion.div
-        role="button"
-        tabIndex={0}
-        className={cn(
-          "relative flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-sm transition-all duration-200 hover:bg-accent/50",
-          isSelected && "bg-accent/80",
-        )}
-        style={{ paddingLeft: `${level * indent + 8}px` }}
-        onClick={handleClick}
-        onKeyDown={handleKeyDown}
-        whileTap={{ scale: 0.98, transition: { duration: 0.06 } }}
-      >
-        {/* Tree Lines */}
-        {showLines && level > 0 && (
-          <div className="pointer-events-none absolute top-0 bottom-0 left-0">
-            {currentPath.map((isLastInPath, pathIndex) => (
-              <div
-                key={pathIndex}
-                className="absolute top-0 bottom-0 border-border/40 border-l"
-                style={{
-                  left: pathIndex * indent + 12,
-                  display:
-                    pathIndex === currentPath.length - 1 && isLastInPath
-                      ? "none"
-                      : "block",
-                }}
-              />
-            ))}
-            <div
-              className="absolute top-1/2 border-border/40 border-t"
-              style={{
-                left: (level - 1) * indent + 12,
-                width: indent - 4,
-                transform: "translateY(-1px)",
-              }}
-            />
-            {isLast && (
-              <div
-                className="absolute top-0 border-border/40 border-l"
-                style={{
-                  left: (level - 1) * indent + 12,
-                  height: "50%",
-                }}
-              />
-            )}
-          </div>
-        )}
-
-        {/* Expand/collapse icon for directories */}
-        <motion.div
-          className="flex size-4 items-center justify-center"
-          animate={{ rotate: node.isDirectory && isExpanded ? 90 : 0 }}
-          transition={{ duration: 0.1, ease: "easeInOut" }}
-        >
-          {node.isDirectory ? (
-            <CaretRightIcon className="size-3 text-muted-foreground" />
-          ) : (
-            <span className="w-4" />
-          )}
-        </motion.div>
-
-        {/* File/folder icon with status indicator */}
-        <div className="relative">
+      <ContextMenu.Root>
+        <ContextMenu.Trigger>
           <motion.div
-            className="flex size-4 items-center justify-center text-muted-foreground"
-            whileHover={{ scale: 1.1 }}
-            transition={{ duration: 0.1 }}
+            role="button"
+            tabIndex={0}
+            className={cn(
+              "relative flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-sm transition-all duration-200 hover:bg-accent/50",
+              isSelected && "bg-accent/80",
+            )}
+            style={{ paddingLeft: `${level * indent + 8}px` }}
+            onClick={handleClick}
+            onKeyDown={handleKeyDown}
+            whileTap={{ scale: 0.98, transition: { duration: 0.06 } }}
           >
-            {node.isDirectory ? (
-              isExpanded ? (
-                <FolderOpenIcon className="size-4" weight="duotone" />
+            {/* Tree Lines */}
+            {showLines && level > 0 && (
+              <div className="pointer-events-none absolute top-0 bottom-0 left-0">
+                {currentPath.map((isLastInPath, pathIndex) => (
+                  <div
+                    key={pathIndex}
+                    className="absolute top-0 bottom-0 border-border/40 border-l"
+                    style={{
+                      left: pathIndex * indent + 12,
+                      display:
+                        pathIndex === currentPath.length - 1 && isLastInPath
+                          ? "none"
+                          : "block",
+                    }}
+                  />
+                ))}
+                <div
+                  className="absolute top-1/2 border-border/40 border-t"
+                  style={{
+                    left: (level - 1) * indent + 12,
+                    width: indent - 4,
+                    transform: "translateY(-1px)",
+                  }}
+                />
+                {isLast && (
+                  <div
+                    className="absolute top-0 border-border/40 border-l"
+                    style={{
+                      left: (level - 1) * indent + 12,
+                      height: "50%",
+                    }}
+                  />
+                )}
+              </div>
+            )}
+
+            {/* Expand/collapse icon for directories */}
+            <motion.div
+              className="flex size-4 items-center justify-center"
+              animate={{ rotate: node.isDirectory && isExpanded ? 90 : 0 }}
+              transition={{ duration: 0.1, ease: "easeInOut" }}
+            >
+              {node.isDirectory ? (
+                <CaretRightIcon className="size-3 text-muted-foreground" />
               ) : (
-                <FolderIcon className="size-4" weight="duotone" />
-              )
-            ) : (
-              <FileIcon className="size-4" weight="duotone" />
+                <span className="w-4" />
+              )}
+            </motion.div>
+
+            {/* File/folder icon with status indicator */}
+            <div className="relative">
+              <motion.div
+                className="flex size-4 items-center justify-center text-muted-foreground"
+                whileHover={{ scale: 1.1 }}
+                transition={{ duration: 0.1 }}
+              >
+                {node.isDirectory ? (
+                  isExpanded ? (
+                    <FolderOpenIcon className="size-4" weight="duotone" />
+                  ) : (
+                    <FolderIcon className="size-4" weight="duotone" />
+                  )
+                ) : (
+                  <FileIcon className="size-4" weight="duotone" />
+                )}
+              </motion.div>
+
+              {/* Status indicator dot */}
+              {node.changes && (
+                <div
+                  className={cn(
+                    "-top-0.5 -right-0.5 absolute size-2 rounded-full border border-background",
+                    node.changes.status === "added" && "bg-green-500",
+                    node.changes.status === "modified" && "bg-orange-500",
+                    node.changes.status === "deleted" && "bg-red-500",
+                    node.changes.status === "renamed" && "bg-blue-500",
+                    node.changes.status === "untracked" && "bg-gray-500",
+                  )}
+                />
+              )}
+            </div>
+
+            {/* File/folder name */}
+            <span
+              className={cn(
+                "flex-1 truncate transition-colors",
+                isSelected ? "text-foreground" : "text-muted-foreground",
+              )}
+            >
+              {node.name}
+            </span>
+
+            {/* Git change statistics */}
+            {node.changes && (
+              <FileBadge
+                status={node.changes.status}
+                additions={node.changes.additions}
+                deletions={node.changes.deletions}
+              />
             )}
           </motion.div>
+        </ContextMenu.Trigger>
 
-          {/* Status indicator dot */}
-          {node.changes && (
-            <div
+        <ContextMenu.Portal>
+          <ContextMenu.Positioner className="z-50" sideOffset={4}>
+            <ContextMenu.Popup
               className={cn(
-                "-top-0.5 -right-0.5 absolute size-2 rounded-full border border-background",
-                node.changes.status === "added" && "bg-green-500",
-                node.changes.status === "modified" && "bg-orange-500",
-                node.changes.status === "deleted" && "bg-red-500",
-                node.changes.status === "renamed" && "bg-blue-500",
-                node.changes.status === "untracked" && "bg-gray-500",
+                "min-w-48 rounded-lg border bg-popover p-1 shadow-lg",
+                "data-[state=closed]:animate-out data-[state=open]:animate-in",
+                "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+                "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
               )}
-            />
-          )}
-        </div>
+            >
+              {/* New File / New Folder for directories */}
+              {node.isDirectory && onCreateFile && (
+                <ContextMenu.Item
+                  className={cn(
+                    "flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1 text-sm outline-none",
+                    "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+                  )}
+                  onClick={() => onCreateFile(node)}
+                >
+                  <FilePlusIcon className="size-4" weight="duotone" />
+                  <span>New File</span>
+                </ContextMenu.Item>
+              )}
 
-        {/* File/folder name */}
-        <span
-          className={cn(
-            "flex-1 truncate transition-colors",
-            isSelected ? "text-foreground" : "text-muted-foreground",
-          )}
-        >
-          {node.name}
-        </span>
+              {node.isDirectory && onCreateFolder && (
+                <ContextMenu.Item
+                  className={cn(
+                    "flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1 text-sm outline-none",
+                    "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+                  )}
+                  onClick={() => onCreateFolder(node)}
+                >
+                  <FolderPlusIcon className="size-4" weight="duotone" />
+                  <span>New Folder</span>
+                </ContextMenu.Item>
+              )}
 
-        {/* Git change statistics */}
-        {node.changes && (
-          <FileBadge
-            status={node.changes.status}
-            additions={node.changes.additions}
-            deletions={node.changes.deletions}
-          />
-        )}
-      </motion.div>
+              {/* Download for files */}
+              {node.isFile && onDownload && (
+                <ContextMenu.Item
+                  className={cn(
+                    "flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1 text-sm outline-none",
+                    "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+                  )}
+                  onClick={() => onDownload(node)}
+                >
+                  <DownloadIcon className="size-4" weight="duotone" />
+                  <span>Download</span>
+                </ContextMenu.Item>
+              )}
+
+              {/* Separator after directory/file specific actions */}
+              {((node.isDirectory && (onCreateFile || onCreateFolder)) ||
+                (node.isFile && onDownload)) && (
+                <ContextMenu.Separator className="my-1 h-px bg-border" />
+              )}
+
+              {/* Rename */}
+              {onRename && (
+                <ContextMenu.Item
+                  className={cn(
+                    "flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1 text-sm outline-none",
+                    "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+                  )}
+                  onClick={handleRename}
+                >
+                  <PencilSimpleIcon className="size-4" weight="duotone" />
+                  <span>Rename</span>
+                </ContextMenu.Item>
+              )}
+
+              {/* Delete */}
+              {onDelete && (
+                <ContextMenu.Item
+                  className={cn(
+                    "flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1 text-sm outline-none",
+                    "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+                  )}
+                  onClick={handleDelete}
+                >
+                  <TrashIcon className="size-4" weight="duotone" />
+                  <span>Delete</span>
+                </ContextMenu.Item>
+              )}
+
+              {/* Separator before utility actions */}
+              {(onRename || onDelete) && (
+                <ContextMenu.Separator className="my-1 h-px bg-border" />
+              )}
+
+              {/* Copy Path */}
+              <ContextMenu.Item
+                className={cn(
+                  "flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1 text-sm outline-none",
+                  "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+                )}
+                onClick={handleCopyPath}
+              >
+                <CopyIcon className="size-4" weight="duotone" />
+                <span>Copy Path</span>
+              </ContextMenu.Item>
+
+              {/* Refresh */}
+              {onRefresh && (
+                <ContextMenu.Item
+                  className={cn(
+                    "flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1 text-sm outline-none",
+                    "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+                  )}
+                  onClick={onRefresh}
+                >
+                  <ArrowClockwiseIcon className="size-4" weight="duotone" />
+                  <span>Refresh</span>
+                </ContextMenu.Item>
+              )}
+            </ContextMenu.Popup>
+          </ContextMenu.Positioner>
+        </ContextMenu.Portal>
+      </ContextMenu.Root>
 
       {/* Render children if directory is expanded */}
       <AnimatePresence>
@@ -677,6 +1032,12 @@ export const FileTreeNode = memo(function FileTreeNode({
                   node={child}
                   level={level + 1}
                   onFileClick={onFileClick}
+                  onRename={onRename}
+                  onDelete={onDelete}
+                  onCreateFile={onCreateFile}
+                  onCreateFolder={onCreateFolder}
+                  onDownload={onDownload}
+                  onRefresh={onRefresh}
                   isLast={index === node.children!.size - 1}
                   parentPath={currentPath}
                   showLines={showLines}
