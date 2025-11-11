@@ -12,7 +12,7 @@ agent-frontmatter:end */
 export const DEFAULT_WORKING_DIRECTORY = "/home/user/workspace";
 
 export const DEFAULT_CONFIG = {
-  timeout: 60000, // E2B sandbox timeout
+  timeout: 300000, // E2B sandbox timeout (5 minutes - increased for stability)
   ports: [3000],
   runtime: "node",
 };

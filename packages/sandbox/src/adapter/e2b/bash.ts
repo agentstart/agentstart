@@ -72,13 +72,19 @@ export class Bash implements BashAPI {
     // Auto-refresh heartbeat and extend timeout before operation
     try {
       await this.manager?.keepAlive();
-    } catch (_error) {
-      // Sandbox may have timed out
+    } catch (keepAliveError) {
+      // Sandbox has timed out or is no longer available
+      const errorMessage =
+        keepAliveError instanceof Error
+          ? keepAliveError.message
+          : String(keepAliveError);
+      console.error(`[E2B Bash] keepAlive failed: ${errorMessage}`);
+
       return {
         exitCode: 1,
         stdout: "",
-        stderr: "Sandbox is no longer available. Please reinitialize.",
-        error: "Sandbox timeout - reinitialize required",
+        stderr: `Sandbox is no longer available: ${errorMessage}`,
+        error: "Sandbox timeout - please reinitialize the sandbox",
         command,
         duration: 0,
       };
@@ -134,14 +140,15 @@ export class Bash implements BashAPI {
       // Check if error is related to sandbox being stopped
       if (
         message.includes("probably not running") ||
-        message.includes("sandbox") ||
-        message.includes("timeout")
+        message.includes("not found") ||
+        message.includes("timeout") ||
+        message.includes("unavailable")
       ) {
         return {
           exitCode: 1,
           stdout,
           stderr: stderr || "Sandbox is no longer available",
-          error: "Sandbox timeout - reinitialize required",
+          error: "Sandbox timeout - please reinitialize the sandbox",
           command,
           duration: Date.now() - start,
         };
@@ -178,7 +185,18 @@ export class Bash implements BashAPI {
     },
   ): Promise<GrepResult> {
     // Auto-refresh heartbeat before operation
-    await this.manager?.keepAlive();
+    try {
+      await this.manager?.keepAlive();
+    } catch (keepAliveError) {
+      console.error(`[E2B Bash] keepAlive failed in grep: ${keepAliveError}`);
+      // Return empty result when sandbox is unavailable
+      return {
+        files: [],
+        duration: 0,
+        totalFiles: 0,
+        totalMatches: 0,
+      };
+    }
 
     const start = Date.now();
 

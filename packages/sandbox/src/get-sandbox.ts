@@ -36,7 +36,29 @@ export async function getSandbox(
   const factory = options.sandbox;
   const cached = sandboxCache.get(factory);
   if (cached) {
-    return cached;
+    try {
+      const sandbox = await cached;
+      // Check if cached sandbox is still active
+      const isActive = await sandbox.isActive();
+      if (isActive) {
+        return sandbox;
+      }
+      // Sandbox is inactive, clean up and recreate
+      console.warn(
+        "[getSandbox] Cached sandbox is inactive, disposing and recreating...",
+      );
+      await sandbox.dispose().catch((err) => {
+        console.error("[getSandbox] Failed to dispose inactive sandbox:", err);
+      });
+      sandboxCache.delete(factory);
+    } catch (error) {
+      // If checking status fails, clear cache and recreate
+      console.error(
+        "[getSandbox] Failed to check cached sandbox status:",
+        error,
+      );
+      sandboxCache.delete(factory);
+    }
   }
 
   const promise = Promise.resolve(factory(options));

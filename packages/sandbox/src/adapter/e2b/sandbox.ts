@@ -188,34 +188,63 @@ export class E2BSandbox implements SandboxAPI {
     sandboxId: string,
     githubToken?: string,
   ): Promise<void> {
-    this.sandbox = await Sandbox.connect(sandboxId);
-    this.sandboxId = sandboxId;
-    this.active = true;
-
-    // Initialize tools with sandbox and manager reference for auto-keepAlive
-    this.fs = new FileSystem(this.sandbox, this);
-    this.bash = new Bash(this.sandbox, this);
-    this.git = new Git(this.sandbox, this);
-
-    // Ensure default working directory exists
     try {
-      await this.sandbox.commands.run(`mkdir -p ${DEFAULT_WORKING_DIRECTORY}`, {
-        cwd: "/home/user",
-      });
+      this.sandbox = await Sandbox.connect(sandboxId);
+      this.sandboxId = sandboxId;
+
+      // Verify sandbox is actually working before marking as active
+      try {
+        await this.sandbox.commands.run("echo 'connection test'", {
+          cwd: "/home/user",
+          timeoutMs: 5000, // Short timeout for verification
+        });
+      } catch (verifyError) {
+        console.warn(
+          `[E2B] Sandbox ${sandboxId} connected but verification failed:`,
+          verifyError,
+        );
+        this.sandbox = null;
+        this.sandboxId = null;
+        throw new Error(`Sandbox ${sandboxId} is not responding to commands`);
+      }
+
+      // Ensure default working directory exists
+      try {
+        await this.sandbox.commands.run(
+          `mkdir -p ${DEFAULT_WORKING_DIRECTORY}`,
+          {
+            cwd: "/home/user",
+          },
+        );
+      } catch (error) {
+        console.warn(
+          `[E2B] Failed to create working directory ${DEFAULT_WORKING_DIRECTORY}:`,
+          error,
+        );
+      }
+
+      // Initialize tools AFTER working directory is ready
+      this.fs = new FileSystem(this.sandbox, this);
+      this.bash = new Bash(this.sandbox, this);
+      this.git = new Git(this.sandbox, this);
+
+      // Mark as active only after everything is ready
+      this.active = true;
+
+      // Set GitHub token if provided
+      if (githubToken) {
+        await this.git.setAuthToken(githubToken);
+      }
+
+      // Refresh the heartbeat after successful connection
+      await this.refreshHeartbeat();
     } catch (error) {
-      console.warn(
-        `[E2B] Failed to create working directory ${DEFAULT_WORKING_DIRECTORY}:`,
-        error,
-      );
+      // Clean up on failure
+      this.sandbox = null;
+      this.sandboxId = null;
+      this.active = false;
+      throw error;
     }
-
-    // Set GitHub token if provided
-    if (githubToken) {
-      await this.git.setAuthToken(githubToken);
-    }
-
-    // Refresh the heartbeat after successful connection
-    await this.refreshHeartbeat();
   }
 
   /**
@@ -360,16 +389,12 @@ export class E2BSandbox implements SandboxAPI {
 
       this.sandbox = await Sandbox.create(createOptions);
       this.sandboxId = this.sandbox.sandboxId;
-      this.active = true;
       this.createdAt = Date.now();
       this.lastActivityTime = Date.now();
 
-      console.log(`[E2B] Sandbox created: ${this.sandboxId}`);
-
-      // Initialize tools with sandbox and manager reference for auto-keepAlive
-      this.fs = new FileSystem(this.sandbox, this);
-      this.bash = new Bash(this.sandbox, this);
-      this.git = new Git(this.sandbox, this);
+      console.log(
+        `[E2B] Sandbox created: ${this.sandboxId} (timeout: ${timeoutMs}ms)`,
+      );
 
       // Create default working directory if it doesn't exist
       try {
@@ -385,6 +410,14 @@ export class E2BSandbox implements SandboxAPI {
           error,
         );
       }
+
+      // Initialize tools AFTER working directory is created
+      this.fs = new FileSystem(this.sandbox, this);
+      this.bash = new Bash(this.sandbox, this);
+      this.git = new Git(this.sandbox, this);
+
+      // Mark as active only after everything is ready
+      this.active = true;
 
       // Set GitHub token if provided
       if (githubToken) {
@@ -407,12 +440,12 @@ export class E2BSandbox implements SandboxAPI {
   }
 
   private getHeartbeatTtlMs(): number {
-    const ttl =
-      this.config.autoStopDelay ??
-      this.config.timeout ??
-      DEFAULT_CONFIG.timeout ??
-      60000;
-    return Math.max(1, ttl);
+    // Use the same timeout as E2B sandbox for consistency
+    // Add 30 seconds buffer to ensure heartbeat doesn't expire before sandbox
+    const sandboxTimeout =
+      this.config.timeout ?? DEFAULT_CONFIG.timeout ?? 60000;
+    const ttl = sandboxTimeout + 30000; // Add 30s buffer
+    return Math.max(60000, ttl); // Minimum 60 seconds
   }
 
   private async isSandboxAliveInStore(sandboxId: string): Promise<boolean> {
