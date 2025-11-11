@@ -25,6 +25,7 @@ import {
   inMemorySecondaryMemoryAdapter,
   redisSecondaryMemoryAdapter,
 } from "agentstart/memory";
+import { e2bSandboxAdapter, nodeSandboxAdapter } from "agentstart/sandbox";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 
@@ -157,7 +158,13 @@ const loggingMiddleware = os.middleware(async ({ next }) => {
   return result;
 });
 
+// Configure sandbox adapter based on E2B_API_KEY availability
+const sandboxAdapter = process.env.E2B_API_KEY
+  ? e2bSandboxAdapter({ apiKey: process.env.E2B_API_KEY })
+  : nodeSandboxAdapter();
+
 export const start = agentStart({
+  sandbox: sandboxAdapter,
   memory: drizzleMemoryAdapter(db, {
     provider: "postgresql",
     schema,
