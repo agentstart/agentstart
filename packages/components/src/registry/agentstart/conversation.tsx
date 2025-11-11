@@ -28,9 +28,8 @@ import {
   useAgentStore,
   useThinkingExtractor,
 } from "agentstart/client";
-import { format, formatDistanceToNow } from "date-fns";
 import type { ComponentProps, ReactNode } from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useStickToBottom } from "use-stick-to-bottom";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,9 +40,9 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
-import { Tooltip, TooltipPopup, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { Message, MessageContent } from "./message";
+import { RelativeTime } from "./relative-time";
 import { Response } from "./response";
 import { StatusIndicators } from "./shimmer";
 import { Source, Sources, SourcesContent, SourcesTrigger } from "./sources";
@@ -255,54 +254,6 @@ function useSafeStore(storeId: string = "default"): UseSafeStoreReturn {
     isUsingThread,
   };
 }
-
-type RelativeTimeProps = {
-  timestamp?: number | Date;
-};
-
-const RelativeTime = ({ timestamp }: RelativeTimeProps) => {
-  const [relativeTime, setRelativeTime] = useState<string>("");
-  const absoluteTime = useMemo(
-    () =>
-      timestamp
-        ? format(timestamp, "M/d/yyyy, h:mm a") // 10/28/2025, 12:04 PM
-        : null,
-    [timestamp],
-  );
-
-  useEffect(() => {
-    if (!timestamp) {
-      setRelativeTime("");
-      return;
-    }
-
-    const updateRelativeTime = () => {
-      setRelativeTime(
-        formatDistanceToNow(new Date(timestamp), { addSuffix: true }),
-      );
-    };
-
-    updateRelativeTime();
-    const interval = setInterval(updateRelativeTime, 60000); // Update every minute
-
-    return () => clearInterval(interval);
-  }, [timestamp]);
-
-  if (!timestamp || !relativeTime) {
-    return null;
-  }
-
-  return (
-    <Tooltip>
-      <TooltipTrigger className="cursor-default text-muted-foreground text-xs">
-        {relativeTime}
-      </TooltipTrigger>
-      <TooltipPopup>
-        <p className="text-xs">{absoluteTime}</p>
-      </TooltipPopup>
-    </Tooltip>
-  );
-};
 
 export type ConversationProps = Omit<
   ComponentProps<typeof ScrollAreaPrimitive.Root>,

@@ -1,11 +1,20 @@
 "use client";
 
+import { FolderSimpleIcon } from "@phosphor-icons/react";
 import type { AgentStartUIMessage, AgentUsageSummary } from "agentstart/agent";
 import { useState } from "react";
 import { Conversation } from "@/components/agent/conversation";
 import { FileExplorer } from "@/components/agent/file-explorer";
+import { Header } from "@/components/agent/header";
 import { PromptInput } from "@/components/agent/prompt-input";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useThread } from "@/lib/agent-client";
+import { cn } from "@/lib/utils";
 
 interface ThreadProps {
   threadId: string;
@@ -22,60 +31,80 @@ export default function Thread({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-full">
-      {/* File Explorer Sidebar */}
-      <div
-        className={`border-r transition-all duration-300 ${
-          isSidebarOpen ? "w-64" : "w-0"
-        } overflow-hidden`}
-      >
-        {isSidebarOpen && (
-          <FileExplorer
-            threadId={threadId}
-            query={{
-              path: "/",
-              recursive: true,
-              ignore: [
-                "node_modules/**",
-                ".next/**",
-                ".git/**",
-                "dist/**",
-                "build/**",
-                "*.log",
-              ],
-            }}
-            onFileClick={(node) => {
-              console.log("File clicked:", node);
-            }}
-          />
-        )}
-      </div>
+    <div className="flex h-full flex-col">
+      {/* Header with File Explorer Toggle */}
+      <Header
+        threadId={threadId}
+        trailing={
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  type="button"
+                  size="icon-sm"
+                  variant="ghost"
+                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                  title={isSidebarOpen ? "Hide Files" : "Show Files"}
+                >
+                  <FolderSimpleIcon
+                    className="size-4"
+                    weight={isSidebarOpen ? "fill" : "regular"}
+                  />
+                </Button>
+              }
+            />
+            <TooltipContent>
+              {isSidebarOpen ? <p>Hide Files</p> : <p>Show Files</p>}
+            </TooltipContent>
+          </Tooltip>
+        }
+      />
 
-      {/* Main Content */}
-      <div className="mx-auto flex h-full w-full max-w-full flex-1 flex-col">
-        {/* Toggle Button */}
-        <div className="border-b p-2">
-          <button
-            type="button"
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="rounded px-3 py-1 text-sm hover:bg-accent"
-          >
-            {isSidebarOpen ? "Hide" : "Show"} Files
-          </button>
+      <div className="flex flex-1 overflow-hidden">
+        {/* Main Content */}
+        <div className="mx-auto flex h-full w-full max-w-full flex-1 flex-col">
+          <Conversation
+            threadId={threadId}
+            initialMessages={initialMessages}
+            contentClassName="pb-48"
+          />
+
+          <div className="sticky inset-x-0 bottom-0 pb-4">
+            <PromptInput
+              className="mx-auto"
+              threadId={threadId}
+              initialUsage={initialUsage}
+            />
+          </div>
         </div>
 
-        <Conversation
-          threadId={threadId}
-          initialMessages={initialMessages}
-          contentClassName="pb-48"
-        />
-
-        <div className="sticky inset-x-0 bottom-0 pb-4">
-          <PromptInput
-            className="mx-auto"
-            threadId={threadId}
-            initialUsage={initialUsage}
-          />
+        {/* File Explorer Sidebar */}
+        <div
+          className={cn(
+            "overflow-hidden transition-all duration-300",
+            isSidebarOpen ? "w-64 border-l" : "w-0",
+          )}
+        >
+          {isSidebarOpen && (
+            <FileExplorer
+              threadId={threadId}
+              query={{
+                path: "/",
+                recursive: true,
+                ignore: [
+                  "node_modules/**",
+                  ".next/**",
+                  ".git/**",
+                  "dist/**",
+                  "build/**",
+                  "*.log",
+                ],
+              }}
+              onFileClick={(node) => {
+                console.log("File clicked:", node);
+              }}
+            />
+          )}
         </div>
       </div>
     </div>
