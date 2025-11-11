@@ -783,12 +783,14 @@ export function Conversation({
             resolvedEmptyState
           )}
 
-          <SuggestedPrompts
-            threadId={threadId}
-            className={cn({
-              "pt-0": !hasMessages,
-            })}
-          />
+          {!shouldShowStatusIndicators && (
+            <SuggestedPrompts
+              threadId={threadId}
+              className={cn({
+                "pt-0": !hasMessages,
+              })}
+            />
+          )}
         </ScrollAreaPrimitive.Content>
       </ScrollAreaPrimitive.Viewport>
       <ScrollAreaPrimitive.Scrollbar
