@@ -10,4 +10,5 @@ SEARCHABLE: packages, agentstart, src, client, store, index, tool, agent, runtim
 agent-frontmatter:end */
 
 export * from "./agent";
+export * from "./setting";
 export * from "./thread";

@@ -344,6 +344,21 @@
       ],
       "dependencies": ["@phosphor-icons/react", "agentstart", "react"],
       "registryDependencies": ["@coss/button", "@coss/tabs"]
+    },
+    {
+      "name": "model-selector",
+      "type": "registry:component",
+      "title": "AgentStart Model Selector",
+      "description": "Compound component for selecting AI models with search and grouping. Provides a dialog-based command palette interface with provider logo display and keyboard navigation.",
+      "files": [
+        {
+          "path": "src/registry/agentstart/model-selector.tsx",
+          "type": "registry:component",
+          "target": "components/agent/model-selector.tsx"
+        }
+      ],
+      "dependencies": ["react"],
+      "registryDependencies": ["@coss/command", "@coss/dialog"]
     }
   ]
 }

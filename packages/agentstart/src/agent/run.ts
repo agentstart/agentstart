@@ -75,6 +75,7 @@ type RunOnFinishCallback = (event: RunFinishEvent) => PromiseLike<void> | void;
 interface StartOptions {
   input: {
     message: AgentStartUIMessage;
+    modelId?: string;
   };
   runtimeContext: Omit<RuntimeContext, "writer">;
   onFinish?: RunOnFinishCallback;
@@ -92,7 +93,7 @@ function ensureMessageMetadata(
   const metadata = (message.metadata ?? {}) as UIMessageMetadata;
   message.metadata = {
     createdAt: metadata.createdAt ?? defaults.createdAt,
-    model: metadata.model ?? defaults.modelId,
+    modelId: metadata.model ?? defaults.modelId,
     ...metadata,
   };
 }
@@ -122,11 +123,51 @@ export class Run {
 
   async start(options: StartOptions) {
     const createdAt = Date.now();
-    const agent = this.agentStartOptions.agent as BaseAgent;
-    const modelId =
-      typeof agent.settings.model === "string"
-        ? agent.settings.model
-        : agent.settings.model.modelId;
+    const baseAgent = this.agentStartOptions.agent as BaseAgent;
+
+    // Support dynamic model switching via modelId parameter
+    let agent: BaseAgent = baseAgent;
+    let modelId: string;
+
+    if (options.input.modelId && this.agentStartOptions.models?.available) {
+      // User requested a specific model, find it in the available models list
+      const requestedModel = this.agentStartOptions.models.available.find(
+        (model) => {
+          const id = typeof model === "string" ? model : model.modelId;
+          return id === options.input.modelId;
+        },
+      );
+
+      if (requestedModel) {
+        // Create a temporary agent with the requested model
+        // We need to cast because we're creating a new instance with the same constructor
+        agent = new (
+          baseAgent.constructor as new (
+            settings: typeof baseAgent.settings,
+          ) => BaseAgent
+        )({
+          ...baseAgent.settings,
+          model: requestedModel,
+        }) as BaseAgent;
+
+        modelId = options.input.modelId;
+      } else {
+        // Fallback to default if requested model not found
+        console.warn(
+          `Model "${options.input.modelId}" not found in available models, using default`,
+        );
+        modelId =
+          typeof baseAgent.settings.model === "string"
+            ? baseAgent.settings.model
+            : baseAgent.settings.model.modelId;
+      }
+    } else {
+      // Use default agent and extract its model ID
+      modelId =
+        typeof baseAgent.settings.model === "string"
+          ? baseAgent.settings.model
+          : baseAgent.settings.model.modelId;
+    }
 
     // Ensure message has metadata with defaults
     ensureMessageMetadata(options.input.message, {
@@ -230,7 +271,7 @@ export class Run {
             messageMetadata: (options) => {
               const agentStartMetadata: UIMessageMetadata = {
                 createdAt,
-                model: modelId,
+                modelId,
                 totalTokens:
                   options.part.type === "finish"
                     ? options.part.totalUsage.totalTokens

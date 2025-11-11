@@ -141,6 +141,7 @@ if (process.env.REDIS_URL || process.env.REDIS_HOST) {
 const openrouter = createOpenRouter({
   apiKey: process.env.MODEL_PROVIDER_API_KEY,
 });
+
 const agent = new Agent({
   model: openrouter("x-ai/grok-4-fast"),
   instructions: "You are a helpful assistant.",
@@ -173,6 +174,15 @@ export const start = agentStart({
   blob: blobAdapter,
   appName: "example-nextjs",
   agent,
+  models: {
+    default: openrouter("x-ai/grok-4-fast"),
+    available: [
+      openrouter("x-ai/grok-4-fast"),
+      openrouter("anthropic/claude-sonnet-4.5"),
+      openrouter("openai/gpt-5"),
+      openrouter("google/gemini-2.0-flash-001"),
+    ],
+  },
   middleware: [
     loggingMiddleware,
     onStart(() => console.log("Handler starting")),

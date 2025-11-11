@@ -29,6 +29,7 @@ import type { AgentStartUIMessage } from "@/agent";
 import type { AgentStartAPI } from "@/api";
 import { useDataStateMapper } from "./data-state-mapper";
 import { useStoreRegistry } from "./provider";
+import { useSettingStore } from "./store";
 import { type AgentStoreWithSync, getAgentStore } from "./store/agent";
 import type { BlobFileList } from "./use-blob-files";
 
@@ -92,11 +93,17 @@ export function createUseThread(client: AgentStartAPI) {
               const body = options.body as {
                 threadId: string;
               };
+
+              // Get selected model ID from global settings store
+              const selectedModelId =
+                useSettingStore.getState().selectedModelId;
+
               return eventIteratorToUnproxiedDataStream(
                 await client.thread.stream(
                   {
-                    ...body,
+                    threadId: body.threadId,
                     message: lastMessage,
+                    modelId: selectedModelId ?? undefined,
                   },
                   { signal: options.abortSignal },
                 ),

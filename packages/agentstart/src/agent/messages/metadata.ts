@@ -14,7 +14,7 @@ import z from "zod";
 export const metadataSchema = z.object({
   sandboxId: z.string().optional(),
   createdAt: z.number().optional(),
-  model: z.string().optional(),
+  modelId: z.string().optional(),
   totalTokens: z.number().optional(),
   finishReason: z
     .enum([

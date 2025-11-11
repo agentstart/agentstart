@@ -78,6 +78,7 @@ import {
   ContextReasoningUsage,
   ContextTrigger,
 } from "./context";
+import { ModelSelector } from "./model-selector";
 import {
   Queue,
   QueueItem,
@@ -1083,7 +1084,10 @@ export function PromptInput({
           />
           {/* Addon */}
           <div className="flex items-center justify-between gap-1 px-4 pb-3">
-            <AddAttachmentsMenu onOpenFileDialog={openFileDialog} />
+            <div className="flex items-center gap-1">
+              <AddAttachmentsMenu onOpenFileDialog={openFileDialog} />
+              <ModelSelector />
+            </div>
             <div className="flex items-center gap-2">
               {showUsage && usageSummary ? (
                 <UsageDisplay summary={usageSummary} />

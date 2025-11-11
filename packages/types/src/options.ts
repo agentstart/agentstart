@@ -65,6 +65,27 @@ export type Blob = BlobAdapter | BlobAdapterFactory;
  */
 export type Sandbox = SandboxAPI | SandboxAdapterFactory;
 
+export interface ModelsConfig {
+  /**
+   * Default model used when no model is specified
+   */
+  default: LanguageModel;
+  /**
+   * List of available models that users can switch between
+   * Simply pass the model instances directly
+   *
+   * @example
+   * ```ts
+   * available: [
+   *   openrouter("x-ai/grok-4-fast"),
+   *   openrouter("anthropic/claude-3.7-sonnet"),
+   *   openrouter("openai/gpt-4-turbo"),
+   * ]
+   * ```
+   */
+  available?: LanguageModel[];
+}
+
 export interface AgentGenerateTitleOptions {
   model: LanguageModel;
   instructions?: string;
@@ -218,6 +239,28 @@ export interface AgentStartOptions {
    * ```
    */
   blob?: Blob;
+  /**
+   * Models configuration for multi-model support.
+   * @type {ModelsConfig | undefined}
+   *
+   * @example
+   * ```ts
+   * import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+   *
+   * const openrouter = createOpenRouter({ apiKey: process.env.MODEL_PROVIDER_API_KEY });
+   *
+   * models: {
+   *   default: openrouter("x-ai/grok-4-fast"),
+   *   available: [
+   *     openrouter("x-ai/grok-4-fast"),
+   *     openrouter("anthropic/claude-3.7-sonnet"),
+   *     openrouter("openai/gpt-4-turbo"),
+   *     openrouter("google/gemini-2.0-flash-exp"),
+   *   ],
+   * }
+   * ```
+   */
+  models?: ModelsConfig;
   /**
    * Model defaults applied to thread-level reasoning tasks.
    * @type {ModelOptions | undefined}

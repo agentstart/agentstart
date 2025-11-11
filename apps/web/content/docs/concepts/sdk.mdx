@@ -130,7 +130,7 @@ await start.api.thread.get({ threadId: 'thr_123' });
 
 <TypeTable
   type={{
-    thread: { type: 'object', typeDescription: '{ id: string; title: string; userId: string; visibility: "public" | "private"; lastContext?: unknown; createdAt: string (date-time); updatedAt: string (date-time) }', required: true, properties: { id: { type: 'string', required: true }, title: { type: 'string', required: true }, userId: { type: 'string', required: true }, visibility: { type: '"public" | "private"', description: 'Allowed values: "public", "private"', default: '"private"', required: true }, lastContext: { type: 'unknown' }, createdAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-03T11:18:24.825Z"', required: true }, updatedAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-03T11:18:24.825Z"', required: true } } }
+    thread: { type: 'object', typeDescription: '{ id: string; title: string; userId: string; visibility: "public" | "private"; lastContext?: unknown; createdAt: string (date-time); updatedAt: string (date-time) }', required: true, properties: { id: { type: 'string', required: true }, title: { type: 'string', required: true }, userId: { type: 'string', required: true }, visibility: { type: '"public" | "private"', description: 'Allowed values: "public", "private"', default: '"private"', required: true }, lastContext: { type: 'unknown' }, createdAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-11T06:29:34.930Z"', required: true }, updatedAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-11T06:29:34.930Z"', required: true } } }
   }}
 />
 
@@ -172,7 +172,7 @@ await start.api.thread.create({ visibility: 'public' });
 <TypeTable
   type={{
     threadId: { type: 'string', required: true },
-    thread: { type: 'object', typeDescription: '{ id: string; title: string; userId: string; visibility: "public" | "private"; lastContext?: unknown; createdAt: string (date-time); updatedAt: string (date-time) }', required: true, properties: { id: { type: 'string', required: true }, title: { type: 'string', required: true }, userId: { type: 'string', required: true }, visibility: { type: '"public" | "private"', description: 'Allowed values: "public", "private"', default: '"private"', required: true }, lastContext: { type: 'unknown' }, createdAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-03T11:18:24.825Z"', required: true }, updatedAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-03T11:18:24.825Z"', required: true } } }
+    thread: { type: 'object', typeDescription: '{ id: string; title: string; userId: string; visibility: "public" | "private"; lastContext?: unknown; createdAt: string (date-time); updatedAt: string (date-time) }', required: true, properties: { id: { type: 'string', required: true }, title: { type: 'string', required: true }, userId: { type: 'string', required: true }, visibility: { type: '"public" | "private"', description: 'Allowed values: "public", "private"', default: '"private"', required: true }, lastContext: { type: 'unknown' }, createdAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-11T06:29:34.930Z"', required: true }, updatedAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-11T06:29:34.930Z"', required: true } } }
   }}
 />
 
@@ -207,7 +207,7 @@ await start.api.thread.update({ threadId: 'thr_123', data: { title: 'Renamed thr
 
 <TypeTable
   type={{
-    thread: { type: 'object', typeDescription: '{ id: string; title: string; userId: string; visibility: "public" | "private"; lastContext?: unknown; createdAt: string (date-time); updatedAt: string (date-time) }', required: true, properties: { id: { type: 'string', required: true }, title: { type: 'string', required: true }, userId: { type: 'string', required: true }, visibility: { type: '"public" | "private"', description: 'Allowed values: "public", "private"', default: '"private"', required: true }, lastContext: { type: 'unknown' }, createdAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-03T11:18:24.825Z"', required: true }, updatedAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-03T11:18:24.825Z"', required: true } } }
+    thread: { type: 'object', typeDescription: '{ id: string; title: string; userId: string; visibility: "public" | "private"; lastContext?: unknown; createdAt: string (date-time); updatedAt: string (date-time) }', required: true, properties: { id: { type: 'string', required: true }, title: { type: 'string', required: true }, userId: { type: 'string', required: true }, visibility: { type: '"public" | "private"', description: 'Allowed values: "public", "private"', default: '"private"', required: true }, lastContext: { type: 'unknown' }, createdAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-11T06:29:34.930Z"', required: true }, updatedAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-11T06:29:34.930Z"', required: true } } }
   }}
 />
 
@@ -273,7 +273,7 @@ for await (const event of await start.api.thread.stream({ threadId: 'thr_123', m
   type={{
     threadId: { type: 'string', description: 'Constraints: min length 1', required: true },
     message: { type: 'unknown', required: true },
-    model: { type: 'string' }
+    modelId: { type: 'string' }
   }}
 />
 
@@ -374,6 +374,245 @@ await start.api.blob.upload({ files: [{ name: 'diagram.png', type: 'image/png', 
   type={{
     success: { type: 'boolean', required: true },
     files: { type: 'Array<object>', typeDescription: 'Array<{ name: string; url: string; downloadUrl: string | null; pathname: string; contentType: string | null; contentDisposition: string | null }>', required: true }
+  }}
+/>
+
+## `sandbox.rename`
+
+_Summary: Rename a file or directory_
+
+Renames a file or directory to a new name in the same parent directory.
+
+```ts
+await start.api.sandbox.rename(input);
+```
+
+#### Examples
+
+**Rename a file**
+
+```ts
+await start.api.sandbox.rename({ path: "/old.txt", newName: "new.txt" });
+```
+
+### Input
+
+<TypeTable
+  type={{
+    path: { type: 'string', description: 'The absolute path of the file to rename', required: true },
+    newName: { type: 'string', description: 'The new name (without path)', required: true }
+  }}
+/>
+
+### Output
+
+<TypeTable
+  type={{
+    success: { type: 'boolean', required: true },
+    newPath: { type: 'string', required: true }
+  }}
+/>
+
+## `sandbox.createFile`
+
+_Summary: Create a new file_
+
+Creates a new file with optional content.
+
+```ts
+await start.api.sandbox.createFile(input);
+```
+
+#### Examples
+
+**Create a new file**
+
+```ts
+await start.api.sandbox.createFile({ path: "/new-file.txt", content: "Hello World" });
+```
+
+### Input
+
+<TypeTable
+  type={{
+    path: { type: 'string', description: 'The absolute path of the file to create', required: true },
+    content: { type: 'string', description: 'Initial content of the file', default: '""' }
+  }}
+/>
+
+### Output
+
+<TypeTable
+  type={{
+    success: { type: 'boolean', required: true }
+  }}
+/>
+
+## `sandbox.createFolder`
+
+_Summary: Create a new folder_
+
+Creates a new folder/directory.
+
+```ts
+await start.api.sandbox.createFolder(input);
+```
+
+#### Examples
+
+**Create a new folder**
+
+```ts
+await start.api.sandbox.createFolder({ path: "/new-folder" });
+```
+
+### Input
+
+<TypeTable
+  type={{
+    path: { type: 'string', description: 'The absolute path of the folder to create', required: true }
+  }}
+/>
+
+### Output
+
+<TypeTable
+  type={{
+    success: { type: 'boolean', required: true }
+  }}
+/>
+
+## `sandbox.download`
+
+_Summary: Download a file_
+
+Returns the content of a file for downloading.
+
+```ts
+await start.api.sandbox.download(input);
+```
+
+#### Examples
+
+**Download a file**
+
+```ts
+await start.api.sandbox.download({ path: "/file.txt" });
+```
+
+### Input
+
+<TypeTable
+  type={{
+    path: { type: 'string', description: 'The absolute path of the file to download', required: true }
+  }}
+/>
+
+### Output
+
+<TypeTable
+  type={{
+    success: { type: 'boolean', required: true },
+    content: { type: 'string', required: true },
+    filename: { type: 'string', required: true }
+  }}
+/>
+
+## `sandbox.delete`
+
+_Summary: Delete a file or directory_
+
+Deletes a file or directory. Directories are deleted recursively.
+
+```ts
+await start.api.sandbox.delete(input);
+```
+
+#### Examples
+
+**Delete a file**
+
+```ts
+await start.api.sandbox.delete({ path: "/file.txt" });
+```
+
+### Input
+
+<TypeTable
+  type={{
+    path: { type: 'string', description: 'The absolute path of the file to delete', required: true }
+  }}
+/>
+
+### Output
+
+<TypeTable
+  type={{
+    success: { type: 'boolean', required: true }
+  }}
+/>
+
+## `sandbox.list`
+
+_Summary: List files and directories_
+
+Returns a flat list of files and directories with parent-child relationships. Supports recursive scanning.
+
+```ts
+await start.api.sandbox.list(input);
+```
+
+#### Examples
+
+**List root directory**
+
+```ts
+await start.api.sandbox.list({ path: "/", recursive: true });
+```
+
+### Input
+
+<TypeTable
+  type={{
+    path: { type: 'string', description: 'The absolute path to list', default: '"/"' },
+    recursive: { type: 'boolean', description: 'Whether to recursively list subdirectories', default: 'false' },
+    ignore: { type: 'Array<string>', description: 'Glob patterns to ignore' },
+    threadId: { type: 'string', description: 'Thread ID to extract file changes from agent operations' }
+  }}
+/>
+
+### Output
+
+<TypeTable
+  type={{
+    items: { type: 'Array<object>', typeDescription: 'Array<{ name: string; path: string; parentPath: string; isFile: boolean; isDirectory: boolean; changes?: { status: "added" | "modified" | "deleted" | "renamed" | "untracked"; additions: number; deletions: number } }>', required: true }
+  }}
+/>
+
+## `model.list`
+
+_Summary: List available models_
+
+Returns the list of models configured in the models.available array, allowing clients to present a model selector UI.
+
+```ts
+await start.api.model.list();
+```
+
+#### Examples
+
+**Fetch available models**
+
+```ts
+const models = await start.api.model.list();
+```
+
+### Output
+
+<TypeTable
+  type={{
+    models: { type: 'Array<object>', typeDescription: 'Array<{ id: string; name: string; provider: string }>', required: true },
+    defaultModelId: { type: 'string | null', description: 'Accepts null.', required: true }
   }}
 />
 

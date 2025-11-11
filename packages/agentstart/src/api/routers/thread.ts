@@ -482,7 +482,7 @@ export function createThreadRouter(procedure = publicProcedure) {
         z.object({
           threadId: z.string().min(1, "Thread ID is required"),
           message: z.any(),
-          model: z.string().optional(),
+          modelId: z.string().optional(),
         }),
       )
       .handler(async ({ input, context, errors, signal }) => {
@@ -503,6 +503,7 @@ export function createThreadRouter(procedure = publicProcedure) {
           const result = await run.start({
             input: {
               message: input.message,
+              modelId: input.modelId,
             },
             runtimeContext: {
               memory,
