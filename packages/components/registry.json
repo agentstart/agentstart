@@ -327,7 +327,12 @@
           "target": "components/agent/tools/write.tsx"
         }
       ],
-      "dependencies": ["@phosphor-icons/react", "agentstart", "react"],
+      "dependencies": [
+        "@phosphor-icons/react",
+        "agentstart",
+        "react",
+        "react-fast-compare"
+      ],
       "registryDependencies": []
     },
     {

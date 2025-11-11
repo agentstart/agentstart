@@ -13,6 +13,7 @@ agent-frontmatter:end */
 
 import type { AgentStartMessagePart } from "agentstart/agent";
 import { memo } from "react";
+import isEqual from "react-fast-compare";
 import { Response } from "../response";
 import { Bash } from "./bash";
 import { EditFile } from "./edit";
@@ -34,10 +35,7 @@ interface Props {
   isStreaming: boolean;
 }
 
-export const MessagePart = memo(function MessagePart({
-  part,
-  isStreaming,
-}: Props) {
+export const MessagePart = memo<Props>(({ part, isStreaming }) => {
   switch (part.type) {
     case "tool-read": {
       return <ReadFile part={part} />;
@@ -71,7 +69,7 @@ export const MessagePart = memo(function MessagePart({
     default:
       return null;
   }
-});
+}, isEqual);
 
 function Reasoning({
   className,
