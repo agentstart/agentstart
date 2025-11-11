@@ -17,7 +17,7 @@ interface GenerateTitleOptions {
   instructions?: string;
 }
 
-const DEFAULT_GENERATE_TITLE_PROMPT = `Write a short, precise title (max 5 words) for this conversation.`;
+const DEFAULT_GENERATE_TITLE_PROMPT = `Write a short, precise title (max 5 words) for this conversation. Use plain text only, no markdown formatting.`;
 
 export async function generateThreadTitle({
   messages,
