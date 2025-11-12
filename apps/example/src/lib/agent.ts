@@ -25,6 +25,7 @@ import {
   inMemorySecondaryMemoryAdapter,
   redisSecondaryMemoryAdapter,
 } from "agentstart/memory";
+import { createAgentPrompt } from "agentstart/prompts";
 import { e2bSandboxAdapter, nodeSandboxAdapter } from "agentstart/sandbox";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
@@ -142,9 +143,17 @@ const openrouter = createOpenRouter({
   apiKey: process.env.MODEL_PROVIDER_API_KEY,
 });
 
+const instructions = createAgentPrompt({
+  scenario: "developer",
+  focus: "Full-stack SaaS applications with Next.js and TypeScript",
+  runtime: "Node.js 20",
+  languages: ["TypeScript"],
+  frameworks: ["Next.js", "React", "Prisma"],
+});
+
 const agent = new Agent({
   model: openrouter("x-ai/grok-4-fast"),
-  instructions: "You are a helpful assistant.",
+  instructions,
   tools: {
     ...agentTools,
     ...osTools,

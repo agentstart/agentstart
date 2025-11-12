@@ -32,6 +32,10 @@
       "import": "./dist/memory/index.mjs",
       "require": "./dist/memory/index.cjs"
     },
+    "./prompts": {
+      "import": "./dist/prompts/index.mjs",
+      "require": "./dist/prompts/index.cjs"
+    },
     "./sandbox": {
       "import": "./dist/sandbox/index.mjs",
       "require": "./dist/sandbox/index.cjs"
@@ -117,6 +121,10 @@
       "./client": {
         "import": "./dist/client/index.js",
         "require": "./dist/client/index.cjs"
+      },
+      "./prompts": {
+        "import": "./dist/prompts/index.js",
+        "require": "./dist/prompts/index.cjs"
       },
       "./usage": {
         "import": "./dist/usage/index.js",

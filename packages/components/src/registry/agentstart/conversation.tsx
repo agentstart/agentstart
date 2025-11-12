@@ -805,8 +805,8 @@ export function Conversation({
       </ScrollAreaPrimitive.Scrollbar>
 
       <ConversationScrollButton
-        className={cn("bottom-52", {
-          "bottom-62": hasQueue,
+        className={cn("bottom-42", {
+          "bottom-52": hasQueue,
         })}
         isAtBottom={isAtBottom}
         scrollToBottom={scrollToBottom}
