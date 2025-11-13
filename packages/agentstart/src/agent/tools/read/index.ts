@@ -81,6 +81,19 @@ export const read = tool({
   async *execute(input, { experimental_context: context }) {
     const { sandbox } = context as RuntimeContext;
 
+    // Check if sandbox is configured
+    if (!sandbox) {
+      yield {
+        status: "error" as const,
+        prompt: "Sandbox not configured",
+        error: {
+          message:
+            "Read tool requires a sandbox to be configured. Please configure a sandbox adapter in your AgentStart options.",
+        },
+      } satisfies AgentStartToolOutput["read"];
+      return;
+    }
+
     yield {
       status: "pending" as const,
       prompt: `Reading file: ${input.filePath}`,

@@ -20,12 +20,21 @@ import { getApi } from "@/api/get-api";
 export function agentStart(options: AgentStartOptions) {
   const context = { current: null as Context | null };
 
-  const router = createAppRouter(options.middleware);
-  const rpcHandler = new RPCHandler(router);
-
   return {
     handler: async (request: Request) => {
       const basePath = options.basePath ?? ("/api/agent" as const);
+
+      const router = await createAppRouter({
+        middleware: options.middleware,
+        enabledRouters: {
+          thread: true,
+          message: true,
+          config: true,
+          blob: !!options.blob,
+          sandbox: !!options.sandbox,
+        },
+      });
+      const rpcHandler = new RPCHandler(router);
 
       const contextOptions: CreateContextOptions = {
         headers: new Headers(request.headers),

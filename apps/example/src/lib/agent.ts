@@ -15,18 +15,16 @@ import { onStart, onSuccess, os } from "@orpc/server";
 import type { Blob, SecondaryMemoryAdapter } from "agentstart";
 import { agentStart } from "agentstart";
 import { Agent, agentTools, osTools } from "agentstart/agent";
-import {
-  r2BlobAdapter,
-  s3BlobAdapter,
-  vercelBlobAdapter,
-} from "agentstart/blob";
+import { r2BlobAdapter, s3BlobAdapter } from "agentstart/blob/s3";
+import { vercelBlobAdapter } from "agentstart/blob/vercel";
 import {
   drizzleMemoryAdapter,
   inMemorySecondaryMemoryAdapter,
   redisSecondaryMemoryAdapter,
 } from "agentstart/memory";
 import { createAgentPrompt } from "agentstart/prompts";
-import { e2bSandboxAdapter, nodeSandboxAdapter } from "agentstart/sandbox";
+import { e2bSandboxAdapter } from "agentstart/sandbox/e2b";
+import { nodeSandboxAdapter } from "agentstart/sandbox/nodejs";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 

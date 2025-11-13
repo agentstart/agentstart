@@ -5,6 +5,15 @@
   "type": "module",
   "exports": {
     ".": "./dist/index.mjs",
+    "./drizzle": "./dist/drizzle/index.mjs",
+    "./in-memory": "./dist/in-memory/index.mjs",
+    "./kysely": "./dist/kysely/index.mjs",
+    "./mongodb": "./dist/mongodb/index.mjs",
+    "./prisma": "./dist/prisma/index.mjs",
+    "./redis": "./dist/redis/index.mjs",
+    "./secondary-in-memory": "./dist/secondary-in-memory/index.mjs",
+    "./upstash": "./dist/upstash/index.mjs",
+    "./vercel-kv": "./dist/vercel-kv/index.mjs",
     "./package.json": "./package.json"
   },
   "scripts": {

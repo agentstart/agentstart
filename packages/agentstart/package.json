@@ -20,6 +20,14 @@
       "import": "./dist/blob/index.mjs",
       "require": "./dist/blob/index.cjs"
     },
+    "./blob/s3": {
+      "import": "./dist/blob/s3.mjs",
+      "require": "./dist/blob/s3.cjs"
+    },
+    "./blob/vercel": {
+      "import": "./dist/blob/vercel.mjs",
+      "require": "./dist/blob/vercel.cjs"
+    },
     "./client": {
       "import": "./dist/client/index.mjs",
       "require": "./dist/client/index.cjs"
@@ -28,9 +36,53 @@
       "import": "./dist/integration/index.mjs",
       "require": "./dist/integration/index.cjs"
     },
+    "./integration/nextjs": {
+      "import": "./dist/integration/nextjs.mjs",
+      "require": "./dist/integration/nextjs.cjs"
+    },
+    "./integration/nodejs": {
+      "import": "./dist/integration/nodejs.mjs",
+      "require": "./dist/integration/nodejs.cjs"
+    },
     "./memory": {
       "import": "./dist/memory/index.mjs",
       "require": "./dist/memory/index.cjs"
+    },
+    "./memory/drizzle": {
+      "import": "./dist/memory/drizzle.mjs",
+      "require": "./dist/memory/drizzle.cjs"
+    },
+    "./memory/in-memory": {
+      "import": "./dist/memory/in-memory.mjs",
+      "require": "./dist/memory/in-memory.cjs"
+    },
+    "./memory/kysely": {
+      "import": "./dist/memory/kysely.mjs",
+      "require": "./dist/memory/kysely.cjs"
+    },
+    "./memory/mongodb": {
+      "import": "./dist/memory/mongodb.mjs",
+      "require": "./dist/memory/mongodb.cjs"
+    },
+    "./memory/prisma": {
+      "import": "./dist/memory/prisma.mjs",
+      "require": "./dist/memory/prisma.cjs"
+    },
+    "./memory/redis": {
+      "import": "./dist/memory/redis.mjs",
+      "require": "./dist/memory/redis.cjs"
+    },
+    "./memory/secondary-in-memory": {
+      "import": "./dist/memory/secondary-in-memory.mjs",
+      "require": "./dist/memory/secondary-in-memory.cjs"
+    },
+    "./memory/upstash": {
+      "import": "./dist/memory/upstash.mjs",
+      "require": "./dist/memory/upstash.cjs"
+    },
+    "./memory/vercel-kv": {
+      "import": "./dist/memory/vercel-kv.mjs",
+      "require": "./dist/memory/vercel-kv.cjs"
     },
     "./prompts": {
       "import": "./dist/prompts/index.mjs",
@@ -39,6 +91,14 @@
     "./sandbox": {
       "import": "./dist/sandbox/index.mjs",
       "require": "./dist/sandbox/index.cjs"
+    },
+    "./sandbox/e2b": {
+      "import": "./dist/sandbox/e2b.mjs",
+      "require": "./dist/sandbox/e2b.cjs"
+    },
+    "./sandbox/nodejs": {
+      "import": "./dist/sandbox/nodejs.mjs",
+      "require": "./dist/sandbox/nodejs.cjs"
     },
     "./package.json": "./package.json"
   },

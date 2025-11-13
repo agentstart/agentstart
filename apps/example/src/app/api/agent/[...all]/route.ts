@@ -9,7 +9,7 @@ FEATURES:
 SEARCHABLE: playground, next, src, app, api, agent, [, all], route
 agent-frontmatter:end */
 
-import { toNextJsHandler } from "agentstart/integration";
+import { toNextJsHandler } from "agentstart/integration/nextjs";
 import { start } from "@/lib/agent"; // path to your auth file
 
 export const { POST, GET } = toNextJsHandler(start.handler);

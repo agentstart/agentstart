@@ -10,6 +10,8 @@ FEATURES:
 SEARCHABLE: nodejs sandbox bash, command runner, grep implementation, shell adapter
 agent-frontmatter:end */
 
+import type { SpawnOptions } from "node:child_process";
+import { spawn } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import type {
@@ -21,13 +23,12 @@ import type {
   ShellCommandPromise,
   ShellCommandResult,
 } from "@agentstart/types";
-import { type Options as ExecaOptions, execa } from "execa";
 import glob from "fast-glob";
 import { chunkToString, interpolateTemplate } from "../../utils/text";
 
 /**
  * Node.js implementation of BashAPI
- * Provides bash-like command operations using execa for better process management
+ * Provides bash-like command operations using native child_process for process management
  */
 export class Bash implements BashAPI {
   private workingDirectory: string;
@@ -79,15 +80,6 @@ export class Bash implements BashAPI {
   ): Promise<ShellCommandResult> {
     const start = Date.now();
 
-    const execaOptions: ExecaOptions = {
-      cwd: options.cwd ?? this.workingDirectory,
-      env: { ...process.env, ...(options.env ?? {}) },
-      timeout: options.timeout,
-      windowsHide: true,
-      reject: false,
-      ...(options.background ? { detached: true, cleanup: false } : {}),
-    };
-
     const shellExecutable =
       process.platform === "win32"
         ? (process.env.ComSpec ?? "cmd.exe")
@@ -97,23 +89,47 @@ export class Bash implements BashAPI {
         ? ["/d", "/s", "/c", command]
         : ["-lc", command];
 
-    const child = execa(shellExecutable, shellArgs, {
-      ...execaOptions,
-      shell: false,
-      stripFinalNewline: false,
+    const spawnOptions: SpawnOptions = {
+      cwd: options.cwd ?? this.workingDirectory,
+      env: { ...process.env, ...(options.env ?? {}) },
+      windowsHide: true,
       windowsVerbatimArguments: process.platform === "win32",
-    });
+      ...(options.background ? { detached: true } : {}),
+    };
 
-    if (options.background) child.unref?.();
+    const child = spawn(shellExecutable, shellArgs, spawnOptions);
+
+    if (options.background) {
+      child.unref?.();
+    }
 
     let abortReason: string | undefined;
+    let killed = false;
+
+    // Handle request timeout
     const requestTimeout = options.requestTimeoutMs
       ? setTimeout(() => {
           abortReason = `Command timed out after ${options.requestTimeoutMs}ms`;
-          if (!child.killed) child.kill("SIGTERM");
+          if (!killed) {
+            killed = true;
+            child.kill("SIGTERM");
+          }
         }, options.requestTimeoutMs)
       : null;
     requestTimeout?.unref?.();
+
+    // Handle shell timeout (if different from request timeout)
+    const shellTimeout =
+      options.timeout && options.timeout !== options.requestTimeoutMs
+        ? setTimeout(() => {
+            if (!abortReason && !killed) {
+              abortReason = `Command timed out after ${options.timeout}ms`;
+              killed = true;
+              child.kill("SIGTERM");
+            }
+          }, options.timeout)
+        : null;
+    shellTimeout?.unref?.();
 
     const createStreamHandler =
       (callback?: (text: string) => void | Promise<void>) =>
@@ -130,8 +146,23 @@ export class Bash implements BashAPI {
         }
       };
 
-    child.stdout?.on("data", createStreamHandler(options.onStdout));
-    child.stderr?.on("data", createStreamHandler(options.onStderr));
+    // Collect stdout and stderr
+    const stdoutChunks: Buffer[] = [];
+    const stderrChunks: Buffer[] = [];
+
+    if (child.stdout) {
+      child.stdout.on("data", (chunk) => {
+        stdoutChunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+        createStreamHandler(options.onStdout)(chunk);
+      });
+    }
+
+    if (child.stderr) {
+      child.stderr.on("data", (chunk) => {
+        stderrChunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+        createStreamHandler(options.onStderr)(chunk);
+      });
+    }
 
     const buildResult = (
       stdout: string,
@@ -147,61 +178,44 @@ export class Bash implements BashAPI {
       duration: Date.now() - start,
     });
 
-    try {
-      const result = await child;
+    return new Promise((resolve, reject) => {
+      let resolved = false;
 
-      // Check if the command was killed due to timeout
-      if (result.timedOut || result.isTerminated || result.isCanceled) {
-        const timeoutError = new Error(
-          abortReason ||
-            `Command timed out after ${options.timeout || options.requestTimeoutMs} milliseconds: ${command}`,
-        );
-        (timeoutError as { timedOut?: boolean }).timedOut = true;
-        throw timeoutError;
-      }
-
-      // Also check if exitCode indicates failure and we had set abortReason
-      if (abortReason && result.exitCode !== 0) {
-        const timeoutError = new Error(abortReason);
-        (timeoutError as { timedOut?: boolean }).timedOut = true;
-        throw timeoutError;
-      }
-
-      return buildResult(
-        chunkToString(result.stdout),
-        chunkToString(result.stderr),
-        result.exitCode ?? 0,
-        result.exitCode === 0 ? undefined : result.shortMessage,
-      );
-    } catch (error) {
-      const err = error as {
-        exitCode?: number;
-        stdout?: unknown;
-        stderr?: unknown;
-        shortMessage?: string;
-        message?: string;
-        isTerminated?: boolean;
-        isCanceled?: boolean;
-        timedOut?: boolean;
+      const cleanup = () => {
+        if (requestTimeout) clearTimeout(requestTimeout);
+        if (shellTimeout) clearTimeout(shellTimeout);
       };
 
-      // If this is a timeout/termination error, re-throw it
-      if (err.timedOut || err.isTerminated || err.isCanceled || abortReason) {
-        throw new Error(
-          abortReason ||
-            `Command timed out after ${options.timeout || options.requestTimeoutMs} milliseconds: ${command}`,
-        );
-      }
+      child.on("error", (error) => {
+        cleanup();
+        if (!resolved) {
+          resolved = true;
+          const stdout = Buffer.concat(stdoutChunks).toString("utf8");
+          const stderr = Buffer.concat(stderrChunks).toString("utf8");
+          resolve(buildResult(stdout, stderr, 1, error.message));
+        }
+      });
 
-      return buildResult(
-        chunkToString(err.stdout),
-        chunkToString(err.stderr),
-        err.exitCode ?? 1,
-        err.shortMessage || err.message || String(error),
-      );
-    } finally {
-      if (requestTimeout) clearTimeout(requestTimeout);
-    }
+      child.on("close", (code, signal) => {
+        cleanup();
+        if (!resolved) {
+          resolved = true;
+          const stdout = Buffer.concat(stdoutChunks).toString("utf8");
+          const stderr = Buffer.concat(stderrChunks).toString("utf8");
+          const exitCode = code ?? (signal ? 1 : 0);
+
+          // Check if the command was killed due to timeout
+          if (killed || signal === "SIGTERM" || signal === "SIGKILL") {
+            if (abortReason) {
+              reject(new Error(abortReason));
+              return;
+            }
+          }
+
+          resolve(buildResult(stdout, stderr, exitCode));
+        }
+      });
+    });
   }
 
   /**

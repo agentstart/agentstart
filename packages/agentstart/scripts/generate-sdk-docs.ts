@@ -17,7 +17,7 @@ import { traverseContractProcedures } from "@orpc/server";
 import { ensureDir, writeFile } from "fs-extra";
 import type { ZodType } from "zod";
 import * as z from "zod";
-import { appRouter } from "../src/api/router";
+import { createAppRouter } from "../src/api/router";
 
 interface ProcedureDoc {
   path: string[];
@@ -100,6 +100,9 @@ interface TypeInfo {
 // Script intended to be executed with Bun. Wrap in async IIFE so we can await future work easily.
 await (async () => {
   const procedures: ProcedureDoc[] = [];
+
+  // Create the app router with all routers enabled
+  const appRouter = await createAppRouter();
 
   traverseContractProcedures(
     { router: appRouter, path: [] },

@@ -33,6 +33,19 @@ export const glob = tool({
   ) {
     const { sandbox } = context as RuntimeContext;
 
+    // Check if sandbox is configured
+    if (!sandbox) {
+      yield {
+        status: "error" as const,
+        prompt: "Sandbox not configured",
+        error: {
+          message:
+            "Glob tool requires a sandbox to be configured. Please configure a sandbox adapter in your AgentStart options.",
+        },
+      } satisfies AgentStartToolOutput["glob"];
+      return;
+    }
+
     yield {
       status: "pending" as const,
       prompt: `Searching: ${pattern} in ${searchPath || "current directory"}`,

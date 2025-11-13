@@ -8,15 +8,34 @@ FEATURES:
   - Returns flat file tree structure with parent-child relationships
   - Supports recursive directory scanning
   - Type-safe file node schema
+  - Handles missing sandbox configuration gracefully
 SEARCHABLE: sandbox router, file tree, filesystem api, orpc router
 agent-frontmatter:end */
 
+import type { AgentStartOptions, SandboxAPI } from "@agentstart/types";
+import { AgentStartError } from "@agentstart/utils";
 import z from "zod";
 import { type AgentStartUIMessage, loadThread } from "@/agent";
 import { publicProcedure } from "@/api/procedures";
 import { handleRouterError } from "@/api/utils/error-handler";
 import { getAdapter } from "@/memory";
 import { getSandbox } from "@/sandbox";
+
+/**
+ * Helper function to get sandbox and throw error if not configured
+ */
+async function requireSandbox(
+  context: AgentStartOptions,
+): Promise<SandboxAPI> {
+  const sandbox = await getSandbox(context);
+  if (!sandbox) {
+    throw new AgentStartError(
+      "SANDBOX_NOT_CONFIGURED",
+      "Sandbox is not configured. Please configure a sandbox adapter in your AgentStart options.",
+    );
+  }
+  return sandbox;
+}
 
 /**
  * Schema for file node returned by sandbox API
@@ -69,7 +88,7 @@ export function createSandboxRouter(procedure = publicProcedure) {
       .output(z.object({ success: z.boolean(), newPath: z.string() }))
       .handler(async ({ input, context, errors }) => {
         try {
-          const sandbox = await getSandbox(context);
+          const sandbox = await requireSandbox(context);
 
           // Extract parent directory and construct new path
           const pathParts = input.path.split("/");
@@ -118,7 +137,7 @@ export function createSandboxRouter(procedure = publicProcedure) {
       .output(z.object({ success: z.boolean() }))
       .handler(async ({ input, context, errors }) => {
         try {
-          const sandbox = await getSandbox(context);
+          const sandbox = await requireSandbox(context);
 
           const pathWithoutLeadingSlash = input.path.startsWith("/")
             ? input.path.substring(1)
@@ -159,7 +178,7 @@ export function createSandboxRouter(procedure = publicProcedure) {
       .output(z.object({ success: z.boolean() }))
       .handler(async ({ input, context, errors }) => {
         try {
-          const sandbox = await getSandbox(context);
+          const sandbox = await requireSandbox(context);
 
           const pathWithoutLeadingSlash = input.path.startsWith("/")
             ? input.path.substring(1)
@@ -206,7 +225,7 @@ export function createSandboxRouter(procedure = publicProcedure) {
       )
       .handler(async ({ input, context, errors }) => {
         try {
-          const sandbox = await getSandbox(context);
+          const sandbox = await requireSandbox(context);
 
           const pathWithoutLeadingSlash = input.path.startsWith("/")
             ? input.path.substring(1)
@@ -255,7 +274,7 @@ export function createSandboxRouter(procedure = publicProcedure) {
       .output(z.object({ success: z.boolean() }))
       .handler(async ({ input, context, errors }) => {
         try {
-          const sandbox = await getSandbox(context);
+          const sandbox = await requireSandbox(context);
 
           const pathWithoutLeadingSlash = input.path.startsWith("/")
             ? input.path.substring(1)
@@ -318,7 +337,7 @@ export function createSandboxRouter(procedure = publicProcedure) {
       .output(z.array(fileNodeSchema))
       .handler(async ({ input, context, errors }) => {
         try {
-          const sandbox = await getSandbox(context);
+          const sandbox = await requireSandbox(context);
 
           // Use sandbox fs.readdir to list directory contents
           const entries = await sandbox.fs.readdir(input.path || "/", {

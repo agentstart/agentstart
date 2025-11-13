@@ -27,6 +27,19 @@ export const write = tool({
   async *execute({ filePath, content }, { experimental_context: context }) {
     const { sandbox } = context as RuntimeContext;
 
+    // Check if sandbox is configured
+    if (!sandbox) {
+      yield {
+        status: "error" as const,
+        prompt: "Sandbox not configured",
+        error: {
+          message:
+            "Write tool requires a sandbox to be configured. Please configure a sandbox adapter in your AgentStart options.",
+        },
+      } satisfies AgentStartToolOutput["write"];
+      return;
+    }
+
     // Check if file exists
     let exists = false;
     try {

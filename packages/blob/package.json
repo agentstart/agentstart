@@ -5,6 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./dist/index.mjs",
+    "./s3": "./dist/s3.mjs",
+    "./vercel": "./dist/vercel.mjs",
     "./package.json": "./package.json"
   },
   "scripts": {

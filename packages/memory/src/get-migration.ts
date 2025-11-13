@@ -21,7 +21,7 @@ import type {
 } from "kysely";
 import { sql } from "kysely";
 import { getSchema } from "./get-schema";
-import { createKyselyAdapter } from "./memory/kysely/dialect";
+import { createKyselyAdapter } from "./kysely/dialect";
 
 const postgresMap = {
   string: ["character varying", "text"],

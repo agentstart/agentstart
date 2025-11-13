@@ -10,7 +10,7 @@ FEATURES:
 SEARCHABLE: agent context, rpc context, memory adapter
 agent-frontmatter:end */
 
-import { inMemoryAdapter } from "@agentstart/memory";
+import { inMemoryAdapter } from "@agentstart/memory/in-memory";
 import type { AgentStartOptions } from "@agentstart/types";
 
 export interface Context extends AgentStartOptions {

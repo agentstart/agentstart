@@ -5,13 +5,12 @@ USAGE: const sandbox = await getSandbox(agentOptions)
 EXPORTS: getSandbox
 FEATURES:
   - Accepts SandboxAPI instance or SandboxAdapterFactory
-  - Defaults to Node.js sandbox if no configuration provided
+  - Returns undefined if no sandbox configured
   - Caches initialized sandboxes for reuse
 SEARCHABLE: sandbox resolver, getSandbox, sandbox initialization
 agent-frontmatter:end */
 
 import type { AgentStartOptions, SandboxAPI } from "@agentstart/types";
-import { nodeSandboxAdapter } from "./factory/nodejs";
 
 const sandboxCache = new WeakMap<
   (options: AgentStartOptions) => Promise<SandboxAPI> | SandboxAPI,
@@ -20,11 +19,10 @@ const sandboxCache = new WeakMap<
 
 export async function getSandbox(
   options: AgentStartOptions,
-): Promise<SandboxAPI> {
+): Promise<SandboxAPI | undefined> {
   if (!options.sandbox) {
-    // Default to Node.js sandbox
-    const defaultFactory = nodeSandboxAdapter();
-    return defaultFactory(options);
+    // No sandbox configured, return undefined
+    return undefined;
   }
 
   // If already a SandboxAPI instance

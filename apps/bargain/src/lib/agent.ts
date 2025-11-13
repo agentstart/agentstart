@@ -14,16 +14,11 @@ import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import type { Blob, SecondaryMemoryAdapter } from "agentstart";
 import { agentStart } from "agentstart";
 import { Agent } from "agentstart/agent";
-import {
-  r2BlobAdapter,
-  s3BlobAdapter,
-  vercelBlobAdapter,
-} from "agentstart/blob";
-import {
-  drizzleMemoryAdapter,
-  inMemorySecondaryMemoryAdapter,
-  redisSecondaryMemoryAdapter,
-} from "agentstart/memory";
+import { r2BlobAdapter, s3BlobAdapter } from "agentstart/blob/s3";
+import { vercelBlobAdapter } from "agentstart/blob/vercel";
+import { drizzleMemoryAdapter } from "agentstart/memory/drizzle";
+import { redisSecondaryMemoryAdapter } from "agentstart/memory/redis";
+import { inMemorySecondaryMemoryAdapter } from "agentstart/memory/secondary-in-memory";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 import instructions from "./instructions";

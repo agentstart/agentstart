@@ -8,49 +8,89 @@ FEATURES:
   - Type-safe exports
   - Modular route organization
   - Dynamic middleware support
+  - Conditional router loading based on configuration
 SEARCHABLE: orpc router, main router, api router
 agent-frontmatter:end */
 
 import type { AnyMiddleware } from "@orpc/server";
 import { createProcedureBuilder } from "./procedures";
-import { createBlobRouter } from "./routers/blob";
-import { createConfigRouter } from "./routers/config";
-import { createMessageRouter } from "./routers/message";
-import { createSandboxRouter } from "./routers/sandbox";
-import { createThreadRouter } from "./routers/thread";
 
 /**
- * Main API router combining all procedures
- * Each procedure can be accessed via RPC or REST
+ * Options for creating the app router
  */
-export const appRouter = {
-  thread: createThreadRouter(),
-  message: createMessageRouter(),
-  blob: createBlobRouter(),
-  sandbox: createSandboxRouter(),
-  config: createConfigRouter(),
-};
-
-/**
- * Create app router with optional middleware applied
- */
-export function createAppRouter(middleware?: AnyMiddleware[]) {
-  if (!middleware?.length) {
-    return appRouter;
-  }
-
-  // Create procedure builder with middleware
-  const procedureBuilder = createProcedureBuilder(middleware);
-
-  // Create routers with middleware-enhanced procedures
-  return {
-    thread: createThreadRouter(procedureBuilder),
-    message: createMessageRouter(procedureBuilder),
-    blob: createBlobRouter(procedureBuilder),
-    sandbox: createSandboxRouter(procedureBuilder),
-    config: createConfigRouter(procedureBuilder),
+export interface CreateAppRouterOptions {
+  middleware?: AnyMiddleware[];
+  /**
+   * Enable or disable specific routers
+   */
+  enabledRouters?: {
+    thread?: boolean;
+    message?: boolean;
+    blob?: boolean;
+    config?: boolean;
+    sandbox?: boolean;
   };
 }
 
-// Export the router type for client usage
-export type AppRouter = typeof appRouter;
+/**
+ * Create app router with optional middleware and router selection
+ * Uses dynamic imports for conditional routers
+ */
+export async function createAppRouter(options?: CreateAppRouterOptions) {
+  const middleware = options?.middleware;
+  const enabledRouters = options?.enabledRouters ?? {};
+
+  // Default all routers to enabled
+  const enableThread = enabledRouters.thread ?? true;
+  const enableMessage = enabledRouters.message ?? true;
+  const enableBlob = enabledRouters.blob ?? true;
+  const enableConfig = enabledRouters.config ?? true;
+  const enableSandbox = enabledRouters.sandbox ?? true;
+
+  // Create procedure builder with middleware if provided
+  const procedureBuilder = middleware?.length
+    ? createProcedureBuilder(middleware)
+    : undefined;
+
+  // Conditionally load each router based on configuration
+  const routers: Partial<AppRouter> = {};
+
+  if (enableThread) {
+    const { createThreadRouter } = await import("./routers/thread");
+    routers.thread = createThreadRouter(procedureBuilder);
+  }
+
+  if (enableMessage) {
+    const { createMessageRouter } = await import("./routers/message");
+    routers.message = createMessageRouter(procedureBuilder);
+  }
+
+  if (enableBlob) {
+    const { createBlobRouter } = await import("./routers/blob");
+    routers.blob = createBlobRouter(procedureBuilder);
+  }
+
+  if (enableConfig) {
+    const { createConfigRouter } = await import("./routers/config");
+    routers.config = createConfigRouter(procedureBuilder);
+  }
+
+  if (enableSandbox) {
+    const { createSandboxRouter } = await import("./routers/sandbox");
+    routers.sandbox = createSandboxRouter(procedureBuilder);
+  }
+
+  return routers as AppRouter;
+}
+
+/**
+ * Type representing the full app router with all routes enabled
+ * Used for type-safe API client creation
+ */
+export type AppRouter = {
+  thread: ReturnType<typeof import("./routers/thread").createThreadRouter>;
+  message: ReturnType<typeof import("./routers/message").createMessageRouter>;
+  blob: ReturnType<typeof import("./routers/blob").createBlobRouter>;
+  config: ReturnType<typeof import("./routers/config").createConfigRouter>;
+  sandbox: ReturnType<typeof import("./routers/sandbox").createSandboxRouter>;
+};

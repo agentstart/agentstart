@@ -5,7 +5,7 @@ import type { SandboxAPI } from "./sandbox";
 export interface RuntimeContext {
   writer: UIMessageStreamWriter<UIMessage>;
   threadId: string;
-  sandbox: SandboxAPI;
+  sandbox?: SandboxAPI;
   memory: MemoryAdapter;
 }
 

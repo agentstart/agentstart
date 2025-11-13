@@ -1,11 +1,16 @@
 /* agent-frontmatter:start
 AGENT: Integration entry exports
-PURPOSE: Re-export runtime adapters for hosting environments
-USAGE: import { toNextJsHandler, toNodeHandler } from "agentstart/integrations"
+PURPOSE: Export integration types (types only, no adapters)
+USAGE: For adapters, use granular imports: agentstart/integration/next, agentstart/integration/node
 FEATURES:
-  - Centralizes integration exports for discoverability
-SEARCHABLE: agent integrations, runtime adapters, next handler, node handler
+  - Type-safe integration configuration
+  - For Next.js handler: import from agentstart/integration/next
+  - For Node.js handler: import from agentstart/integration/node
+SEARCHABLE: agent integrations, runtime adapters, integration types
 agent-frontmatter:end */
 
-export * from "./next";
-export * from "./node";
+// Currently no shared types to export
+// Use granular imports for specific adapters:
+// - agentstart/integration/next
+// - agentstart/integration/node
+

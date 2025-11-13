@@ -1,12 +1,13 @@
 /* agent-frontmatter:start
 AGENT: Memory adapter runtime utilities
 PURPOSE: Provide helper functions for initializing and transforming adapter data
-USAGE: import { getAdapter } from "agentstart/memory/utils"
-EXPORTS: getAdapter, convertToDB, convertFromDB
+USAGE: import { getAdapter, withApplyDefault } from "agentstart/memory/utils"
+EXPORTS: getAdapter, convertToDB, convertFromDB, withApplyDefault
 FEATURES:
   - Falls back to an in-memory adapter when no database is configured
   - Converts between logical field names and database column names
-SEARCHABLE: memory adapter utils, getAdapter, field conversion
+  - Applies default values during record creation
+SEARCHABLE: memory adapter utils, getAdapter, field conversion, defaults
 agent-frontmatter:end */
 
 import type {
@@ -16,9 +17,9 @@ import type {
 } from "@agentstart/types";
 import { AgentStartError } from "@agentstart/utils";
 import { getTables } from ".";
-import { inMemoryAdapter } from "./memory/in-memory";
-import { kyselyMemoryAdapter } from "./memory/kysely";
-import { createKyselyAdapter } from "./memory/kysely/dialect";
+import { inMemoryAdapter } from "./in-memory";
+import { kyselyMemoryAdapter } from "./kysely";
+import { createKyselyAdapter } from "./kysely/dialect";
 
 export async function getAdapter(
   options: AgentStartOptions,
@@ -87,4 +88,23 @@ export function convertFromDB<T extends Record<string, unknown>>(
     result[key] = values[value.fieldName || key];
   }
   return result as T;
+}
+
+export function withApplyDefault(
+  value: unknown,
+  field: FieldAttribute,
+  action: "create" | "update",
+) {
+  if (action === "update") {
+    return value;
+  }
+  if (value === undefined || value === null) {
+    if (field.defaultValue) {
+      if (typeof field.defaultValue === "function") {
+        return field.defaultValue();
+      }
+      return field.defaultValue;
+    }
+  }
+  return value;
 }

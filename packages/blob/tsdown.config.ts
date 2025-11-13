@@ -12,7 +12,7 @@ agent-frontmatter:end */
 import { defineConfig } from "tsdown";
 
 export default defineConfig({
-  entry: ["./src/index.ts"],
+  entry: ["./src/index.ts", "./src/vercel.ts", "./src/s3.ts"],
   unbundle: true,
   exports: true,
   ignoreWatch: ["node_modules", "dist", ".cache", ".turbo"],

@@ -5,6 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./dist/index.mjs",
+    "./e2b": "./dist/e2b.mjs",
+    "./nodejs": "./dist/nodejs.mjs",
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -20,7 +22,6 @@
     "@agentstart/utils": "workspace:*",
     "@e2b/code-interpreter": "catalog:",
     "chokidar": "catalog:",
-    "execa": "catalog:",
     "fast-glob": "catalog:",
     "fs-extra": "catalog:",
     "pathe": "catalog:"

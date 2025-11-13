@@ -13,7 +13,7 @@ FEATURES:
 SEARCHABLE: thread router, agent stream, rpc thread, orpc router
 agent-frontmatter:end */
 
-import type { MemoryAdapter } from "@agentstart/types";
+import type { MemoryAdapter, RuntimeContext } from "@agentstart/types";
 import { AgentStartError } from "@agentstart/utils";
 import { streamToEventIterator } from "@orpc/server";
 import z from "zod";
@@ -496,20 +496,25 @@ export function createThreadRouter(procedure = publicProcedure) {
           }
 
           const memory = await getAdapter(context);
-          const sandbox = await getSandbox(context);
 
           const run = new Run(context);
+
+          // Only include sandbox if configured
+          const runtimeContext: Omit<RuntimeContext, "writer"> = {
+            memory,
+            threadId: input.threadId,
+          };
+
+          if (context.sandbox) {
+            runtimeContext.sandbox = await getSandbox(context);
+          }
 
           const result = await run.start({
             input: {
               message: input.message,
               modelId: input.modelId,
             },
-            runtimeContext: {
-              memory,
-              sandbox,
-              threadId: input.threadId,
-            },
+            runtimeContext,
             onFinish: async (event: RunFinishEvent) => {
               if (!event.usageSummary) {
                 return;

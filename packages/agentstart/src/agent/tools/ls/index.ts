@@ -61,6 +61,19 @@ export const ls = tool({
   ) {
     const { sandbox } = context as RuntimeContext;
 
+    // Check if sandbox is configured
+    if (!sandbox) {
+      yield {
+        status: "error" as const,
+        prompt: "Sandbox not configured",
+        error: {
+          message:
+            "Ls tool requires a sandbox to be configured. Please configure a sandbox adapter in your AgentStart options.",
+        },
+      } satisfies AgentStartToolOutput["ls"];
+      return;
+    }
+
     // Use current directory if no path specified
     const resolvedPath = targetPath || "/";
 
