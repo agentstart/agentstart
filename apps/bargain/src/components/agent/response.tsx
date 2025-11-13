@@ -63,6 +63,19 @@ export const Response = memo(
             </pre>
           );
         },
+        img: (props) => {
+          const { src, alt, ...rest } = props;
+          if (!src) return null;
+          return (
+            <img
+              className="my-2 block max-h-40 rounded-lg"
+              src={src}
+              loading="lazy"
+              alt={alt}
+              {...rest}
+            />
+          );
+        },
       }}
       {...props}
     />

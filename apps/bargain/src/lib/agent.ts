@@ -139,7 +139,11 @@ const openrouter = createOpenRouter({
 
 const agent = new Agent({
   model: openrouter("x-ai/grok-4-fast"),
-  instructions,
+  instructions: instructions(
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:3000"
+      : "http://localhost:3000",
+  ),
   tools: {
     generateLink,
   },
