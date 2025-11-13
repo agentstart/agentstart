@@ -82,6 +82,10 @@ export function createUseThread(client: AgentStartAPI) {
     const mapDataToStateRef = useRef(mapDataToState);
     mapDataToStateRef.current = mapDataToState;
 
+    // Keep storeId in a ref to avoid stale closure in onFinish
+    const storeIdRef = useRef(storeId);
+    storeIdRef.current = storeId;
+
     // biome-ignore lint/correctness/useExhaustiveDependencies: is fine
     const thread = useMemo(
       () =>
@@ -122,9 +126,10 @@ export function createUseThread(client: AgentStartAPI) {
               return;
             }
 
+            // Use ref to get current storeId to avoid stale closure
             const store = getAgentStore<AgentStartUIMessage>(
               storeInstancesRef.current,
-              storeId,
+              storeIdRef.current,
             );
             const {
               messageQueue,
@@ -152,7 +157,7 @@ export function createUseThread(client: AgentStartAPI) {
             }
             void sendMessage(messagePayload, {
               body: {
-                threadId: storeId,
+                threadId: storeIdRef.current,
               },
             }).catch((error) => {
               console.error("Failed to send queued message", error);
@@ -199,6 +204,10 @@ function useCreateThread<TMessage extends UIMessage = UIMessage>(
     useRef<UseBoundStore<StoreApi<AgentStoreWithSync<TMessage>>>>(store);
 
   useEffect(() => {
+    // Always get the current store for this storeId to handle storeId changes
+    const currentStore = customStore || getAgentStore(storeInstances, storeId);
+    storeRef.current = currentStore;
+
     if (!storeRef.current) return;
 
     const threadState = {
@@ -223,6 +232,9 @@ function useCreateThread<TMessage extends UIMessage = UIMessage>(
       storeRef.current.setState(threadState);
     }
   }, [
+    customStore,
+    storeInstances,
+    storeId,
     threadHelpers.id,
     threadHelpers.messages,
     threadHelpers.error,

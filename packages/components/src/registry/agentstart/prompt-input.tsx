@@ -853,33 +853,33 @@ export function PromptInput({
     setBlobFiles(normalized);
   }, [attachments, setBlobFiles]);
 
-  const handleMessageSubmit = useCallback(
-    async (message: { text?: string; files?: BlobFileList }) => {
-      let files: FileList | FileUIPart[] | undefined;
+  const handleMessageSubmit = async (message: {
+    text?: string;
+    files?: BlobFileList;
+  }) => {
+    let files: FileList | FileUIPart[] | undefined;
 
-      if (message?.files && Array.isArray(message.files)) {
-        if (message.files.every((file) => file instanceof File)) {
-          const dataTransfer = new DataTransfer();
-          for (const file of message.files) {
-            dataTransfer.items.add(file);
-          }
-          files = dataTransfer.files;
-        } else if (
-          message.files.every(
-            (file) => !(file instanceof File) && isFileUIPart(file),
-          )
-        ) {
-          files = message.files as FileUIPart[];
+    if (message?.files && Array.isArray(message.files)) {
+      if (message.files.every((file) => file instanceof File)) {
+        const dataTransfer = new DataTransfer();
+        for (const file of message.files) {
+          dataTransfer.items.add(file);
         }
+        files = dataTransfer.files;
+      } else if (
+        message.files.every(
+          (file) => !(file instanceof File) && isFileUIPart(file),
+        )
+      ) {
+        files = message.files as FileUIPart[];
       }
+    }
 
-      return sendMessage(
-        { text: message?.text ?? "", files },
-        { body: { threadId } },
-      );
-    },
-    [sendMessage, threadId],
-  );
+    return await sendMessage(
+      { text: message?.text ?? "", files },
+      { body: { threadId } },
+    );
+  };
 
   const handleSubmit = async (message: PromptInputMessage) => {
     const isBusy = ["streaming", "submitted"].includes(status);
@@ -933,10 +933,16 @@ export function PromptInput({
       setInput("");
       clearFiles();
       clearAttachments();
-      handleMessageSubmit({
-        text: message.text?.trim() ?? "",
-        files: processedFiles,
-      });
+      try {
+        await handleMessageSubmit({
+          text: message.text?.trim() ?? "",
+          files: processedFiles,
+        });
+      } catch (error) {
+        console.error("Failed to send message:", error);
+        // Restore input on error
+        setInput(message.text ?? "");
+      }
     } else {
       const trimmedText = message.text?.trim() ?? "";
       setNewThreadDraft({

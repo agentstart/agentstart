@@ -43,10 +43,6 @@ import { RelativeTime } from "./relative-time";
 
 export type HeaderProps = ComponentProps<"header"> & {
   /**
-   * Thread identifier to fetch data for
-   */
-  threadId: string;
-  /**
    * Custom loading state element while fetching thread data
    */
   loadingState?: ReactNode;
@@ -85,7 +81,6 @@ export type HeaderProps = ComponentProps<"header"> & {
 };
 
 export function Header({
-  threadId,
   className,
   loadingState,
   errorState,
@@ -97,11 +92,12 @@ export function Header({
   hideSettings = false,
   ...props
 }: HeaderProps) {
-  const { orpc } = useAgentStartContext();
+  const { orpc, threadId } = useAgentStartContext();
 
   const { data, error, isLoading, isError, refetch } = useQuery(
     orpc.thread.get.queryOptions({
-      input: { threadId },
+      input: { threadId: threadId! },
+      enabled: !!threadId,
     }),
   );
   const queryClient = useQueryClient();
@@ -120,7 +116,7 @@ export function Header({
   const deleteMutation = useMutation(
     orpc.thread.delete.mutationOptions({
       onSuccess: () => {
-        onDelete?.(threadId);
+        onDelete?.(threadId!);
       },
     }),
   );
@@ -169,10 +165,10 @@ export function Header({
     );
     if (newTitle?.trim() && newTitle !== thread.title) {
       updateMutation.mutate({
-        threadId,
+        threadId: threadId!,
         data: { title: newTitle.trim() },
       });
-      onRename?.(threadId, newTitle.trim());
+      onRename?.(threadId!, newTitle.trim());
     }
   };
 
@@ -182,7 +178,7 @@ export function Header({
         `Are you sure you want to delete "${thread.title ?? "this thread"}"?`,
       )
     ) {
-      deleteMutation.mutate({ threadId });
+      deleteMutation.mutate({ threadId: threadId! });
     }
   };
 

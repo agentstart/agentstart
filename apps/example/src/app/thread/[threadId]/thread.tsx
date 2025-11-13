@@ -34,7 +34,6 @@ export default function Thread({
     <div className="flex h-full flex-col">
       {/* Header with File Explorer Toggle */}
       <Header
-        threadId={threadId}
         trailing={
           <Tooltip>
             <TooltipTrigger
@@ -64,17 +63,12 @@ export default function Thread({
         {/* Main Content */}
         <div className="mx-auto flex h-full w-full max-w-full flex-1 flex-col">
           <Conversation
-            threadId={threadId}
             initialMessages={initialMessages}
             contentClassName="pb-48"
           />
 
           <div className="sticky inset-x-0 bottom-0 pb-4">
-            <PromptInput
-              className="mx-auto"
-              threadId={threadId}
-              initialUsage={initialUsage}
-            />
+            <PromptInput className="mx-auto" initialUsage={initialUsage} />
           </div>
         </div>
 
@@ -87,7 +81,6 @@ export default function Thread({
         >
           {isSidebarOpen && (
             <FileExplorer
-              threadId={threadId}
               query={{
                 path: "/",
                 recursive: true,
