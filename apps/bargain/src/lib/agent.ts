@@ -158,20 +158,27 @@ export const start = agentStart({
   agent,
   models: {
     default: openrouter("x-ai/grok-4-fast"),
-    available: [
-      openrouter("x-ai/grok-4-fast"),
-      openrouter("anthropic/claude-sonnet-4.5"),
-      openrouter("openai/gpt-5"),
-      openrouter("google/gemini-2.0-flash-001"),
-    ],
   },
   advanced: {
-    generateTitle: {
-      model: openrouter("x-ai/grok-4-fast"),
-    },
     generateSuggestions: {
       model: openrouter("x-ai/grok-4-fast"),
-      limit: 5,
+      limit: 3,
+      instructions: `根据刚才讨论的内容生成 ${3} 条相关的后续建议。
+
+指南：
+1. 分析助手刚才展示/讨论的内容（数据、分析、见解）
+2. 建议合乎逻辑的下一步，基于这个具体回复展开
+3. 保持建议极简（理想 2-3 个字，最多 5 个字）
+4. 使用动作动词（"显示"、"对比"、"分析"、"检查"、"列出"、"探索"）
+5. 使建议针对具体情境，而非泛泛而谈
+6. 关注能提供价值的可用功能
+
+好的建议应该：
+- 针对刚才讨论的内容
+- 可使用现有功能执行
+- 简洁清晰（2-3 个字）
+- 自然的下一步，而非重复
+- 使用简体中文`,
     },
   },
   welcome: {
