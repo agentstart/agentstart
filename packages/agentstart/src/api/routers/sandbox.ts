@@ -24,9 +24,7 @@ import { getSandbox } from "@/sandbox";
 /**
  * Helper function to get sandbox and throw error if not configured
  */
-async function requireSandbox(
-  context: AgentStartOptions,
-): Promise<SandboxAPI> {
+async function requireSandbox(context: AgentStartOptions): Promise<SandboxAPI> {
   const sandbox = await getSandbox(context);
   if (!sandbox) {
     throw new AgentStartError(

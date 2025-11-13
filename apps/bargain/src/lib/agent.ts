@@ -22,6 +22,7 @@ import { inMemorySecondaryMemoryAdapter } from "agentstart/memory/secondary-in-m
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 import instructions from "./instructions";
+import { generateLink } from "./tools/generate-link";
 
 if (!process.env.MODEL_PROVIDER_API_KEY) {
   throw new Error("Missing MODEL_PROVIDER_API_KEY");
@@ -139,6 +140,9 @@ const openrouter = createOpenRouter({
 const agent = new Agent({
   model: openrouter("x-ai/grok-4-fast"),
   instructions,
+  tools: {
+    generateLink,
+  },
 });
 
 export const start = agentStart({

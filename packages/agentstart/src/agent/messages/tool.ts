@@ -406,7 +406,56 @@ export const toolOutputSchema = z.object({
 export type AgentStartToolInput = z.infer<typeof toolInputSchema>;
 export type AgentStartToolOutput = z.infer<typeof toolOutputSchema>;
 export type AgentStartToolSet = InferUITools<Tools>;
-export type AgentStartMessagePart = UIMessagePart<
+
+// Base generic type that users can extend in their codebase
+export type BaseMessagePart<ToolSet extends Record<string, any>> = UIMessagePart<
   AgentStartDataPart,
-  AgentStartToolSet
+  ToolSet
 >;
+
+// Default AgentStartMessagePart (includes all built-in tools)
+export type AgentStartMessagePart = BaseMessagePart<AgentStartToolSet>;
+
+/**
+ * Utility type to extract a specific tool's message part type.
+ * Use this in your custom tool UI components to get proper type safety.
+ *
+ * @example
+ * ```typescript
+ * import type { ToolPart } from 'agentstart/agent';
+ * import type { generateLink } from './tools/generate-link';
+ *
+ * type ExtendedToolSet = AgentStartToolSet & {
+ *   generateLink: typeof generateLink;
+ * };
+ *
+ * type GenerateLinkPart = ToolPart<'generateLink', ExtendedToolSet>;
+ *
+ * interface Props {
+ *   part: GenerateLinkPart;
+ * }
+ * ```
+ */
+export type ToolPart<
+  ToolName extends string,
+  ToolSet extends Record<string, any>
+> = Extract<BaseMessagePart<ToolSet>, { type: `tool-${ToolName}` }>;
+
+/**
+ * Utility type to create an extended tool set by merging built-in tools with custom tools.
+ * Use this as a convenience helper when you need to add custom tools to the base set.
+ *
+ * @example
+ * ```typescript
+ * import type { ExtendToolSet } from 'agentstart/agent';
+ * import type { generateLink } from './tools/generate-link';
+ * import type { myCustomTool } from './tools/custom';
+ *
+ * type MyToolSet = ExtendToolSet<{
+ *   generateLink: typeof generateLink;
+ *   myCustomTool: typeof myCustomTool;
+ * }>;
+ * ```
+ */
+export type ExtendToolSet<CustomTools extends Record<string, any>> =
+  AgentStartToolSet & CustomTools;

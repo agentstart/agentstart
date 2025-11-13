@@ -14,6 +14,8 @@ agent-frontmatter:end */
 import type { AgentStartToolSet, BaseMessagePart } from "agentstart/agent";
 import { memo } from "react";
 import isEqual from "react-fast-compare";
+import { GenerateLink } from "@/components/agent/tools/generate-link";
+import type { generateLink } from "@/lib/tools/generate-link";
 import { Response } from "../response";
 import { Bash } from "./bash";
 import { EditFile } from "./edit";
@@ -36,7 +38,9 @@ import { WriteFile } from "./write";
 // type ExtendedToolSet = AgentStartToolSet & {
 //   myCustomTool?: any;  // Add other custom tools
 // }
-type ExtendedToolSet = AgentStartToolSet;
+type ExtendedToolSet = AgentStartToolSet & {
+  generateLink: typeof generateLink;
+};
 // ================================================
 
 interface Props {
@@ -64,6 +68,8 @@ export const MessagePart = memo<Props>(({ part, isStreaming }) => {
     case "tool-todoRead":
     case "tool-todoWrite":
       return <Todo part={part} />;
+    case "tool-generateLink":
+      return <GenerateLink part={part} />;
 
     case "reasoning":
       return (

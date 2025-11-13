@@ -64,9 +64,14 @@ export function getApi(options: AgentStartOptions): AgentStartAPI {
             return async (...args: unknown[]) => {
               const router = await ensureRouter();
               const client = createRouterClient(router, {
-                context: (override = {}) => mergeContext(context, override as ContextOverride),
+                context: (override = {}) =>
+                  mergeContext(context, override as ContextOverride),
               });
-              const routerObj = Reflect.get(client as object, property, receiver);
+              const routerObj = Reflect.get(
+                client as object,
+                property,
+                receiver,
+              );
               const methodFn = Reflect.get(routerObj, method);
               return methodFn.apply(routerObj, args);
             };

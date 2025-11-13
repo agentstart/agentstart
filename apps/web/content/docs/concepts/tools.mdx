@@ -242,6 +242,113 @@ const longRunningTool = {
 };
 ```
 
+## Type Safety for Custom Tools in UI Components
+
+When creating UI components for custom tools, you can use type utilities from AgentStart to ensure full type safety without repetition.
+
+### Available Type Utilities
+
+AgentStart provides three key type utilities for working with custom tools:
+
+1. **`BaseMessagePart<ToolSet>`**: Generic type for message parts with extended tool sets
+2. **`ToolPart<ToolName, ToolSet>`**: Extracts the specific message part type for a tool
+3. **`ExtendToolSet<CustomTools>`**: Conveniently merges built-in tools with custom tools
+
+### Basic Example
+
+```tsx
+import type { ToolPart, ExtendToolSet } from "agentstart/agent";
+import type { generateLink } from "./tools/generate-link";
+
+// Extend the tool set with your custom tool
+import type { ToolPart, ExtendToolSet } from "agentstart/agent";
+import type { generateLink } from "./tools/generate-link";
+
+// Extend the tool set with your custom tool
+import type { ToolPart, ExtendToolSet } from "agentstart/agent";
+import type { generateLink } from "./tools/generate-link";
+
+// Extend the tool set with your custom tool
+type ExtendedToolSet = ExtendToolSet<{
+  generateLink: typeof generateLink;
+}>;
+
+// Extract the specific message part type
+type GenerateLinkPart = ToolPart<"generateLink", ExtendedToolSet>;
+
+// Use it in your component
+interface GenerateLinkProps {
+  part: GenerateLinkPart;
+}
+
+export function GenerateLinkUI({ part }: GenerateLinkProps) {
+  // Now you have full type safety
+  const { state, input, output } = part;
+  // input has type: { price: number } | undefined
+  // output has type: { status: "pending" | "done" | "error", url?: string, ... }
+
+  return <div>{/* Your UI implementation */}</div>;
+}
+```
+
+### Multiple Custom Tools
+
+For multiple custom tools, the utility types keep your code clean:
+
+```tsx
+import type { ToolPart, ExtendToolSet } from "agentstart/agent";
+import type { generateLink } from "./tools/generate-link";
+import type { weatherTool } from "./tools/weather";
+import type { databaseTool } from "./tools/database";
+
+type ExtendedToolSet = ExtendToolSet<{
+  generateLink: typeof generateLink;
+  getWeather: typeof weatherTool;
+  queryDatabase: typeof databaseTool;
+}>;
+
+// Extract specific tool types as needed
+type GenerateLinkPart = ToolPart<"generateLink", ExtendedToolSet>;
+type WeatherPart = ToolPart<"getWeather", ExtendedToolSet>;
+```
+
+### Using with `MessagePartView`
+
+When using the `MessagePartView` component from AgentStart, you can extend it to support your custom tools:
+
+```tsx
+// In your message-part-view.tsx file
+import type { BaseMessagePart, AgentStartToolSet, ExtendToolSet } from "agentstart/agent";
+import type { generateLink } from "./tools/generate-link";
+
+// Add your custom tool to the extended set
+type ExtendedToolSet = ExtendToolSet<{
+  generateLink: typeof generateLink;
+  // Add more tools as needed
+}>;
+
+interface Props {
+  part: BaseMessagePart<ExtendedToolSet>;
+  isStreaming: boolean;
+}
+
+export function MessagePart({ part, isStreaming }: Props) {
+  switch (part.type) {
+    case "tool-read":
+      return <ReadFile part={part} />;
+    case "tool-generateLink":
+      return <GenerateLink part={part} />;
+    // ... other cases
+  }
+}
+```
+
+The type utilities ensure that:
+
+- `part.type` will include `"tool-generateLink"` as a valid case
+- `part.input` and `part.output` have the correct types for each tool
+- You get autocompletion and type checking throughout your UI code
+
 ## Next Steps
 
 <Cards>

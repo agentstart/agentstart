@@ -1,301 +1,204 @@
-Welcome to your new TanStack app! 
+# 归家十二分 - AI 砍价守门员
 
-# Getting Started
+一个基于 AgentStart 框架构建的智能砍价 agent 应用，用户可以通过与 AI 对话进行互动式砍价游戏。
 
-To run this application:
+## 功能特性
+
+### 智能砍价对话
+- 与 AI 守门员进行趣味性砍价对话
+- AI 会根据你的聊天内容评估"好感度"（0-61+分）
+- 好感度越高，价格优惠越大（¥49 → ¥9.99）
+- 评分维度包括：创意、真诚度、逻辑性
+
+### 动态价格生成
+- Agent 根据好感度自动生成购买链接
+- 每次价格变动时自动调用工具生成新链接
+- 价格范围：¥49（初始）到 ¥9.99（最低）
+
+### 分享功能
+- 点击分享按钮可生成精美的价格展示截图
+- 截图展示最终砍价后的优惠价格
+- 包含首页二维码，方便好友扫码参与砍价
+- 支持分享到朋友圈/社群进行传播
+
+## 快速开始
+
+### 环境要求
+
+- Node.js 18+
+- Bun 运行时
+- PostgreSQL 数据库
+
+### 安装依赖
 
 ```bash
 bun install
-bun --bun run start
 ```
 
-# Building For Production
+### 环境变量配置
 
-To build this application for production:
+创建 `.env` 文件并配置以下必需变量：
 
 ```bash
-bun --bun run build
+# AI 模型 API Key（必需）
+MODEL_PROVIDER_API_KEY=your_openrouter_api_key
+
+# 数据库连接（必需）
+DATABASE_URL=postgresql://user:password@host:port/database
+
+# Blob 存储配置（可选，三选一）
+# Vercel Blob
+BLOB_READ_WRITE_TOKEN=vercel_blob_rw_...
+
+# AWS S3
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_S3_BUCKET=your_bucket_name
+AWS_REGION=us-east-1
+
+# Cloudflare R2
+R2_ACCESS_KEY_ID=your_access_key
+R2_SECRET_ACCESS_KEY=your_secret_key
+R2_BUCKET_NAME=your_bucket_name
+R2_ACCOUNT_ID=your_account_id
+
+# Redis（可选，用于生产环境的辅助存储）
+REDIS_URL=redis://localhost:6379
 ```
 
-## Testing
-
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
+### 数据库初始化
 
 ```bash
-bun --bun run test
+# 推送数据库 schema
+bun run db:push
 ```
 
-## Styling
-
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
-
-
-## Linting & Formatting
-
-This project uses [Biome](https://biomejs.dev/) for linting and formatting. The following scripts are available:
-
+### 启动开发服务器
 
 ```bash
-bun --bun run lint
-bun --bun run format
-bun --bun run check
+bun run dev
 ```
 
+应用将在 `http://localhost:3000` 启动。
 
+## 构建与部署
 
-## Routing
-This project uses [TanStack Router](https://tanstack.com/router). The initial setup is a file based router. Which means that the routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add another a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you use the `<Outlet />` component.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-
-import { Link } from "@tanstack/react-router";
-
-export const Route = createRootRoute({
-  component: () => (
-    <>
-      <header>
-        <nav>
-          <Link to="/">Home</Link>
-          <Link to="/about">About</Link>
-        </nav>
-      </header>
-      <Outlet />
-      <TanStackRouterDevtools />
-    </>
-  ),
-})
-```
-
-The `<TanStackRouterDevtools />` component is not required so you can remove it if you don't want it in your layout.
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-const peopleRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/people",
-  loader: async () => {
-    const response = await fetch("https://swapi.dev/api/people");
-    return response.json() as Promise<{
-      results: {
-        name: string;
-      }[];
-    }>;
-  },
-  component: () => {
-    const data = peopleRoute.useLoaderData();
-    return (
-      <ul>
-        {data.results.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    );
-  },
-});
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-### React-Query
-
-React-Query is an excellent addition or alternative to route loading and integrating it into you application is a breeze.
-
-First add your dependencies:
+### 本地构建
 
 ```bash
-bun install @tanstack/react-query @tanstack/react-query-devtools
+bun run build
 ```
 
-Next we'll need to create a query client and provider. We recommend putting those in `main.tsx`.
-
-```tsx
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-// ...
-
-const queryClient = new QueryClient();
-
-// ...
-
-if (!rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement);
-
-  root.render(
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  );
-}
-```
-
-You can also add TanStack Query Devtools to the root route (optional).
-
-```tsx
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-
-const rootRoute = createRootRoute({
-  component: () => (
-    <>
-      <Outlet />
-      <ReactQueryDevtools buttonPosition="top-right" />
-      <TanStackRouterDevtools />
-    </>
-  ),
-});
-```
-
-Now you can use `useQuery` to fetch your data.
-
-```tsx
-import { useQuery } from "@tanstack/react-query";
-
-import "./App.css";
-
-function App() {
-  const { data } = useQuery({
-    queryKey: ["people"],
-    queryFn: () =>
-      fetch("https://swapi.dev/api/people")
-        .then((res) => res.json())
-        .then((data) => data.results as { name: string }[]),
-    initialData: [],
-  });
-
-  return (
-    <div>
-      <ul>
-        {data.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-export default App;
-```
-
-You can find out everything you need to know on how to use React-Query in the [React-Query documentation](https://tanstack.com/query/latest/docs/framework/react/overview).
-
-## State Management
-
-Another common requirement for React applications is state management. There are many options for state management in React. TanStack Store provides a great starting point for your project.
-
-First you need to add TanStack Store as a dependency:
+### 预览生产构建
 
 ```bash
-bun install @tanstack/store
+bun run serve
 ```
 
-Now let's create a simple counter in the `src/App.tsx` file as a demonstration.
+### 部署到 Cloudflare Pages
 
-```tsx
-import { useStore } from "@tanstack/react-store";
-import { Store } from "@tanstack/store";
-import "./App.css";
-
-const countStore = new Store(0);
-
-function App() {
-  const count = useStore(countStore);
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-    </div>
-  );
-}
-
-export default App;
+```bash
+bun run deploy
 ```
 
-One of the many nice features of TanStack Store is the ability to derive state from other state. That derived state will update when the base state updates.
+## 技术栈
 
-Let's check this out by doubling the count using derived state.
+- **框架**: AgentStart - 开箱即用的 AI Agent 开发框架
+- **前端**: React + TanStack Router
+- **构建工具**: Vite
+- **样式**: Tailwind CSS
+- **UI 组件**: Base UI Components
+- **AI 模型**: OpenRouter (x-ai/grok-4-fast)
+- **数据库**: PostgreSQL + Drizzle ORM
+- **Blob 存储**: Vercel Blob / AWS S3 / Cloudflare R2（可选）
+- **类型检查**: TypeScript
+- **代码质量**: Biome
 
-```tsx
-import { useStore } from "@tanstack/react-store";
-import { Store, Derived } from "@tanstack/store";
-import "./App.css";
+## 开发工具
 
-const countStore = new Store(0);
+### 代码检查与格式化
 
-const doubledStore = new Derived({
-  fn: () => countStore.state * 2,
-  deps: [countStore],
-});
-doubledStore.mount();
+```bash
+# 运行 linter 并自动修复问题
+bun run lint
 
-function App() {
-  const count = useStore(countStore);
-  const doubledCount = useStore(doubledStore);
-
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-      <div>Doubled - {doubledCount}</div>
-    </div>
-  );
-}
-
-export default App;
+# 类型检查
+bun run typecheck
 ```
 
-We use the `Derived` class to create a new store that is derived from another store. The `Derived` class has a `mount` method that will start the derived store updating.
+### 测试
 
-Once we've created the derived store we can use it in the `App` component just like we would any other store using the `useStore` hook.
+```bash
+# 运行测试
+bun run test
+```
 
-You can find out everything you need to know on how to use TanStack Store in the [TanStack Store documentation](https://tanstack.com/store/latest).
+## 项目结构
 
-# Demo files
+```
+apps/bargain/
+├── src/
+│   ├── components/      # UI 组件
+│   │   ├── agent/      # Agent 相关组件
+│   │   └── ui/         # 基础 UI 组件
+│   ├── routes/         # TanStack Router 路由
+│   ├── lib/            # 核心逻辑
+│   │   ├── agent.ts    # Agent 配置
+│   │   └── instructions.ts  # Agent 指令和规则
+│   └── db/             # 数据库配置和 schema
+├── public/             # 静态资源
+└── README.md
+```
 
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
+## Agent 配置
 
-# Learn More
+### 价格阶梯表
 
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
+| 好感度 | 最低价格 |
+|--------|----------|
+| 0-3    | ¥49      |
+| 4-8    | ¥39.99   |
+| 9-13   | ¥34.99   |
+| 14-20  | ¥29.99   |
+| 21-27  | ¥24.99   |
+| 28-37  | ¥21.99   |
+| 38-47  | ¥19.99   |
+| 48-60  | ¥11.99   |
+| ≥61    | ¥9.99    |
+
+### 评分标准
+
+Agent 根据以下标准评估每轮对话的好感度（1-5分）：
+
+- **5分**: 近乎完美的创意+真诚+逻辑
+- **4分**: 至少一个维度突出（创意/真诚）
+- **3分**: 有效但不出彩，理由合理
+- **2分**: 模板化/敷衍
+- **1分**: 极端敷衍
+- **0分**: 重复理由或编造苦难
+
+## 自定义配置
+
+### 修改 Agent 指令
+
+编辑 `src/lib/instructions.ts` 来自定义 Agent 的行为、规则和人设。
+
+### 修改价格表
+
+在 `src/lib/instructions.ts` 中调整价格阶梯表来改变优惠策略。
+
+### 更换 AI 模型
+
+在 `src/lib/agent.ts` 中修改 `openrouter()` 调用来切换不同的 AI 模型。
+
+## 贡献指南
+
+欢迎提交 Issue 和 Pull Request！
+
+## 许可证
+
+MIT
+
+---
+
+基于 [AgentStart](https://github.com/agentstart) 框架构建
