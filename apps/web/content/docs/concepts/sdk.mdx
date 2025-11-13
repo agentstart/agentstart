@@ -130,7 +130,7 @@ await start.api.thread.get({ threadId: 'thr_123' });
 
 <TypeTable
   type={{
-    thread: { type: 'object', typeDescription: '{ id: string; title: string; userId: string; visibility: "public" | "private"; lastContext?: unknown; createdAt: string (date-time); updatedAt: string (date-time) }', required: true, properties: { id: { type: 'string', required: true }, title: { type: 'string', required: true }, userId: { type: 'string', required: true }, visibility: { type: '"public" | "private"', description: 'Allowed values: "public", "private"', default: '"private"', required: true }, lastContext: { type: 'unknown' }, createdAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-11T13:13:08.400Z"', required: true }, updatedAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-11T13:13:08.400Z"', required: true } } }
+    thread: { type: 'object', typeDescription: '{ id: string; title: string; userId: string; visibility: "public" | "private"; lastContext?: unknown; createdAt: string (date-time); updatedAt: string (date-time) }', required: true, properties: { id: { type: 'string', required: true }, title: { type: 'string', required: true }, userId: { type: 'string', required: true }, visibility: { type: '"public" | "private"', description: 'Allowed values: "public", "private"', default: '"private"', required: true }, lastContext: { type: 'unknown' }, createdAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-12T11:17:45.897Z"', required: true }, updatedAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-12T11:17:45.897Z"', required: true } } }
   }}
 />
 
@@ -172,7 +172,7 @@ await start.api.thread.create({ visibility: 'public' });
 <TypeTable
   type={{
     threadId: { type: 'string', required: true },
-    thread: { type: 'object', typeDescription: '{ id: string; title: string; userId: string; visibility: "public" | "private"; lastContext?: unknown; createdAt: string (date-time); updatedAt: string (date-time) }', required: true, properties: { id: { type: 'string', required: true }, title: { type: 'string', required: true }, userId: { type: 'string', required: true }, visibility: { type: '"public" | "private"', description: 'Allowed values: "public", "private"', default: '"private"', required: true }, lastContext: { type: 'unknown' }, createdAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-11T13:13:08.400Z"', required: true }, updatedAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-11T13:13:08.400Z"', required: true } } }
+    thread: { type: 'object', typeDescription: '{ id: string; title: string; userId: string; visibility: "public" | "private"; lastContext?: unknown; createdAt: string (date-time); updatedAt: string (date-time) }', required: true, properties: { id: { type: 'string', required: true }, title: { type: 'string', required: true }, userId: { type: 'string', required: true }, visibility: { type: '"public" | "private"', description: 'Allowed values: "public", "private"', default: '"private"', required: true }, lastContext: { type: 'unknown' }, createdAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-12T11:17:45.897Z"', required: true }, updatedAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-12T11:17:45.897Z"', required: true } } }
   }}
 />
 
@@ -207,7 +207,7 @@ await start.api.thread.update({ threadId: 'thr_123', data: { title: 'Renamed thr
 
 <TypeTable
   type={{
-    thread: { type: 'object', typeDescription: '{ id: string; title: string; userId: string; visibility: "public" | "private"; lastContext?: unknown; createdAt: string (date-time); updatedAt: string (date-time) }', required: true, properties: { id: { type: 'string', required: true }, title: { type: 'string', required: true }, userId: { type: 'string', required: true }, visibility: { type: '"public" | "private"', description: 'Allowed values: "public", "private"', default: '"private"', required: true }, lastContext: { type: 'unknown' }, createdAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-11T13:13:08.400Z"', required: true }, updatedAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-11T13:13:08.400Z"', required: true } } }
+    thread: { type: 'object', typeDescription: '{ id: string; title: string; userId: string; visibility: "public" | "private"; lastContext?: unknown; createdAt: string (date-time); updatedAt: string (date-time) }', required: true, properties: { id: { type: 'string', required: true }, title: { type: 'string', required: true }, userId: { type: 'string', required: true }, visibility: { type: '"public" | "private"', description: 'Allowed values: "public", "private"', default: '"private"', required: true }, lastContext: { type: 'unknown' }, createdAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-12T11:17:45.898Z"', required: true }, updatedAt: { type: 'string', description: 'Constraints: format date-time', typeDescription: 'string (date-time)', default: '"2025-11-12T11:17:45.898Z"', required: true } } }
   }}
 />
 
@@ -308,37 +308,6 @@ await start.api.message.get({ threadId: 'thr_123' });
 <TypeTable
   type={{
     items: { type: 'Array<UIMessage>', description: 'Array of UI messages. Each message part can be text, tool-call, or tool-result.', typeDescription: 'Array<{ id: string; role: string; parts: MessagePart[]; metadata?: object }>', required: true, properties: { id: { type: 'string', required: true }, role: { type: '"system" | "user" | "assistant"', required: true }, parts: { type: 'Array<MessagePart>', description: 'Message parts (text, tool-call, tool-result)', required: true }, metadata: { type: 'object', description: 'Optional metadata' } } }
-  }}
-/>
-
-## `blob.getConfig`
-
-_Summary: Inspect blob storage configuration_
-
-Returns whether blob uploads are enabled along with provider-specific constraints so clients can validate files before uploading.
-
-```ts
-await start.api.blob.getConfig();
-```
-
-#### Examples
-
-**Client-side capability check**
-
-```ts
-const config = await start.api.blob.getConfig();
-if (!config.enabled) {
-  console.log('Uploads are disabled');
-}
-```
-
-### Output
-
-<TypeTable
-  type={{
-    enabled: { type: 'boolean', required: true },
-    constraints: { type: 'object | null', typeDescription: '{ maxFileSize?: number; allowedMimeTypes?: Array<string>; maxFiles?: number; uploadTiming?: "onSubmit" | "immediate" } | null', required: true, properties: { maxFileSize: { type: 'number' }, allowedMimeTypes: { type: 'Array<string>' }, maxFiles: { type: 'number' }, uploadTiming: { type: '"onSubmit" | "immediate"', description: 'Allowed values: "onSubmit", "immediate"' } } },
-    provider: { type: '"vercelBlob" | "awsS3" | "cloudflareR2" | null', description: 'Allowed values: "vercelBlob", "awsS3", "cloudflareR2"\nAccepts null.', required: true }
   }}
 />
 
@@ -589,30 +558,37 @@ await start.api.sandbox.list({ path: "/", recursive: true });
   }}
 />
 
-## `model.list`
+## `config.get`
 
-_Summary: List available models_
+_Summary: Get application configuration_
 
-Returns the list of models configured in the models.available array, allowing clients to present a model selector UI.
+Returns comprehensive application configuration including app name, welcome settings, available models, and other frontend-relevant settings.
 
 ```ts
-await start.api.model.list();
+await start.api.config.get();
 ```
 
 #### Examples
 
-**Fetch available models**
+**Fetch all config**
 
 ```ts
-const models = await start.api.model.list();
+const config = await start.api.config.get();
+console.log(config.appName);
+console.log(config.welcome);
+console.log(config.models);
 ```
 
 ### Output
 
 <TypeTable
   type={{
-    models: { type: 'Array<object>', typeDescription: 'Array<{ id: string; name: string; provider: string }>', required: true },
-    defaultModelId: { type: 'string | null', description: 'Accepts null.', required: true }
+    appName: { type: 'string | null', description: 'Accepts null.', required: true },
+    logo: { type: 'string | object | null', typeDescription: 'string | { src: string; alt?: string; width?: number; height?: number } | null', required: true },
+    baseURL: { type: 'string | null', description: 'Accepts null.', required: true },
+    welcome: { type: 'object', typeDescription: '{ enabled: boolean; description: string | null; suggestions: Array<string> | null }', required: true, properties: { enabled: { type: 'boolean', required: true }, description: { type: 'string | null', description: 'Accepts null.', required: true }, suggestions: { type: 'Array<string> | null', description: 'Accepts null.', required: true } } },
+    models: { type: 'object | null', typeDescription: '{ default: string | null; available: Array<{ id: string; name: string; provider: string }> } | null', required: true, properties: { default: { type: 'string | null', description: 'Accepts null.', required: true }, available: { type: 'Array<object>', typeDescription: 'Array<{ id: string; name: string; provider: string }>', required: true } } },
+    blob: { type: 'object', typeDescription: '{ enabled: boolean; constraints: { maxFileSize?: number; allowedMimeTypes?: Array<string>; maxFiles?: number; uploadTiming?: "onSubmit" | "immediate" } | null; provider: "vercelBlob" | "awsS3" | "cloudflareR2" | null }', required: true, properties: { enabled: { type: 'boolean', required: true }, constraints: { type: 'object | null', typeDescription: '{ maxFileSize?: number; allowedMimeTypes?: Array<string>; maxFiles?: number; uploadTiming?: "onSubmit" | "immediate" } | null', required: true, properties: { maxFileSize: { type: 'number' }, allowedMimeTypes: { type: 'Array<string>' }, maxFiles: { type: 'number' }, uploadTiming: { type: '"onSubmit" | "immediate"', description: 'Allowed values: "onSubmit", "immediate"' } } }, provider: { type: '"vercelBlob" | "awsS3" | "cloudflareR2" | null', description: 'Allowed values: "vercelBlob", "awsS3", "cloudflareR2"\nAccepts null.', required: true } } }
   }}
 />
 

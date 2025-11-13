@@ -15,20 +15,19 @@ agent-frontmatter:end */
 "use client";
 
 import { ArrowUpRightIcon } from "@phosphor-icons/react";
-import { useAgentStore, useDataPart } from "agentstart/client";
+import {
+  useAgentStartContext,
+  useAgentStore,
+  useDataPart,
+} from "agentstart/client";
 import type { HTMLMotionProps } from "motion/react";
 import { AnimatePresence, motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 
-export type SuggestionsProps = Omit<HTMLMotionProps<"div">, "children"> & {
-  threadId?: string;
-};
+export type SuggestionsProps = Omit<HTMLMotionProps<"div">, "children">;
 
-export function SuggestedPrompts({
-  threadId,
-  className,
-  ...props
-}: SuggestionsProps) {
+export function SuggestedPrompts({ className, ...props }: SuggestionsProps) {
+  const { threadId } = useAgentStartContext();
   const storeId = threadId ?? "default";
   const [suggestions, clearSuggestions] = useDataPart(
     "data-agentstart-suggestions",

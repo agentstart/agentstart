@@ -20,7 +20,7 @@ export function PromptInputDemo() {
   return (
     <AgentStartProvider client={mockClient} navigate={mockNavigate}>
       <div className="bg-background">
-        <PromptInput threadId="demo-thread-1" />
+        <PromptInput />
       </div>
     </AgentStartProvider>
   );

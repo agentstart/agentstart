@@ -17,8 +17,6 @@ import {
   ArrowsClockwiseIcon,
   CaretDownIcon,
   ChatSlashIcon,
-  CheckIcon,
-  CopyIcon,
 } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import type { AgentStartUIMessage } from "agentstart/agent";
@@ -29,7 +27,7 @@ import {
   useThinkingExtractor,
 } from "agentstart/client";
 import type { ComponentProps, ReactNode } from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { useStickToBottom } from "use-stick-to-bottom";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,36 +39,10 @@ import {
 } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
-import { Message, MessageContent } from "./message";
-import { RelativeTime } from "./relative-time";
-import { Response } from "./response";
-import { StatusIndicators } from "./shimmer";
-import { Source, Sources, SourcesContent, SourcesTrigger } from "./sources";
-import { SuggestedPrompts } from "./suggested-prompts";
-import { MessagePart } from "./tools/message-part-view";
-
-// Helper types
-type MessagePartType = NonNullable<AgentStartUIMessage["parts"]>[number];
-type TextPart = MessagePartType & { type: "text"; text: string };
-type ImagePart = MessagePartType & {
-  type: "file";
-  url: string;
-  mediaType: string;
-  filename?: string;
-};
-
-// Type guards
-const isTextPart = (part: MessagePartType): part is TextPart =>
-  part?.type === "text" &&
-  typeof part.text === "string" &&
-  part.text.length > 0;
-
-const isImagePart = (part: MessagePartType): part is ImagePart =>
-  part?.type === "file" &&
-  typeof (part as { mediaType?: unknown }).mediaType === "string" &&
-  ((part as { mediaType?: string }).mediaType?.startsWith("image/") ?? false) &&
-  typeof (part as { url?: unknown }).url === "string" &&
-  ((part as { url?: string }).url?.length ?? 0) > 0;
+import { StatusIndicators } from "../shimmer";
+import { SuggestedPrompts } from "../suggested-prompts";
+import { WelcomeMessage } from "../welcome-message";
+import { ConversationMessage } from "./conversation-message";
 
 // Helper functions
 const getFileCount = (files: unknown): number => {
@@ -85,102 +57,6 @@ const hasNewThreadDraftContent = (draft: unknown): boolean => {
   const hasText = (d.text?.trim() ?? "").length > 0;
   const fileCount = getFileCount(d.files);
   return hasText || fileCount > 0;
-};
-
-const copyMessageText = (message: AgentStartUIMessage): void => {
-  const parts = message.parts ?? [];
-  if (parts.length === 0) return;
-
-  const contentParts: string[] = [];
-  const sources: Array<{ url: string; title?: string }> = [];
-
-  for (const part of parts) {
-    // Text content
-    if (part.type === "text" && (part as any).text) {
-      contentParts.push((part as any).text);
-    }
-    // Reasoning blocks
-    else if (part.type === "reasoning" && (part as any).text) {
-      contentParts.push(`[Thinking]\n${(part as any).text}`);
-    }
-    // Tool executions
-    else if (part.type.startsWith("tool-")) {
-      const toolPart = part as any;
-      const toolName = part.type.replace("tool-", "");
-      let toolSection = `[Tool: ${toolName}]`;
-
-      // Format tool input based on type
-      if (toolPart.input) {
-        if (toolName === "bash" && toolPart.input.command) {
-          toolSection += `\nCommand: ${toolPart.input.command}`;
-        } else if (toolName === "read" && toolPart.input.filePath) {
-          toolSection += `\nFile: ${toolPart.input.filePath}`;
-        } else if (toolName === "write" && toolPart.input.filePath) {
-          toolSection += `\nFile: ${toolPart.input.filePath}`;
-        } else if (toolName === "edit" && toolPart.input.filePath) {
-          toolSection += `\nFile: ${toolPart.input.filePath}`;
-        } else if (toolName === "glob" && toolPart.input.pattern) {
-          toolSection += `\nPattern: ${toolPart.input.pattern}`;
-        } else if (toolName === "grep" && toolPart.input.pattern) {
-          toolSection += `\nPattern: ${toolPart.input.pattern}`;
-        } else if (toolName === "ls" && toolPart.input.path) {
-          toolSection += `\nPath: ${toolPart.input.path}`;
-        } else {
-          // Generic fallback for other tools
-          toolSection += `\nInput: ${JSON.stringify(toolPart.input)}`;
-        }
-      }
-
-      // Format tool output
-      if (toolPart.output?.metadata) {
-        const meta = toolPart.output.metadata;
-        if (toolName === "bash") {
-          if (meta.stdout) toolSection += `\nOutput:\n${meta.stdout}`;
-          if (meta.stderr) toolSection += `\nError:\n${meta.stderr}`;
-        } else if (toolName === "read" && meta.content) {
-          toolSection += `\nContent:\n${meta.content}`;
-        } else if (
-          toolName === "grep" &&
-          (meta.files || meta.matches || meta.counts)
-        ) {
-          if (meta.files) {
-            toolSection += `\nFiles:\n${meta.files.join("\n")}`;
-          } else if (meta.matches) {
-            toolSection += `\nMatches:\n${meta.matches.join("\n")}`;
-          } else if (meta.counts) {
-            toolSection += `\nCounts:\n${meta.counts.map((c: any) => `${c.filename}: ${c.count}`).join("\n")}`;
-          }
-        } else if (toolName === "glob" && meta.matches) {
-          toolSection += `\nMatches:\n${meta.matches.join("\n")}`;
-        } else if (toolPart.output.prompt) {
-          toolSection += `\nResult: ${toolPart.output.prompt}`;
-        }
-      } else if (toolPart.output?.prompt) {
-        toolSection += `\nResult: ${toolPart.output.prompt}`;
-      }
-
-      contentParts.push(toolSection);
-    }
-    // Source URLs
-    else if (part.type === "source-url") {
-      const sourcePart = part as any;
-      sources.push({
-        url: sourcePart.url,
-        title: sourcePart.title,
-      });
-    }
-  }
-
-  // Add sources at the end
-  if (sources.length > 0) {
-    const sourceLines = sources.map((s) => `- [${s.title || s.url}](${s.url})`);
-    contentParts.push(`\nSources:\n${sourceLines.join("\n")}`);
-  }
-
-  if (contentParts.length === 0) return;
-
-  const fullText = contentParts.join("\n\n");
-  void navigator.clipboard.writeText(fullText);
 };
 
 // Internal hook: Safe store access with fallback when useThread is not used
@@ -261,10 +137,6 @@ export type ConversationProps = Omit<
 > & {
   contentClassName?: string;
   /**
-   * Thread identifier to hydrate the conversation.
-   */
-  threadId?: string;
-  /**
    * Optional messages used to hydrate the UI before the client store syncs.
    */
   initialMessages?: AgentStartUIMessage[];
@@ -298,7 +170,7 @@ const ConversationEmptyState = ({
 }: ConversationEmptyStateProps) => (
   <div
     className={cn(
-      "flex size-full flex-col items-center justify-center gap-3 p-8 text-center",
+      "flex size-full flex-col items-center justify-center gap-3",
       className,
     )}
     {...props}
@@ -316,57 +188,6 @@ const ConversationEmptyState = ({
     )}
   </div>
 );
-
-type CopyButtonProps = Omit<
-  ComponentProps<typeof Button>,
-  "onClick" | "children"
-> & {
-  onCopy: () => void;
-  feedbackDuration?: number;
-};
-
-const CopyButton = ({
-  onCopy,
-  feedbackDuration = 3000,
-  disabled,
-  ...props
-}: CopyButtonProps) => {
-  const [isCopied, setIsCopied] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
-
-  const handleClick = () => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    onCopy();
-    setIsCopied(true);
-
-    timeoutRef.current = setTimeout(() => {
-      setIsCopied(false);
-      timeoutRef.current = null;
-    }, feedbackDuration);
-  };
-
-  return (
-    <Button onClick={handleClick} disabled={disabled || isCopied} {...props}>
-      {isCopied ? (
-        <CheckIcon className="size-4" weight="bold" />
-      ) : (
-        <CopyIcon className="size-4" weight="duotone" />
-      )}
-      <span className="sr-only">{isCopied ? "Copied" : "Copy"}</span>
-    </Button>
-  );
-};
 
 type ConversationScrollButtonProps = ComponentProps<typeof Button> & {
   isAtBottom: boolean;
@@ -403,7 +224,6 @@ const ConversationScrollButton = ({
 type UIAgentStore = AgentStore<AgentStartUIMessage>;
 
 export function Conversation({
-  threadId,
   className,
   contentClassName,
   emptyState,
@@ -412,7 +232,7 @@ export function Conversation({
   initialMessages,
   ...props
 }: ConversationProps) {
-  const { orpc } = useAgentStartContext();
+  const { orpc, threadId } = useAgentStartContext();
 
   const { scrollRef, contentRef, isAtBottom, scrollToBottom } =
     useStickToBottom({
@@ -495,141 +315,6 @@ export function Conversation({
     safeSetMessages(fetchedMessages);
   }, [fetchedMessages, messages, safeSetMessages, threadId]);
 
-  const renderAssistantMessage = useCallback(
-    (message: AgentStartUIMessage, isLastMessage: boolean) => {
-      const parts = message.parts ?? [];
-
-      return parts.map((part, index) => (
-        <MessagePart
-          key={`${message.id}-tool-${index}`}
-          part={part}
-          isStreaming={
-            isLastMessage &&
-            status === "streaming" &&
-            index === parts.length - 1
-          }
-        />
-      ));
-    },
-    [status],
-  );
-
-  const renderUserMessage = useCallback((message: AgentStartUIMessage) => {
-    const parts = (message.parts ?? []) as MessagePartType[];
-    const textParts = parts.filter(isTextPart);
-    const imageParts = parts.filter(isImagePart);
-
-    if (textParts.length === 0 && imageParts.length === 0) {
-      return null;
-    }
-
-    return (
-      <div className="flex w-full flex-col gap-2">
-        {imageParts.length > 0 ? (
-          <div
-            className={cn(
-              "grid gap-2",
-              imageParts.length === 1 ? "grid-cols-1" : "grid-cols-2",
-            )}
-          >
-            {imageParts.map((part, index) => (
-              <figure
-                key={`${message.id}-image-${index}`}
-                className="relative overflow-hidden rounded-md border bg-muted"
-              >
-                <img
-                  alt={part.filename || `Attachment ${index + 1}`}
-                  className="h-full max-h-60 w-full object-cover"
-                  loading="lazy"
-                  src={part.url}
-                />
-                {part.filename ? (
-                  <figcaption className="sr-only">{part.filename}</figcaption>
-                ) : null}
-              </figure>
-            ))}
-          </div>
-        ) : null}
-
-        {textParts.map((part, index) => (
-          <Response key={`${message.id}-text-${index}`}>{part.text}</Response>
-        ))}
-      </div>
-    );
-  }, []);
-
-  const renderUserActions = (message: AgentStartUIMessage) => (
-    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
-      <CopyButton
-        className="size-7"
-        size="icon-sm"
-        variant="ghost"
-        onCopy={() => copyMessageText(message)}
-      />
-
-      <RelativeTime timestamp={message.metadata?.createdAt} />
-    </div>
-  );
-
-  const renderAssistantActions = (message: AgentStartUIMessage) => {
-    const parts = message.parts ?? [];
-    const sourceParts = parts.filter((part) => part.type === "source-url");
-
-    return (
-      <>
-        <div className="flex w-full items-center justify-start gap-1 opacity-0 group-hover:opacity-100">
-          <Button
-            className="size-7"
-            size="icon-sm"
-            variant="ghost"
-            onClick={() =>
-              regenerate({
-                body: {
-                  threadId,
-                },
-              })
-            }
-          >
-            <ArrowsClockwiseIcon className="size-4" weight="duotone" />
-            <span className="sr-only">Retry</span>
-          </Button>
-
-          <CopyButton
-            className="size-7"
-            size="icon-sm"
-            variant="ghost"
-            onCopy={() => copyMessageText(message)}
-          />
-
-          <RelativeTime timestamp={message.metadata?.createdAt} />
-        </div>
-
-        {sourceParts.length > 0 && (
-          <div className="w-full">
-            <Sources>
-              <SourcesTrigger count={sourceParts.length} />
-              <SourcesContent>
-                {sourceParts.map((part, index) => {
-                  const sourcePart = part as {
-                    url: string;
-                    title?: string;
-                  };
-                  return (
-                    <Source
-                      key={`${message.id}-source-${index}`}
-                      href={sourcePart.url}
-                      title={sourcePart.title || sourcePart.url}
-                    />
-                  );
-                })}
-              </SourcesContent>
-            </Sources>
-          </div>
-        )}
-      </>
-    );
-  };
-
   const fetchError = isError ? (queryError as Error) : null;
   const hasMessages = messages.length > 0;
   const showInitialLoading =
@@ -647,7 +332,9 @@ export function Conversation({
       }
       title="Start a conversation"
       description="Send a message to begin chatting with the agent."
-    />
+    >
+      <WelcomeMessage className="mt-4" />
+    </ConversationEmptyState>
   );
 
   const defaultLoadingState = (
@@ -701,42 +388,15 @@ export function Conversation({
           ) : hasMessages ? (
             <div className="flex flex-col gap-2">
               {messages.map((message, index) => {
-                if (message.role === "system") {
-                  return null;
-                }
-
                 const isLastMessage = index === messages.length - 1;
                 return (
-                  <Message
-                    from={message.role}
+                  <ConversationMessage
                     key={message.id}
-                    className={cn("flex-col", {
-                      "items-start": message.role === "assistant",
-                      "items-end": message.role === "user",
-                    })}
-                  >
-                    {message.role === "user" && renderUserActions(message)}
-
-                    <MessageContent
-                      className={cn({
-                        "space-y-2": message.role === "assistant",
-                        "text-base ltr:rounded-br-none! rtl:rounded-bl-none!":
-                          message.role === "user",
-                      })}
-                      variant={
-                        message.role === "assistant" ? "flat" : "contained"
-                      }
-                    >
-                      {message.role === "assistant"
-                        ? renderAssistantMessage(message, isLastMessage)
-                        : renderUserMessage(message)}
-                    </MessageContent>
-
-                    {message.role === "assistant" &&
-                    ["ready", "error"].includes(status)
-                      ? renderAssistantActions(message)
-                      : null}
-                  </Message>
+                    message={message}
+                    isLastMessage={isLastMessage}
+                    status={status}
+                    regenerate={regenerate}
+                  />
                 );
               })}
               {shouldShowStatusIndicators && (
@@ -785,7 +445,6 @@ export function Conversation({
 
           {!shouldShowStatusIndicators && (
             <SuggestedPrompts
-              threadId={threadId}
               className={cn({
                 "pt-0": !hasMessages,
               })}

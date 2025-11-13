@@ -6,10 +6,9 @@ EXPORTS: mockClient, mockNavigate
 FEATURES:
   - Mock oRPC router client matching AgentStartAPI structure
   - Procedures that are callable functions with proper structure
-  - Mock data for threads, messages, and blob storage
-  - Blob management (getConfig, upload)
+  - Mock data for threads, messages, blob storage, and app config
   - Console logging for debugging
-SEARCHABLE: mock client, demo utilities, orpc mock, blob mock
+SEARCHABLE: mock client, demo utilities, orpc mock, blob mock, config mock
 agent-frontmatter:end */
 
 import type { AgentStartUIMessage } from "agentstart/agent";
@@ -202,26 +201,6 @@ export const mockClient = {
     ),
   },
   blob: {
-    getConfig: createMockProcedure("blob.getConfig", async () => {
-      return {
-        enabled: true,
-        constraints: {
-          maxFileSize: 10 * 1024 * 1024, // 10 MB
-          allowedMimeTypes: [
-            "image/jpeg",
-            "image/png",
-            "image/gif",
-            "image/webp",
-            "application/pdf",
-            "text/plain",
-            "text/markdown",
-          ],
-          maxFiles: 5,
-          uploadTiming: "onSubmit" as const,
-        },
-        provider: "vercelBlob" as const,
-      };
-    }),
     upload: createMockProcedure(
       "blob.upload",
       async (input: {
@@ -243,6 +222,60 @@ export const mockClient = {
         };
       },
     ),
+  },
+  config: {
+    get: createMockProcedure("config.get", async () => {
+      return {
+        appName: "Demo App",
+        logo: null,
+        baseURL: null,
+        welcome: {
+          enabled: true,
+          description: "Welcome to the demo app!",
+          suggestions: [
+            "Tell me about React",
+            "Help me build a component",
+            "Explain TypeScript",
+          ],
+        },
+        navigation: {
+          mode: "direct" as const,
+        },
+        models: {
+          default: "openai/gpt-4",
+          available: [
+            {
+              id: "openai/gpt-4",
+              name: "gpt-4",
+              provider: "openai",
+            },
+            {
+              id: "openai/gpt-3.5-turbo",
+              name: "gpt-3.5-turbo",
+              provider: "openai",
+            },
+          ],
+        },
+        blob: {
+          enabled: true,
+          constraints: {
+            maxFileSize: 10 * 1024 * 1024, // 10 MB
+            allowedMimeTypes: [
+              "image/jpeg",
+              "image/png",
+              "image/gif",
+              "image/webp",
+              "application/pdf",
+              "text/plain",
+              "text/markdown",
+            ],
+            maxFiles: 5,
+            uploadTiming: "onSubmit" as const,
+          },
+          provider: "vercelBlob" as const,
+        },
+      };
+    }),
   },
 } as unknown as AgentStartAPI;
 

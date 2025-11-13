@@ -127,6 +127,21 @@ export interface AgentPlugin {
  * };
  * ```
  */
+export interface AgentWelcomeOptions {
+  /**
+   * Description text explaining what this agent does.
+   * Displayed when starting a new conversation.
+   * @type {string | undefined}
+   */
+  description?: string;
+  /**
+   * Initial suggestion prompts shown to users.
+   * These are displayed as clickable suggestions when starting a new thread.
+   * @type {string[] | undefined}
+   */
+  suggestions?: string[];
+}
+
 export interface AgentAdvancedOptions {
   /**
    * Override the ID generator per thread; return false to skip request-side IDs.
@@ -151,6 +166,33 @@ export interface AgentStartOptions {
    * @type {string | undefined}
    */
   appName?: string;
+  /**
+   * Logo configuration for branding.
+   * Can be a simple URL string or an object with detailed options.
+   * @type {string | { src: string; alt?: string; width?: number; height?: number } | undefined}
+   *
+   * @example
+   * ```ts
+   * // Simple URL
+   * logo: "/logo.svg"
+   *
+   * // Detailed configuration
+   * logo: {
+   *   src: "/logo.svg",
+   *   alt: "My App",
+   *   width: 48,
+   *   height: 48
+   * }
+   * ```
+   */
+  logo?:
+    | string
+    | {
+        src: string;
+        alt?: string;
+        width?: number;
+        height?: number;
+      };
   /**
    * Base URL that the agent should treat as its absolute origin.
    * @type {string | undefined}
@@ -276,6 +318,23 @@ export interface AgentStartOptions {
    * @type {ModelOptions | undefined}
    */
   todo?: ModelOptions;
+  /**
+   * Welcome configuration for new conversations.
+   * @type {AgentWelcomeOptions | undefined}
+   *
+   * @example
+   * ```ts
+   * welcome: {
+   *   description: "I'm your AI assistant specialized in helping with code reviews and refactoring.",
+   *   suggestions: [
+   *     "Review my latest pull request",
+   *     "Suggest improvements for this function",
+   *     "Help me refactor this component"
+   *   ]
+   * }
+   * ```
+   */
+  welcome?: AgentWelcomeOptions;
 }
 
 export type AgentStartOptionsWithoutAgent = Omit<AgentStartOptions, "agent"> & {

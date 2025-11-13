@@ -14,8 +14,8 @@ agent-frontmatter:end */
 import type { AnyMiddleware } from "@orpc/server";
 import { createProcedureBuilder } from "./procedures";
 import { createBlobRouter } from "./routers/blob";
+import { createConfigRouter } from "./routers/config";
 import { createMessageRouter } from "./routers/message";
-import { createModelRouter } from "./routers/model";
 import { createSandboxRouter } from "./routers/sandbox";
 import { createThreadRouter } from "./routers/thread";
 
@@ -28,7 +28,7 @@ export const appRouter = {
   message: createMessageRouter(),
   blob: createBlobRouter(),
   sandbox: createSandboxRouter(),
-  model: createModelRouter(),
+  config: createConfigRouter(),
 };
 
 /**
@@ -48,7 +48,7 @@ export function createAppRouter(middleware?: AnyMiddleware[]) {
     message: createMessageRouter(procedureBuilder),
     blob: createBlobRouter(procedureBuilder),
     sandbox: createSandboxRouter(procedureBuilder),
-    model: createModelRouter(procedureBuilder),
+    config: createConfigRouter(procedureBuilder),
   };
 }
 

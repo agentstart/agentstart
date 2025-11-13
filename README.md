@@ -186,7 +186,7 @@ function MyComponent() {
 }
 ```
 
-Blob storage is **optional** and will be disabled if no provider configuration is supplied. When disabled, the `blob.getConfig` API returns `{ enabled: false }` and file uploads will not be processed.
+Blob storage is **optional** and will be disabled if no provider configuration is supplied. When disabled, the `config.get` API returns `{ blob: { enabled: false } }` and file uploads will not be processed.
 
 ### Components
 
@@ -263,6 +263,12 @@ The `SEARCHABLE` field should contain comma-separated keywords that describe the
 ## Code Style Guardrails
 
 - Prefer precise TypeScript types and `unknown` over `any`. Unless a spec explicitly allows it, `any` is off limits.
+- **Type assertions (`as`)**: Avoid using `as` for type assertions unless absolutely necessary. Type assertions bypass TypeScript's type checking and can hide bugs. Instead:
+  - Use proper type guards and narrowing (e.g., `typeof`, `instanceof`, `Array.isArray()`)
+  - Define proper types at the source rather than casting later
+  - Use generic constraints when dealing with generic types
+  - Only use `as` when you have verified runtime guarantees that TypeScript cannot infer (e.g., parsing validated JSON)
+  - **Never** use `as any` - this completely defeats TypeScript's purpose
 - When a function needs more than two parameters, wrap them in a single options object so call sites remain readable and extensible.
 - Do not introduce redundant wrapper callbacks (e.g. `const handleX = useCallback(() => doX())`); invoke the underlying function directly to keep the code concise.
 - **Path normalization**: Always normalize file paths at the system entry point to ensure consistent format across the entire data flow. This is critical for Map/Set lookups and parent-child relationships. Use a standard format (e.g., always include leading `/` for absolute paths) and apply it uniformly to both `path` and `parentPath` fields before any downstream processing.

@@ -1,10 +1,11 @@
 /* agent-frontmatter:start
 AGENT: AgentStart prompt input component
 PURPOSE: Integrated prompt input with file attachments, queue, and usage display
-USAGE: <PromptInput threadId={threadId} />
+USAGE: <PromptInput />
 EXPORTS: PromptInput, PromptInputProps
 FEATURES:
   - Dual mode: create new thread or send message to existing thread
+  - Gets threadId from useAgentStartContext
   - File attachments via drag-and-drop, paste, or picker
   - Message queue management
   - Usage summary display
@@ -51,6 +52,7 @@ import {
   type KeyboardEventHandler,
   type ReactNode,
   type RefObject,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -101,7 +103,6 @@ import {
 
 export interface PromptInputProps {
   className?: string;
-  threadId?: string;
   initialUsage?: AgentUsageSummary;
 }
 
@@ -736,10 +737,10 @@ function MessageQueue({
 
 export function PromptInput({
   className,
-  threadId,
   initialUsage,
 }: PromptInputProps = {}) {
-  const { client, orpc, navigate } = useAgentStartContext();
+  const { client, orpc, navigate, threadId, setThreadId } =
+    useAgentStartContext();
   const queryClient = useQueryClient();
 
   // Input state
@@ -852,33 +853,33 @@ export function PromptInput({
     setBlobFiles(normalized);
   }, [attachments, setBlobFiles]);
 
-  const handleMessageSubmit = async (message: {
-    text?: string;
-    files?: BlobFileList;
-  }) => {
-    let files: FileList | FileUIPart[] | undefined;
+  const handleMessageSubmit = useCallback(
+    async (message: { text?: string; files?: BlobFileList }) => {
+      let files: FileList | FileUIPart[] | undefined;
 
-    if (message?.files && Array.isArray(message.files)) {
-      if (message.files.every((file) => file instanceof File)) {
-        const dataTransfer = new DataTransfer();
-        for (const file of message.files) {
-          dataTransfer.items.add(file);
+      if (message?.files && Array.isArray(message.files)) {
+        if (message.files.every((file) => file instanceof File)) {
+          const dataTransfer = new DataTransfer();
+          for (const file of message.files) {
+            dataTransfer.items.add(file);
+          }
+          files = dataTransfer.files;
+        } else if (
+          message.files.every(
+            (file) => !(file instanceof File) && isFileUIPart(file),
+          )
+        ) {
+          files = message.files as FileUIPart[];
         }
-        files = dataTransfer.files;
-      } else if (
-        message.files.every(
-          (file) => !(file instanceof File) && isFileUIPart(file),
-        )
-      ) {
-        files = message.files as FileUIPart[];
       }
-    }
 
-    return sendMessage(
-      { text: message?.text ?? "", files },
-      { body: { threadId } },
-    );
-  };
+      return sendMessage(
+        { text: message?.text ?? "", files },
+        { body: { threadId } },
+      );
+    },
+    [sendMessage, threadId],
+  );
 
   const handleSubmit = async (message: PromptInputMessage) => {
     const isBusy = ["streaming", "submitted"].includes(status);
@@ -951,6 +952,10 @@ export function PromptInput({
           await createThreadMutation.mutateAsync({
             visibility: "public",
           });
+
+        // Update context state (single source of truth)
+        setThreadId(newThreadId);
+
         navigate(`/thread/${newThreadId}`);
         queryClient.invalidateQueries(
           orpc.thread.list.queryOptions({ input: {} }),
@@ -1031,7 +1036,7 @@ export function PromptInput({
         setNewThreadDraft({ text: storedText, files });
       }
     })();
-  }, [id, newThreadDraft, setNewThreadDraft, threadId]);
+  }, [id, newThreadDraft, setNewThreadDraft, threadId, handleMessageSubmit]);
 
   return (
     <div className="mx-auto flex w-full flex-col px-4 sm:min-w-[390px] sm:max-w-3xl">

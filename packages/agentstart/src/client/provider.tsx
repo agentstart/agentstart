@@ -26,6 +26,7 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
 import type { StoreApi, UseBoundStore } from "zustand";
 import type { AgentStartAPI } from "../api";
@@ -46,6 +47,8 @@ interface AgentStartClientContextState {
   client: AgentStartAPI;
   orpc: RouterUtils<AgentStartAPI>;
   navigate: (path: string) => void;
+  threadId: string | undefined;
+  setThreadId: (threadId: string | undefined) => void;
 }
 
 const AgentStartClientContext =
@@ -71,6 +74,9 @@ export function AgentStartProvider({
     Map<string, UseBoundStore<StoreApi<AgentStoreWithSync<any>>>>
   >(stores ?? new Map());
 
+  // Current thread ID state (single source of truth)
+  const [threadId, setThreadId] = useState<string | undefined>();
+
   const storeRegistryState = useMemo(
     () => ({
       storeInstances: storeInstancesRef.current,
@@ -85,8 +91,10 @@ export function AgentStartProvider({
       client,
       orpc,
       navigate,
+      threadId,
+      setThreadId,
     };
-  }, [client, navigate]);
+  }, [client, navigate, threadId]);
 
   // Cleanup all store instances on unmount
   useEffect(() => {

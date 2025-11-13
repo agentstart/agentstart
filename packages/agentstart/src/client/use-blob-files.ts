@@ -99,15 +99,16 @@ export interface UseBlobFilesResult {
 export function useBlobFiles(client: AgentStartAPI): UseBlobFilesResult {
   const orpc = createTanstackQueryUtils(client);
 
-  // Fetch blob configuration
+  // Fetch app configuration (includes blob config)
   const { data: config } = useQuery(
-    orpc.blob.getConfig.queryOptions({
+    orpc.config.get.queryOptions({
       input: {},
     }),
   );
 
-  const isEnabled = Boolean(config?.enabled);
-  const uploadTiming = config?.constraints?.uploadTiming ?? "onSubmit";
+  const blobConfig = config?.blob;
+  const isEnabled = Boolean(blobConfig?.enabled);
+  const uploadTiming = blobConfig?.constraints?.uploadTiming ?? "onSubmit";
 
   // Internal state
   const [files, setFilesState] = useState<BlobFileList>([] as BlobFile[]);
@@ -214,11 +215,11 @@ export function useBlobFiles(client: AgentStartAPI): UseBlobFilesResult {
    */
   const validateFile = useCallback(
     (file: File): ValidationError | null => {
-      if (!config?.constraints) {
+      if (!blobConfig?.constraints) {
         return null;
       }
 
-      const constraints = config.constraints;
+      const constraints = blobConfig.constraints;
 
       // Check file size
       if (constraints.maxFileSize && file.size > constraints.maxFileSize) {
@@ -242,7 +243,7 @@ export function useBlobFiles(client: AgentStartAPI): UseBlobFilesResult {
 
       return null;
     },
-    [config],
+    [blobConfig],
   );
 
   /**
@@ -252,11 +253,11 @@ export function useBlobFiles(client: AgentStartAPI): UseBlobFilesResult {
     (files: File[]): ValidationError[] => {
       const errors: ValidationError[] = [];
 
-      if (!config?.constraints) {
+      if (!blobConfig?.constraints) {
         return errors;
       }
 
-      const constraints = config.constraints;
+      const constraints = blobConfig.constraints;
 
       // Check file count
       if (constraints.maxFiles && files.length > constraints.maxFiles) {
@@ -277,7 +278,7 @@ export function useBlobFiles(client: AgentStartAPI): UseBlobFilesResult {
 
       return errors;
     },
-    [config, validateFile],
+    [blobConfig, validateFile],
   );
 
   /**

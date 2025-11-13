@@ -4,7 +4,7 @@ PURPOSE: Manage model selection state and fetch available models
 USAGE: const { models, selectedModel, setSelectedModel, isLoading } = useModelSelector(client)
 EXPORTS: useModelSelector, UseModelSelectorResult, ModelInfo
 FEATURES:
-  - Fetches available models from API
+  - Fetches available models from config.get API
   - Manages selected model state via global settings store
   - Provides default model fallback
   - Integrates with AgentStartAPI
@@ -88,19 +88,22 @@ export function useModelSelector(
     (state) => state.setSelectedModelId,
   );
 
-  // Fetch available models
+  // Fetch application config which includes models
   const {
-    data: modelsData,
+    data: configData,
     isLoading,
     error,
   } = useQuery(
-    orpc.model.list.queryOptions({
+    orpc.config.get.queryOptions({
       input: {},
     }),
   );
 
-  const models = useMemo(() => modelsData?.models ?? [], [modelsData?.models]);
-  const defaultModelId = modelsData?.defaultModelId ?? null;
+  const models = useMemo(
+    () => configData?.models?.available ?? [],
+    [configData?.models?.available],
+  );
+  const defaultModelId = configData?.models?.default ?? null;
   const isEnabled = models.length > 0;
 
   // Set default model if no model is selected

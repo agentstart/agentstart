@@ -29,7 +29,7 @@ export type SidebarContentProps = {
 
 export function SidebarContent({ children }: SidebarContentProps) {
   const { open } = useSidebar();
-  if (!open) return null;
+  if (!open) return <ShadcnSidebarContent />;
 
   return (
     <ShadcnSidebarContent>

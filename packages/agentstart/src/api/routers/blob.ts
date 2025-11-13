@@ -1,15 +1,14 @@
 /* agent-frontmatter:start
 AGENT: Blob router using oRPC
-PURPOSE: Expose blob storage configuration and upload endpoints
-USAGE: blob.getConfig() to fetch constraints, blob.upload() to upload files
+PURPOSE: Expose blob storage upload endpoints
+USAGE: blob.upload() to upload files
 EXPORTS: blobRouter, createBlobRouter
 FEATURES:
-  - Returns blob constraints (maxFileSize, allowedMimeTypes, maxFiles)
-  - Exposes provider capabilities to clients
   - Handles file uploads via ORPC with base64 encoding
   - Works with any configured blob adapter on the context
   - Supports dynamic middleware via procedure builder
-SEARCHABLE: blob router, blob config, upload constraints api, file upload
+  - Validates files against constraints (see config.get for constraints)
+SEARCHABLE: blob router, file upload, upload api
 agent-frontmatter:end */
 
 import { getBlob } from "@agentstart/blob";
@@ -22,15 +21,6 @@ const uploadFileSchema = z.object({
   data: z.string(), // base64 encoded file data
   type: z.string(), // MIME type
 });
-
-const blobConstraintsSchema = z.object({
-  maxFileSize: z.number().optional(),
-  allowedMimeTypes: z.array(z.string()).optional(),
-  maxFiles: z.number().optional(),
-  uploadTiming: z.enum(["onSubmit", "immediate"]).optional(),
-});
-
-const providerEnum = z.enum(["vercelBlob", "awsS3", "cloudflareR2"]);
 
 const uploadedFileSchema = z.object({
   name: z.string(),
@@ -46,50 +36,6 @@ const uploadedFileSchema = z.object({
  */
 export function createBlobRouter(procedure = publicProcedure) {
   return {
-    getConfig: procedure
-      .meta({
-        doc: {
-          summary: "Inspect blob storage configuration",
-          description:
-            "Returns whether blob uploads are enabled along with provider-specific constraints so clients can validate files before uploading.",
-          examples: [
-            {
-              title: "Client-side capability check",
-              code: "const config = await start.api.blob.getConfig();\nif (!config.enabled) {\n  console.log('Uploads are disabled');\n}",
-            },
-          ],
-        },
-      })
-      .output(
-        z.object({
-          enabled: z.boolean(),
-          constraints: blobConstraintsSchema.nullable(),
-          provider: providerEnum.nullable(),
-        }),
-      )
-      .handler(async ({ context, errors }) => {
-        try {
-          const adapter = await getBlob(context);
-          if (!adapter) {
-            return {
-              enabled: false,
-              constraints: null,
-              provider: null,
-            };
-          }
-
-          const constraints = adapter.getConstraints();
-          return {
-            enabled: true,
-            constraints: constraints ?? null,
-            provider: adapter.provider,
-          };
-        } catch (error) {
-          console.error("Error fetching blob config:", error);
-          handleRouterError(error, errors);
-        }
-      }),
-
     upload: procedure
       .meta({
         doc: {

@@ -177,9 +177,8 @@ function extractDataPartsFromMessages(
     for (const part of message.parts) {
       // Extract direct data parts
       if (isDataPart(part)) {
-        const dataPart = part as AgentStartDataUIPart;
-        if (dataPart.data !== undefined) {
-          collectedDataParts.push(dataPart);
+        if (part.data !== undefined) {
+          collectedDataParts.push(part);
         }
       }
 

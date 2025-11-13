@@ -1,0 +1,32 @@
+/* agent-frontmatter:start
+AGENT: Homepage component
+PURPOSE: Renders landing page with welcome message and prompt input
+USAGE: Serves as the default route
+EXPORTS: default
+FEATURES:
+  - Shows welcome page with prompt input
+  - Creates thread on message submission
+SEARCHABLE: playground, next, src, app, page, landing, chat
+agent-frontmatter:end */
+
+import { PromptInput } from "@/components/agent/prompt-input";
+import { WelcomeMessage } from "@/components/agent/welcome-message";
+
+export default async function Page() {
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex flex-1 overflow-hidden">
+        {/* Main Content */}
+        <div className="mx-auto flex h-full w-full max-w-full flex-1 flex-col">
+          <div className="relative mx-auto flex flex size-full w-full flex-col flex-col px-4 sm:min-w-[390px] sm:max-w-3xl">
+            <WelcomeMessage />
+          </div>
+
+          <div className="sticky inset-x-0 bottom-0 pb-4">
+            <PromptInput className="mx-auto" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

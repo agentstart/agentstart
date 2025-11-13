@@ -1,13 +1,13 @@
 /* agent-frontmatter:start
 AGENT: Blob router tests
-PURPOSE: Validate blob.getConfig and blob.upload behaviours with mocked adapters
+PURPOSE: Validate blob.upload behaviours with mocked adapters
 USAGE: Run with vitest to exercise constraint handling and error branches
 EXPORTS: none
 FEATURES:
   - Mocks adapter instances directly in context
   - Covers constraint failures (size, MIME type) and missing configuration
   - Confirms successful uploads invoke adapter.put with expected payload
-SEARCHABLE: blob router test, upload constraints test, getConfig test
+SEARCHABLE: blob router test, upload constraints test
 agent-frontmatter:end */
 
 import type { BlobAdapter } from "@agentstart/types";
@@ -73,47 +73,6 @@ describe("blob router", () => {
 
   beforeEach(() => {
     vi.resetAllMocks();
-  });
-
-  describe("getConfig", () => {
-    it("returns disabled payload when blob config is absent", async () => {
-      const result = await router.getConfig({
-        context: {},
-      });
-
-      expect(result).toEqual({
-        enabled: false,
-        constraints: null,
-        provider: null,
-      });
-    });
-
-    it("returns provider info and constraints when adapter is provided", async () => {
-      const adapter = createAdapter({
-        getConstraints: vi.fn().mockReturnValue({
-          maxFileSize: 1024,
-          allowedMimeTypes: ["text/plain"],
-          maxFiles: 2,
-        }),
-        provider: "awsS3",
-      });
-
-      const result = await router.getConfig({
-        context: {
-          blob: adapter,
-        },
-      });
-
-      expect(result).toEqual({
-        enabled: true,
-        constraints: {
-          maxFileSize: 1024,
-          allowedMimeTypes: ["text/plain"],
-          maxFiles: 2,
-        },
-        provider: "awsS3",
-      });
-    });
   });
 
   describe("upload", () => {

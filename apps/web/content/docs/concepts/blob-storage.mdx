@@ -6,7 +6,7 @@ description: Configure file uploads and attachments for AgentStart deployments
 AgentStart ships with first-class blob storage support so your agents can accept file uploads, persist normalized metadata, and reuse attachments across tools, memory, and UI layers.
 
 <Callout>
-  Blob storage is optional. If you skip configuration the `blob.getConfig` procedure returns `{ enabled: false }` and file uploads are disabled automatically.
+  Blob storage is optional. If you skip configuration the `config.get` procedure returns `{ blob: { enabled: false } }` and file uploads are disabled automatically.
 </Callout>
 
 ## Enabling Blob Storage
@@ -185,7 +185,7 @@ The `blob.upload` ORPC procedure performs a second layer of validation—rejecti
 
 ## Troubleshooting
 
-- `blob.getConfig` returns `{ enabled: false }`: the `blob` option was omitted or misconfigured. Verify environment variables and restart the server.
+- `config.get` returns `{ blob: { enabled: false } }`: the `blob` option was omitted or misconfigured. Verify environment variables and restart the server.
 - Upload requests return `403` or `SignatureDoesNotMatch`: double-check provider credentials and bucket permissions.
 - Large uploads stall: switch to `uploadTiming: "immediate"` so files upload while the user composes a message, then confirm the provider supports multipart uploads.
 

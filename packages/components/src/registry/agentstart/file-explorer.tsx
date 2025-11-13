@@ -66,7 +66,7 @@ import {
   InputGroupText,
 } from "@/components/ui/input-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { SidebarMenuSkeleton } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 // ============================================================================
@@ -121,8 +121,6 @@ export interface FileExplorerProps {
     /** Glob patterns to ignore */
     ignore?: string[];
   };
-  /** Thread ID to extract file changes from agent operations */
-  threadId?: string;
   /** Custom empty state */
   emptyState?: ReactNode;
   /** Custom error state */
@@ -249,7 +247,7 @@ function FileExplorerContent({
   animateExpand = true,
 }: Omit<
   FileExplorerProps,
-  "entries" | "className" | "query" | "threadId" | "emptyState" | "errorState"
+  "entries" | "className" | "query" | "emptyState" | "errorState"
 > & {
   onRename?: (node: FileNode, newName: string) => void;
   onDelete?: (node: FileNode) => void;
@@ -428,7 +426,6 @@ export function FileExplorer({
   onFileClick,
   className,
   query,
-  threadId,
   emptyState,
   errorState,
   showSearch = true,
@@ -437,7 +434,7 @@ export function FileExplorer({
   indent = 20,
   animateExpand = true,
 }: FileExplorerProps) {
-  const { orpc } = useAgentStartContext();
+  const { orpc, threadId } = useAgentStartContext();
 
   // If entries provided directly, use them; otherwise fetch via API
   const {
@@ -588,9 +585,9 @@ export function FileExplorer({
       <FileTreeProvider>
         {isLoading && !entries ? (
           <div className="p-4">
-            <SidebarMenuSkeleton />
-            <SidebarMenuSkeleton />
-            <SidebarMenuSkeleton />
+            <Skeleton />
+            <Skeleton />
+            <Skeleton />
           </div>
         ) : isError && !entries ? (
           <div className="flex h-full items-center justify-center p-4">
