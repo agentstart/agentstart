@@ -22,6 +22,11 @@ function App() {
         {/* Main Content */}
         <div className="mx-auto flex h-full w-full max-w-full flex-1 flex-col">
           <div className="relative mx-auto flex size-full w-full flex-col px-4 sm:min-w-[390px] sm:max-w-3xl">
+            <img
+              className="my-8 block h-auto w-full"
+              src="/banner.png"
+              alt="banner"
+            />
             <WelcomeMessage />
           </div>
 

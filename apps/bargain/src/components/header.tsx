@@ -13,8 +13,8 @@ agent-frontmatter:end */
 
 export function Header() {
   return (
-    <header className="flex items-center justify-between gap-1 border-b bg-background px-6 py-3">
-      <h1 className="font-semibold text-base">来和归家十二分砍价守门员聊聊</h1>
+    <header className="flex items-center gap-2 border-b bg-background px-4 py-3">
+      <h1 className="text-base">和归家十二分砍价守门员聊聊</h1>
     </header>
   );
 }

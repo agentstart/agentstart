@@ -37,7 +37,7 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { StatusIndicators } from "../shimmer";
 import { SuggestedPrompts } from "../suggested-prompts";
@@ -338,11 +338,34 @@ export function Conversation({
   );
 
   const defaultLoadingState = (
-    <ConversationEmptyState
-      icon={<Spinner className="text-muted-foreground" />}
-      title="Loading conversation"
-      description="Fetching the latest messages…"
-    />
+    <div className="mx-auto flex w-full flex-col gap-4 px-4 py-2 sm:min-w-[390px] sm:max-w-3xl">
+      <div className="flex justify-start">
+        <div className="max-w-[80%]">
+          <Skeleton className="mb-2 h-4 w-24" />
+          <Skeleton className="mb-1 h-3 w-48" />
+          <Skeleton className="h-3 w-32" />
+        </div>
+      </div>
+      <div className="flex justify-end">
+        <div className="max-w-[80%]">
+          <Skeleton className="mb-2 h-4 w-20" />
+          <Skeleton className="h-3 w-40" />
+        </div>
+      </div>
+      <div className="flex justify-start">
+        <div className="max-w-[80%]">
+          <Skeleton className="mb-2 h-4 w-28" />
+          <Skeleton className="mb-1 h-3 w-56" />
+          <Skeleton className="h-3 w-44" />
+        </div>
+      </div>
+      <div className="flex justify-start">
+        <div className="max-w-[80%]">
+          <Skeleton className="mb-2 h-4 w-24" />
+          <Skeleton className="h-3 w-36" />
+        </div>
+      </div>
+    </div>
   );
 
   const defaultErrorState = fetchError && (

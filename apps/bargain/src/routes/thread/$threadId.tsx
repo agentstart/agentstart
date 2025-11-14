@@ -46,7 +46,7 @@ const getThreadData = createServerFn()
       thread,
       initialMessages,
       initialUsage,
-    };
+    } as any; // Type assertion: Bypassing TanStack Router's serialization type check
   });
 
 export const Route = createFileRoute("/thread/$threadId")({
@@ -55,7 +55,7 @@ export const Route = createFileRoute("/thread/$threadId")({
     try {
       // Isomorphic loader calls server function via RPC
       const data = await getThreadData({ data: { threadId: params.threadId } });
-      return data as any; // Type assertion: Bypassing TanStack Router's serialization type check
+      return data;
     } catch (error) {
       console.error("Failed to fetch thread data:", error);
       throw redirect({ to: "/" });

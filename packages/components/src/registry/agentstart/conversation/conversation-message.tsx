@@ -222,7 +222,6 @@ export type ConversationMessageProps = {
   isLastMessage: boolean;
   status: AgentStore<AgentStartUIMessage>["status"];
   regenerate: AgentStore<AgentStartUIMessage>["regenerate"];
-  showLogo?: boolean;
 };
 
 export function ConversationMessage({
@@ -230,14 +229,13 @@ export function ConversationMessage({
   isLastMessage,
   status,
   regenerate,
-  showLogo = false,
 }: ConversationMessageProps) {
   const { orpc, threadId } = useAgentStartContext();
 
   // Fetch logo configuration if needed
   const { data: appConfig } = useQuery(
     orpc.config.get.queryOptions({
-      enabled: showLogo && message.role === "assistant",
+      enabled: message.role === "assistant",
     }),
   );
 
@@ -251,8 +249,8 @@ export function ConversationMessage({
       const parts = message.parts ?? [];
       const elements: React.ReactElement[] = [];
 
-      // Render logo if enabled
-      if (showLogo && logoSrc) {
+      // Render logo if configured
+      if (logoSrc) {
         // Generate fallback initials from logoAlt
         const fallbackText = logoAlt
           .split(" ")
@@ -264,14 +262,14 @@ export function ConversationMessage({
         if (parts.length > 0) {
           // Logo with content: left-right layout
           elements.push(
-            <div key="logo-header" className="flex flex-col items-start gap-4">
+            <div key="logo-header" className="flex flex-col items-start gap-3">
               <div className="shrink-0">
                 <Avatar style={{ width: logoWidth, height: logoHeight }}>
                   <AvatarImage src={logoSrc} alt={logoAlt} />
                   <AvatarFallback>{fallbackText}</AvatarFallback>
                 </Avatar>
               </div>
-              <div className="flex-1">
+              <div className="flex-1 space-y-2">
                 {parts.map((part, index) => (
                   <MessagePart
                     key={`${message.id}-tool-${index}`}
@@ -321,7 +319,7 @@ export function ConversationMessage({
 
       return elements;
     },
-    [status, showLogo, logoSrc, logoAlt, logoWidth, logoHeight],
+    [status, logoSrc, logoAlt, logoWidth, logoHeight],
   );
 
   const renderUserMessage = useCallback((message: AgentStartUIMessage) => {

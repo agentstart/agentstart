@@ -25,8 +25,9 @@ import {
   useStoreRegistry,
 } from "agentstart/client";
 import { AnimatePresence, motion } from "motion/react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { ConversationMessage } from "./conversation/conversation-message";
 
 type UIAgentStore = AgentStore<AgentStartUIMessage>;
@@ -51,10 +52,20 @@ export function WelcomeMessage({ className }: WelcomeMessageProps) {
     storeId,
   );
   const setNewThreadDraft = useAgentStore((state) => state.setNewThreadDraft);
+  const status = useAgentStore((state) => state.status, storeId);
+
+  const [sendingSuggestion, setSendingSuggestion] = useState<string | null>(
+    null,
+  );
 
   const createThreadMutation = useMutation(
     orpc.thread.create.mutationOptions(),
   );
+
+  const isLoading =
+    status === "submitted" ||
+    status === "streaming" ||
+    createThreadMutation?.isPending;
 
   // Fetch application configuration
   const { data: appConfig } = useQuery(
@@ -64,6 +75,8 @@ export function WelcomeMessage({ className }: WelcomeMessageProps) {
   );
 
   const handleSuggestionClick = async (suggestion: string) => {
+    setSendingSuggestion(suggestion);
+
     // If no threadId (on homepage), create thread first
     if (!threadId) {
       try {
@@ -97,18 +110,24 @@ export function WelcomeMessage({ className }: WelcomeMessageProps) {
         );
       } catch (error) {
         console.error("[WelcomeMessage] Failed to create thread:", error);
+      } finally {
+        setSendingSuggestion(null);
       }
     } else {
       // Has threadId, send message directly
-      navigate(`/thread/${threadId}`);
-      sendMessage(
-        { text: suggestion },
-        {
-          body: {
-            threadId,
+      try {
+        navigate(`/thread/${threadId}`);
+        await sendMessage(
+          { text: suggestion },
+          {
+            body: {
+              threadId,
+            },
           },
-        },
-      );
+        );
+      } finally {
+        setSendingSuggestion(null);
+      }
     }
   };
 
@@ -160,7 +179,6 @@ export function WelcomeMessage({ className }: WelcomeMessageProps) {
               isLastMessage={false}
               status="ready"
               regenerate={async () => {}}
-              showLogo={true}
             />
           </motion.div>
         )}
@@ -195,7 +213,9 @@ export function WelcomeMessage({ className }: WelcomeMessageProps) {
                       variant="outline"
                       size="sm"
                       onClick={() => handleSuggestionClick(suggestion)}
+                      disabled={isLoading}
                     >
+                      {sendingSuggestion === suggestion && <Spinner className="mr-2" />}
                       {suggestion}
                       <ArrowUpRightIcon className="size-3" weight="bold" />
                     </Button>

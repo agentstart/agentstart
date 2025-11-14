@@ -22,7 +22,9 @@ import {
 } from "agentstart/client";
 import type { HTMLMotionProps } from "motion/react";
 import { AnimatePresence, motion } from "motion/react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 export type SuggestionsProps = Omit<HTMLMotionProps<"div">, "children">;
 
@@ -34,10 +36,16 @@ export function SuggestedPrompts({ className, ...props }: SuggestionsProps) {
     storeId,
   );
   const sendMessage = useAgentStore((state) => state.sendMessage, storeId);
+  const status = useAgentStore((state) => state.status, storeId);
 
-  const handlePromptClick = (prompt: string) => {
+  const [sendingPrompt, setSendingPrompt] = useState<string | null>(null);
+
+  const isLoading = status === "submitted" || status === "streaming";
+
+  const handlePromptClick = async (prompt: string) => {
+    setSendingPrompt(prompt);
     clearSuggestions();
-    sendMessage(
+    await sendMessage(
       { text: prompt },
       {
         body: {
@@ -45,6 +53,7 @@ export function SuggestedPrompts({ className, ...props }: SuggestionsProps) {
         },
       },
     );
+    setSendingPrompt(null);
   };
 
   if (!suggestions?.prompts || suggestions.prompts.length === 0) {
@@ -82,7 +91,9 @@ export function SuggestedPrompts({ className, ...props }: SuggestionsProps) {
                 variant="outline"
                 size="sm"
                 onClick={() => handlePromptClick(prompt)}
+                disabled={isLoading}
               >
+                {sendingPrompt === prompt && <Spinner className="mr-2" />}
                 {prompt}
                 <ArrowUpRightIcon className="size-3" weight="bold" />
               </Button>
