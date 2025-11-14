@@ -180,6 +180,7 @@ export const start = agentStart({
 4. 适当给出砍价相关词汇
 5. 使建议针对具体情境，而非泛泛而谈
 6. 关注能提供价值的可用功能
+7. 如果没有调用过 generateLink tool 并且已经有了价格，那么第一个 suggestion 必须是"上订购链接"之类的词汇
 
 好的建议应该：
 - 针对刚才讨论的内容
