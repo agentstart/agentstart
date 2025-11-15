@@ -142,7 +142,7 @@ const agent = new Agent({
   instructions: instructions(
     process.env.NODE_ENV === "development"
       ? "http://localhost:3000"
-      : "https://guijia.store",
+      : "https://kan.guijia.store",
   ),
   tools: {
     generateVerificationCode,
