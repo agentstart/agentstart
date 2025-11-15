@@ -15,7 +15,7 @@ agent-frontmatter:end */
 "use client";
 
 import { ArrowUpRightIcon } from "@phosphor-icons/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AgentStartUIMessage } from "agentstart/agent";
 import type { AgentStore } from "agentstart/client";
 import {

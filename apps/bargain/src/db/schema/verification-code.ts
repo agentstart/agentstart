@@ -11,7 +11,13 @@ FEATURES:
 SEARCHABLE: verification code, schema, database, table, redeem, purchase
 agent-frontmatter:end */
 
-import { boolean, numeric, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  numeric,
+  pgTable,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core";
 import { thread } from "./agent";
 
 export const verificationCode = pgTable("verification_code", {

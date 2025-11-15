@@ -33,4 +33,3 @@ export const todo = pgTable("todo", {
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
 });
-
