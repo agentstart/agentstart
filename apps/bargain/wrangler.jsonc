@@ -11,5 +11,11 @@
       "invocation_logs": true,
       "persist": true
     }
-  }
+  },
+  "routes": [
+    {
+      "pattern": "kan.guijia.store",
+      "custom_domain": true
+    }
+  ]
 }
