@@ -19,7 +19,7 @@ agent-frontmatter:end */
 import { useMutation } from "@tanstack/react-query";
 import type { FileUIPart } from "ai";
 import { isFileUIPart } from "ai";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAgentStartContext } from "./provider";
 
 /**
@@ -42,6 +42,26 @@ interface FileUploadData {
 
 export type BlobFile = File | FileUIPart;
 export type BlobFileList = FileList | BlobFile[];
+
+const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  const chunkSize = 0x8000;
+
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    let chunk = "";
+    const end = Math.min(i + chunkSize, bytes.length);
+    for (let j = i; j < end; j += 1) {
+      const chatcode = bytes[j];
+      if (chatcode) {
+        chunk += String.fromCharCode(chatcode);
+      }
+    }
+    binary += chunk;
+  }
+
+  return btoa(binary);
+};
 
 export interface UseBlobFilesResult {
   /**
@@ -104,6 +124,7 @@ export function useBlobFiles(): UseBlobFilesResult {
 
   // Internal state
   const [files, setFilesState] = useState<BlobFileList>([] as BlobFile[]);
+  const lastAutoUploadSignatureRef = useRef<string | null>(null);
 
   const inferFilename = useCallback((url?: string): string => {
     if (!url) {
@@ -303,7 +324,7 @@ export function useBlobFiles(): UseBlobFilesResult {
       const filesData: FileUploadData[] = await Promise.all(
         normalizedFiles.map(async (file) => {
           const buffer = await file.arrayBuffer();
-          const base64 = Buffer.from(buffer).toString("base64");
+          const base64 = arrayBufferToBase64(buffer);
           return {
             name: file.name,
             data: base64,
@@ -341,6 +362,24 @@ export function useBlobFiles(): UseBlobFilesResult {
     mutationFn: performUpload,
   });
 
+  const getUploadSignature = useCallback((fileArray: BlobFile[]): string => {
+    return fileArray
+      .map((item) => {
+        if (item instanceof File) {
+          return `file:${item.name}:${item.size}:${item.type}:${item.lastModified}`;
+        }
+        if (isFileUIPart(item)) {
+          const identifier =
+            (typeof item.url === "string" && item.url.length > 0
+              ? item.url
+              : item.filename) ?? "file-part";
+          return `part:${identifier}:${item.mediaType ?? ""}`;
+        }
+        return "unknown";
+      })
+      .join("|");
+  }, []);
+
   /**
    * Auto-upload files in immediate mode
    */
@@ -366,6 +405,12 @@ export function useBlobFiles(): UseBlobFilesResult {
       return;
     }
 
+    const signature = getUploadSignature(uploadCandidates);
+    if (signature && signature === lastAutoUploadSignatureRef.current) {
+      return;
+    }
+    lastAutoUploadSignatureRef.current = signature;
+
     prepareFilesForUpload(uploadCandidates)
       .then((filesToUpload) => {
         if (filesToUpload.length === 0) {
@@ -388,6 +433,7 @@ export function useBlobFiles(): UseBlobFilesResult {
     uploadMutation.isPending,
     uploadMutation.mutateAsync,
     mergeUploadResults,
+    getUploadSignature,
     prepareFilesForUpload,
     shouldUpload,
   ]);
@@ -396,6 +442,7 @@ export function useBlobFiles(): UseBlobFilesResult {
    * Set files to upload
    */
   const setFiles = useCallback((newFiles: BlobFileList) => {
+    lastAutoUploadSignatureRef.current = null;
     setFilesState(newFiles);
   }, []);
 
@@ -403,6 +450,7 @@ export function useBlobFiles(): UseBlobFilesResult {
    * Clear all files
    */
   const clearFiles = useCallback(() => {
+    lastAutoUploadSignatureRef.current = null;
     setFilesState([] as BlobFile[]);
   }, []);
 

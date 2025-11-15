@@ -133,7 +133,11 @@ export function AgentStartProvider({
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="system" storageKey="agentstart-theme">
-        <AgentStartProviderInner client={client} navigate={navigate} stores={stores}>
+        <AgentStartProviderInner
+          client={client}
+          navigate={navigate}
+          stores={stores}
+        >
           {children}
         </AgentStartProviderInner>
       </ThemeProvider>
