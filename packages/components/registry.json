@@ -4,26 +4,6 @@
   "homepage": "https://agentstart.ai",
   "items": [
     {
-      "name": "provider",
-      "type": "registry:component",
-      "title": "AgentStart Provider",
-      "description": "React context provider for sharing the AgentStart client instance across components. Eliminates prop drilling and provides hooks for accessing the client.",
-      "files": [
-        {
-          "path": "src/registry/agentstart/provider.tsx",
-          "type": "registry:component",
-          "target": "components/agent/provider.tsx"
-        }
-      ],
-      "dependencies": [
-        "@orpc/tanstack-query",
-        "@tanstack/react-query",
-        "agentstart",
-        "react"
-      ],
-      "registryDependencies": ["@coss/tooltip"]
-    },
-    {
       "name": "sidebar",
       "type": "registry:component",
       "title": "AgentStart Sidebar",
@@ -69,19 +49,20 @@
         "@coss/scroll-area",
         "sidebar",
         "@coss/tooltip",
-        "@coss/provider"
+        "@coss/provider",
+        "theme-switch"
       ]
     },
     {
-      "name": "conversation",
+      "name": "header",
       "type": "registry:component",
-      "title": "AgentStart Conversation",
-      "description": "Render thread messages with auto-scroll and tool-aware formatting. Loads thread transcripts with TanStack Query and displays AI responses and tool interactions.",
+      "title": "AgentStart Header",
+      "description": "Thread header component that fetches thread metadata via oRPC and TanStack Query with rename/delete actions and timestamp display.",
       "files": [
         {
-          "path": "src/registry/agentstart/conversation.tsx",
+          "path": "src/registry/agentstart/header.tsx",
           "type": "registry:component",
-          "target": "components/agent/conversation.tsx"
+          "target": "components/agent/header.tsx"
         }
       ],
       "dependencies": [
@@ -91,13 +72,53 @@
         "react"
       ],
       "registryDependencies": [
+        "@coss/button",
+        "@coss/menu",
+        "@coss/skeleton",
+        "@coss/tooltip",
+        "relative-time"
+      ]
+    },
+    {
+      "name": "conversation",
+      "type": "registry:component",
+      "title": "AgentStart Conversation",
+      "description": "Render thread messages with auto-scroll, welcome state, and tool-aware formatting. Loads thread transcripts with TanStack Query and displays AI responses and tool interactions.",
+      "files": [
+        {
+          "path": "src/registry/agentstart/conversation/index.tsx",
+          "type": "registry:component",
+          "target": "components/agent/conversation/index.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/conversation/conversation-message.tsx",
+          "type": "registry:component",
+          "target": "components/agent/conversation/conversation-message.tsx"
+        }
+      ],
+      "dependencies": [
+        "@base-ui-components/react",
+        "@phosphor-icons/react",
+        "@tanstack/react-query",
+        "agentstart",
+        "ai",
+        "react",
+        "use-stick-to-bottom"
+      ],
+      "registryDependencies": [
         "spinner",
         "@coss/button",
         "@coss/empty",
+        "@coss/avatar",
         "@coss/provider",
+        "message",
+        "response",
+        "sources",
+        "message-part-view",
         "shimmer",
         "suggested-prompts",
-        "message-part-view"
+        "welcome-message",
+        "relative-time"
       ]
     },
     {
@@ -117,10 +138,19 @@
         "@tanstack/react-query",
         "agentstart",
         "ai",
-        "react",
-        "motion"
+        "nanoid",
+        "react"
       ],
-      "registryDependencies": ["spinner", "@coss/provider"]
+      "registryDependencies": [
+        "@coss/button",
+        "@coss/menu",
+        "@coss/preview-card",
+        "@coss/textarea",
+        "spinner",
+        "context",
+        "model-selector",
+        "queue"
+      ]
     },
     {
       "name": "suggested-prompts",
@@ -140,13 +170,38 @@
         "motion",
         "react"
       ],
-      "registryDependencies": ["@coss/button"]
+      "registryDependencies": ["@coss/button", "spinner"]
+    },
+    {
+      "name": "welcome-message",
+      "type": "registry:component",
+      "title": "AgentStart Welcome Message",
+      "description": "Display welcome description and initial suggestions for new conversations with send-on-click behavior.",
+      "files": [
+        {
+          "path": "src/registry/agentstart/welcome-message.tsx",
+          "type": "registry:component",
+          "target": "components/agent/welcome-message.tsx"
+        }
+      ],
+      "dependencies": [
+        "@phosphor-icons/react",
+        "@tanstack/react-query",
+        "agentstart",
+        "motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "@coss/button",
+        "spinner",
+        "conversation"
+      ]
     },
     {
       "name": "code-block",
       "type": "registry:component",
       "title": "AgentStart Code Block",
-      "description": "Render syntax-highlighted code snippets with line numbers and copy functionality using Shiki for dual-theme highlighting.",
+      "description": "Syntax highlighted code blocks rendered with Shiki and optional copy-to-clipboard controls.",
       "files": [
         {
           "path": "src/registry/agentstart/code-block.tsx",
@@ -154,8 +209,16 @@
           "target": "components/agent/code-block.tsx"
         }
       ],
-      "dependencies": ["@phosphor-icons/react", "react", "shiki"],
-      "registryDependencies": ["@coss/button"]
+      "dependencies": [
+        "@phosphor-icons/react",
+        "@shikijs/transformers",
+        "shiki",
+        "react"
+      ],
+      "registryDependencies": [
+        "@coss/button",
+        "@coss/scroll-area"
+      ]
     },
     {
       "name": "shimmer",
@@ -171,6 +234,73 @@
       ],
       "dependencies": ["motion", "react"],
       "registryDependencies": []
+    },
+    {
+      "name": "relative-time",
+      "type": "registry:component",
+      "title": "AgentStart Relative Time",
+      "description": "Human-readable relative timestamps with tooltip showing UTC/local details and auto-updates.",
+      "files": [
+        {
+          "path": "src/registry/agentstart/relative-time.tsx",
+          "type": "registry:component",
+          "target": "components/agent/relative-time.tsx"
+        }
+      ],
+      "dependencies": ["date-fns", "react"],
+      "registryDependencies": ["@coss/badge", "@coss/tooltip"]
+    },
+    {
+      "name": "message",
+      "type": "registry:component",
+      "title": "AgentStart Message",
+      "description": "Conversation message shells providing styled wrappers for user and assistant messages in transcripts. Includes variant-aware message body styling and avatar helpers.",
+      "files": [
+        {
+          "path": "src/registry/agentstart/message.tsx",
+          "type": "registry:component",
+          "target": "components/agent/message.tsx"
+        }
+      ],
+      "dependencies": [
+        "ai",
+        "class-variance-authority",
+        "react"
+      ],
+      "registryDependencies": ["@coss/avatar"]
+    },
+    {
+      "name": "response",
+      "type": "registry:component",
+      "title": "AgentStart Response",
+      "description": "Markdown response renderer that renders assistant text parts using Streamdown with stable memoization. Applies consistent typography to markdown streams.",
+      "files": [
+        {
+          "path": "src/registry/agentstart/response.tsx",
+          "type": "registry:component",
+          "target": "components/agent/response.tsx"
+        }
+      ],
+      "dependencies": ["react", "streamdown"],
+      "registryDependencies": ["code-block"]
+    },
+    {
+      "name": "sources",
+      "type": "registry:component",
+      "title": "AgentStart Sources",
+      "description": "Source citation accordion that displays expandable citation lists for assistant responses. Features collapsible list of used sources with default trigger and link styling.",
+      "files": [
+        {
+          "path": "src/registry/agentstart/sources.tsx",
+          "type": "registry:component",
+          "target": "components/agent/sources.tsx"
+        }
+      ],
+      "dependencies": [
+        "@phosphor-icons/react",
+        "react"
+      ],
+      "registryDependencies": ["@coss/collapsible"]
     },
     {
       "name": "context",
@@ -192,21 +322,6 @@
       ]
     },
     {
-      "name": "message",
-      "type": "registry:component",
-      "title": "AgentStart Message",
-      "description": "Conversation message shells providing styled wrappers for user and assistant messages in transcripts. Includes variant-aware message body styling and avatar helpers.",
-      "files": [
-        {
-          "path": "src/registry/agentstart/message.tsx",
-          "type": "registry:component",
-          "target": "components/agent/message.tsx"
-        }
-      ],
-      "dependencies": ["ai", "class-variance-authority", "react"],
-      "registryDependencies": ["@coss/avatar"]
-    },
-    {
       "name": "queue",
       "type": "registry:component",
       "title": "AgentStart Queue",
@@ -226,49 +341,38 @@
       ]
     },
     {
+      "name": "steps",
+      "type": "registry:component",
+      "title": "AgentStart Steps",
+      "description": "Collapsible steps layout with optional loading/error indicators, scrollable content, and timeline bar styling.",
+      "files": [
+        {
+          "path": "src/registry/agentstart/steps.tsx",
+          "type": "registry:component",
+          "target": "components/agent/steps.tsx"
+        }
+      ],
+      "dependencies": ["@phosphor-icons/react", "react"],
+      "registryDependencies": [
+        "@coss/collapsible",
+        "@coss/scroll-area",
+        "spinner"
+      ]
+    },
+    {
       "name": "reasoning",
       "type": "registry:component",
       "title": "AgentStart Reasoning",
       "description": "Reasoning disclosure widget that shows expandable reasoning traces with streaming-aware behavior. Auto-opens while streaming and auto-closes after completion.",
       "files": [
         {
-          "path": "src/registry/agentstart/reasoning.tsx",
+          "path": "src/registry/agentstart/tools/reasoning.tsx",
           "type": "registry:component",
-          "target": "components/agent/reasoning.tsx"
+          "target": "components/agent/tools/reasoning.tsx"
         }
       ],
       "dependencies": ["@phosphor-icons/react", "react"],
-      "registryDependencies": ["@coss/collapsible", "response", "shimmer"]
-    },
-    {
-      "name": "response",
-      "type": "registry:component",
-      "title": "AgentStart Response",
-      "description": "Markdown response renderer that renders assistant text parts using Streamdown with stable memoization. Applies consistent typography to markdown streams.",
-      "files": [
-        {
-          "path": "src/registry/agentstart/response.tsx",
-          "type": "registry:component",
-          "target": "components/agent/response.tsx"
-        }
-      ],
-      "dependencies": ["react", "streamdown"],
-      "registryDependencies": []
-    },
-    {
-      "name": "sources",
-      "type": "registry:component",
-      "title": "AgentStart Sources",
-      "description": "Source citation accordion that displays expandable citation lists for assistant responses. Features collapsible list of used sources with default trigger and link styling.",
-      "files": [
-        {
-          "path": "src/registry/agentstart/sources.tsx",
-          "type": "registry:component",
-          "target": "components/agent/sources.tsx"
-        }
-      ],
-      "dependencies": ["@phosphor-icons/react", "react"],
-      "registryDependencies": ["@coss/collapsible"]
+      "registryDependencies": ["steps", "shimmer", "response"]
     },
     {
       "name": "message-part-view",
@@ -312,11 +416,6 @@
           "target": "components/agent/tools/todo.tsx"
         },
         {
-          "path": "src/registry/agentstart/tools/tool.tsx",
-          "type": "registry:component",
-          "target": "components/agent/tools/tool.tsx"
-        },
-        {
           "path": "src/registry/agentstart/tools/edit.tsx",
           "type": "registry:component",
           "target": "components/agent/tools/edit.tsx"
@@ -328,12 +427,18 @@
         }
       ],
       "dependencies": [
+        "@agentstart/utils",
         "@phosphor-icons/react",
         "agentstart",
+        "ai",
         "react",
         "react-fast-compare"
       ],
-      "registryDependencies": []
+      "registryDependencies": [
+        "@coss/tooltip",
+        "reasoning",
+        "response"
+      ]
     },
     {
       "name": "theme-switch",
@@ -347,7 +452,11 @@
           "target": "components/agent/theme-switch.tsx"
         }
       ],
-      "dependencies": ["@phosphor-icons/react", "agentstart", "react"],
+      "dependencies": [
+        "@phosphor-icons/react",
+        "agentstart",
+        "react"
+      ],
       "registryDependencies": ["@coss/button", "@coss/tabs"]
     },
     {
@@ -362,8 +471,45 @@
           "target": "components/agent/model-selector.tsx"
         }
       ],
-      "dependencies": ["react"],
-      "registryDependencies": ["@coss/command", "@coss/dialog"]
+      "dependencies": [
+        "@phosphor-icons/react",
+        "agentstart",
+        "react"
+      ],
+      "registryDependencies": [
+        "@coss/button",
+        "@coss/command",
+        "@coss/dialog"
+      ]
+    },
+    {
+      "name": "file-explorer",
+      "type": "registry:component",
+      "title": "AgentStart File Explorer",
+      "description": "File explorer tree with search, filtering, and smooth expand/collapse animations backed by TanStack Query.",
+      "files": [
+        {
+          "path": "src/registry/agentstart/file-explorer.tsx",
+          "type": "registry:component",
+          "target": "components/agent/file-explorer.tsx"
+        }
+      ],
+      "dependencies": [
+        "@base-ui-components/react",
+        "@phosphor-icons/react",
+        "@tanstack/react-query",
+        "agentstart",
+        "motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "@coss/badge",
+        "@coss/button",
+        "@coss/empty",
+        "@coss/input-group",
+        "@coss/scroll-area",
+        "@coss/skeleton"
+      ]
     }
   ]
 }

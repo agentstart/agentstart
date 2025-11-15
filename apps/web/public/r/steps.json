@@ -1,0 +1,24 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "steps",
+  "type": "registry:component",
+  "title": "AgentStart Steps",
+  "description": "Collapsible steps layout with optional loading/error indicators, scrollable content, and timeline bar styling.",
+  "dependencies": [
+    "@phosphor-icons/react",
+    "react"
+  ],
+  "registryDependencies": [
+    "@coss/collapsible",
+    "@coss/scroll-area",
+    "spinner"
+  ],
+  "files": [
+    {
+      "path": "src/registry/agentstart/steps.tsx",
+      "content": "\"use client\";\n\nimport { CaretRightIcon, WarningCircleIcon } from \"@phosphor-icons/react\";\nimport {\n  Collapsible,\n  CollapsibleContent,\n  CollapsibleTrigger,\n} from \"@/components/ui/collapsible\";\nimport { ScrollArea } from \"@/components/ui/scroll-area\";\nimport { Spinner } from \"@/components/ui/spinner\";\nimport { cn } from \"@/lib/utils\";\n\nexport type StepsItemProps = React.ComponentProps<\"div\">;\n\nexport const StepsItem = ({\n  children,\n  className,\n  ...props\n}: StepsItemProps) => (\n  <div className={cn(\"text-muted-foreground text-sm\", className)} {...props}>\n    {children}\n  </div>\n);\n\nexport type StepsTriggerProps = React.ComponentProps<\n  typeof CollapsibleTrigger\n> & {\n  leftIcon?: React.ReactNode;\n  swapIconOnHover?: boolean;\n  loading?: boolean;\n  error?: boolean;\n};\n\nexport const StepsTrigger = ({\n  children,\n  className,\n  leftIcon,\n  swapIconOnHover = true,\n  loading = false,\n  error = false,\n  ...props\n}: StepsTriggerProps) => {\n  const iconNode = loading ? (\n    <Spinner className=\"size-4 text-muted-foreground\" />\n  ) : error ? (\n    <WarningCircleIcon weight=\"duotone\" className=\"size-4 text-red-600\" />\n  ) : (\n    leftIcon\n  );\n  const shouldSwapIconOnHover = swapIconOnHover && !loading && !error;\n\n  return (\n    <CollapsibleTrigger\n      className={cn(\n        \"group/steps-trigger flex w-full cursor-pointer items-center justify-start gap-1 text-muted-foreground text-sm transition-colors hover:text-foreground\",\n        className,\n      )}\n      aria-busy={loading || undefined}\n      {...props}\n    >\n      <div className=\"flex w-full items-center gap-2\">\n        {iconNode ? (\n          <span className=\"relative inline-flex size-4 items-center justify-center\">\n            <span\n              className={cn(\n                \"transition-opacity\",\n                shouldSwapIconOnHover && \"group-hover/steps-trigger:opacity-0\",\n              )}\n            >\n              {iconNode}\n            </span>\n            {shouldSwapIconOnHover && (\n              <CaretRightIcon className=\"absolute size-4 opacity-0 transition-all group-hover/steps-trigger:opacity-100 group-data-panel-open/steps-trigger:rotate-90\" />\n            )}\n          </span>\n        ) : null}\n        {children}\n      </div>\n      {!iconNode &&\n        (loading ? (\n          <Spinner className=\"size-4 text-muted-foreground\" />\n        ) : (\n          <CaretRightIcon className=\"size-4 transition-transform group-data-panel-open/steps-trigger:rotate-90\" />\n        ))}\n    </CollapsibleTrigger>\n  );\n};\n\nexport type StepsContentProps = React.ComponentProps<\n  typeof CollapsibleContent\n> & {\n  bar?: React.ReactNode;\n};\n\nexport const StepsContent = ({\n  children,\n  className,\n  bar,\n  ...props\n}: StepsContentProps) => {\n  return (\n    <CollapsibleContent\n      className={cn(\n        \"overflow-hidden text-popover-foreground data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down\",\n        className,\n      )}\n      {...props}\n    >\n      <ScrollArea className=\"mt-3 grid max-h-96 min-w-0 max-w-full grid-cols-[min-content_minmax(0,1fr)] items-start gap-x-3 overflow-y-auto\">\n        <div className=\"min-w-0 self-stretch\">{bar ?? <StepsBar />}</div>\n        <div className=\"min-w-0 space-y-2\">{children}</div>\n      </ScrollArea>\n    </CollapsibleContent>\n  );\n};\n\nexport type StepsBarProps = React.HTMLAttributes<HTMLDivElement>;\n\nexport const StepsBar = ({ className, ...props }: StepsBarProps) => (\n  <div\n    className={cn(\"mr-2 ml-1.5 h-full w-[2px] bg-muted\", className)}\n    aria-hidden\n    {...props}\n  />\n);\n\nexport type StepsProps = React.ComponentProps<typeof Collapsible>;\n\nexport function Steps({\n  defaultOpen = false,\n  className,\n  ...props\n}: StepsProps) {\n  return (\n    <Collapsible\n      className={cn(className)}\n      defaultOpen={defaultOpen}\n      {...props}\n    />\n  );\n}\n",
+      "type": "registry:component",
+      "target": "components/agent/steps.tsx"
+    }
+  ]
+}
