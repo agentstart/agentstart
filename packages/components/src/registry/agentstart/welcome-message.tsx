@@ -67,12 +67,8 @@ export function WelcomeMessage({ className }: WelcomeMessageProps) {
     status === "streaming" ||
     createThreadMutation?.isPending;
 
-  // Fetch application configuration
-  const { data: appConfig } = useQuery(
-    orpc.config.get.queryOptions({
-      enabled: messages.length === 0, // Only fetch when there are no messages
-    }),
-  );
+  // Use config from context (fetched once at provider level)
+  const { config: appConfig } = useAgentStartContext();
 
   const handleSuggestionClick = async (suggestion: string) => {
     setSendingSuggestion(suggestion);
@@ -215,9 +211,7 @@ export function WelcomeMessage({ className }: WelcomeMessageProps) {
                       onClick={() => handleSuggestionClick(suggestion)}
                       disabled={isLoading}
                     >
-                      {sendingSuggestion === suggestion && (
-                        <Spinner className="mr-2" />
-                      )}
+                      {sendingSuggestion === suggestion && <Spinner />}
                       {suggestion}
                       <ArrowUpRightIcon className="size-3" weight="bold" />
                     </Button>

@@ -93,7 +93,7 @@ export function SuggestedPrompts({ className, ...props }: SuggestionsProps) {
                 onClick={() => handlePromptClick(prompt)}
                 disabled={isLoading}
               >
-                {sendingPrompt === prompt && <Spinner className="mr-2" />}
+                {sendingPrompt === prompt && <Spinner />}
                 {prompt}
                 <ArrowUpRightIcon className="size-3" weight="bold" />
               </Button>

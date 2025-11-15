@@ -18,7 +18,11 @@ import {
   createTanstackQueryUtils,
   type RouterUtils,
 } from "@orpc/tanstack-query";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
 import {
   createContext,
   type ReactNode,
@@ -30,6 +34,7 @@ import {
 } from "react";
 import type { StoreApi, UseBoundStore } from "zustand";
 import type { AgentStartAPI } from "../api";
+import type { AppConfig } from "../api/routers/config";
 import type { AgentStoreWithSync } from "./store/agent";
 import { ThemeProvider } from "./theme-provider";
 
@@ -49,6 +54,7 @@ interface AgentStartClientContextState {
   navigate: (path: string) => void;
   threadId: string | undefined;
   setThreadId: (threadId: string | undefined) => void;
+  config: AppConfig | undefined;
 }
 
 const AgentStartClientContext =
@@ -63,19 +69,27 @@ export interface AgentStartProviderProps {
 
 const queryClient = new QueryClient();
 
-export function AgentStartProvider({
+// Inner component that fetches config and provides context to children
+function AgentStartProviderInner({
   client,
   navigate,
   stores,
   children,
 }: AgentStartProviderProps) {
-  // Store registry for managing Zustand store instances
+  const [threadId, setThreadId] = useState<string | undefined>();
+
+  // Fetch app configuration once at the provider level with 30 min cache
+  const orpcUtils = useMemo(() => createTanstackQueryUtils(client), [client]);
+  const configQuery = useQuery(
+    orpcUtils.config.get.queryOptions({
+      staleTime: 30 * 60 * 1000, // 30 minutes
+      gcTime: 30 * 60 * 1000, // 30 minutes
+    }),
+  );
+
   const storeInstancesRef = useRef<
     Map<string, UseBoundStore<StoreApi<AgentStoreWithSync<any>>>>
   >(stores ?? new Map());
-
-  // Current thread ID state (single source of truth)
-  const [threadId, setThreadId] = useState<string | undefined>();
 
   const storeRegistryState = useMemo(
     () => ({
@@ -85,18 +99,16 @@ export function AgentStartProvider({
   );
 
   const clientState = useMemo(() => {
-    const orpc = createTanstackQueryUtils(client);
-
     return {
       client,
-      orpc,
+      orpc: orpcUtils,
       navigate,
       threadId,
       setThreadId,
+      config: configQuery.data,
     };
-  }, [client, navigate, threadId]);
+  }, [client, orpcUtils, navigate, threadId, configQuery.data]);
 
-  // Cleanup all store instances on unmount
   useEffect(() => {
     return () => {
       storeInstancesRef.current.clear();
@@ -104,15 +116,28 @@ export function AgentStartProvider({
   }, []);
 
   return (
-    <ThemeProvider defaultTheme="system" storageKey="agentstart-theme">
-      <StoreRegistryContext.Provider value={storeRegistryState}>
-        <AgentStartClientContext.Provider value={clientState}>
-          <QueryClientProvider client={queryClient}>
-            {children}
-          </QueryClientProvider>
-        </AgentStartClientContext.Provider>
-      </StoreRegistryContext.Provider>
-    </ThemeProvider>
+    <StoreRegistryContext.Provider value={storeRegistryState}>
+      <AgentStartClientContext.Provider value={clientState}>
+        {children}
+      </AgentStartClientContext.Provider>
+    </StoreRegistryContext.Provider>
+  );
+}
+
+export function AgentStartProvider({
+  client,
+  navigate,
+  stores,
+  children,
+}: AgentStartProviderProps) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="system" storageKey="agentstart-theme">
+        <AgentStartProviderInner client={client} navigate={navigate} stores={stores}>
+          {children}
+        </AgentStartProviderInner>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 

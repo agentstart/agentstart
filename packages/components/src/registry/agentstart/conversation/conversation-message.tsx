@@ -18,7 +18,6 @@ import {
   CheckIcon,
   CopyIcon,
 } from "@phosphor-icons/react";
-import { useQuery } from "@tanstack/react-query";
 import type { AgentStartUIMessage } from "agentstart/agent";
 import { type AgentStore, useAgentStartContext } from "agentstart/client";
 import { isToolUIPart } from "ai";
@@ -230,16 +229,9 @@ export function ConversationMessage({
   status,
   regenerate,
 }: ConversationMessageProps) {
-  const { orpc, threadId } = useAgentStartContext();
+  const { threadId, config } = useAgentStartContext();
 
-  // Fetch logo configuration if needed
-  const { data: appConfig } = useQuery(
-    orpc.config.get.queryOptions({
-      enabled: message.role === "assistant",
-    }),
-  );
-
-  const logo = appConfig?.logo;
+  const logo = config?.logo;
   const logoSrc = typeof logo === "string" ? logo : logo?.src;
   const logoAlt = typeof logo === "string" ? "Logo" : logo?.alt || "Logo";
   const logoWidth = typeof logo === "string" ? undefined : logo?.width;

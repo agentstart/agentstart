@@ -150,7 +150,7 @@ import { client } from "@/lib/agent-client";
 
 export function AttachmentInput() {
   const { files, setFiles, processFiles, clearFiles, isUploading, uploadTiming } =
-    useBlobFiles(client);
+    useBlobFiles();
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files) return;

@@ -79,7 +79,7 @@ import { Spinner } from "@/components/ui/spinner";
 
 export function FileUpload({ threadId }: { threadId?: string }) {
   const { files, setFiles, processFiles, clearFiles, isUploading, uploadTiming } =
-    useBlobFiles(client);
+    useBlobFiles();
   const sendMessage = useAgentStore((state) => state.sendMessage, threadId ?? "default");
 
   const handleFileSelect = (event: ChangeEvent<HTMLInputElement>) => {

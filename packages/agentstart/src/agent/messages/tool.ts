@@ -232,7 +232,7 @@ export const toolInputSchema = z.object({
   }),
 });
 
-const baseToolOutputSchema = z.object({
+export const baseToolOutputSchema = z.object({
   status: z.enum(["pending", "done", "error"]),
   prompt: z.string().describe("A agent-readable summary of the tool action"),
   error: errorSchema
@@ -408,10 +408,8 @@ export type AgentStartToolOutput = z.infer<typeof toolOutputSchema>;
 export type AgentStartToolSet = InferUITools<Tools>;
 
 // Base generic type that users can extend in their codebase
-export type BaseMessagePart<ToolSet extends Record<string, any>> = UIMessagePart<
-  AgentStartDataPart,
-  ToolSet
->;
+export type BaseMessagePart<ToolSet extends Record<string, any>> =
+  UIMessagePart<AgentStartDataPart, ToolSet>;
 
 // Default AgentStartMessagePart (includes all built-in tools)
 export type AgentStartMessagePart = BaseMessagePart<AgentStartToolSet>;
@@ -438,7 +436,7 @@ export type AgentStartMessagePart = BaseMessagePart<AgentStartToolSet>;
  */
 export type ToolPart<
   ToolName extends string,
-  ToolSet extends Record<string, any>
+  ToolSet extends Record<string, any>,
 > = Extract<BaseMessagePart<ToolSet>, { type: `tool-${ToolName}` }>;
 
 /**

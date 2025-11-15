@@ -1,7 +1,7 @@
 /* agent-frontmatter:start
 AGENT: Model selector hook
 PURPOSE: Manage model selection state and fetch available models
-USAGE: const { models, selectedModel, setSelectedModel, isLoading } = useModelSelector(client)
+USAGE: const { models, selectedModel, setSelectedModel } = useModelSelector()
 EXPORTS: useModelSelector, UseModelSelectorResult, ModelInfo
 FEATURES:
   - Fetches available models from config.get API
@@ -13,10 +13,8 @@ agent-frontmatter:end */
 
 "use client";
 
-import { createTanstackQueryUtils } from "@orpc/tanstack-query";
-import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo } from "react";
-import type { AgentStartAPI } from "@/api";
+import { useAgentStartContext } from "./provider";
 import { useSettingStore } from "./store/setting";
 
 export interface ModelInfo {
@@ -42,14 +40,6 @@ export interface UseModelSelectorResult {
    * Get the full model info for the selected model
    */
   selectedModel: ModelInfo | null;
-  /**
-   * Whether models are currently being loaded
-   */
-  isLoading: boolean;
-  /**
-   * Error loading models
-   */
-  error: Error | null;
   /**
    * Whether model selection is enabled (true if models are configured)
    */
@@ -77,33 +67,20 @@ export interface UseModelSelectorResult {
  * );
  * ```
  */
-export function useModelSelector(
-  client: AgentStartAPI,
-): UseModelSelectorResult {
-  const orpc = createTanstackQueryUtils(client);
-
+export function useModelSelector(): UseModelSelectorResult {
   // Get selected model ID from global settings store
   const selectedModelId = useSettingStore((state) => state.selectedModelId);
   const setSelectedModelIdInStore = useSettingStore(
     (state) => state.setSelectedModelId,
   );
 
-  // Fetch application config which includes models
-  const {
-    data: configData,
-    isLoading,
-    error,
-  } = useQuery(
-    orpc.config.get.queryOptions({
-      input: {},
-    }),
-  );
+  const { config: appConfig } = useAgentStartContext();
 
   const models = useMemo(
-    () => configData?.models?.available ?? [],
-    [configData?.models?.available],
+    () => appConfig?.models?.available ?? [],
+    [appConfig?.models?.available],
   );
-  const defaultModelId = configData?.models?.default ?? null;
+  const defaultModelId = appConfig?.models?.default ?? null;
   const isEnabled = models.length > 0;
 
   // Set default model if no model is selected
@@ -133,18 +110,8 @@ export function useModelSelector(
       selectedModelId,
       setSelectedModelId,
       selectedModel,
-      isLoading,
-      error: error as Error | null,
       isEnabled,
     }),
-    [
-      models,
-      selectedModelId,
-      setSelectedModelId,
-      selectedModel,
-      isLoading,
-      error,
-      isEnabled,
-    ],
+    [models, selectedModelId, setSelectedModelId, selectedModel, isEnabled],
   );
 }

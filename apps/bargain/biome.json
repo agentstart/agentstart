@@ -1,3 +1,0 @@
-{
-  "extends": ["@agentstart/biome-config/biome"]
-}

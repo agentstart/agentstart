@@ -1,7 +1,7 @@
 /* agent-frontmatter:start
 AGENT: Blob files hook
 PURPOSE: Handle file validation and upload for blob storage
-USAGE: const { files, setFiles, processFiles, clearFiles, isUploading, uploadTiming } = useBlobFiles(client)
+USAGE: const { files, setFiles, processFiles, clearFiles, isUploading, uploadTiming } = useBlobFiles()
 EXPORTS: useBlobFiles, UseBlobFilesResult
 FEATURES:
   - Automatic file processing: upload to blob if enabled, return FileList if disabled
@@ -16,12 +16,11 @@ agent-frontmatter:end */
 
 "use client";
 
-import { createTanstackQueryUtils } from "@orpc/tanstack-query";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import type { FileUIPart } from "ai";
 import { isFileUIPart } from "ai";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { AgentStartAPI } from "@/api";
+import { useAgentStartContext } from "./provider";
 
 /**
  * Validation error for file constraints
@@ -81,7 +80,7 @@ export interface UseBlobFilesResult {
  *
  * @example
  * ```tsx
- * const { files, setFiles, processFiles, clearFiles, isUploading } = useBlobFiles(client);
+ * const { files, setFiles, processFiles, clearFiles, isUploading } = useBlobFiles();
  *
  * // File selection (automatic upload in immediate mode)
  * const handleFileSelect = (selectedFiles: FileList) => {
@@ -96,15 +95,8 @@ export interface UseBlobFilesResult {
  * };
  * ```
  */
-export function useBlobFiles(client: AgentStartAPI): UseBlobFilesResult {
-  const orpc = createTanstackQueryUtils(client);
-
-  // Fetch app configuration (includes blob config)
-  const { data: config } = useQuery(
-    orpc.config.get.queryOptions({
-      input: {},
-    }),
-  );
+export function useBlobFiles(): UseBlobFilesResult {
+  const { client, config } = useAgentStartContext();
 
   const blobConfig = config?.blob;
   const isEnabled = Boolean(blobConfig?.enabled);

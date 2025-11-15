@@ -41,6 +41,10 @@ export function useDataStateMapper(client: AgentStartAPI, storeId: string) {
         queryClient.invalidateQueries(orpc.thread.list.queryOptions());
         break;
       }
+      case "data-agentstart-title_update_error":
+      case "data-agentstart-suggestions":
+      case "data-agentstart-suggestions_error":
+      case "data-agentstart-usage":
       default:
         break;
     }

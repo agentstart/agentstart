@@ -171,7 +171,7 @@ The `useBlobFiles` hook handles client-side validation and upload:
 import { useBlobFiles } from "agentstart/client";
 
 function MyComponent() {
-  const { uploadMutation, validateFiles, isEnabled } = useBlobFiles(client);
+  const { uploadMutation, validateFiles, isEnabled } = useBlobFiles();
 
   const handleFileSelect = async (files: File[]) => {
     const errors = validateFiles(files);

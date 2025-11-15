@@ -796,7 +796,7 @@ export function PromptInput({
     processFiles,
     clearFiles,
     isUploading,
-  } = useBlobFiles(client);
+  } = useBlobFiles();
 
   const createThreadMutation = useMutation(
     orpc.thread.create.mutationOptions(),

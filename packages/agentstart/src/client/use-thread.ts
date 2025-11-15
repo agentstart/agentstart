@@ -117,7 +117,7 @@ export function createUseThread(client: AgentStartAPI) {
               throw new Error("Reconnection not supported");
             },
           } satisfies ChatTransport<AgentStartUIMessage>,
-          onData: (data) => mapDataToStateRef.current(data),
+          onData: (data) => mapDataToStateRef.current(data as any),
           onFinish: ({ message, isAbort, isDisconnect, isError }) => {
             if (isAbort || isDisconnect || isError) {
               return;

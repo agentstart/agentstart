@@ -182,3 +182,6 @@ export function createConfigRouter(procedure = publicProcedure) {
       }),
   };
 }
+
+// Type exports for client-side usage
+export type AppConfig = z.infer<typeof appConfigSchema>;

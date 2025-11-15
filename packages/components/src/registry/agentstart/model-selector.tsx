@@ -15,7 +15,7 @@ agent-frontmatter:end */
 "use client";
 
 import { CaretDownIcon, CheckIcon } from "@phosphor-icons/react";
-import { useAgentStartContext, useModelSelector } from "agentstart/client";
+import { useModelSelector } from "agentstart/client";
 import type { ComponentProps, ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -108,15 +108,13 @@ export function ModelSelector({
   emptyText = "No models found.",
   groupByProvider = true,
 }: ModelSelectorProps) {
-  const { client } = useAgentStartContext();
   const {
     models,
     selectedModelId,
     setSelectedModelId,
     selectedModel,
-    isLoading,
     isEnabled,
-  } = useModelSelector(client);
+  } = useModelSelector();
 
   const [open, setOpen] = useState(false);
 
@@ -150,14 +148,10 @@ export function ModelSelector({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button type="button" variant="ghost" size="sm" disabled={isLoading}>
+          <Button type="button" variant="ghost" size="sm">
             {selectedModel && <ModelLogo provider={selectedModel.provider} />}
             <span className="truncate">
-              {isLoading
-                ? "Loading models..."
-                : selectedModel
-                  ? selectedModel.name
-                  : "Select model"}
+              {selectedModel ? selectedModel.name : "Select model"}
             </span>
             <CaretDownIcon className="ml-auto size-3.5 shrink-0 opacity-50" />
           </Button>
