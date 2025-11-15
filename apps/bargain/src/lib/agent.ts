@@ -141,8 +141,8 @@ const agent = new Agent({
   model: openrouter("google/gemini-2.0-flash-001"),
   instructions: instructions(
     process.env.NODE_ENV === "development"
-      ? "http://192.168.31.176:3000"
-      : "http://localhost:3000",
+      ? "http://localhost:3000"
+      : "https://guijia.store",
   ),
   tools: {
     generateVerificationCode,
