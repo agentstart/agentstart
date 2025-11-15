@@ -18,22 +18,25 @@ import type {
   BlobOptions,
   BlobProviderVercelBlob,
 } from "@agentstart/types";
-import {
-  type CompleteMultipartUploadCommandOptions,
-  type CopyCommandOptions,
-  completeMultipartUpload,
-  copy,
-  createMultipartUpload,
-  createMultipartUploader,
-  del,
-  head,
-  type ListCommandOptions,
-  list,
-  type PutCommandOptions,
-  put,
-  type UploadPartCommandOptions,
-  uploadPart,
+import type {
+  CompleteMultipartUploadCommandOptions,
+  CopyCommandOptions,
+  ListCommandOptions,
+  PutCommandOptions,
+  UploadPartCommandOptions,
 } from "@vercel/blob";
+
+type VercelBlobModule = typeof import("@vercel/blob");
+type PutBodyInput = Parameters<VercelBlobModule["put"]>[1];
+
+let vercelBlobModulePromise: Promise<VercelBlobModule> | undefined;
+
+async function loadVercelBlobModule(): Promise<VercelBlobModule> {
+  if (!vercelBlobModulePromise) {
+    vercelBlobModulePromise = import("@vercel/blob");
+  }
+  return vercelBlobModulePromise;
+}
 
 function resolveKey(key: string, prefix?: string) {
   if (!prefix) {
@@ -51,14 +54,14 @@ function applyPrefix(path: string, prefix?: string) {
   return resolveKey(path, prefix);
 }
 
-function normalizeBody(body: unknown): Parameters<typeof put>[1] {
+function normalizeBody(body: unknown): PutBodyInput {
   if (body instanceof ArrayBuffer) {
     return Buffer.from(body);
   }
   if (body instanceof Uint8Array) {
     return Buffer.from(body);
   }
-  return body as Parameters<typeof put>[1];
+  return body as PutBodyInput;
 }
 
 type AnyCommandOptions =
@@ -100,24 +103,37 @@ export function createVercelBlobAdapter(
   return {
     provider: provider.provider,
     getConstraints: () => constraints,
-    put: (pathname: string, body: unknown, options?: PutCommandOptions) =>
-      put(
+    put: async (
+      pathname: string,
+      body: unknown,
+      options?: PutCommandOptions,
+    ) => {
+      const { put } = await loadVercelBlobModule();
+      return put(
         resolveKey(pathname, provider.keyPrefix),
         normalizeBody(body),
         mergeCommandOptions(provider.token, providerPutDefaults, options),
-      ),
-    del: (urlOrPathname: string | string[], options?: BlobCommandOptions) => {
+      );
+    },
+    del: async (
+      urlOrPathname: string | string[],
+      options?: BlobCommandOptions,
+    ) => {
+      const { del } = await loadVercelBlobModule();
       const targets = Array.isArray(urlOrPathname)
         ? urlOrPathname.map((entry) => applyPrefix(entry, provider.keyPrefix))
         : applyPrefix(urlOrPathname, provider.keyPrefix);
       return del(targets, mergeCommandOptions(provider.token, {}, options));
     },
-    head: (urlOrPathname: string, options?: BlobCommandOptions) =>
-      head(
+    head: async (urlOrPathname: string, options?: BlobCommandOptions) => {
+      const { head } = await loadVercelBlobModule();
+      return head(
         applyPrefix(urlOrPathname, provider.keyPrefix),
         mergeCommandOptions(provider.token, {}, options),
-      ),
-    list: (options?: ListCommandOptions) => {
+      );
+    },
+    list: async (options?: ListCommandOptions) => {
+      const { list } = await loadVercelBlobModule();
       const merged = mergeCommandOptions(provider.token, {}, options);
       if (options?.prefix || provider.keyPrefix) {
         merged.prefix = options?.prefix
@@ -126,7 +142,8 @@ export function createVercelBlobAdapter(
       }
       return list(merged);
     },
-    copy: (options: CopyCommandOptions) => {
+    copy: async (options: CopyCommandOptions) => {
+      const { copy } = await loadVercelBlobModule();
       const { source, target, ...rest } = options as CopyCommandOptions & {
         source: string;
         target: string;
@@ -142,35 +159,49 @@ export function createVercelBlobAdapter(
         merged,
       );
     },
-    createMultipartUpload: (pathname: string, options?: PutCommandOptions) =>
-      createMultipartUpload(
+    createMultipartUpload: async (
+      pathname: string,
+      options?: PutCommandOptions,
+    ) => {
+      const { createMultipartUpload } = await loadVercelBlobModule();
+      return createMultipartUpload(
         resolveKey(pathname, provider.keyPrefix),
         mergeCommandOptions(provider.token, providerPutDefaults, options),
-      ),
-    createMultipartUploader: (pathname: string, options?: PutCommandOptions) =>
-      createMultipartUploader(
+      );
+    },
+    createMultipartUploader: async (
+      pathname: string,
+      options?: PutCommandOptions,
+    ) => {
+      const { createMultipartUploader } = await loadVercelBlobModule();
+      return createMultipartUploader(
         resolveKey(pathname, provider.keyPrefix),
         mergeCommandOptions(provider.token, providerPutDefaults, options),
-      ),
-    uploadPart: (
+      );
+    },
+    uploadPart: async (
       pathname: string,
       body: unknown,
       options: UploadPartCommandOptions,
-    ) =>
-      uploadPart(
+    ) => {
+      const { uploadPart } = await loadVercelBlobModule();
+      return uploadPart(
         resolveKey(pathname, provider.keyPrefix),
         normalizeBody(body),
         mergeCommandOptions(provider.token, {}, options),
-      ),
-    completeMultipartUpload: (
+      );
+    },
+    completeMultipartUpload: async (
       pathname: string,
       parts: { etag: string; partNumber: number }[],
       options: CompleteMultipartUploadCommandOptions,
-    ) =>
-      completeMultipartUpload(
+    ) => {
+      const { completeMultipartUpload } = await loadVercelBlobModule();
+      return completeMultipartUpload(
         resolveKey(pathname, provider.keyPrefix),
         parts,
         mergeCommandOptions(provider.token, providerPutDefaults, options),
-      ),
+      );
+    },
   };
 }

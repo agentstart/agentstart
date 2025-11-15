@@ -14,9 +14,9 @@ import { cloudflare } from "@cloudflare/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import { devtools } from "@tanstack/devtools-vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
-import viteReact from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import viteTsConfigPaths from "vite-tsconfig-paths";
+import viteReact from "@vitejs/plugin-react";
 
 const config = defineConfig(({ command }) => {
   const enableDevtools = command === "serve";
@@ -33,6 +33,13 @@ const config = defineConfig(({ command }) => {
     ],
     optimizeDeps: {
       include: ["agentstart"],
+    },
+    build: {
+      rollupOptions: {
+        // Mark Node.js built-ins as external to be excluded from bundle
+        // This prevents the "require is not defined" error in Workers
+        external: ["assert", "buffer", "stream", "util", "net", "tls", "http", "https"] as any,
+      },
     },
   };
 });
