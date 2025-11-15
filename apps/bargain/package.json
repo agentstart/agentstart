@@ -7,7 +7,7 @@
     "build": "vite build",
     "serve": "vite preview",
     "test": "vitest run",
-    "lint": "bunx biome check --write --unsafe ./src",
+    "lint": "biome check --write --unsafe ./src",
     "typecheck": "tsc --noEmit",
     "db:push": "drizzle-kit push",
     "deploy": "wrangler deploy"
@@ -53,7 +53,8 @@
     "tailwindcss": "catalog:",
     "tokenlens": "catalog:",
     "use-stick-to-bottom": "catalog:",
-    "vite-tsconfig-paths": "catalog:"
+    "vite-tsconfig-paths": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",

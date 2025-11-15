@@ -16,7 +16,7 @@ Before opening a pull request, skim a few key resources:
 Get your local workspace ready in a few steps:
 
 <Callout type="warn">
-  Make sure you have the latest [Node.js](https://nodejs.org/en/download) LTS and [Bun](https://bun.com) installed.
+  Make sure you have the latest [Node.js](https://nodejs.org/en/download) LTS and [pnpm](https://pnpm.io/installation) installed.
 </Callout>
 
 <Steps>
@@ -39,10 +39,10 @@ Get your local workspace ready in a few steps:
   <Step>
     ### 3. Install dependencies
 
-    AgentStart uses Bun workspaces. Install everything with:
+    AgentStart uses pnpm workspaces. Install everything with:
 
     ```bash
-    bun install
+    pnpm install
     ```
   </Step>
 </Steps>
@@ -69,10 +69,10 @@ Once you have an idea for a contribution, follow this workflow:
 
     ```bash
     # Start all packages in watch mode
-    bun run dev
+    pnpm run dev
 
     # or, start the docs site in isolation
-    bun run dev:web
+    pnpm run dev:web
     ```
 
     The documentation lives in `apps/web`; use the second command when iterating on docs-only contributions.
@@ -114,11 +114,11 @@ Contributions that add or expand framework adapters are welcome:
 
 ## Testing
 
-AgentStart uses Vitest and Bun-powered scripts. Place test files next to the code they cover and run the shared scripts before submitting changes.
+AgentStart uses Vitest and pnpm-powered scripts. Place test files next to the code they cover and run the shared scripts before submitting changes.
 
 ### Testing Best Practices
 
-- Run `bun run lint`, `bun run typecheck`, and `bun run test` before opening a PR
+- Run `pnpm run lint`, `pnpm run typecheck`, and `pnpm run test` before opening a PR
 - Add or update tests alongside feature or bug-fix work
 - Keep commits and pull requests focused
 - Update documentation to reflect behaviour changes

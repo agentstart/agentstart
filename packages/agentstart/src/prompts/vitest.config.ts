@@ -1,7 +1,7 @@
 /* agent-frontmatter:start
 AGENT: Vitest configuration for prompt tests
 PURPOSE: Configure test runner for prompt system unit tests
-USAGE: Run with: bun test
+USAGE: Run with: pnpm vitest
 FEATURES:
   - Configured for ES modules
   - Excludes node_modules

@@ -1,7 +1,7 @@
 /* agent-frontmatter:start
 AGENT: SDK docs generator prototype
 PURPOSE: Traverse oRPC router procedures and extract metadata for documentation
-USAGE: bun run ./scripts/generate-sdk-docs.ts
+USAGE: pnpm tsx ./scripts/generate-sdk-docs.ts
 EXPORTS:
   - default (script entry)
 FEATURES:
@@ -14,7 +14,7 @@ agent-frontmatter:end */
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { traverseContractProcedures } from "@orpc/server";
-import { ensureDir, writeFile } from "fs-extra";
+import fs from "fs-extra";
 import type { ZodType } from "zod";
 import * as z from "zod";
 import { createAppRouter } from "../src/api/router";
@@ -217,7 +217,7 @@ async function writeMdx(procedures: ProcedureDoc[]) {
     "../../../apps/web/content/docs/concepts",
   );
 
-  await ensureDir(docsDir);
+  await fs.ensureDir(docsDir);
 
   const mdxPath = resolve(docsDir, "sdk.mdx");
   const lines: string[] = [];
@@ -330,7 +330,7 @@ async function writeMdx(procedures: ProcedureDoc[]) {
     }
   }
 
-  await writeFile(mdxPath, `${lines.join("\n")}\n`, "utf8");
+  await fs.writeFile(mdxPath, `${lines.join("\n")}\n`, "utf8");
 }
 
 function schemaToTypeTable(

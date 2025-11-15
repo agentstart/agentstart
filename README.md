@@ -254,8 +254,8 @@ The `SEARCHABLE` field should contain comma-separated keywords that describe the
 2. Run `npx agentstart/cli generate` after schema changes to keep memory tables aligned.
 3. Use the template-specific dev server (`npm run dev:express`, `npm run dev:next`) to test interactions.
 4. Verify memory adapters with integration tests (see `/tooling/testing`).
-5. **Always run `bun run lint` and `bun run typecheck` after completing changes** to ensure code quality and type safety before committing.
-6. Default test command: use `bun run test` instead of invoking `bun test` directly, so workspace scripts stay consistent with CI.
+5. **Always run `pnpm run lint` and `pnpm run typecheck` after completing changes** to ensure code quality and type safety before committing.
+6. Default test command: use `pnpm run test` instead of invoking runner binaries directly, so workspace scripts stay consistent with CI.
 7. Unit tests are optional overall, but add or update them when you touch stability-critical paths (adapters, persistence flows, core runtime hooks) so regressions surface early.
 8. Reference packages managed by the root `catalog` with the plain `catalog:` alias; never install those dependencies with explicit versions (e.g. avoid `npm install react@...`) so updates stay centralized.
 9. Treat every `tsconfig.json` as locked configuration—do not modify these files during regular development.

@@ -15,7 +15,7 @@
     "start": "node ./dist/index.mjs",
     "test": "vitest",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "lint": "bunx biome check --write --unsafe ./src",
+    "lint": "biome check --write --unsafe ./src",
     "typecheck": "tsc --noEmit"
   },
   "publishConfig": {
@@ -34,8 +34,8 @@
   "bin": "./dist/index.mjs",
   "devDependencies": {
     "@agentstart/biome-config": "workspace:*",
-    "@agentstart/types": "workspace:*",
     "@agentstart/tsconfig": "workspace:*",
+    "@agentstart/types": "workspace:*",
     "@types/fs-extra": "catalog:",
     "@types/semver": "catalog:",
     "tsdown": "catalog:",

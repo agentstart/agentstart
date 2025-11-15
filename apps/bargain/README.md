@@ -26,13 +26,13 @@
 ### 环境要求
 
 - Node.js 18+
-- Bun 运行时
+- pnpm 9+（管理依赖）
 - PostgreSQL 数据库
 
 ### 安装依赖
 
 ```bash
-bun install
+pnpm install
 ```
 
 ### 环境变量配置
@@ -70,13 +70,13 @@ REDIS_URL=redis://localhost:6379
 
 ```bash
 # 推送数据库 schema
-bun run db:push
+pnpm run db:push
 ```
 
 ### 启动开发服务器
 
 ```bash
-bun run dev
+pnpm run dev
 ```
 
 应用将在 `http://localhost:3000` 启动。
@@ -86,19 +86,19 @@ bun run dev
 ### 本地构建
 
 ```bash
-bun run build
+pnpm run build
 ```
 
 ### 预览生产构建
 
 ```bash
-bun run serve
+pnpm run serve
 ```
 
 ### 部署到 Cloudflare Pages
 
 ```bash
-bun run deploy
+pnpm run deploy
 ```
 
 ## 技术栈
@@ -120,17 +120,17 @@ bun run deploy
 
 ```bash
 # 运行 linter 并自动修复问题
-bun run lint
+pnpm run lint
 
 # 类型检查
-bun run typecheck
+pnpm run typecheck
 ```
 
 ### 测试
 
 ```bash
 # 运行测试
-bun run test
+pnpm run test
 ```
 
 ## 项目结构

@@ -1,7 +1,7 @@
 /* agent-frontmatter:start
 AGENT: Template system unit tests
 PURPOSE: Test generateFromTemplate and BasePromptTemplate functionality
-USAGE: Run with vitest: bun test template.test.ts
+USAGE: Run with vitest: pnpm vitest template.test.ts
 FEATURES:
   - Tests 7-section structure enforcement
   - Validates XML formatting

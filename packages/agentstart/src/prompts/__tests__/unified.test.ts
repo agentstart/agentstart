@@ -1,7 +1,7 @@
 /* agent-frontmatter:start
 AGENT: Unified API unit tests
 PURPOSE: Test createAgentPrompt, detectScenario, and builder functionality
-USAGE: Run with vitest: bun test unified.test.ts
+USAGE: Run with vitest: pnpm vitest unified.test.ts
 FEATURES:
   - Tests zero config
   - Tests natural language detection

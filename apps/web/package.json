@@ -8,7 +8,7 @@
     "start": "next start",
     "postinstall": "fumadocs-mdx",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "lint": "bunx biome check --write --unsafe ./src",
+    "lint": "biome check --write --unsafe ./src",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

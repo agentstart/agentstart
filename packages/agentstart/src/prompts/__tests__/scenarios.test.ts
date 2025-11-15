@@ -1,7 +1,7 @@
 /* agent-frontmatter:start
 AGENT: Scenario prompts unit tests
 PURPOSE: Test all scenario-specific prompt factories (developer, research, analysis, etc.)
-USAGE: Run with vitest: bun test scenarios.test.ts
+USAGE: Run with vitest: pnpm vitest scenarios.test.ts
 FEATURES:
   - Tests all 7 scenarios
   - Validates scenario-specific parameters
