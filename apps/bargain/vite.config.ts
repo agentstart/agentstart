@@ -40,6 +40,8 @@ const config = defineConfig(({ command }) => {
         // This prevents the "require is not defined" error in Workers
         external: ["assert", "buffer", "stream", "util", "net", "tls", "http", "https"] as any,
       },
+      minify: "oxc",
+      cssMinify: "lightningcss",
     },
   };
 });
