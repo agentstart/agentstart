@@ -92,8 +92,8 @@ export function VerificationDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
+      <DialogContent className="overflow-hidden p-0 py-4">
+        <DialogHeader className="px-4">
           <DialogTitle>保存核销凭证</DialogTitle>
           <DialogDescription>
             含核销码与付款码，扫码支付时输入核销码并保存凭证以便线下核销
@@ -101,7 +101,7 @@ export function VerificationDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div ref={screenshotRef}>
+          <div className="px-4 pb-4" ref={screenshotRef}>
             <Fieldset className="max-w-full">
               <Field>
                 <FieldLabel>核销码</FieldLabel>
@@ -171,7 +171,7 @@ export function VerificationDialog({
             </Fieldset>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 px-4">
             <Button
               onClick={handleDownload}
               disabled={isGenerating}
