@@ -6,7 +6,6 @@ import { useEffect } from "react";
 import { Conversation } from "@/components/agent/conversation";
 import { PromptInput } from "@/components/agent/prompt-input";
 import { useThread } from "@/lib/agent-client";
-import { Header } from "./header";
 
 interface ThreadProps {
   threadId?: string;
@@ -33,8 +32,6 @@ export default function Thread({
 
   return (
     <div className="flex h-full flex-col">
-      <Header />
-
       <div className="flex flex-1 overflow-hidden">
         {/* Main Content */}
         <div className="mx-auto flex size-full max-w-full flex-1 flex-col">

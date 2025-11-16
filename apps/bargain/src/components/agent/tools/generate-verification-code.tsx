@@ -123,79 +123,6 @@ export function GenerateVerificationCode({
                   </span>
                 </Field>
 
-                {output.metadata.verificationCode && (
-                  <Field>
-                    <FieldLabel>核销码</FieldLabel>
-                    <InputGroup>
-                      <InputGroupInput
-                        ref={verificationCodeInputRef}
-                        type="text"
-                        readOnly
-                        value={output.metadata.verificationCode}
-                        aria-label="核销码"
-                      />
-                      <InputGroupAddon align="inline-end">
-                        <Tooltip>
-                          <TooltipTrigger
-                            render={
-                              <Button
-                                variant="ghost"
-                                size="xs"
-                                aria-label="复制核销码"
-                                onClick={handleCopyCode}
-                              >
-                                {copySuccess ? (
-                                  <CheckIcon weight="bold" className="size-4" />
-                                ) : (
-                                  <>
-                                    <CopyIcon
-                                      weight="bold"
-                                      className="size-4"
-                                    />
-                                    复制
-                                  </>
-                                )}
-                              </Button>
-                            }
-                          />
-                          <TooltipPopup>
-                            <p>{copySuccess ? "已复制" : "复制核销码"}</p>
-                          </TooltipPopup>
-                        </Tooltip>
-                      </InputGroupAddon>
-                    </InputGroup>
-                    <FieldDescription>
-                      扫描付款码时输入此核销码完成支付，请妥善保存
-                    </FieldDescription>
-                  </Field>
-                )}
-
-                {/* Payment QR Code Image */}
-                {output.metadata.paymentImageUrl && (
-                  <Field>
-                    <FieldLabel>付款二维码</FieldLabel>
-                    <img
-                      src={output.metadata.paymentImageUrl}
-                      alt="付款二维码"
-                      className="max-w-[120px]"
-                    />
-                    <FieldDescription>
-                      先扫码打开支付页，按提示输入上方核销码后完成付款
-                    </FieldDescription>
-                  </Field>
-                )}
-
-                {/* Instructions */}
-                <div className="rounded-lg bg-muted p-3 text-muted-foreground text-sm">
-                  <p className="mb-1 font-medium">使用说明:</p>
-                  <ul className="list-disc space-y-1 pl-5">
-                    <li>先使用付款二维码微信扫码进入支付页面</li>
-                    <li>按提示输入上方核销码后完成支付</li>
-                    <li>点击“保存核销凭证”按钮生成图片，线下核销时出示</li>
-                    <li>核销码与您的砍价记录绑定</li>
-                  </ul>
-                </div>
-
                 {/* Action Buttons */}
                 <div className="flex gap-2">
                   <Button
@@ -208,7 +135,7 @@ export function GenerateVerificationCode({
                     }
                   >
                     <ArchiveIcon weight="duotone" className="size-4" />
-                    保存核销凭证
+                    去付款
                   </Button>
 
                   <Button

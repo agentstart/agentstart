@@ -151,7 +151,7 @@ export function VerificationDialog({
                   <img
                     src={paymentImageUrl}
                     alt="付款二维码"
-                    className="max-w-[200px] object-contain"
+                    className="max-w-[120px] object-contain"
                   />
                 </div>
                 <FieldDescription>
