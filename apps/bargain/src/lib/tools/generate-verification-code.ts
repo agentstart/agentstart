@@ -13,12 +13,11 @@ SEARCHABLE: generate verification code, purchase, tool, bargain, redeem code
 agent-frontmatter:end */
 
 import { generateId } from "@agentstart/utils";
-import { neon } from "@neondatabase/serverless";
 import type { RuntimeContext } from "agentstart";
 import { baseToolOutputSchema } from "agentstart/agent";
 import { tool } from "ai";
-import { drizzle } from "drizzle-orm/neon-http";
 import { z } from "zod";
+import { db } from "@/db";
 import { verificationCode } from "@/db/schema/verification-code";
 
 // Input schema for generateVerificationCode tool
@@ -75,7 +74,10 @@ function selectPaymentImage(price: number): string {
     }
   }
 
-  return `/sk${closestPrice}.png`;
+  const host = process.env.NODE_ENV === "development"
+    ? "http://localhost:3000"
+    : "https://kan.guijia.store"
+  return `${host}/sk${closestPrice}.png`;
 }
 
 export const generateVerificationCode = tool({
@@ -103,10 +105,6 @@ export const generateVerificationCode = tool({
   outputSchema: generateVerificationCodeOutputSchema,
   async *execute({ price }, { experimental_context: context }) {
     const { threadId } = context as RuntimeContext;
-
-    // Initialize database connection
-    const sql = neon(process.env.DATABASE_URL!);
-    const db = drizzle({ client: sql });
 
     const normalizedPrice = Number(price.toFixed(2));
 
