@@ -145,11 +145,11 @@ export function VerificationDialog({
 
               <Field>
                 <FieldLabel>付款二维码</FieldLabel>
-                <div className="mb-4 max-h-72 w-full">
+                <div className="mb-4 w-full">
                   <img
                     src={paymentImageUrl}
                     alt="付款二维码"
-                    className="object-contain"
+                    className="max-w-[200px] object-contain"
                   />
                 </div>
                 <FieldDescription>

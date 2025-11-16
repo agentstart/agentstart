@@ -172,7 +172,7 @@ export function GenerateVerificationCode({
                     <img
                       src={output.metadata.paymentImageUrl}
                       alt="付款二维码"
-                      className="max-w-xs rounded-lg border"
+                      className="max-w-[120px]"
                     />
                     <FieldDescription>
                       先扫码打开支付页，按提示输入上方核销码后完成付款
