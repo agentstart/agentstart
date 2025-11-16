@@ -8,8 +8,6 @@ catalogs:
     "@ai-sdk/deepseek": beta
     "@ai-sdk/openai": beta
     "@ai-sdk/react": beta
-    "@aws-sdk/client-s3": ^3.932.0
-    "@aws-sdk/s3-request-presigner": ^3.932.0
     "@babel/preset-react": ^7.28.5
     "@babel/preset-typescript": ^7.28.5
     "@base-ui-components/react": ^1.0.0-beta.4
@@ -66,6 +64,7 @@ catalogs:
     "@vitejs/plugin-react": ^5.1.1
     "@vitest/ui": ^4.0.9
     ai: beta
+    aws4fetch: ^1.0.20
     babel-plugin-react-compiler: ^1.0.0
     better-auth: ^1.3.34
     better-sqlite3: ^12.4.1
@@ -86,6 +85,7 @@ catalogs:
     drizzle-zod: ^0.8.3
     embla-carousel-react: ^8.6.0
     fast-glob: ^3.3.3
+    fast-xml-parser: ^4.2.5
     figlet: ^1.9.4
     fs-extra: ^11.3.2
     fumadocs-core: ^16.0.11

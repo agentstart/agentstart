@@ -20,6 +20,7 @@ import { useMutation } from "@tanstack/react-query";
 import type { FileUIPart } from "ai";
 import { isFileUIPart } from "ai";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { arrayBufferToBase64 } from "./internal/base64";
 import { useAgentStartContext } from "./provider";
 
 /**
@@ -42,26 +43,6 @@ interface FileUploadData {
 
 export type BlobFile = File | FileUIPart;
 export type BlobFileList = FileList | BlobFile[];
-
-const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-  const chunkSize = 0x8000;
-
-  for (let i = 0; i < bytes.length; i += chunkSize) {
-    let chunk = "";
-    const end = Math.min(i + chunkSize, bytes.length);
-    for (let j = i; j < end; j += 1) {
-      const chatcode = bytes[j];
-      if (chatcode) {
-        chunk += String.fromCharCode(chatcode);
-      }
-    }
-    binary += chunk;
-  }
-
-  return btoa(binary);
-};
 
 export interface UseBlobFilesResult {
   /**

@@ -19,9 +19,9 @@
   },
   "dependencies": {
     "@agentstart/types": "workspace:*",
-    "@aws-sdk/client-s3": "catalog:",
-    "@aws-sdk/s3-request-presigner": "catalog:",
-    "@vercel/blob": "catalog:"
+    "@vercel/blob": "catalog:",
+    "aws4fetch": "catalog:",
+    "fast-xml-parser": "catalog:"
   },
   "devDependencies": {
     "@agentstart/biome-config": "workspace:*",
