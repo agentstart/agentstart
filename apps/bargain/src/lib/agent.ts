@@ -19,6 +19,7 @@ import { vercelBlobAdapter } from "agentstart/blob/vercel";
 import { drizzleMemoryAdapter } from "agentstart/memory/drizzle";
 import { redisSecondaryMemoryAdapter } from "agentstart/memory/redis";
 import { inMemorySecondaryMemoryAdapter } from "agentstart/memory/secondary-in-memory";
+import { hasToolCall, stepCountIs } from "ai";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 import instructions from "./instructions";
@@ -143,6 +144,7 @@ const agent = new Agent({
   tools: {
     generateVerificationCode,
   },
+  stopWhen: [stepCountIs(20), hasToolCall("generateVerificationCode")],
 });
 
 export const start = agentStart({
