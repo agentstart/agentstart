@@ -11,6 +11,7 @@ agent-frontmatter:end */
 
 import { createRouter } from "@tanstack/react-router";
 import { NotFound } from "@/components/not-found";
+import * as Sentry from "@sentry/tanstackstart-react";
 
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
@@ -23,6 +24,16 @@ export const getRouter = () => {
     defaultPreloadStaleTime: 0,
     defaultNotFoundComponent: NotFound,
   });
+
+  if (!router.isServer) {
+    Sentry.init({
+      dsn: import.meta.env.SENTRY_DSN,
+
+      // Adds request headers and IP for users, for more info visit:
+      // https://docs.sentry.io/platforms/javascript/guides/tanstackstart-react/configuration/options/#sendDefaultPii
+      sendDefaultPii: true,
+    });
+  }
 
   return router;
 };
