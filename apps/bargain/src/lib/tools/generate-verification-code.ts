@@ -74,10 +74,7 @@ function selectPaymentImage(price: number): string {
     }
   }
 
-  const host = process.env.NODE_ENV === "development"
-    ? "http://localhost:3000"
-    : "https://kan.guijia.store"
-  return `${host}/sk${closestPrice}.png`;
+  return `https://assets.guijia.store/sk${closestPrice}.png`;
 }
 
 export const generateVerificationCode = tool({

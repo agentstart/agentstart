@@ -139,11 +139,7 @@ const openrouter = createOpenRouter({
 
 const agent = new Agent({
   model: openrouter("google/gemini-2.0-flash-001"),
-  instructions: instructions(
-    process.env.NODE_ENV === "development"
-      ? "http://localhost:3000"
-      : "https://kan.guijia.store",
-  ),
+  instructions,
   tools: {
     generateVerificationCode,
   },
