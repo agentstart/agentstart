@@ -115,23 +115,25 @@ export function VerificationDialog({
                   />
                   <InputGroupAddon align="inline-end">
                     <Tooltip>
-                      <TooltipTrigger>
-                        <Button
-                          variant="ghost"
-                          size="xs"
-                          aria-label="复制核销码"
-                          onClick={handleCopyCode}
-                        >
-                          {copySuccess ? (
-                            <CheckIcon weight="bold" className="size-4" />
-                          ) : (
-                            <>
-                              <CopyIcon weight="bold" className="size-4" />
-                              复制
-                            </>
-                          )}
-                        </Button>
-                      </TooltipTrigger>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="xs"
+                            aria-label="复制核销码"
+                            onClick={handleCopyCode}
+                          >
+                            {copySuccess ? (
+                              <CheckIcon weight="bold" className="size-4" />
+                            ) : (
+                              <>
+                                <CopyIcon weight="bold" className="size-4" />
+                                复制
+                              </>
+                            )}
+                          </Button>
+                        }
+                      />
                       <TooltipPopup>
                         <p>{copySuccess ? "已复制" : "复制核销码"}</p>
                       </TooltipPopup>
