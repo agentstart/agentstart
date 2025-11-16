@@ -21,7 +21,7 @@ import {
   useState,
 } from "react";
 
-type Theme = "dark" | "light" | "system";
+export type Theme = "dark" | "light" | "system";
 
 interface ThemeProviderProps {
   children: ReactNode;

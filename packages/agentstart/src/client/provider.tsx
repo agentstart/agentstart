@@ -36,7 +36,7 @@ import type { StoreApi, UseBoundStore } from "zustand";
 import type { AgentStartAPI } from "../api";
 import type { AppConfig } from "../api/routers/config";
 import type { AgentStoreWithSync } from "./store/agent";
-import { ThemeProvider } from "./theme-provider";
+import { type Theme, ThemeProvider } from "./theme-provider";
 
 // Store registry context for managing Zustand store instances
 interface StoreRegistryContextState {
@@ -61,6 +61,7 @@ const AgentStartClientContext =
   createContext<AgentStartClientContextState | null>(null);
 
 export interface AgentStartProviderProps {
+  defaultTheme?: Theme;
   client: AgentStartAPI;
   navigate: (path: string) => void;
   stores?: Map<string, UseBoundStore<StoreApi<AgentStoreWithSync<any>>>>;
@@ -125,6 +126,7 @@ function AgentStartProviderInner({
 }
 
 export function AgentStartProvider({
+  defaultTheme = "system",
   client,
   navigate,
   stores,
@@ -132,7 +134,7 @@ export function AgentStartProvider({
 }: AgentStartProviderProps) {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="system" storageKey="agentstart-theme">
+      <ThemeProvider defaultTheme={defaultTheme} storageKey="agentstart-theme">
         <AgentStartProviderInner
           client={client}
           navigate={navigate}

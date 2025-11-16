@@ -26,7 +26,11 @@ export function Provider({ children }: ProviderProps) {
   };
 
   return (
-    <AgentStartProvider client={client} navigate={navigate}>
+    <AgentStartProvider
+      defaultTheme="light"
+      client={client}
+      navigate={navigate}
+    >
       {children}
     </AgentStartProvider>
   );
