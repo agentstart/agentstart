@@ -28,20 +28,7 @@ const config = defineConfig(({ command }) => {
       // this is the plugin that enables path aliases
       viteTsConfigPaths(),
       tailwindcss(),
-      tanstackStart({
-        spa: {
-          enabled: true
-        },
-        prerender: {
-          enabled: true,
-          autoStaticPathsDiscovery: true,
-          concurrency: 14,
-          crawlLinks: true,
-          onSuccess: ({ page }) => {
-            console.log(`Rendered ${page.path}!`)
-          },
-        }
-      }),
+      tanstackStart(),
       viteReact(),
     ],
     optimizeDeps: {
