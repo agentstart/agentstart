@@ -20,11 +20,11 @@ function App() {
     <div className="flex h-full flex-col">
       <div className="flex flex-1 overflow-hidden">
         {/* Main Content */}
-        <div className="mx-auto flex h-full w-full max-w-full flex-1 flex-col ">
-          <div className="relative overflow-y-auto mx-auto flex size-full w-full flex-col px-4 pb-48 sm:min-w-[390px] sm:max-w-3xl">
+        <div className="mx-auto flex h-full w-full max-w-full flex-1 flex-col">
+          <div className="relative mx-auto flex size-full w-full flex-col overflow-y-auto px-4 pb-48 sm:min-w-[390px] sm:max-w-3xl">
             <img
               className="my-8 block h-auto w-full"
-              src="/banner.png"
+              src="https://cdn.guijia.store/assets/banner.png"
               alt="banner"
             />
             <WelcomeMessage />
