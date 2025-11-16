@@ -74,7 +74,7 @@ function selectPaymentImage(price: number): string {
     }
   }
 
-  return `https://assets.guijia.store/sk${closestPrice}.png`;
+  return `https://cdn.guijia.store/assets/sk${closestPrice}.png`;
 }
 
 export const generateVerificationCode = tool({
