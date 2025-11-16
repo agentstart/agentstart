@@ -148,8 +148,9 @@ export const generateVerificationCode = tool({
         status: "done" as const,
         prompt: `核销码生成成功！
         
-💳 核销码：${code}
-💰 当前价格：¥${normalizedPrice}
+核销码：${code}
+当前价格：¥${normalizedPrice}
+付款码图片：${paymentImageUrl}
 
 使用流程：
 1. 在支付页面输入核销码完成付款
