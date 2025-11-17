@@ -152,9 +152,15 @@ export const start = agentStart({
 Create a client to interact with your agent:
 
 ```ts title="lib/agent-client.ts"
-import { createAgentClient } from "agentstart/client";
+import {
+  createAgentClient,
+  useAgentStore,
+  useThreadStore,
+} from "agentstart/client";
 
-export const { client, useThread, useAgentStore } = createAgentClient();
+export const { client, useThread } = createAgentClient();
+
+export { useAgentStore, useThreadStore };
 ```
 
 ### Accessing Thread State
@@ -209,12 +215,14 @@ export default function ThreadPage() {
 }
 ```
 
-### Agent Store API
+Need metadata like the current thread title? Use `useThreadStore((state) => state.getThread(threadId))` alongside `useThread` to stay in sync.
 
-The agent store provides access to conversation state:
+### Agent & Thread Stores
+
+The agent store provides conversation state helpers, and the thread store exposes the latest metadata for each thread:
 
 ```tsx
-import { useAgentStore } from "@/lib/agent-client";
+import { useAgentStore, useThreadStore } from "@/lib/agent-client";
 
 // Get messages
 const messages = useAgentStore((state) => state.messages, threadId);
@@ -226,7 +234,7 @@ const status = useAgentStore((state) => state.status, threadId);
 const sendMessage = useAgentStore((state) => state.sendMessage, threadId);
 
 // Get thread metadata
-const thread = useAgentStore((state) => state.thread, threadId);
+const thread = useThreadStore((state) => state.getThread(threadId));
 ```
 
 ## Adding Custom Tools

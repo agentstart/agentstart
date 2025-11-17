@@ -22,6 +22,7 @@ catalogs:
     "@icons-pack/react-simple-icons": ^13.8.0
     "@mrleebo/prisma-ast": ^0.13.1
     "@neondatabase/serverless": ^1.0.2
+    "@opennextjs/cloudflare": ^1.12.0
     "@openrouter/ai-sdk-provider": ^1.2.3
     "@orpc/client": ^1.11.2
     "@orpc/server": ^1.11.2

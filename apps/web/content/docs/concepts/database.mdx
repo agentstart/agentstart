@@ -49,16 +49,16 @@ Refer to the Migration section in `/docs/concepts/cli` for exact commands.
 
 ## Secondary Storage
 
-Some agent features rely on storage beyond the primary database:
+Some runtime features rely on storage beyond the primary database:
 
-- Blob storage: persist file uploads and multimodal attachments used by tools and messages. Providers supported: Vercel Blob, AWS S3, Cloudflare R2.
-- Vector storage: back the knowledge base with embeddings for retrieval‑augmented generation (often paired with SQL metadata in the primary DB).
+- **Blob storage** – persists file uploads and multimodal attachments used by tools and messages. Providers supported: Vercel Blob, AWS S3, Cloudflare R2.
+- **Secondary memory** – a key-value store (Redis, Upstash, Vercel KV, etc.) that tracks sandbox heartbeats and enables the E2B sandbox adapter to resume work across processes.
 
-Blob storage is optional and configured in your agent setup. See `/docs/concepts/blob-storage` for providers, constraints, and client utilities. Vector storage is configured via your chosen embedding + vector solution and linked to knowledge metadata in SQL.
+Blob storage is optional and configured in your agent setup. See `/docs/concepts/blob-storage` for providers, constraints, and client utilities. Secondary memory is configured through `agentStart({ secondaryMemory: ... })` and documented in `/docs/concepts/secondary-memory`; it is required when you opt into the E2B sandbox adapter.
 
 ## Core Schema
 
-AgentStart requires two main tables:
+AgentStart always needs thread and message tables. If you enable the built-in `agentTools` (the default quickstart configuration), add the todos table so task management persists.
 
 ### Threads Table
 
@@ -95,6 +95,22 @@ Recommended indexes for performance:
 CREATE INDEX idx_messages_thread_id ON messages(thread_id);
 CREATE INDEX idx_threads_user_id ON threads(user_id);
 ```
+
+### Todos Table
+
+Persists the task list used by the `todoRead` and `todoWrite` tools:
+
+```sql
+CREATE TABLE todos (
+  id TEXT PRIMARY KEY,
+  thread_id TEXT NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
+  todos JSONB NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+If you skip `agentTools`, you can omit this table.
 
 ## Connection Management
 
@@ -134,13 +150,14 @@ You can extend the schema with application‑specific tables or additional colum
 - Store structured payloads in `metadata` JSONB and index selected keys if needed.
 - Create domain tables (e.g., tasks, todos) that reference `threads(id)`.
 
-Example custom table:
+Example custom table for storing generated artifacts:
 
 ```sql
-CREATE TABLE todos (
+CREATE TABLE artifacts (
   id TEXT PRIMARY KEY,
   thread_id TEXT NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
-  todos JSONB NOT NULL,
+  type TEXT NOT NULL,
+  payload JSONB NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
