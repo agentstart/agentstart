@@ -159,6 +159,18 @@ export function VerificationDialog({
                 </FieldDescription>
               </Field>
 
+              <Field>
+                <FieldLabel>老板二维码</FieldLabel>
+                <div className="mb-4 w-full">
+                  <img
+                    src="https://cdn.guijia.store/assets/wechat_qrcode.jpg"
+                    alt="老板二维码"
+                    className="max-w-[120px] object-contain"
+                  />
+                </div>
+                <FieldDescription>有事请联系老板</FieldDescription>
+              </Field>
+
               <div className="rounded-lg bg-muted p-3 text-muted-foreground text-sm">
                 <p className="mb-1 font-medium">使用说明:</p>
                 <ul className="list-disc space-y-1 pl-5">
