@@ -534,7 +534,12 @@ function SidebarMenuButton({
       <TooltipTrigger
         render={button as React.ReactElement<Record<string, unknown>>}
       />
-      <TooltipContent hidden={state !== "collapsed" || isMobile} {...tooltip} />
+      <TooltipContent
+        hidden={state !== "collapsed" || isMobile}
+        side="right"
+        align="center"
+        {...tooltip}
+      />
     </Tooltip>
   );
 }

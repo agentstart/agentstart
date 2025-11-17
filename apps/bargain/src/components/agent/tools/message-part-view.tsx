@@ -1,3 +1,5 @@
+// agentstart-sync:ignore
+
 /* agent-frontmatter:start
 AGENT: Message part view orchestrator
 PURPOSE: Route different tool and content types to their specific UI components

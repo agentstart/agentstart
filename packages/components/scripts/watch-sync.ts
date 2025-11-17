@@ -10,7 +10,7 @@ FEATURES:
 SEARCHABLE: component sync, watch script, app mirroring
 agent-frontmatter:end */
 
-import { copyFile, mkdir, readdir, rm, stat } from "node:fs/promises";
+import { copyFile, mkdir, readdir, readFile, rm, stat } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import chokidar, { type FSWatcher } from "chokidar";
@@ -25,6 +25,7 @@ interface CategoryConfig {
 const componentsRoot = process.cwd();
 const workspaceRoot = path.resolve(componentsRoot, "..", "..");
 const appsRoot = path.join(workspaceRoot, "apps");
+const syncSkipMarker = "// agentstart-sync:ignore";
 
 const categories: Record<CategoryKey, CategoryConfig> = {
   ui: {
@@ -62,6 +63,17 @@ const ensureSourceDirectory = async (directory: string) => {
   if (stats === null || !stats.isDirectory()) {
     throw new Error(`Source directory is missing: ${directory}`);
   }
+};
+
+const shouldSkipTarget = async (targetPath: string) => {
+  const targetStat = await safeStat(targetPath);
+  if (!targetStat?.isFile()) {
+    return false;
+  }
+
+  const content = await readFile(targetPath, "utf8");
+  const header = content.slice(0, 1024);
+  return header.includes(syncSkipMarker);
 };
 
 const discoverAppPackages = async (): Promise<string[]> => {
@@ -119,6 +131,13 @@ const syncFileToApps = async ({
 
   for (const appRoot of appPackages) {
     const targetPath = path.join(appRoot, category.targetSubDir, relativePath);
+    if (await shouldSkipTarget(targetPath)) {
+      const logPath = path.relative(workspaceRoot, targetPath);
+      console.log(
+        `[sync:${categoryKey}] skipped ${logPath} (sync ignore marker found)`,
+      );
+      continue;
+    }
     await mkdir(path.dirname(targetPath), { recursive: true });
     await copyFile(sourcePath, targetPath);
 
@@ -141,6 +160,13 @@ const removeFromApps = async ({
 
   for (const appRoot of appPackages) {
     const targetPath = path.join(appRoot, category.targetSubDir, relativePath);
+    if (await shouldSkipTarget(targetPath)) {
+      const logPath = path.relative(workspaceRoot, targetPath);
+      console.log(
+        `[sync:${categoryKey}] preserved ${logPath} (sync ignore marker found)`,
+      );
+      continue;
+    }
     await rm(targetPath, { force: true });
 
     const logPath = path.relative(workspaceRoot, targetPath);

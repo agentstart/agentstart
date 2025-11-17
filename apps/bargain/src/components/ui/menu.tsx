@@ -1,5 +1,3 @@
-"use client";
-
 import { Menu as MenuPrimitive } from "@base-ui-components/react/menu";
 import { CheckIcon, ChevronRightIcon } from "lucide-react";
 import type * as React from "react";
@@ -34,15 +32,13 @@ function MenuPopup({
         align={align}
         alignOffset={alignOffset}
       >
-        <span
-          className={cn(
-            "relative flex origin-(--transform-origin) rounded-lg border bg-popover bg-clip-padding shadow-lg transition-[scale,opacity] before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-lg)-1px)] before:shadow-[0_1px_--theme(--color-black/4%)] has-data-starting-style:scale-98 has-data-starting-style:opacity-0 dark:bg-clip-border dark:before:shadow-[0_-1px_--theme(--color-white/8%)]",
-            className,
-          )}
-        >
+        <span className="relative flex origin-(--transform-origin) rounded-lg border bg-popover bg-clip-padding shadow-lg transition-[scale,opacity] before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-lg)-1px)] before:shadow-[0_1px_--theme(--color-black/4%)] has-data-starting-style:scale-98 has-data-starting-style:opacity-0 dark:bg-clip-border dark:before:shadow-[0_-1px_--theme(--color-white/8%)]">
           <MenuPrimitive.Popup
             data-slot="menu-popup"
-            className="max-h-(--available-height) not-[class*='w-']:min-w-32 overflow-y-auto p-1"
+            className={cn(
+              "max-h-(--available-height) min-w-32 overflow-y-auto p-1",
+              className,
+            )}
             {...props}
           />
         </span>

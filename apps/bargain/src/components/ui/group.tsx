@@ -1,42 +1,24 @@
 import { mergeProps } from "@base-ui-components/react/merge-props";
 import { useRender } from "@base-ui-components/react/use-render";
-import { cva, type VariantProps } from "class-variance-authority";
 import type * as React from "react";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
-const groupVariants = cva(
-  "flex w-fit *:focus-visible:z-10 has-[>[data-slot=group]]:gap-2 *:has-focus-visible:z-10",
-  {
-    variants: {
-      orientation: {
-        horizontal:
-          "*:not-first:before:-start-[0.5px] *:not-[&:nth-last-child(1_of_:not([aria-hidden],span[data-base-ui-inert]))]:before:-end-[0.5px] *:not-first:rounded-s-none *:not-[&:nth-last-child(1_of_:not([aria-hidden],span[data-base-ui-inert]))]:rounded-e-none *:not-first:border-s-0 *:not-[&:nth-last-child(1_of_:not([aria-hidden],span[data-base-ui-inert]))]:border-e-0 *:not-first:before:rounded-s-none *:not-[&:nth-last-child(1_of_:not([aria-hidden],span[data-base-ui-inert]))]:before:rounded-e-none *:pointer-coarse:after:min-w-auto",
-        vertical:
-          "*:not-first:before:-top-[0.5px] *:not-[&:nth-last-child(1_of_:not([aria-hidden],span[data-base-ui-inert]))]:before:-bottom-[0.5px] flex-col *:not-first:rounded-t-none *:not-[&:nth-last-child(1_of_:not([aria-hidden],span[data-base-ui-inert]))]:rounded-b-none *:not-first:border-t-0 *:not-[&:nth-last-child(1_of_:not([aria-hidden],span[data-base-ui-inert]))]:border-b-0 *:not-[&:nth-last-child(1_of_:not([aria-hidden],span[data-base-ui-inert]))]:before:hidden *:not-first:before:rounded-t-none *:not-[&:nth-last-child(1_of_:not([aria-hidden],span[data-base-ui-inert]))]:before:rounded-b-none *:pointer-coarse:after:min-h-auto dark:*:last:before:hidden dark:*:first:before:block",
-      },
-    },
-    defaultVariants: {
-      orientation: "horizontal",
-    },
-  },
-);
-
 function Group({
   className,
-  orientation,
   children,
   ...props
 }: {
   className?: string;
-  orientation?: VariantProps<typeof groupVariants>["orientation"];
   children: React.ReactNode;
-} & React.ComponentProps<"div">) {
+}) {
   return (
     <div
       data-slot="group"
-      data-orientation={orientation}
-      className={cn(groupVariants({ orientation }), className)}
+      className={cn(
+        "flex w-fit [--clip-end:-1rem] [--clip-start:-1rem] *:pointer-coarse:after:min-w-auto",
+        className,
+      )}
       role="group"
       {...props}
     >
@@ -45,15 +27,14 @@ function Group({
   );
 }
 
-function GroupText({
+function GroupItem({
   className,
   render,
   ...props
 }: useRender.ComponentProps<"div">) {
   const defaultProps = {
-    "data-slot": "group-text",
     className: cn(
-      "relative inline-flex items-center rounded-lg border border-border bg-muted bg-clip-padding px-[calc(--spacing(3)-1px)] text-sm font-medium whitespace-nowrap shadow-xs transition-shadow outline-none before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-lg)-1px)] before:shadow-[0_1px_--theme(--color-black/4%)] dark:bg-input/64 dark:before:shadow-[0_-1px_--theme(--color-white/8%)] [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+      "border-x-0 not-first:rounded-s-none not-last:rounded-e-none before:[clip-path:inset(-1rem_var(--clip-end)_-1rem_var(--clip-start))] not-first:before:-start-0.5 not-first:before:rounded-s-none not-first:before:[--clip-start:2px] not-last:before:-end-0.5 not-last:before:rounded-e-none not-last:before:[--clip-end:2px] first:border-s last:border-e focus-visible:z-10 has-focus-visible:z-10 not-last:has-[+[data-slot=separator]]:before:[--clip-end:1.5px] [[data-slot=separator]+&]:before:[--clip-start:1.5px]",
       className,
     ),
   };
@@ -64,18 +45,12 @@ function GroupText({
   });
 }
 
-function GroupSeparator({
-  className,
-  orientation = "vertical",
-  ...props
-}: {
-  className?: string;
-} & React.ComponentProps<typeof Separator>) {
+function GroupSeparator({ className, ...props }: { className?: string }) {
   return (
     <Separator
-      orientation={orientation}
+      orientation="vertical"
       className={cn(
-        "[[data-slot=input-control]:focus-within+&,[data-slot=select-trigger]:focus-visible+*+&]:-translate-x-px relative z-20 has-[+[data-slot=input-control]:focus-within,+[data-slot=select-trigger]:focus-visible+*,+[data-slot=number-field]:focus-within]:translate-x-px has-[+[data-slot=input-control]:focus-within,+[data-slot=select-trigger]:focus-visible+*,+[data-slot=number-field]:focus-within]:bg-ring [[data-slot=input-control]:focus-within+&,[data-slot=select-trigger]:focus-visible+*+&,[data-slot=number-field]:focus-within+&]:bg-ring",
+        "[[data-slot=input-control]:focus-within+&,[data-slot=field-control]:focus-within+&,[data-slot=select-trigger]:focus-visible+*+&]:-translate-x-px relative z-20 has-[+[data-slot=input-control]:focus-within,+[data-slot=field-control]:focus-within,+[data-slot=select-trigger]:focus-visible+*]:translate-x-px has-[+[data-slot=input-control]:focus-within,+[data-slot=field-control]:focus-within,+[data-slot=select-trigger]:focus-visible+*]:bg-ring [[data-slot=input-control]:focus-within+&,[data-slot=field-control]:focus-within+&,[data-slot=select-trigger]:focus-visible+*+&]:bg-ring",
         className,
       )}
       {...props}
@@ -83,12 +58,4 @@ function GroupSeparator({
   );
 }
 
-export {
-  Group,
-  Group as ButtonGroup,
-  GroupText,
-  GroupText as ButtonGroupText,
-  GroupSeparator,
-  GroupSeparator as ButtonGroupSeparator,
-  groupVariants,
-};
+export { Group, GroupItem, GroupSeparator };

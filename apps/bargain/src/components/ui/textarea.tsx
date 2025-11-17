@@ -1,5 +1,3 @@
-"use client";
-
 import { Field as FieldPrimitive } from "@base-ui-components/react/field";
 import { mergeProps } from "@base-ui-components/react/merge-props";
 import type * as React from "react";
@@ -30,7 +28,7 @@ function Textarea({
       }
     >
       <FieldPrimitive.Control
-        render={(defaultProps) => (
+        render={(controlProps) => (
           <textarea
             data-slot="textarea"
             className={cn(
@@ -40,7 +38,7 @@ function Textarea({
               size === "lg" &&
                 "min-h-18.5 py-[calc(--spacing(2)-1px)] max-sm:min-h-21.5",
             )}
-            {...mergeProps(defaultProps, props)}
+            {...mergeProps(props, controlProps)}
           />
         )}
       />

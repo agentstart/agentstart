@@ -19,7 +19,7 @@ catalogs:
       specifier: ^7.28.5
       version: 7.28.5
     '@base-ui-components/react':
-      specifier: ^1.0.0-beta.4
+      specifier: 1.0.0-beta.4
       version: 1.0.0-beta.4
     '@biomejs/biome':
       specifier: ^2.3.5

@@ -22,7 +22,6 @@ function ToggleGroup({
   className,
   variant = "default",
   size = "default",
-  orientation = "horizontal",
   children,
   ...props
 }: ToggleGroupPrimitive.Props & VariantProps<typeof toggleVariants>) {
@@ -31,17 +30,11 @@ function ToggleGroup({
       data-slot="toggle-group"
       data-variant={variant}
       data-size={size}
-      orientation={orientation}
       className={cn(
-        "flex w-fit *:focus-visible:z-10",
-        orientation === "horizontal"
-          ? "*:pointer-coarse:after:min-w-auto"
-          : "*:pointer-coarse:after:min-h-auto",
+        "flex w-fit *:pointer-coarse:after:min-w-auto",
         variant === "default"
           ? "gap-0.5"
-          : orientation === "horizontal"
-            ? "*:not-first:before:-start-[0.5px] *:not-last:before:-end-[0.5px] *:not-first:rounded-s-none *:not-last:rounded-e-none *:not-first:border-s-0 *:not-last:border-e-0 *:not-first:before:rounded-s-none *:not-last:before:rounded-e-none"
-            : "*:not-first:before:-top-[0.5px] *:not-last:before:-bottom-[0.5px] flex-col *:not-first:rounded-t-none *:not-last:rounded-b-none *:not-first:border-t-0 *:not-last:border-b-0 *:not-last:before:hidden *:not-first:before:rounded-t-none *:not-last:before:rounded-b-none dark:*:last:before:hidden dark:*:first:before:block",
+          : "[--clip-end:-1rem] [--clip-start:-1rem]",
         className,
       )}
       {...props}
@@ -69,7 +62,11 @@ function Toggle({
     <ToggleComponent
       data-variant={resolvedVariant}
       data-size={resolvedSize}
-      className={className}
+      className={cn(
+        resolvedVariant === "outline" &&
+          "not-first:before:-start-0.5 not-last:before:-end-0.5 not-first:rounded-s-none not-last:rounded-e-none border-x-0 not-first:before:rounded-s-none not-last:before:rounded-e-none first:border-s last:border-e focus-visible:z-10 before:[clip-path:inset(-1rem_var(--clip-end)_-1rem_var(--clip-start))] not-first:before:[--clip-start:2px] not-last:before:[--clip-end:2px] not-last:has-[+[data-slot=separator]]:before:[--clip-end:1.5px] [[data-slot=separator]+&]:before:[--clip-start:1.5px]",
+        className,
+      )}
       variant={resolvedVariant}
       size={resolvedSize}
       {...props}
@@ -79,16 +76,8 @@ function Toggle({
   );
 }
 
-function ToggleGroupSeparator({
-  className,
-  orientation = "vertical",
-  ...props
-}: {
-  className?: string;
-} & React.ComponentProps<typeof Separator>) {
-  return (
-    <Separator orientation={orientation} className={className} {...props} />
-  );
+function ToggleGroupSeparator({ className, ...props }: { className?: string }) {
+  return <Separator orientation="vertical" className={className} {...props} />;
 }
 
 export { ToggleGroup, Toggle, Toggle as ToggleGroupItem, ToggleGroupSeparator };

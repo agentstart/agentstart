@@ -8,6 +8,7 @@
     "./styles/*": "./src/components/*"
   },
   "scripts": {
+    "dev": "tsx scripts/watch-sync.ts",
     "build": "shadcn build --output ../../apps/web/public/r",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "lint": "biome check --write --unsafe ./src",
