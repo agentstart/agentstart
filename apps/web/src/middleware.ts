@@ -3,7 +3,8 @@ import { type NextRequest, NextResponse } from "next/server";
 
 const { rewrite: rewriteLLM } = rewritePath("/docs/*path", "/llms.mdx/*path");
 
-export default function proxy(request: NextRequest) {
+// https://github.com/opennextjs/opennextjs-cloudflare/issues/962
+export default function middleware(request: NextRequest) {
   if (isMarkdownPreferred(request)) {
     const result = rewriteLLM(request.nextUrl.pathname);
 
