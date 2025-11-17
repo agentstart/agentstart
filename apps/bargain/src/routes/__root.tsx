@@ -24,10 +24,24 @@ export const Route = createRootRoute({
         href: appCss,
       },
     ],
+    scripts: [
+      {
+        async: true,
+        src: "https://www.googletagmanager.com/gtag/js?id=G-L1TE2288LG",
+      },
+      {
+        children: `window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-L1TE2288LG');
+`,
+      },
+    ],
   }),
 
   shellComponent: RootDocument,
-  ssr: false
+  ssr: false,
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
