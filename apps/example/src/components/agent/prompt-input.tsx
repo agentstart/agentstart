@@ -111,12 +111,14 @@ type SendState = "idle" | "streaming" | "uploading";
 
 export type PromptInputLayout = "default" | "mobile";
 
-type SendButtonProps = {
-  children: ReactNode;
+type PromptActionButtonProps = {
   className?: string;
   input: string;
   attachmentsCount: number;
   sendState: SendState;
+  isPending: boolean;
+  hasError: boolean;
+  onStop?: () => void | Promise<void>;
 };
 
 type AddAttachmentsMenuProps = {
@@ -213,30 +215,43 @@ function summarizeQueuedRemainder(queued: QueuedAgentMessage): string {
 // Small Utility Components
 // ============================================================================
 
-function SendButton({
-  children,
+function PromptActionButton({
   className,
   input,
   attachmentsCount,
   sendState,
-}: SendButtonProps) {
+  isPending,
+  hasError,
+  onStop,
+}: PromptActionButtonProps) {
   const hasText = input.trim().length > 0;
   const hasAttachments = attachmentsCount > 0;
   const isStreaming = sendState === "streaming";
   const isUploading = sendState === "uploading";
   const shouldDisable =
     (!isStreaming && !hasText && !hasAttachments) || isUploading;
+  const isStopButton = sendState === "streaming";
+  const buttonType = isStopButton ? "button" : "submit";
+
+  const icon = useMemo(() => {
+    if (hasError) return <BugIcon className="size-4.5" weight="duotone" />;
+    if (isStreaming) return <StopIcon className="size-4.5" weight="bold" />;
+    if (isUploading) return <Spinner className="size-4.5" />;
+    if (isPending) return <Spinner className="size-4.5" />;
+    return <ArrowUpIcon className="size-4.5" weight="bold" />;
+  }, [hasError, isStreaming, isUploading, isPending]);
 
   return (
     <Button
-      aria-label="Submit"
+      aria-label={isStopButton ? "Stop" : "Submit"}
       className={className}
       disabled={shouldDisable}
+      onClick={isStopButton ? onStop : undefined}
       size="icon-sm"
-      type="submit"
+      type={buttonType}
       variant="default"
     >
-      {children}
+      {icon}
     </Button>
   );
 }
@@ -995,15 +1010,6 @@ export function PromptInput({
       ? "uploading"
       : "idle";
 
-  const getSendIcon = () => {
-    if (hasError) return <BugIcon className="size-4.5" weight="duotone" />;
-    if (sendState === "streaming")
-      return <StopIcon className="size-4.5" weight="bold" />;
-    if (sendState === "uploading") return <Spinner className="size-4.5" />;
-    if (isPending) return <Spinner className="size-4.5" />;
-    return <ArrowUpIcon className="size-4.5" weight="bold" />;
-  };
-
   const handleSendQueuedMessage = async (queuedId: string) => {
     if (!threadId) return;
     const queued = takeQueuedMessageById(queuedId);
@@ -1117,13 +1123,14 @@ export function PromptInput({
                   <UsageDisplay summary={usageSummary} />
                 ) : null}
 
-                <SendButton
+                <PromptActionButton
                   input={input}
                   attachmentsCount={attachments.length}
                   sendState={sendState}
-                >
-                  {getSendIcon()}
-                </SendButton>
+                  isPending={isPending}
+                  hasError={hasError}
+                  onStop={stop}
+                />
               </div>
             </>
           ) : (
@@ -1149,13 +1156,14 @@ export function PromptInput({
                     <UsageDisplay summary={usageSummary} />
                   ) : null}
 
-                  <SendButton
+                  <PromptActionButton
                     input={input}
                     attachmentsCount={attachments.length}
                     sendState={sendState}
-                  >
-                    {getSendIcon()}
-                  </SendButton>
+                    isPending={isPending}
+                    hasError={hasError}
+                    onStop={stop}
+                  />
                 </div>
               </div>
             </>
