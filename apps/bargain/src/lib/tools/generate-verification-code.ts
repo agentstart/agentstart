@@ -26,7 +26,7 @@ const generateVerificationCodeInputSchema = z.object({
     .number()
     .positive()
     .describe(
-      "The final determined price (must be a positive number, for example, 29.99)",
+      "The final determined price (must be a positive number, for example, 20.99)",
     ),
   threadId: z
     .string()
@@ -56,11 +56,11 @@ function generateRandomCode(): string {
 
 // Function to select payment image based on price
 function selectPaymentImage(price: number): string {
-  // Available images: sk999.PNG, sk1199.PNG, sk1499.PNG, sk1699.PNG, sk1899.PNG, sk2099.PNG, sk2299.PNG, sk2599.PNG, sk2999.PNG
+  // Available images: sk999.PNG, sk1199.PNG, sk1499.PNG, sk1699.PNG, sk1899.PNG, sk2099.PNG
 
-  // Map price to nearest available image in fen (分) so ¥25.99 => 2599
+  // Map price to nearest available image in fen (分) so ¥20.99 => 2099
   const priceInFen = Math.round(price * 100);
-  const availablePrices = [999, 1199, 1499, 1699, 1899, 2099, 2299, 2599, 2999];
+  const availablePrices = [999, 1199, 1499, 1699, 1899, 2099];
 
   // Find the closest price
   let closestPrice = availablePrices[0];
@@ -83,7 +83,7 @@ export const generateVerificationCode = tool({
 当用户表达购买意愿或价格已确定时使用此工具生成5位数字核销码。
 
 输入：
-- price: 最终确定的价格（数字，例如 29.99）
+- price: 最终确定的价格（数字，例如 20.99）
 
 输出：
 - verificationCode: 5位数字核销码
