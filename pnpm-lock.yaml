@@ -844,6 +844,9 @@ importers:
       react-dom:
         specifier: 'catalog:'
         version: 19.2.0(react@19.2.0)
+      react-fast-compare:
+        specifier: 'catalog:'
+        version: 3.2.2
       react-hook-form:
         specifier: 'catalog:'
         version: 7.66.0(react@19.2.0)
@@ -911,6 +914,9 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
+      wrangler:
+        specifier: 'catalog:'
+        version: 4.47.0
 
   packages/agentstart:
     dependencies:

@@ -14,7 +14,7 @@ export function ConversationDemo() {
       stores={stores}
     >
       <div className="h-[450px] rounded-lg border border-border bg-muted/10">
-        <Conversation threadId="demo-thread-1" />
+        <Conversation />
       </div>
     </AgentStartProvider>
   );
