@@ -1,0 +1,106 @@
+/* agent-frontmatter:start
+AGENT: Suggested prompts UI component
+PURPOSE: Display AI-generated follow-up suggestions as interactive buttons
+USAGE: Import and render in agent conversation UI to show contextual next-step prompts
+EXPORTS: SuggestedPrompts
+FEATURES:
+  - Animated appearance and dismissal with Framer Motion
+  - Automatic data extraction from agent message stream
+  - Click to send suggestion as new message
+  - Auto-clear on interaction
+  - Multi-store support via threadId
+SEARCHABLE: suggested prompts, follow-up suggestions, agent ui, conversation actions
+agent-frontmatter:end */
+
+"use client";
+
+import { ArrowUpRightIcon } from "@phosphor-icons/react";
+import {
+  useAgentStartContext,
+  useAgentStore,
+  useDataPart,
+} from "agentstart/client";
+import type { HTMLMotionProps } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+
+export type SuggestionsProps = Omit<HTMLMotionProps<"div">, "children">;
+
+export function SuggestedPrompts({ className, ...props }: SuggestionsProps) {
+  const { threadId } = useAgentStartContext();
+  const storeId = threadId ?? "default";
+  const [suggestions, clearSuggestions] = useDataPart(
+    "data-agentstart-suggestions",
+    storeId,
+  );
+  const sendMessage = useAgentStore((state) => state.sendMessage, storeId);
+  const status = useAgentStore((state) => state.status, storeId);
+
+  const [sendingPrompt, setSendingPrompt] = useState<string | null>(null);
+
+  const isLoading = status === "submitted" || status === "streaming";
+
+  const handlePromptClick = async (prompt: string) => {
+    setSendingPrompt(prompt);
+    clearSuggestions();
+    await sendMessage(
+      { text: prompt },
+      {
+        body: {
+          threadId,
+        },
+      },
+    );
+    setSendingPrompt(null);
+  };
+
+  if (!suggestions?.prompts || suggestions.prompts.length === 0) {
+    return null;
+  }
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key="suggested-prompts"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 12 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+        className={className}
+        {...props}
+      >
+        <div className="w-fit px-0.5 pt-1 pb-2 text-muted-foreground">
+          Suggestions
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {suggestions.prompts.map((prompt, index) => (
+            <motion.div
+              key={prompt}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{
+                duration: 0.2,
+                delay: index * 0.05,
+                ease: "easeOut",
+              }}
+            >
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePromptClick(prompt)}
+                disabled={isLoading}
+              >
+                {sendingPrompt === prompt && <Spinner />}
+                {prompt}
+                <ArrowUpRightIcon className="size-3" weight="bold" />
+              </Button>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
