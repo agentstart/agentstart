@@ -13,18 +13,19 @@ SEARCHABLE: install deps, workspace catalog, clack prompts workflow
 agent-frontmatter:end */
 
 import { spawn } from "node:child_process";
+import { readFile, writeFile } from "node:fs/promises";
 import { dirname, relative, resolve } from "node:path";
 import {
   cancel,
   intro,
   isCancel,
   log,
+  multiselect,
   outro,
   select,
   text,
 } from "@clack/prompts";
 import fg from "fast-glob";
-import { readFile, writeFile } from "node:fs/promises";
 import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
 
 type WorkspaceCatalog = Record<string, string>;
@@ -52,10 +53,7 @@ function sortWorkspaceCatalog(catalog: WorkspaceCatalog): WorkspaceCatalog {
   );
 }
 
-function areCatalogsEqual(
-  a: WorkspaceCatalog,
-  b: WorkspaceCatalog,
-): boolean {
+function areCatalogsEqual(a: WorkspaceCatalog, b: WorkspaceCatalog): boolean {
   const aKeys = Object.keys(a);
   const bKeys = Object.keys(b);
   if (aKeys.length !== bKeys.length) {
@@ -141,9 +139,7 @@ async function writeWorkspaceSnapshot(
     },
   };
 
-  const serialized = ensureTrailingNewline(
-    stringifyAsYaml(nextConfig),
-  );
+  const serialized = ensureTrailingNewline(stringifyAsYaml(nextConfig));
 
   await writeFile(pnpmWorkspacePath, serialized, "utf8");
 
@@ -192,11 +188,6 @@ async function readWorkspaceSnapshot(): Promise<WorkspaceFileSnapshot | null> {
 async function readWorkspacePackagePatterns(): Promise<string[]> {
   const snapshot = await readWorkspaceSnapshot();
   return snapshot?.packages ?? [];
-}
-
-async function readWorkspaceCatalog(): Promise<WorkspaceCatalog> {
-  const snapshot = await readWorkspaceSnapshot();
-  return snapshot?.catalog ?? {};
 }
 
 function sortObjectByKeys<T extends Record<string, unknown>>(obj: T): T {
@@ -381,9 +372,7 @@ async function getWorkspacePackages(): Promise<WorkspacePackage[]> {
   const workspacePatterns = await readWorkspacePackagePatterns();
 
   if (workspacePatterns.length === 0) {
-    log.error(
-      `No workspace package patterns defined in ${pnpmWorkspacePath}.`,
-    );
+    log.error(`No workspace package patterns defined in ${pnpmWorkspacePath}.`);
     return [];
   }
 
@@ -431,18 +420,26 @@ async function getWorkspacePackages(): Promise<WorkspacePackage[]> {
   return packages.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-async function promptForPackage(packages: WorkspacePackage[]) {
-  const selected = await select<WorkspacePackage>({
-    message: "Select the workspace package to update",
+async function promptForPackages(
+  packages: WorkspacePackage[],
+): Promise<WorkspacePackage[]> {
+  const selected = await multiselect<WorkspacePackage>({
+    message: "Select the workspace package(s) to update",
     options: packages.map((pkg) => ({
       label: `${pkg.name} (${pkg.dir})`,
       value: pkg,
     })),
+    required: true,
   });
 
   if (isCancel(selected)) {
     cancel("Dependency installation cancelled.");
     process.exit(0);
+  }
+
+  if (selected.length === 0) {
+    log.error("No workspace packages selected.");
+    process.exit(1);
   }
 
   return selected;
@@ -635,7 +632,7 @@ async function main() {
       process.exit(1);
     }
 
-    const targetPackage = await promptForPackage(packages);
+    const packageTargets = await promptForPackages(packages);
     const dependencyNames = await promptForDependencyNames();
 
     const resolvedVersions: Record<string, string> = {};
@@ -656,11 +653,18 @@ async function main() {
 
     const dependencyGroup = await promptForDependencyGroup();
 
-    const packageUpdated = await updateWorkspacePackage(
-      targetPackage,
-      dependencyNames,
-      dependencyGroup,
-    );
+    let packageUpdated = false;
+
+    for (const targetPackage of packageTargets) {
+      const updated = await updateWorkspacePackage(
+        targetPackage,
+        dependencyNames,
+        dependencyGroup,
+      );
+      if (updated) {
+        packageUpdated = true;
+      }
+    }
 
     const catalogUpdated = await updateCatalogEntries(
       dependencyNames,

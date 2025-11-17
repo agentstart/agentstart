@@ -714,6 +714,9 @@ importers:
       react-hook-form:
         specifier: 'catalog:'
         version: 7.66.0(react@19.2.0)
+      react-medium-image-zoom:
+        specifier: 'catalog:'
+        version: 5.4.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react-resizable-panels:
         specifier: 'catalog:'
         version: 3.0.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -862,6 +865,9 @@ importers:
       react-hook-form:
         specifier: 'catalog:'
         version: 7.66.0(react@19.2.0)
+      react-medium-image-zoom:
+        specifier: 'catalog:'
+        version: 5.4.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react-resizable-panels:
         specifier: 'catalog:'
         version: 3.0.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -1256,6 +1262,9 @@ importers:
       react-hook-form:
         specifier: 'catalog:'
         version: 7.66.0(react@19.2.0)
+      react-medium-image-zoom:
+        specifier: 'catalog:'
+        version: 5.4.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react-resizable-panels:
         specifier: 'catalog:'
         version: 3.0.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
