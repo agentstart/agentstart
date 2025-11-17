@@ -18,6 +18,7 @@
     "@agentstart/utils": "workspace:*",
     "@base-ui-components/react": "catalog:",
     "@hookform/resolvers": "catalog:",
+    "@next/third-parties": "catalog:",
     "@opennextjs/cloudflare": "catalog:",
     "@orpc/tanstack-query": "catalog:",
     "@phosphor-icons/react": "catalog:",
