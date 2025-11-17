@@ -178,6 +178,7 @@ export function VerificationDialog({
                   <li>按提示输入上方核销码后完成支付</li>
                   <li>点击下方“保存图片”按钮生成凭证，线下核销时出示</li>
                   <li>核销码与您的砍价记录绑定</li>
+                  <li>一个核销码仅能购买一份 多买无效哦～</li>
                 </ul>
               </div>
             </Fieldset>
