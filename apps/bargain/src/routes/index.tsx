@@ -31,7 +31,7 @@ function App() {
           </div>
 
           <div className="sticky inset-x-0 bottom-0 pb-4">
-            <PromptInput className="mx-auto" />
+            <PromptInput className="mx-auto" layout="mobile" />
           </div>
         </div>
       </div>

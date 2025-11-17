@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import type { PromptInputLayout } from "../prompt-input";
 import { StatusIndicators } from "../shimmer";
 import { SuggestedPrompts } from "../suggested-prompts";
 import { WelcomeMessage } from "../welcome-message";
@@ -136,6 +137,7 @@ export type ConversationProps = Omit<
   "children"
 > & {
   contentClassName?: string;
+  layout?: PromptInputLayout;
   /**
    * Optional messages used to hydrate the UI before the client store syncs.
    */
@@ -230,9 +232,11 @@ export function Conversation({
   loadingState,
   errorState,
   initialMessages,
+  layout = "default",
   ...props
 }: ConversationProps) {
   const { orpc, threadId } = useAgentStartContext();
+  const isMobileLayout = layout === "mobile";
 
   const { scrollRef, contentRef, isAtBottom, scrollToBottom } =
     useStickToBottom({
@@ -404,7 +408,11 @@ export function Conversation({
       >
         <ScrollAreaPrimitive.Content
           ref={contentRef}
-          className="mx-auto flex flex-col gap-4 px-4 py-2 sm:min-w-[390px]! sm:max-w-3xl"
+          className={cn(
+            "mx-auto flex flex-col gap-4 px-4 py-2 sm:min-w-[390px]! sm:max-w-3xl",
+            isMobileLayout ? "pb-24" : "pb-48",
+            contentClassName,
+          )}
         >
           {resolvedErrorState ? (
             resolvedErrorState
@@ -487,8 +495,8 @@ export function Conversation({
       </ScrollAreaPrimitive.Scrollbar>
 
       <ConversationScrollButton
-        className={cn("bottom-42", {
-          "bottom-52": hasQueue,
+        className={cn(isMobileLayout ? "bottom-24" : "bottom-42", {
+          [isMobileLayout ? "bottom-29" : "bottom-52"]: hasQueue,
         })}
         isAtBottom={isAtBottom}
         scrollToBottom={scrollToBottom}

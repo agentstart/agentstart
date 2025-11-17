@@ -4,7 +4,10 @@ import type { AgentStartUIMessage, AgentUsageSummary } from "agentstart/agent";
 import { useAgentStartContext } from "agentstart/client";
 import { useEffect } from "react";
 import { Conversation } from "@/components/agent/conversation";
-import { PromptInput } from "@/components/agent/prompt-input";
+import {
+  PromptInput,
+  type PromptInputLayout,
+} from "@/components/agent/prompt-input";
 import { useThread } from "@/lib/agent-client";
 
 interface ThreadProps {
@@ -19,6 +22,7 @@ export default function Thread({
   initialUsage,
 }: ThreadProps) {
   const { threadId, setThreadId } = useAgentStartContext();
+  const layout: PromptInputLayout = "mobile";
 
   // Sync prop to Context if provided
   useEffect(() => {
@@ -35,13 +39,15 @@ export default function Thread({
       <div className="flex flex-1 overflow-hidden">
         {/* Main Content */}
         <div className="mx-auto flex size-full max-w-full flex-1 flex-col">
-          <Conversation
-            initialMessages={initialMessages}
-            contentClassName="pb-48"
-          />
+          <Conversation initialMessages={initialMessages} layout={layout} />
 
           <div className="sticky inset-x-0 bottom-0 pb-4">
-            <PromptInput className="mx-auto" initialUsage={initialUsage} />
+            <PromptInput
+              className="mx-auto"
+              layout={layout}
+              showUsage={false}
+              initialUsage={initialUsage}
+            />
           </div>
         </div>
       </div>

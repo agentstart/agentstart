@@ -103,9 +103,13 @@ import {
 export interface PromptInputProps {
   className?: string;
   initialUsage?: AgentUsageSummary;
+  layout?: PromptInputLayout;
+  showUsage?: boolean;
 }
 
 type SendState = "idle" | "streaming" | "uploading";
+
+export type PromptInputLayout = "default" | "mobile";
 
 type SendButtonProps = {
   children: ReactNode;
@@ -171,6 +175,7 @@ type PromptInputTextareaProps = React.ComponentProps<typeof Textarea> & {
   attachments: (FileUIPart & { id: string })[];
   onRemoveAttachment: (id: string) => void;
   onAddFiles: (files: File[]) => void;
+  layout?: PromptInputLayout;
 };
 
 // ============================================================================
@@ -408,10 +413,12 @@ function PromptInputTextarea({
   onRemoveAttachment,
   onAddFiles,
   className,
+  layout = "default",
   placeholder = "Ask anything",
   ...props
 }: PromptInputTextareaProps) {
   const [isComposing, setIsComposing] = useState(false);
+  const isMobileLayout = layout === "mobile";
 
   const handleKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
     if (e.key === "Enter") {
@@ -457,7 +464,8 @@ function PromptInputTextarea({
     <textarea
       data-slot="textarea"
       className={cn(
-        "field-sizing-content min-h-17.5 w-full resize-none rounded-[inherit] px-[calc(--spacing(3)-1px)] py-[calc(--spacing(1.5)-1px)] outline-none [scrollbar-color:var(--accent)_transparent] [scrollbar-width:thin] max-sm:min-h-20.5",
+        "field-sizing-content w-full resize-none rounded-[inherit] px-[calc(--spacing(3)-1px)] py-[calc(--spacing(1.5)-1px)] outline-none [scrollbar-color:var(--accent)_transparent] [scrollbar-width:thin]",
+        isMobileLayout ? "min-h-10" : "min-h-17.5 max-sm:min-h-20.5",
         className,
       )}
       name="message"
@@ -737,10 +745,12 @@ function MessageQueue({
 export function PromptInput({
   className,
   initialUsage,
+  layout = "default",
+  showUsage = true,
 }: PromptInputProps = {}) {
-  const { client, orpc, navigate, threadId, setThreadId } =
-    useAgentStartContext();
+  const { orpc, navigate, threadId, setThreadId } = useAgentStartContext();
   const queryClient = useQueryClient();
+  const isMobileLayout = layout === "mobile";
 
   // Input state
   const [input, setInput] = useState("");
@@ -787,7 +797,8 @@ export function PromptInput({
     storeKey,
   );
   const usageSummary = usagePart ?? initialUsage ?? null;
-  const showUsage = Boolean(threadId) && Boolean(usageSummary);
+  const shouldShowUsage =
+    showUsage && Boolean(threadId) && Boolean(usageSummary);
 
   // Blob files
   const {
@@ -1077,41 +1088,78 @@ export function PromptInput({
         <div
           data-slot="textarea-control"
           className={cn(
-            "field-sizing-content relative inline-flex max-h-60 min-h-24 w-full flex-col overflow-hidden rounded-[18px] border border-input bg-background bg-clip-padding text-base shadow-xs transition-all duration-300 has-focus-visible:has-aria-invalid:border-destructive/64 has-aria-invalid:border-destructive/36 has-focus-visible:border-ring has-disabled:opacity-64 sm:text-sm dark:bg-input/32 dark:bg-clip-border [&:has(:disabled,:focus-visible,[aria-invalid])]:shadow-none",
+            "field-sizing-content relative inline-flex max-h-60 w-full overflow-hidden rounded-[18px] border border-input bg-background bg-clip-padding text-base shadow-xs transition-all duration-300 has-focus-visible:has-aria-invalid:border-destructive/64 has-aria-invalid:border-destructive/36 has-focus-visible:border-ring has-disabled:opacity-64 sm:text-sm dark:bg-input/32 dark:bg-clip-border [&:has(:disabled,:focus-visible,[aria-invalid])]:shadow-none",
+            isMobileLayout
+              ? "min-h-14 flex-row items-end gap-2 px-4 py-2"
+              : "min-h-24 flex-col",
             className,
           )}
         >
-          {/* Textarea */}
-          <PromptInputTextarea
-            className="px-4 pt-2"
-            placeholder="Ask anything"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            attachments={attachments}
-            onRemoveAttachment={removeAttachment}
-            onAddFiles={addFiles}
-            autoFocus
-          />
-          {/* Addon */}
-          <div className="flex items-center justify-between gap-1 px-4 pb-3">
-            <div className="flex items-center gap-1">
-              <AddAttachmentsMenu onOpenFileDialog={openFileDialog} />
-              <ModelSelector />
-            </div>
-            <div className="flex items-center gap-2">
-              {showUsage && usageSummary ? (
-                <UsageDisplay summary={usageSummary} />
-              ) : null}
+          {isMobileLayout ? (
+            <>
+              <div className="flex h-10 items-center gap-1">
+                <AddAttachmentsMenu onOpenFileDialog={openFileDialog} />
+                <ModelSelector />
+              </div>
+              <PromptInputTextarea
+                className="min-h-8.5 min-w-0 flex-1 rounded-none p-0"
+                placeholder="Ask anything"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                attachments={attachments}
+                onRemoveAttachment={removeAttachment}
+                onAddFiles={addFiles}
+                autoFocus
+                layout={layout}
+              />
+              <div className="flex h-10 shrink-0 items-center gap-2">
+                {shouldShowUsage && usageSummary ? (
+                  <UsageDisplay summary={usageSummary} />
+                ) : null}
 
-              <SendButton
-                input={input}
-                attachmentsCount={attachments.length}
-                sendState={sendState}
-              >
-                {getSendIcon()}
-              </SendButton>
-            </div>
-          </div>
+                <SendButton
+                  input={input}
+                  attachmentsCount={attachments.length}
+                  sendState={sendState}
+                >
+                  {getSendIcon()}
+                </SendButton>
+              </div>
+            </>
+          ) : (
+            <>
+              <PromptInputTextarea
+                className="px-4 pt-2"
+                placeholder="Ask anything"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                attachments={attachments}
+                onRemoveAttachment={removeAttachment}
+                onAddFiles={addFiles}
+                autoFocus
+                layout={layout}
+              />
+              <div className="flex w-full items-center justify-between gap-1 px-4 pb-3">
+                <div className="flex items-center gap-1">
+                  <AddAttachmentsMenu onOpenFileDialog={openFileDialog} />
+                  <ModelSelector />
+                </div>
+                <div className="flex items-center gap-2">
+                  {shouldShowUsage && usageSummary ? (
+                    <UsageDisplay summary={usageSummary} />
+                  ) : null}
+
+                  <SendButton
+                    input={input}
+                    attachmentsCount={attachments.length}
+                    sendState={sendState}
+                  >
+                    {getSendIcon()}
+                  </SendButton>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </PromptInputForm>
     </div>

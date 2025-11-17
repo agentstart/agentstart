@@ -37,8 +37,9 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import type { PromptInputLayout } from "../prompt-input";
 import { StatusIndicators } from "../shimmer";
 import { SuggestedPrompts } from "../suggested-prompts";
 import { WelcomeMessage } from "../welcome-message";
@@ -136,6 +137,7 @@ export type ConversationProps = Omit<
   "children"
 > & {
   contentClassName?: string;
+  layout?: PromptInputLayout;
   /**
    * Optional messages used to hydrate the UI before the client store syncs.
    */
@@ -230,9 +232,11 @@ export function Conversation({
   loadingState,
   errorState,
   initialMessages,
+  layout = "default",
   ...props
 }: ConversationProps) {
   const { orpc, threadId } = useAgentStartContext();
+  const isMobileLayout = layout === "mobile";
 
   const { scrollRef, contentRef, isAtBottom, scrollToBottom } =
     useStickToBottom({
@@ -338,11 +342,34 @@ export function Conversation({
   );
 
   const defaultLoadingState = (
-    <ConversationEmptyState
-      icon={<Spinner className="text-muted-foreground" />}
-      title="Loading conversation"
-      description="Fetching the latest messages…"
-    />
+    <div className="mx-auto flex w-full flex-col gap-4 px-4 py-2 sm:min-w-[390px] sm:max-w-3xl">
+      <div className="flex justify-start">
+        <div className="max-w-[80%]">
+          <Skeleton className="mb-2 h-4 w-24" />
+          <Skeleton className="mb-1 h-3 w-48" />
+          <Skeleton className="h-3 w-32" />
+        </div>
+      </div>
+      <div className="flex justify-end">
+        <div className="max-w-[80%]">
+          <Skeleton className="mb-2 h-4 w-20" />
+          <Skeleton className="h-3 w-40" />
+        </div>
+      </div>
+      <div className="flex justify-start">
+        <div className="max-w-[80%]">
+          <Skeleton className="mb-2 h-4 w-28" />
+          <Skeleton className="mb-1 h-3 w-56" />
+          <Skeleton className="h-3 w-44" />
+        </div>
+      </div>
+      <div className="flex justify-start">
+        <div className="max-w-[80%]">
+          <Skeleton className="mb-2 h-4 w-24" />
+          <Skeleton className="h-3 w-36" />
+        </div>
+      </div>
+    </div>
   );
 
   const defaultErrorState = fetchError && (
@@ -381,7 +408,11 @@ export function Conversation({
       >
         <ScrollAreaPrimitive.Content
           ref={contentRef}
-          className="mx-auto flex flex-col gap-4 px-4 py-2 sm:min-w-[390px]! sm:max-w-3xl"
+          className={cn(
+            "mx-auto flex flex-col gap-4 px-4 py-2 sm:min-w-[390px]! sm:max-w-3xl",
+            isMobileLayout ? "pb-24" : "pb-48",
+            contentClassName,
+          )}
         >
           {resolvedErrorState ? (
             resolvedErrorState
@@ -464,8 +495,8 @@ export function Conversation({
       </ScrollAreaPrimitive.Scrollbar>
 
       <ConversationScrollButton
-        className={cn("bottom-42", {
-          "bottom-52": hasQueue,
+        className={cn(isMobileLayout ? "bottom-24" : "bottom-42", {
+          [isMobileLayout ? "bottom-29" : "bottom-52"]: hasQueue,
         })}
         isAtBottom={isAtBottom}
         scrollToBottom={scrollToBottom}
