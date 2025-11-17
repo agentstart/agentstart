@@ -300,6 +300,9 @@ catalogs:
     react-hook-form:
       specifier: ^7.66.0
       version: 7.66.0
+    react-medium-image-zoom:
+      specifier: ^5.4.0
+      version: 5.4.0
     react-resizable-panels:
       specifier: ^3.0.6
       version: 3.0.6
@@ -536,6 +539,9 @@ importers:
       react-fast-compare:
         specifier: 'catalog:'
         version: 3.2.2
+      react-medium-image-zoom:
+        specifier: 'catalog:'
+        version: 5.4.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       shiki:
         specifier: 'catalog:'
         version: 3.15.0

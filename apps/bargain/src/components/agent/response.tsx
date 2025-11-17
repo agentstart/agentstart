@@ -11,11 +11,15 @@ agent-frontmatter:end */
 
 "use client";
 
+import { MagnifyingGlassPlusIcon } from "@phosphor-icons/react";
+import { MagnifyingGlassMinusIcon } from "@phosphor-icons/react/dist/ssr";
 import { type ComponentProps, memo } from "react";
+import Zoom from "react-medium-image-zoom";
 import type { BundledLanguage } from "shiki/bundle/web";
 import { Streamdown } from "streamdown";
 import { cn } from "@/lib/utils";
 import { CodeBlock } from "./code-block";
+import "react-medium-image-zoom/dist/styles.css";
 
 type ResponseProps = ComponentProps<typeof Streamdown>;
 
@@ -67,13 +71,28 @@ export const Response = memo(
           const { src, alt, ...rest } = props;
           if (!src) return null;
           return (
-            <img
-              className="my-2 block max-h-40 rounded-lg"
-              src={src}
-              loading="lazy"
-              alt={alt}
-              {...rest}
-            />
+            <Zoom
+              IconZoom={() => (
+                <MagnifyingGlassPlusIcon
+                  weight="duotone"
+                  className="size-5.5"
+                />
+              )}
+              IconUnzoom={() => (
+                <MagnifyingGlassMinusIcon
+                  weight="duotone"
+                  className="size-5.5"
+                />
+              )}
+            >
+              <img
+                className="my-2 block max-h-40 rounded-lg"
+                src={src}
+                loading="lazy"
+                alt={alt}
+                {...rest}
+              />
+            </Zoom>
           );
         },
       }}
