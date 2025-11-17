@@ -1090,19 +1090,19 @@ export function PromptInput({
           className={cn(
             "field-sizing-content relative inline-flex max-h-60 w-full overflow-hidden rounded-[18px] border border-input bg-background bg-clip-padding text-base shadow-xs transition-all duration-300 has-focus-visible:has-aria-invalid:border-destructive/64 has-aria-invalid:border-destructive/36 has-focus-visible:border-ring has-disabled:opacity-64 sm:text-sm dark:bg-input/32 dark:bg-clip-border [&:has(:disabled,:focus-visible,[aria-invalid])]:shadow-none",
             isMobileLayout
-              ? "min-h-14 flex-row items-end gap-2 px-4 py-2"
+              ? "min-h-10 flex-row items-end gap-2 px-4 py-2"
               : "min-h-24 flex-col",
             className,
           )}
         >
           {isMobileLayout ? (
             <>
-              <div className="flex h-10 items-center gap-1">
+              <div className="flex h-7 items-center gap-1">
                 <AddAttachmentsMenu onOpenFileDialog={openFileDialog} />
                 <ModelSelector />
               </div>
               <PromptInputTextarea
-                className="min-h-8.5 min-w-0 flex-1 rounded-none p-0"
+                className="min-h-5.5 min-w-0 flex-1 rounded-none p-0 leading-none"
                 placeholder="Ask anything"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -1112,7 +1112,7 @@ export function PromptInput({
                 autoFocus
                 layout={layout}
               />
-              <div className="flex h-10 shrink-0 items-center gap-2">
+              <div className="flex h-7 shrink-0 items-center gap-2">
                 {shouldShowUsage && usageSummary ? (
                   <UsageDisplay summary={usageSummary} />
                 ) : null}

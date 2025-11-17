@@ -410,7 +410,7 @@ export function Conversation({
           ref={contentRef}
           className={cn(
             "mx-auto flex flex-col gap-4 px-4 py-2 sm:min-w-[390px]! sm:max-w-3xl",
-            isMobileLayout ? "pb-24" : "pb-48",
+            isMobileLayout ? "pb-22" : "pb-48",
             contentClassName,
           )}
         >
@@ -495,8 +495,8 @@ export function Conversation({
       </ScrollAreaPrimitive.Scrollbar>
 
       <ConversationScrollButton
-        className={cn(isMobileLayout ? "bottom-24" : "bottom-42", {
-          [isMobileLayout ? "bottom-29" : "bottom-52"]: hasQueue,
+        className={cn(isMobileLayout ? "bottom-22" : "bottom-42", {
+          [isMobileLayout ? "bottom-27" : "bottom-52"]: hasQueue,
         })}
         isAtBottom={isAtBottom}
         scrollToBottom={scrollToBottom}
