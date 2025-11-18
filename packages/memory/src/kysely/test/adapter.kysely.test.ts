@@ -9,10 +9,10 @@ FEATURES:
 SEARCHABLE: kysely adapter test, thread message
 agent-frontmatter:end */
 
+import { rm } from "node:fs/promises";
 import path from "node:path";
 import type { AgentStartOptions } from "@agentstart/types";
 import Database from "better-sqlite3";
-import fs from "fs-extra";
 import { Kysely, MysqlDialect, SqliteDialect } from "kysely";
 import { createPool, type Pool } from "mysql2/promise";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
@@ -41,7 +41,7 @@ const mysqlInit = await setupMysql();
 
 describe("adapter test", async () => {
   const sqliteDbPath = path.join(__dirname, "test.db");
-  await fs.unlink(sqliteDbPath).catch(() => {});
+  await rm(sqliteDbPath).catch(() => {});
   const sqlite = new Database(sqliteDbPath);
   let mysqlKy: Kysely<unknown> | null = null;
   const sqliteKy = new Kysely({
@@ -92,7 +92,7 @@ describe("adapter test", async () => {
     }
 
     sqlite.close();
-    await fs.unlink(sqliteDbPath).catch(() => {});
+    await rm(sqliteDbPath).catch(() => {});
   });
 
   if (!mysqlInit.skip && mysqlInit.pool) {
