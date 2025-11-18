@@ -20,6 +20,8 @@ import { createAgentClient } from "agentstart/client";
 import { AgentStartProvider } from "agentstart/client";
 
 const { client } = createAgentClient();
+// Derive currentThreadId from your routing state if available
+const currentThreadId = undefined;
 
 export default function App({ children }: { children: React.ReactNode }) {
   return (
@@ -29,6 +31,8 @@ export default function App({ children }: { children: React.ReactNode }) {
         // Your navigation logic
         window.location.href = path;
       }}
+      // Optional: hydrate the current thread
+      getThreadId={() => currentThreadId}
     >
       {children}
     </AgentStartProvider>
@@ -42,6 +46,7 @@ export default function App({ children }: { children: React.ReactNode }) {
 |------|------|----------|-------------|
 | `client` | `AgentStartAPI` | ✅ | The AgentStart client instance created by createAgentClient() |
 | `navigate` | `(path: string) => void` | ✅ | Navigation function for routing between pages |
+| `getThreadId` | `() => string \| undefined` | - | (Optional) Resolver for the current thread ID; called each render; takes precedence over `setThreadId` (local updates are ignored when provided) |
 | `children` | `ReactNode` | ✅ | Child components that will have access to the client |
 
 ## Features
@@ -71,6 +76,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               window.location.href = path;
             }
           }}
+          getThreadId={() => currentThreadId}
         >
           {children}
         </AgentStartProvider>
@@ -92,11 +98,15 @@ const { client } = createAgentClient();
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
+  const { threadId } = router.query;
 
   return (
     <AgentStartProvider 
       client={client}
       navigate={(path) => router.push(path)}
+      getThreadId={() =>
+        typeof threadId === "string" ? threadId : undefined
+      }
     >
       <Component {...pageProps} />
     </AgentStartProvider>
@@ -115,11 +125,14 @@ const { client } = createAgentClient();
 
 export default function App({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
+  const match = useMatch("/thread/:threadId");
+  const threadId = match?.params?.threadId;
 
   return (
     <AgentStartProvider 
       client={client}
       navigate={(path) => navigate(path)}
+      getThreadId={() => threadId}
     >
       {children}
     </AgentStartProvider>
@@ -135,7 +148,8 @@ Use the `useAgentStartContext` hook to access the client in child components:
 import { useAgentStartContext } from "agentstart/client";
 
 export function MyComponent() {
-  const { client, orpc, navigate } = useAgentStartContext();
+  const { client, orpc, navigate, threadId, setThreadId, config } =
+    useAgentStartContext();
 
   // Use client directly
   const loadThreads = async () => {
@@ -167,7 +181,18 @@ interface AgentStartContextState {
   
   // Navigation function
   navigate: (path: string) => void;
+
+  // Current thread identifier (if any) and setter
+  threadId: string | undefined;
+  setThreadId: (threadId: string | undefined) => void;
+
+  // App config fetched once at provider level
+  config: AppConfig | undefined;
 }
+
+// Note: if getThreadId is provided to AgentStartProvider, it is treated as the
+// single source of truth. In that case, setThreadId no-ops until you navigate
+// or change the resolver's return value.
 ```
 
 ## Error Handling
@@ -201,6 +226,7 @@ import type { AgentStartProviderProps } from "agentstart/client";
 const props: AgentStartProviderProps = {
   client,
   navigate: (path) => console.log(path),
+  getThreadId: () => "thread-123",
   children: <div />,
 };
 ```

@@ -17,18 +17,10 @@ npx shadcn@latest add sidebar --registry=@agentstart
 
 ```tsx
 import { Sidebar } from "@/components/agent/sidebar";
-import { useRouter } from "next/navigation";
 
 export default function App({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-
-  return (
-    <Sidebar
-      onSelectThread={(thread) => router.push(`/thread/${thread.id}`)}
-    >
-      {children}
-    </Sidebar>
-  );
+  // Navigation and active thread are provided via AgentStartProvider
+  return <Sidebar>{children}</Sidebar>;
 }
 ```
 
@@ -37,8 +29,6 @@ export default function App({ children }: { children: React.ReactNode }) {
 | Name | Type | Default | Description |
 |------|------|---------|-------------|
 | `children` | `ReactNode` | - | Main content to display next to the sidebar |
-| `selectedThreadId` | `string` | - | Currently selected thread ID |
-| `onSelectThread` | `(thread: DBThread) => void` | - | Callback when a thread is selected |
 | `pageSize` | `number` | `20` | Number of threads to load per page |
 | `header` | `{ title?: string }` | - | Custom header configuration |
 | `footer` | `ReactNode` | - | Custom footer content |
@@ -69,30 +59,34 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   return (
-    <Sidebar onSelectThread={(thread) => router.push(`/thread/${thread.id}`)}>
-      {children}
-    </Sidebar>
+    <Sidebar>{children}</Sidebar>
   );
 }
 ```
 
-### With Selected Thread
+### With Current Thread
 
 ```tsx
 import { Sidebar } from "@/components/agent/sidebar";
+import { AgentStartProvider, createAgentClient } from "agentstart/client";
 import { useParams, useRouter } from "next/navigation";
+
+const { client } = createAgentClient();
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { threadId } = useParams();
 
   return (
-    <Sidebar
-      selectedThreadId={threadId as string}
-      onSelectThread={(thread) => router.push(`/thread/${thread.id}`)}
+    <AgentStartProvider
+      client={client}
+      navigate={(path) => router.push(path)}
+      getThreadId={() =>
+        typeof threadId === "string" ? threadId : undefined
+      }
     >
-      {children}
-    </Sidebar>
+      <Sidebar>{children}</Sidebar>
+    </AgentStartProvider>
   );
 }
 ```
@@ -106,7 +100,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <Sidebar
       header={{ title: "My AI Assistant" }}
-      onSelectThread={(thread) => console.log(thread)}
     >
       {children}
     </Sidebar>
@@ -130,7 +123,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </p>
         </div>
       }
-      onSelectThread={(thread) => console.log(thread)}
     >
       {children}
     </Sidebar>
@@ -147,7 +139,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <Sidebar
       sidebar={{ side: "right" }}
-      onSelectThread={(thread) => console.log(thread)}
     >
       {children}
     </Sidebar>
@@ -164,7 +155,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <Sidebar
       pageSize={50}
-      onSelectThread={(thread) => console.log(thread)}
     >
       {children}
     </Sidebar>
@@ -208,7 +198,6 @@ interface SidebarConfig {
     defaultOpen: true,
     onOpenChange: (open) => console.log("Sidebar:", open),
   }}
-  onSelectThread={(thread) => console.log(thread)}
 >
   {children}
 </Sidebar>
@@ -242,13 +231,8 @@ The sidebar shows:
 
 ```tsx
 import type { SidebarProps } from "@/components/agent/sidebar";
-import type { DBThread } from "agentstart/memory";
 
 const props: SidebarProps = {
-  selectedThreadId: "thread-123",
-  onSelectThread: (thread: DBThread) => {
-    console.log(thread.id);
-  },
   pageSize: 20,
   header: { title: "Threads" },
 };
@@ -263,33 +247,37 @@ import { Sidebar } from "@/components/agent/sidebar";
 import { Conversation } from "@/components/agent/conversation";
 import { PromptInput } from "@/components/agent/prompt-input";
 import { useParams, useRouter } from "next/navigation";
-import { useThread } from "agentstart/client";
+import { AgentStartProvider, createAgentClient } from "agentstart/client";
 
 export default function ThreadLayout() {
+  const { client, useThread } = createAgentClient();
   const router = useRouter();
   const { threadId } = useParams<{ threadId: string }>();
   
   useThread(threadId);
 
   return (
-    <Sidebar
-      selectedThreadId={threadId}
-      onSelectThread={(thread) => router.push(`/thread/${thread.id}`)}
+    <AgentStartProvider
+      client={client}
+      navigate={(path) => router.push(path)}
+      getThreadId={() => threadId}
     >
-      <div className="flex h-screen flex-col">
-        <header className="border-b p-4">
-          <h1 className="font-bold">Chat</h1>
-        </header>
-        
-        <div className="flex-1 overflow-y-auto">
-          <Conversation threadId={threadId} />
+      <Sidebar>
+        <div className="flex h-screen flex-col">
+          <header className="border-b p-4">
+            <h1 className="font-bold">Chat</h1>
+          </header>
+          
+          <div className="flex-1 overflow-y-auto">
+            <Conversation />
+          </div>
+          
+          <div className="border-t p-4">
+            <PromptInput />
+          </div>
         </div>
-        
-        <div className="border-t p-4">
-          <PromptInput threadId={threadId} />
-        </div>
-      </div>
-    </Sidebar>
+      </Sidebar>
+    </AgentStartProvider>
   );
 }
 ```

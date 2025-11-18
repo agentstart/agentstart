@@ -17,11 +17,9 @@ import { agentStart } from "agentstart";
 import { Agent, agentTools, osTools } from "agentstart/agent";
 import { r2BlobAdapter, s3BlobAdapter } from "agentstart/blob/s3";
 import { vercelBlobAdapter } from "agentstart/blob/vercel";
-import {
-  drizzleMemoryAdapter,
-  inMemorySecondaryMemoryAdapter,
-  redisSecondaryMemoryAdapter,
-} from "agentstart/memory";
+import { drizzleMemoryAdapter } from "agentstart/memory/drizzle";
+import { redisSecondaryMemoryAdapter } from "agentstart/memory/redis";
+import { inMemorySecondaryMemoryAdapter } from "agentstart/memory/secondary-in-memory";
 import { createAgentPrompt } from "agentstart/prompts";
 import { e2bSandboxAdapter } from "agentstart/sandbox/e2b";
 import { nodeSandboxAdapter } from "agentstart/sandbox/nodejs";

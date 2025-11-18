@@ -12,7 +12,6 @@ agent-frontmatter:end */
 "use client";
 
 import { AgentStartProvider } from "agentstart/client";
-import type { DBThread } from "agentstart/memory";
 import { useParams, useRouter } from "next/navigation";
 import type React from "react";
 import { Sidebar } from "@/components/agent/sidebar/sidebar";
@@ -24,17 +23,15 @@ interface ProviderProps {
 export function Provider({ children }: ProviderProps) {
   const router = useRouter();
   const navigate = router.push;
-  const { threadId } = useParams<{ threadId: string }>();
-
-  const onSelectThread = (thread: DBThread) => {
-    navigate(`/thread/${thread.id}`);
-  };
+  const { threadId } = useParams<{ threadId?: string }>();
 
   return (
-    <AgentStartProvider client={client} navigate={navigate}>
-      <Sidebar selectedThreadId={threadId} onSelectThread={onSelectThread}>
-        {children}
-      </Sidebar>
+    <AgentStartProvider
+      client={client}
+      navigate={navigate}
+      getThreadId={() => threadId}
+    >
+      <Sidebar>{children}</Sidebar>
     </AgentStartProvider>
   );
 }

@@ -711,6 +711,9 @@ importers:
       react-dom:
         specifier: 'catalog:'
         version: 19.2.0(react@19.2.0)
+      react-fast-compare:
+        specifier: 'catalog:'
+        version: 3.2.2
       react-hook-form:
         specifier: 'catalog:'
         version: 7.66.1(react@19.2.0)
@@ -766,6 +769,9 @@ importers:
       tailwindcss:
         specifier: 'catalog:'
         version: 4.1.17
+      tw-animate-css:
+        specifier: 'catalog:'
+        version: 1.4.0
       typescript:
         specifier: 'catalog:'
         version: 5.9.3

@@ -5,7 +5,7 @@ USAGE: <Sidebar>{mainContent}</Sidebar>
 EXPORTS: Sidebar, SidebarProps
 FEATURES:
   - Fetches threads via TanStack Query with automatic caching and refetching
-  - Supports infinite scroll pagination, thread creation, and selection callbacks
+  - Supports infinite scroll pagination and thread actions
   - Wraps children inside <SidebarInset> for a ready-to-use layout
 SEARCHABLE: agent layout, sidebar, agent threads list, tanstack query
 agent-frontmatter:end */
@@ -55,9 +55,6 @@ import { SidebarItem } from "./sidebar-item";
 export type SidebarProps = {
   children?: ReactNode;
   className?: string;
-  // Thread selection
-  selectedThreadId?: string;
-  onSelectThread?: (thread: DBThread) => void;
   // Query configuration
   pageSize?: number;
   // UI customization
@@ -82,8 +79,6 @@ export type SidebarProps = {
 export function Sidebar({
   children,
   className,
-  selectedThreadId,
-  onSelectThread,
   pageSize = 20,
   header,
   footer = <SimpleThemeSwitch />,
@@ -91,7 +86,7 @@ export function Sidebar({
   errorState,
   sidebar,
 }: SidebarProps) {
-  const { orpc } = useAgentStartContext();
+  const { orpc, threadId, navigate } = useAgentStartContext();
 
   // Infinite query for thread list with pagination
   const { data, error, isLoading, isError, refetch } = useQuery(
@@ -188,8 +183,8 @@ export function Sidebar({
       <SidebarItem
         key={thread.id}
         thread={thread}
-        isActive={thread.id === selectedThreadId}
-        onSelect={onSelectThread}
+        isActive={thread.id === threadId}
+        onSelect={({ id }) => navigate(`/thread/${id}`)}
         leading={<ThreadAvatar title={thread.title} />}
         trailing={
           <MoreOptions
@@ -208,12 +203,10 @@ export function Sidebar({
 
     return items;
   }, [
-    selectedThreadId,
     emptyState,
     error,
     errorState,
     refetch,
-    onSelectThread,
     isError,
     isLoading,
     threads,

@@ -1,11 +1,12 @@
 /* agent-frontmatter:start
 AGENT: AgentStart provider
 PURPOSE: Supply the shared AgentStart client instance and store registry through React context
-USAGE: <AgentStartProvider client={client} navigate={navigate}>{children}</AgentStartProvider>
+USAGE: <AgentStartProvider client={client} navigate={navigate} getThreadId={getThreadId}>{children}</AgentStartProvider>
 EXPORTS: AgentStartProvider, AgentStartProviderProps, useAgentStartContext, useStoreRegistry
 FEATURES:
   - Shares the thread-capable AgentStart client with all descendant components
   - Manages Zustand store instances lifecycle via store registry
+  - Supports external thread identifier resolution without duplicating state; local updates are ignored when a resolver is present
   - Provides TanStack Query client for server state management
   - Supplies navigation function for thread routing
   - Cleans up all store instances on unmount
@@ -26,6 +27,7 @@ import {
 import {
   createContext,
   type ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -64,6 +66,7 @@ export interface AgentStartProviderProps {
   defaultTheme?: Theme;
   client: AgentStartAPI;
   navigate: (path: string) => void;
+  getThreadId?: () => string | undefined;
   stores?: Map<string, UseBoundStore<StoreApi<AgentStoreWithSync<any>>>>;
   children: ReactNode;
 }
@@ -74,10 +77,22 @@ const queryClient = new QueryClient();
 function AgentStartProviderInner({
   client,
   navigate,
+  getThreadId,
   stores,
   children,
 }: AgentStartProviderProps) {
-  const [threadId, setThreadId] = useState<string | undefined>();
+  const [threadIdState, setThreadIdState] = useState<string | undefined>();
+  const externalThreadId = getThreadId?.();
+  const resolvedThreadId =
+    typeof externalThreadId === "undefined" ? threadIdState : externalThreadId;
+  const setThreadId = useCallback(
+    (nextThreadId: string | undefined) => {
+      // If an external resolver exists, treat it as the single source of truth
+      if (typeof externalThreadId !== "undefined") return;
+      setThreadIdState(nextThreadId);
+    },
+    [externalThreadId],
+  );
 
   // Fetch app configuration once at the provider level with 30 min cache
   const orpcUtils = useMemo(() => createTanstackQueryUtils(client), [client]);
@@ -104,11 +119,18 @@ function AgentStartProviderInner({
       client,
       orpc: orpcUtils,
       navigate,
-      threadId,
+      threadId: resolvedThreadId,
       setThreadId,
       config: configQuery.data,
     };
-  }, [client, orpcUtils, navigate, threadId, configQuery.data]);
+  }, [
+    client,
+    orpcUtils,
+    navigate,
+    resolvedThreadId,
+    setThreadId,
+    configQuery.data,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -129,6 +151,7 @@ export function AgentStartProvider({
   defaultTheme = "system",
   client,
   navigate,
+  getThreadId,
   stores,
   children,
 }: AgentStartProviderProps) {
@@ -138,6 +161,7 @@ export function AgentStartProvider({
         <AgentStartProviderInner
           client={client}
           navigate={navigate}
+          getThreadId={getThreadId}
           stores={stores}
         >
           {children}

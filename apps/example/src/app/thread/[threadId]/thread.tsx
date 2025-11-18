@@ -2,6 +2,7 @@
 
 import { FolderSimpleIcon } from "@phosphor-icons/react";
 import type { AgentStartUIMessage, AgentUsageSummary } from "agentstart/agent";
+import { useAgentStartContext } from "agentstart/client";
 import { useState } from "react";
 import { Conversation } from "@/components/agent/conversation";
 import { FileExplorer } from "@/components/agent/file-explorer";
@@ -23,12 +24,15 @@ interface ThreadProps {
 }
 
 export default function Thread({
-  threadId,
+  threadId: threadIdProp,
   initialMessages,
   initialUsage,
 }: ThreadProps) {
-  useThread(threadId);
+  const { threadId: contextThreadId } = useAgentStartContext();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const activeThreadId = contextThreadId ?? threadIdProp;
+  useThread(activeThreadId);
 
   return (
     <div className="flex h-full flex-col">

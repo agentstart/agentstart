@@ -2,7 +2,6 @@
 
 import type { AgentStartUIMessage, AgentUsageSummary } from "agentstart/agent";
 import { useAgentStartContext } from "agentstart/client";
-import { useEffect } from "react";
 import { Conversation } from "@/components/agent/conversation";
 import {
   PromptInput,
@@ -21,18 +20,11 @@ export default function Thread({
   initialMessages,
   initialUsage,
 }: ThreadProps) {
-  const { threadId, setThreadId } = useAgentStartContext();
+  const { threadId: contextThreadId } = useAgentStartContext();
   const layout: PromptInputLayout = "mobile";
 
-  // Sync prop to Context if provided
-  useEffect(() => {
-    if (threadIdProp && threadIdProp !== threadId) {
-      setThreadId(threadIdProp);
-    }
-  }, [threadIdProp, threadId, setThreadId]);
-
-  // Only call useThread if threadId exists
-  useThread(threadId);
+  const activeThreadId = contextThreadId ?? threadIdProp;
+  useThread(activeThreadId);
 
   return (
     <div className="flex h-full flex-col">

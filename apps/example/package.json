@@ -42,6 +42,7 @@
     "react": "catalog:",
     "react-day-picker": "catalog:",
     "react-dom": "catalog:",
+    "react-fast-compare": "catalog:",
     "react-hook-form": "catalog:",
     "react-medium-image-zoom": "catalog:",
     "react-resizable-panels": "catalog:",
@@ -62,6 +63,7 @@
     "@types/react-dom": "catalog:",
     "drizzle-kit": "catalog:",
     "tailwindcss": "catalog:",
+    "tw-animate-css": "catalog:",
     "typescript": "catalog:"
   }
 }

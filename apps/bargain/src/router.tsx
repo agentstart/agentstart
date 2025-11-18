@@ -9,9 +9,9 @@ FEATURES:
 SEARCHABLE: router, tanstack, bargain app, not found
 agent-frontmatter:end */
 
+import * as Sentry from "@sentry/tanstackstart-react";
 import { createRouter } from "@tanstack/react-router";
 import { NotFound } from "@/components/not-found";
-import * as Sentry from "@sentry/tanstackstart-react";
 
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
