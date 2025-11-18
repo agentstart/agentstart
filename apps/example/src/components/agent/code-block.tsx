@@ -16,6 +16,7 @@ agent-frontmatter:end */
 
 import { CheckIcon, CopyIcon } from "@phosphor-icons/react";
 import { transformerNotationDiff } from "@shikijs/transformers";
+import { useTheme } from "agentstart/client";
 import {
   type ComponentProps,
   createContext,
@@ -124,6 +125,7 @@ export const CodeBlock = ({
   const [html, setHtml] = useState<string>("");
   const [darkHtml, setDarkHtml] = useState<string>("");
   const mounted = useRef(false);
+  const { resolvedTheme } = useTheme();
 
   useEffect(() => {
     highlightCode({ code, language, showLineNumbers, showDiff }).then(
@@ -143,35 +145,27 @@ export const CodeBlock = ({
 
   return (
     <CodeBlockContext.Provider value={{ code, copyCode: copyCode ?? code }}>
-      <div className="group/code-block relative max-h-[200px]">
-        <ScrollArea
-          className={cn(
-            "relative max-h-[200px] w-full overflow-hidden rounded-lg border bg-background text-foreground",
-            "[&_.diff.add]:bg-green-500/10 [&_.diff.add]:text-green-600 [&_.diff.add]:before:absolute [&_.diff.add]:before:left-1 [&_.diff.add]:before:content-['+']",
-            "[&_.diff.remove]:bg-red-500/10 [&_.diff.remove]:text-red-600 [&_.diff.remove]:opacity-70 [&_.diff.remove]:before:absolute [&_.diff.remove]:before:left-1 [&_.diff.remove]:before:content-['-']",
-            "dark:[&_.diff.add]:bg-green-500/20 dark:[&_.diff.add]:text-green-400",
-            "dark:[&_.diff.remove]:bg-red-500/20 dark:[&_.diff.remove]:text-red-400",
-            className,
-          )}
-          {...props}
-        >
+      <div
+        className={cn(
+          "group/code-block relative max-h-[200px] overflow-hidden rounded-lg border text-foreground",
+          "[&_.diff.add]:bg-green-500/10 [&_.diff.add]:text-green-600 [&_.diff.add]:before:absolute [&_.diff.add]:before:left-1 [&_.diff.add]:before:content-['+']",
+          "[&_.diff.remove]:bg-red-500/10 [&_.diff.remove]:text-red-600 [&_.diff.remove]:opacity-70 [&_.diff.remove]:before:absolute [&_.diff.remove]:before:left-1 [&_.diff.remove]:before:content-['-']",
+          "dark:[&_.diff.add]:bg-green-500/20 dark:[&_.diff.add]:text-green-400",
+          "dark:[&_.diff.remove]:bg-red-500/20 dark:[&_.diff.remove]:text-red-400",
+          className,
+        )}
+        {...props}
+      >
+        <ScrollArea className="max-h-[200px]">
           <div
             className={cn(
-              "[&>pre]:m-0 [&>pre]:bg-background! [&>pre]:py-5 [&>pre]:text-foreground! [&>pre]:text-sm",
-              "[&_code]:wrap-break-word [&_code]:block [&_code]:w-full [&_code]:font-mono [&_code]:text-sm [&_code]:leading-normal",
+              "[&>pre]:m-0 [&>pre]:bg-background! [&>pre]:text-foreground! [&>pre]:text-sm",
+              "[&_code]:wrap-break-word [&_code]:block [&_code]:w-full [&_code]:border-none [&_code]:font-mono [&_code]:text-sm [&_code]:leading-normal",
               "[&_.line]:relative [&_.line]:inline-block [&_.line]:w-full [&_.line]:px-4",
-              "dark:hidden",
             )}
-            dangerouslySetInnerHTML={{ __html: html }}
-          />
-          <div
-            className={cn(
-              "[&>pre]:m-0 [&>pre]:bg-background! [&>pre]:py-5 [&>pre]:text-foreground! [&>pre]:text-sm",
-              "[&_code]:wrap-break-word [&_code]:block [&_code]:w-full [&_code]:font-mono [&_code]:text-sm [&_code]:leading-normal",
-              "[&_.line]:relative [&_.line]:inline-block [&_.line]:w-full [&_.line]:px-4",
-              "hidden dark:block",
-            )}
-            dangerouslySetInnerHTML={{ __html: darkHtml }}
+            dangerouslySetInnerHTML={{
+              __html: resolvedTheme === "dark" ? darkHtml : html,
+            }}
           />
           {children && (
             <div className="absolute top-2 right-2 flex items-center gap-2">

@@ -18,54 +18,21 @@ const openrouter = createOpenRouter({
 });
 
 const agent = new Agent({
-  model: openrouter("x-ai/grok-4-fast"),
+  model: openrouter("google/gemini-2.0-flash-001"),
   instructions: "You are a helpful coding assistant.",
   tools: {
-    ...agentTools, // Task management tools
-    ...osTools,    // File system and shell operations
+    ...agentTools, // task tools are safe without sandbox
+    // ...osTools, // enable only if you configured sandbox in agentStart
+    // add your custom tools here
   },
 });
 ```
 
 ### Available Tools
 
-**agentTools** provides task management:
-- `todoRead` - Read the current task list
-- `todoWrite` - Update task list with new tasks
-
-**osTools** provides file system and shell operations:
-- `bash` - Execute shell commands
-- `read` - Read file contents
-- `write` - Write to files
-- `edit` - Update file sections
-- `glob` - Search files by pattern
-- `grep` - Search file contents
-- `ls` - List directory contents
-
-You can import and use them together or separately:
-
-```ts
-import { Agent, agentTools, osTools } from "agentstart/agent";
-
-// Use both tool sets
-const agent = new Agent({
-  model,
-  instructions: "You are a helpful coding assistant.",
-  tools: {
-    ...agentTools,
-    ...osTools,
-  },
-});
-
-// Or use only task management tools
-const agent = new Agent({
-  model,
-  instructions: "You are a task-focused assistant.",
-  tools: {
-    ...agentTools,
-  },
-});
-```
+- Built-in task tools (`todoRead`, `todoWrite`): available via `agentTools`
+- OS tools (`bash`, `read`, `write`, etc.): add `osTools` only when you configured `sandbox`; otherwise they will return “Sandbox not configured”
+- Custom tools: add your own utilities to `tools`
 
 ## Starting the Agent Runtime
 

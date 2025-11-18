@@ -6,12 +6,12 @@ description: Configure code execution environments for AgentStart deployments
 AgentStart provides first-class sandbox support so your agents can execute code, manage files, and run git operations in isolated environments. The framework supports both local Node.js sandboxes for development and E2B cloud sandboxes for production deployments.
 
 <Callout>
-  Sandbox is optional. If you skip configuration, AgentStart will use a default Node.js sandbox with the current working directory as workspace. For production deployments with code isolation requirements, E2B cloud sandboxes are recommended.
+  Sandbox is optional. If you skip configuration, sandbox routes and OS tools stay disabled and any OS tool call will return “Sandbox not configured”. For production deployments with code isolation requirements, explicitly configure a sandbox (Node.js or E2B).
 </Callout>
 
 ## Enabling Sandbox
 
-Configure sandbox using adapter factories when you call `agentStart`. The adapter pattern provides a clean, type-safe interface for different sandbox providers.
+Configure sandbox using adapter factories when you call `agentStart`. The adapter pattern provides a clean, type-safe interface for different sandbox providers. Without this option, the runtime will not bind `sandbox` in context and OS tools will be unavailable.
 
 ```ts title="lib/agent.ts"
 import { agentStart } from "agentstart";

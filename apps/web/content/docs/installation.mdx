@@ -39,7 +39,7 @@ If you're using a separate client and server setup, make sure to install AgentSt
 
 Create a `.env` file in the root of your project and add the following environment variables:
 
-1. **Model Provider API Key**
+1. **Model Provider API Key** (required)
 
 API key from your model provider (OpenRouter, OpenAI, Anthropic, etc.).
 
@@ -47,20 +47,41 @@ API key from your model provider (OpenRouter, OpenAI, Anthropic, etc.).
 MODEL_PROVIDER_API_KEY=your_api_key_here
 ```
 
-2. **Execution Sandbox Key**
-
-AgentStart shells out to the E2B sandbox for secure tool execution. Provide your key so long-running code can execute.
-
-```txt title=".env"
-E2B_API_KEY=your_e2b_key_here
-```
-
-3. **Database URL**
+2. **Database URL** (required)
 
 Connection string for the memory adapter:
 
 ```txt title=".env"
 DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+```
+
+3. **E2B Sandbox** (optional)
+
+Only needed if you explicitly enable the E2B sandbox adapter. Also configure `secondaryMemory` (e.g., Redis) when using E2B.
+
+```txt title=".env"
+E2B_API_KEY=your_e2b_key_here
+REDIS_URL=redis://user:password@host:port # example secondary memory store
+```
+
+4. **Blob Storage** (optional)
+
+Provide one of the supported providers if you need file uploads:
+
+```txt title=".env"
+# Vercel Blob
+BLOB_READ_WRITE_TOKEN=vercel_blob_rw_...
+
+# AWS S3
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+AWS_S3_BUCKET=...
+
+# Cloudflare R2
+R2_ACCESS_KEY_ID=...
+R2_SECRET_ACCESS_KEY=...
+R2_BUCKET_NAME=...
+R2_ACCOUNT_ID=...
 ```
 
 </Step>
@@ -146,7 +167,7 @@ Create a file named `agent.ts` in one of these locations:
 
 ```ts title="agent.ts"
 import { agentStart } from "agentstart";
-import { Agent, agentTools } from "agentstart/agent";
+import { Agent, agentTools, osTools } from "agentstart/agent";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 
 const openrouter = createOpenRouter({
@@ -154,10 +175,12 @@ const openrouter = createOpenRouter({
 });
 
 const agent = new Agent({
-  model: openrouter("x-ai/grok-4-fast"),
+  model: openrouter("google/gemini-2.0-flash-001"),
   instructions: "You are a helpful assistant.",
   tools: {
-    ...agentTools,
+    ...agentTools, // safe without sandbox
+    // ...osTools, // enable only if you configured sandbox in agentStart
+    // add your custom tools here
   },
 });
 
@@ -244,16 +267,18 @@ AgentStart ships with adapters for popular ORMs and query builders. Pass the ada
   </Tab>
 </Tabs>
 
-<Tabs items={["Drizzle", "Prisma", "MongoDB"]}>
+<Tabs items={["Drizzle", "Prisma"]}>
   <Tab value="Drizzle">
   ```ts title="agent.ts"
   import { agentStart } from "agentstart";
   import { drizzleMemoryAdapter } from "agentstart/memory";
   import { db } from "@/db"; // your drizzle instance
+  import * as schema from "@/db/schema";
 
   export const start = agentStart({
     memory: drizzleMemoryAdapter(db, {
       provider: "postgresql", // or "mysql", "sqlite"
+      schema,
     }),
   })
   ```
@@ -271,18 +296,6 @@ AgentStart ships with adapters for popular ORMs and query builders. Pass the ada
     memory: prismaMemoryAdapter(prisma, {
       provider: "sqlite", // or "mysql", "postgresql"
     }),
-  })
-  ```
-  </Tab>
-  
-  <Tab value="MongoDB">
-  ```ts title="agent.ts"
-  import { agentStart } from "agentstart";
-  import { mongodbMemoryAdapter } from "agentstart/memory";
-  import { client } from "@/db"; // your mongodb client
-
-  export const start = agentStart({
-    memory: mongodbMemoryAdapter(client),
   })
   ```
   </Tab>

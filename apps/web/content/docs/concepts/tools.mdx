@@ -42,6 +42,10 @@ import { osTools } from "agentstart/agent";
 // - ls: List directory contents
 ```
 
+<Callout type="warn">
+OS tools require a configured sandbox (`sandbox` option in `agentStart`). Without a sandbox, these tools will respond with “Sandbox not configured”.
+</Callout>
+
 <Tabs items={["bash", "read/write/edit", "glob/grep", "ls"]}>
 
 <Tab value="bash">
