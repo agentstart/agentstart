@@ -33,6 +33,7 @@
     "components/sidebar",
     "---Integrations---",
     "integrations/next",
+    "integrations/tanstack-start",
     "---Reference---",
     "reference/options",
     "contributing"
