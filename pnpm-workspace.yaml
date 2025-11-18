@@ -14,7 +14,7 @@ catalogs:
     '@base-ui-components/react': 1.0.0-beta.4
     '@better-auth/cli': 1.3.34
     '@better-auth/stripe': ^1.3.34
-    '@biomejs/biome': ^2.3.5
+    '@biomejs/biome': ^2.3.6
     '@clack/prompts': ^0.11.0
     '@cloudflare/vite-plugin': ^1.14.2
     '@daveyplate/better-auth-ui': ^3.2.9
@@ -26,29 +26,29 @@ catalogs:
     '@next/third-parties': ^16.0.3
     '@opennextjs/cloudflare': ^1.12.0
     '@openrouter/ai-sdk-provider': ^1.2.3
-    '@orpc/client': ^1.11.2
-    '@orpc/server': ^1.11.2
-    '@orpc/tanstack-query': ^1.11.2
+    '@orpc/client': ^1.11.3
+    '@orpc/server': ^1.11.3
+    '@orpc/tanstack-query': ^1.11.3
     '@phosphor-icons/react': ^2.1.10
     '@prisma/client': ^6.19.0
     '@react-email/components': ^1.0.1
     '@sentry/tanstackstart-react': ^10.25.0
     '@shikijs/transformers': ^3.15.0
-    '@stripe/stripe-js': ^8.4.0
+    '@stripe/stripe-js': ^8.5.1
     '@t3-oss/env-nextjs': ^0.13.8
     '@tailwindcss/container-queries': ^0.1.1
     '@tailwindcss/postcss': ^4.1.17
     '@tailwindcss/vite': ^4.1.17
     '@tanstack/devtools-vite': ^0.3.11
     '@tanstack/react-devtools': ^0.8.1
-    '@tanstack/react-query': ^5.90.9
-    '@tanstack/react-router': ^1.136.4
-    '@tanstack/react-router-devtools': ^1.136.4
-    '@tanstack/react-router-ssr-query': ^1.136.4
-    '@tanstack/react-start': ^1.136.4
+    '@tanstack/react-query': ^5.90.10
+    '@tanstack/react-router': ^1.136.8
+    '@tanstack/react-router-devtools': ^1.136.8
+    '@tanstack/react-router-ssr-query': ^1.136.8
+    '@tanstack/react-start': ^1.136.8
     '@tanstack/react-table': ^8.21.3
     '@tanstack/react-virtual': ^3.13.12
-    '@tanstack/router-plugin': ^1.136.4
+    '@tanstack/router-plugin': ^1.136.8
     '@testing-library/dom': ^10.4.1
     '@testing-library/react': ^16.3.0
     '@types/better-sqlite3': ^7.6.13
@@ -58,7 +58,7 @@ catalogs:
     '@types/node': ^24.10.1
     '@types/pg': ^8.15.6
     '@types/prompts': ^2.4.9
-    '@types/react': ^19.2.5
+    '@types/react': ^19.2.6
     '@types/react-dom': ^19.2.3
     '@types/semver': ^7.7.1
     '@upstash/redis': ^1.35.6
@@ -66,7 +66,7 @@ catalogs:
     '@vercel/kv': ^3.0.0
     '@vercel/postgres': ^0.10.0
     '@vitejs/plugin-react': ^5.1.1
-    '@vitest/ui': ^4.0.9
+    '@vitest/ui': ^4.0.10
     ai: beta
     aws4fetch: ^1.0.20
     babel-plugin-react-compiler: ^1.0.0
@@ -89,13 +89,13 @@ catalogs:
     drizzle-zod: ^0.8.3
     embla-carousel-react: ^8.6.0
     fast-glob: ^3.3.3
-    fast-xml-parser: ^4.2.5
+    fast-xml-parser: ^5.3.2
     figlet: ^1.9.4
     fs-extra: ^11.3.2
-    fumadocs-core: ^16.0.11
-    fumadocs-mdx: ^13.0.8
+    fumadocs-core: ^16.0.13
+    fumadocs-mdx: ^14.0.1
     fumadocs-typescript: ^4.0.13
-    fumadocs-ui: ^16.0.11
+    fumadocs-ui: ^16.0.13
     get-tsconfig: ^4.13.0
     harden-react-markdown: ^1.1.5
     hono: ^4.10.6
@@ -106,7 +106,7 @@ catalogs:
     jsdom: ^27.2.0
     katex: ^0.16.25
     kysely: ^0.28.8
-    lucide-react: ^0.553.0
+    lucide-react: ^0.554.0
     mongodb: ^7.0.0
     motion: ^12.23.24
     mysql2: ^3.15.3
@@ -126,7 +126,7 @@ catalogs:
     react-dom: ^19.2.0
     react-email: 5.0.4
     react-fast-compare: ^3.2.2
-    react-hook-form: ^7.66.0
+    react-hook-form: ^7.66.1
     react-markdown: ^10.1.0
     react-medium-image-zoom: ^5.4.0
     react-resizable-panels: ^3.0.6
@@ -144,7 +144,7 @@ catalogs:
     shiki: ^3.15.0
     sonner: ^2.0.7
     std-env: ^3.10.0
-    streamdown: ^1.4.0
+    streamdown: ^1.5.1
     stripe: ^19.3.1
     tailwind-merge: ^3.4.0
     tailwindcss: 4.1.17
@@ -152,7 +152,7 @@ catalogs:
     taze: ^19.9.0
     tokenlens: ^1.3.1
     ts-pattern: ^5.9.0
-    tsdown: ^0.16.4
+    tsdown: ^0.16.5
     tsx: ^4.20.6
     turbo: ^2.6.1
     tw-animate-css: ^1.4.0
@@ -162,7 +162,7 @@ catalogs:
     vaul: ^1.1.2
     vite: npm:rolldown-vite@latest
     vite-tsconfig-paths: ^5.1.4
-    vitest: ^4.0.9
+    vitest: ^4.0.10
     web-vitals: ^5.1.0
     wrangler: ^4.47.0
     yaml: ^2.8.1
