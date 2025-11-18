@@ -241,6 +241,17 @@ export async function runAdapterTest(opts: AdapterTestOptions) {
     expect(total).toBeGreaterThanOrEqual(2);
   });
 
+  test("should count threads without filters", async () => {
+    const total = await adapter.count({
+      model: "thread",
+    });
+    const listed = await adapter.findMany<DBThread>({
+      model: "thread",
+    });
+    expect(total).toBe(listed.length);
+    expect(total).toBeGreaterThanOrEqual(3);
+  });
+
   test("create message model", async () => {
     message.threadId = thread.id;
     const res = await adapter.create({
@@ -333,6 +344,75 @@ export async function runAdapterTest(opts: AdapterTestOptions) {
         {
           field: "id",
           value: secondMessageId,
+        },
+      ],
+    });
+  });
+
+  test("supports concurrent message writes", async () => {
+    const initialCount = await adapter.count({
+      model: "message",
+      where: [
+        {
+          field: "threadId",
+          value: thread.id,
+        },
+      ],
+    });
+
+    const concurrentIds = Array.from({ length: 5 }, (_, index) => {
+      return `msg-burst-${Date.now()}-${index}`;
+    });
+
+    await Promise.all(
+      concurrentIds.map((id, index) =>
+        adapter.create({
+          model: "message",
+          data: {
+            id,
+            threadId: thread.id,
+            role: "assistant",
+            parts: [{ type: "text", value: `burst-${index}` }],
+            attachments: [],
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        }),
+      ),
+    );
+
+    const created = await adapter.findMany({
+      model: "message",
+      where: [
+        {
+          field: "id",
+          operator: "in",
+          value: concurrentIds,
+        },
+      ],
+    });
+    expect(created.length).toBe(concurrentIds.length);
+
+    const afterCount = await adapter.count({
+      model: "message",
+      where: [
+        {
+          field: "threadId",
+          value: thread.id,
+        },
+      ],
+    });
+    expect(afterCount).toBeGreaterThanOrEqual(
+      initialCount + concurrentIds.length,
+    );
+
+    await adapter.deleteMany({
+      model: "message",
+      where: [
+        {
+          field: "id",
+          operator: "in",
+          value: concurrentIds,
         },
       ],
     });
