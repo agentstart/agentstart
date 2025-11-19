@@ -481,7 +481,18 @@ function buildTypeTableEntry(
   }
 
   if (typeof schema.default !== "undefined") {
-    entry.default = formatLiteral(schema.default);
+    let defaultValue = schema.default;
+    if (
+      schema.format === "date-time" &&
+      typeof defaultValue === "string" &&
+      defaultValue.includes("T")
+    ) {
+      const datePart = defaultValue.split("T")[0];
+      if (datePart) {
+        defaultValue = datePart;
+      }
+    }
+    entry.default = formatLiteral(defaultValue);
   }
 
   if (schema.deprecated === true) {

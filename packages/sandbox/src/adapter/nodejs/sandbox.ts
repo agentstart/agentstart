@@ -56,7 +56,9 @@ const instances = new Map<string, NodeSandbox>();
  * This implementation provides compatibility with the E2B API.
  */
 export class NodeSandbox implements SandboxAPI {
-  private static readonly DEFAULT_CONFIG: Partial<NodeJSSandboxConfig> = {};
+  static readonly DEFAULT_CONFIG: NodeJSSandboxConfig = {
+    timeout: 300000,
+  };
 
   readonly fs: FileSystemAPI;
   readonly bash: BashAPI;

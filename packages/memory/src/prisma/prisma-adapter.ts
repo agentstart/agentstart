@@ -115,6 +115,28 @@ const createTransform = (
     return value;
   };
 
+  const normalizeJsonForOutput = (
+    value: unknown,
+    fieldAttr: FieldAttribute | undefined,
+  ) => {
+    if (
+      !fieldAttr ||
+      fieldAttr.type !== "json" ||
+      value === undefined ||
+      value === null
+    ) {
+      return value;
+    }
+    if (typeof value === "string") {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return value;
+      }
+    }
+    return value;
+  };
+
   return {
     transformInput(
       data: Record<string, any>,
@@ -191,7 +213,8 @@ const createTransform = (
         }
         const field = tableSchema[key];
         if (field) {
-          transformedData[key] = data[field.fieldName || key];
+          const rawValue = data[field.fieldName || key];
+          transformedData[key] = normalizeJsonForOutput(rawValue, field);
         }
       }
       return transformedData as any;

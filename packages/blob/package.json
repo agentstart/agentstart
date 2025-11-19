@@ -1,7 +1,6 @@
 {
   "name": "@agentstart/blob",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "exports": {
     ".": "./dist/index.mjs",
@@ -36,8 +35,11 @@
   "types": "./dist/index.d.mts",
   "publishConfig": {
     "exports": {
-      ".": "./dist/index.js",
+      ".": "./dist/index.mjs",
+      "./s3": "./dist/s3.mjs",
+      "./vercel": "./dist/vercel.mjs",
       "./package.json": "./package.json"
-    }
+    },
+    "access": "public"
   }
 }

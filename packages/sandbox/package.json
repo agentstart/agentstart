@@ -1,7 +1,6 @@
 {
   "name": "@agentstart/sandbox",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "exports": {
     ".": "./dist/index.mjs",
@@ -31,6 +30,7 @@
     "@agentstart/biome-config": "workspace:*",
     "@agentstart/tsconfig": "workspace:*",
     "@biomejs/biome": "catalog:",
+    "@types/fs-extra": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
@@ -40,8 +40,11 @@
   "types": "./dist/index.d.mts",
   "publishConfig": {
     "exports": {
-      ".": "./dist/index.js",
+      ".": "./dist/index.mjs",
+      "./e2b": "./dist/e2b.mjs",
+      "./nodejs": "./dist/nodejs.mjs",
       "./package.json": "./package.json"
-    }
+    },
+    "access": "public"
   }
 }

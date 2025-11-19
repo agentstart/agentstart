@@ -42,40 +42,57 @@ const mysqlInit = await setupMysql();
 describe("adapter test", async () => {
   const sqliteDbPath = path.join(__dirname, "test.db");
   await rm(sqliteDbPath).catch(() => {});
-  const sqlite = new Database(sqliteDbPath);
+
+  let sqlite: Database.Database | null = null;
+  try {
+    sqlite = new Database(sqliteDbPath);
+  } catch (error) {
+    console.warn(
+      `[kysely-adapter] skipping SQLite tests: unable to load better-sqlite3 — ${
+        (error as Error).message
+      }`,
+    );
+  }
   let mysqlKy: Kysely<unknown> | null = null;
-  const sqliteKy = new Kysely({
-    dialect: new SqliteDialect({
-      database: sqlite,
-    }),
-  });
+  const sqliteKy = sqlite
+    ? new Kysely({
+        dialect: new SqliteDialect({
+          database: sqlite,
+        }),
+      })
+    : null;
 
   const createOptions = (memory: AgentStartOptions["memory"]) =>
     ({
       memory,
     }) satisfies Omit<AgentStartOptions, "agent">;
 
-  const sqliteOptions = createOptions({
-    db: sqliteKy,
-    type: "sqlite",
-  });
+  const sqliteOptions = sqliteKy
+    ? createOptions({
+        db: sqliteKy,
+        type: "sqlite",
+      })
+    : null;
 
   beforeAll(async () => {
     if (!mysqlInit.skip && mysqlInit.pool) {
-      mysqlKy = new Kysely({
+      const mysqlInstance = new Kysely({
         dialect: new MysqlDialect(mysqlInit.pool),
       });
+      mysqlKy = mysqlInstance;
       const mysqlOptions = createOptions({
-        db: mysqlKy,
+        db: mysqlInstance,
         type: "mysql",
       });
       const { runMigrations } = await getMigrations(mysqlOptions);
       await runMigrations();
     }
 
-    const { runMigrations: runSqliteMigrations } =
-      await getMigrations(sqliteOptions);
-    await runSqliteMigrations();
+    if (sqliteKy && sqliteOptions) {
+      const { runMigrations: runSqliteMigrations } =
+        await getMigrations(sqliteOptions);
+      await runSqliteMigrations();
+    }
   });
 
   afterAll(async () => {
@@ -91,7 +108,9 @@ describe("adapter test", async () => {
       }
     }
 
-    sqlite.close();
+    if (sqlite) {
+      sqlite.close();
+    }
     await rm(sqliteDbPath).catch(() => {});
   });
 
@@ -115,114 +134,126 @@ describe("adapter test", async () => {
     });
   }
 
-  const sqliteAdapter = kyselyMemoryAdapter(sqliteKy, {
-    type: "sqlite",
-  });
-  await runAdapterTest({
-    getAdapter: async (customOptions = {}) => {
-      return sqliteAdapter({ ...sqliteOptions, ...customOptions });
+  if (sqliteKy && sqliteOptions) {
+    const sqliteAdapter = kyselyMemoryAdapter(sqliteKy, {
+      type: "sqlite",
+    });
+    await runAdapterTest({
+      getAdapter: async (customOptions = {}) => {
+        return sqliteAdapter({ ...sqliteOptions, ...customOptions });
+      },
+    });
+  }
+
+  test.skipIf(!sqliteKy || !sqliteOptions)(
+    "upsert inserts and updates message rows (sqlite)",
+    async () => {
+      if (!sqliteKy || !sqliteOptions) {
+        throw new Error("SQLite test skipped — adapter not initialized");
+      }
+      const instance = await (
+        kyselyMemoryAdapter(sqliteKy, {
+          type: "sqlite",
+        }) as ReturnType<typeof kyselyMemoryAdapter>
+      )(sqliteOptions);
+      const upsert = instance.upsert;
+      if (!upsert) {
+        throw new Error(
+          "expected kyselyMemoryAdapter to expose an upsert method",
+        );
+      }
+
+      const timestamp = new Date();
+      const thread = await instance.create({
+        model: "thread",
+        data: {
+          id: `thread-upsert-${Date.now()}`,
+          title: "Upsert Thread",
+          userId: "user-upsert",
+          visibility: "private",
+          lastContext: null,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        },
+      });
+
+      const messageId = `msg-upsert-${Date.now()}`;
+      const initialParts = [{ type: "text", value: "hello kysely" }] as const;
+
+      await upsert({
+        model: "message",
+        where: [
+          {
+            field: "id",
+            value: messageId,
+          },
+        ],
+        create: {
+          id: messageId,
+          threadId: thread.id,
+          role: "assistant",
+          attachments: [],
+          createdAt: new Date(),
+        },
+        update: {
+          parts: initialParts,
+          updatedAt: new Date(),
+        },
+      });
+
+      const created = await instance.findOne<{
+        id: string;
+        parts: Array<Record<string, unknown>>;
+      }>({
+        model: "message",
+        where: [
+          {
+            field: "id",
+            value: messageId,
+          },
+        ],
+      });
+
+      expect(created?.id).toBe(messageId);
+      expect(created?.parts).toEqual(initialParts);
+
+      const updatedParts = [{ type: "text", value: "goodbye kysely" }] as const;
+
+      await upsert({
+        model: "message",
+        where: [
+          {
+            field: "id",
+            value: messageId,
+          },
+        ],
+        create: {
+          id: messageId,
+          threadId: thread.id,
+          role: "assistant",
+          attachments: [],
+          createdAt: new Date(),
+        },
+        update: {
+          parts: updatedParts,
+          updatedAt: new Date(),
+        },
+      });
+
+      const updated = await instance.findOne<{
+        id: string;
+        parts: Array<Record<string, unknown>>;
+      }>({
+        model: "message",
+        where: [
+          {
+            field: "id",
+            value: messageId,
+          },
+        ],
+      });
+
+      expect(updated?.parts).toEqual(updatedParts);
     },
-  });
-
-  test("upsert inserts and updates message rows (sqlite)", async () => {
-    const instance = await sqliteAdapter(sqliteOptions);
-    const upsert = instance.upsert;
-    if (!upsert) {
-      throw new Error(
-        "expected kyselyMemoryAdapter to expose an upsert method",
-      );
-    }
-
-    const timestamp = new Date();
-    const thread = await instance.create({
-      model: "thread",
-      data: {
-        id: `thread-upsert-${Date.now()}`,
-        title: "Upsert Thread",
-        userId: "user-upsert",
-        visibility: "private",
-        lastContext: null,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      },
-    });
-
-    const messageId = `msg-upsert-${Date.now()}`;
-    const initialParts = [{ type: "text", value: "hello kysely" }] as const;
-
-    await upsert({
-      model: "message",
-      where: [
-        {
-          field: "id",
-          value: messageId,
-        },
-      ],
-      create: {
-        id: messageId,
-        threadId: thread.id,
-        role: "assistant",
-        attachments: [],
-        createdAt: new Date(),
-      },
-      update: {
-        parts: initialParts,
-        updatedAt: new Date(),
-      },
-    });
-
-    const created = await instance.findOne<{
-      id: string;
-      parts: Array<Record<string, unknown>>;
-    }>({
-      model: "message",
-      where: [
-        {
-          field: "id",
-          value: messageId,
-        },
-      ],
-    });
-
-    expect(created?.id).toBe(messageId);
-    expect(created?.parts).toEqual(initialParts);
-
-    const updatedParts = [{ type: "text", value: "goodbye kysely" }] as const;
-
-    await upsert({
-      model: "message",
-      where: [
-        {
-          field: "id",
-          value: messageId,
-        },
-      ],
-      create: {
-        id: messageId,
-        threadId: thread.id,
-        role: "assistant",
-        attachments: [],
-        createdAt: new Date(),
-      },
-      update: {
-        parts: updatedParts,
-        updatedAt: new Date(),
-      },
-    });
-
-    const updated = await instance.findOne<{
-      id: string;
-      parts: Array<Record<string, unknown>>;
-    }>({
-      model: "message",
-      where: [
-        {
-          field: "id",
-          value: messageId,
-        },
-      ],
-    });
-
-    expect(updated?.parts).toEqual(updatedParts);
-  });
+  );
 });

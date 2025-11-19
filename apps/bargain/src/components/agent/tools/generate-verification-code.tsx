@@ -14,24 +14,13 @@ agent-frontmatter:end */
 
 "use client";
 
-import {
-  ArchiveIcon,
-  CheckIcon,
-  CopyIcon,
-  ShareFatIcon,
-} from "@phosphor-icons/react";
+import { ArchiveIcon, ShareFatIcon } from "@phosphor-icons/react";
 import type { ExtendToolSet, ToolPart } from "agentstart/agent";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { ShareDialog } from "@/components/share-dialog";
 import { Button } from "@/components/ui/button";
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Fieldset } from "@/components/ui/fieldset";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
-import { Tooltip, TooltipPopup, TooltipTrigger } from "@/components/ui/tooltip";
 import { VerificationDialog } from "@/components/verification-dialog";
 import type { generateVerificationCode } from "@/lib/tools/generate-verification-code";
 import { Steps, StepsContent, StepsItem, StepsTrigger } from "../steps";
@@ -57,8 +46,6 @@ export function GenerateVerificationCode({
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isVerificationDialogOpen, setIsVerificationDialogOpen] =
     useState(false);
-  const [copySuccess, setCopySuccess] = useState(false);
-  const verificationCodeInputRef = useRef<HTMLInputElement>(null);
 
   const isLoading = ["input-streaming", "input-available"].includes(state);
   const isDone =
@@ -69,24 +56,6 @@ export function GenerateVerificationCode({
     state === "output-available" &&
     output &&
     (output.status ? output.status === "error" : false);
-
-  const handleCopyCode = async () => {
-    const code =
-      verificationCodeInputRef.current?.value ??
-      output?.metadata?.verificationCode;
-
-    if (!code) {
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
-    } catch (error) {
-      console.error("Failed to copy verification code:", error);
-    }
-  };
 
   const handleShare = () => {
     setIsShareDialogOpen(true);

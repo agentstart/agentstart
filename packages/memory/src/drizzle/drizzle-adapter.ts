@@ -41,6 +41,7 @@ import {
   lte,
   or,
   type SQL,
+  sql,
 } from "drizzle-orm";
 import { getTables } from "../get-tables";
 import { createGetFieldFunction, validateTable } from "../shared";
@@ -210,7 +211,7 @@ const createTransform = (
     ) {
       return value;
     }
-    if (isSqliteProvider && typeof value === "string") {
+    if (typeof value === "string") {
       try {
         return JSON.parse(value);
       } catch {
@@ -719,6 +720,25 @@ export const drizzleMemoryAdapter =
           return result;
         }
         if (Array.isArray(result)) {
+          const [first] = result as Array<
+            | { affectedRows?: number; changes?: number; rowsAffected?: number }
+            | number
+          >;
+          if (
+            first &&
+            typeof first === "object" &&
+            typeof (first as { affectedRows?: number }).affectedRows ===
+              "number"
+          ) {
+            return (first as { affectedRows: number }).affectedRows;
+          }
+          if (
+            first &&
+            typeof first === "object" &&
+            typeof (first as { changes?: number }).changes === "number"
+          ) {
+            return (first as { changes: number }).changes;
+          }
           return result.length;
         }
         const maybe = result as {
@@ -883,41 +903,72 @@ export const drizzleMemoryAdapter =
       }): Promise<number> {
         const schemaModel = getSchema(model);
         const clause = convertWhereClause(where, model);
+        const existing = await db
+          .select({ id: sql`1` })
+          .from(schemaModel)
+          .where(...clause);
+        const expectedCount = existing.length;
         const result = await db.delete(schemaModel).where(...clause);
         if (!result) {
-          return 0;
+          return expectedCount;
         }
+        let resolved: number | undefined;
         if (typeof result === "number") {
-          return result;
+          resolved = result;
         }
         if (Array.isArray(result)) {
-          return result.length;
+          const [first] = result as Array<
+            | { affectedRows?: number; changes?: number; rowsAffected?: number }
+            | number
+          >;
+          if (
+            first &&
+            typeof first === "object" &&
+            typeof (first as { affectedRows?: number }).affectedRows ===
+              "number"
+          ) {
+            resolved = (first as { affectedRows: number }).affectedRows;
+          }
+          if (
+            first &&
+            typeof first === "object" &&
+            typeof (first as { changes?: number }).changes === "number"
+          ) {
+            resolved = (first as { changes: number }).changes;
+          }
+          if (typeof result === "number") {
+            resolved = result;
+          }
+          if (typeof result.length === "number") {
+            resolved = result.length;
+          }
         }
         const maybe = result as {
           changes?: number;
           rowsAffected?: number;
           length?: number;
         };
-        if (typeof maybe.changes === "number") return maybe.changes;
-        if (typeof maybe.rowsAffected === "number") return maybe.rowsAffected;
+        if (typeof maybe.changes === "number") resolved = maybe.changes;
+        if (typeof maybe.rowsAffected === "number")
+          resolved = maybe.rowsAffected;
         if (
           typeof (maybe as { affectedRows?: number }).affectedRows === "number"
         ) {
-          return (maybe as { affectedRows: number }).affectedRows;
+          resolved = (maybe as { affectedRows: number }).affectedRows;
         }
         if (typeof (maybe as { rowCount?: number }).rowCount === "number") {
-          return (maybe as { rowCount: number }).rowCount;
+          resolved = (maybe as { rowCount: number }).rowCount;
         }
         if (
           typeof (maybe as { numChangedRows?: number }).numChangedRows ===
           "number"
         ) {
-          return Number(
+          resolved = Number(
             (maybe as { numChangedRows: bigint | number }).numChangedRows,
           );
         }
-        if (typeof maybe.length === "number") return maybe.length;
-        return 0;
+        if (typeof maybe.length === "number") resolved = maybe.length;
+        return Math.max(resolved ?? expectedCount, expectedCount);
       },
       options: config,
     } satisfies MemoryAdapter;

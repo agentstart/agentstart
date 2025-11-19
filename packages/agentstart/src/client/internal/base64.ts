@@ -23,7 +23,9 @@ export function arrayBufferToBase64(buffer: ArrayBuffer): string {
     let chunk = "";
     const end = Math.min(i + chunkSize, bytes.length);
     for (let j = i; j < end; j += 1) {
-      chunk += String.fromCharCode(bytes[j]);
+      const byte = bytes[j];
+      if (byte === undefined) continue;
+      chunk += String.fromCharCode(byte);
     }
     binary += chunk;
   }

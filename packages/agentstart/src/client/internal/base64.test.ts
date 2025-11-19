@@ -13,7 +13,7 @@ import { Buffer } from "node:buffer";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { arrayBufferToBase64 } from "./base64";
 
-type BtoaGlobal = typeof globalThis & {
+type BtoaGlobal = Omit<typeof globalThis, "btoa"> & {
   btoa?: (data: string) => string;
 };
 

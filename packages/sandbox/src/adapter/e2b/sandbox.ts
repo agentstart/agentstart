@@ -181,73 +181,6 @@ export class E2BSandbox implements SandboxAPI {
   }
 
   /**
-   * Connect to an existing sandbox
-   * @private
-   */
-  private async connect(
-    sandboxId: string,
-    githubToken?: string,
-  ): Promise<void> {
-    try {
-      this.sandbox = await Sandbox.connect(sandboxId);
-      this.sandboxId = sandboxId;
-
-      // Verify sandbox is actually working before marking as active
-      try {
-        await this.sandbox.commands.run("echo 'connection test'", {
-          cwd: "/home/user",
-          timeoutMs: 5000, // Short timeout for verification
-        });
-      } catch (verifyError) {
-        console.warn(
-          `[E2B] Sandbox ${sandboxId} connected but verification failed:`,
-          verifyError,
-        );
-        this.sandbox = null;
-        this.sandboxId = null;
-        throw new Error(`Sandbox ${sandboxId} is not responding to commands`);
-      }
-
-      // Ensure default working directory exists
-      try {
-        await this.sandbox.commands.run(
-          `mkdir -p ${DEFAULT_WORKING_DIRECTORY}`,
-          {
-            cwd: "/home/user",
-          },
-        );
-      } catch (error) {
-        console.warn(
-          `[E2B] Failed to create working directory ${DEFAULT_WORKING_DIRECTORY}:`,
-          error,
-        );
-      }
-
-      // Initialize tools AFTER working directory is ready
-      this.fs = new FileSystem(this.sandbox, this);
-      this.bash = new Bash(this.sandbox, this);
-      this.git = new Git(this.sandbox, this);
-
-      // Mark as active only after everything is ready
-      this.active = true;
-
-      // Set GitHub token if provided
-      if (githubToken) {
-        await this.git.setAuthToken(githubToken);
-      }
-
-      // Refresh the heartbeat after successful connection
-      await this.refreshHeartbeat();
-    } catch (error) {
-      // Clean up on failure
-      this.sandbox = null;
-      this.sandboxId = null;
-      this.active = false;
-      throw error;
-    }
-  }
-
-  /**
    * Get the underlying sandbox instance
    * Note: For most operations, use the provided APIs (fs, bash, git, dev) directly
    */
@@ -294,6 +227,61 @@ export class E2BSandbox implements SandboxAPI {
     }
     await this.stop();
     await this.createSandbox();
+  }
+
+  /**
+   * Connect to an existing sandbox by ID and hydrate tooling.
+   */
+  private async connect(
+    sandboxId: string,
+    githubToken?: string,
+  ): Promise<void> {
+    await this.stop();
+
+    try {
+      const timeoutMs = Math.floor(
+        this.config.timeout || DEFAULT_CONFIG.timeout,
+      );
+
+      this.sandbox = await Sandbox.connect(sandboxId);
+      this.sandboxId = sandboxId;
+      this.createdAt = Date.now();
+      this.lastActivityTime = Date.now();
+
+      // Ensure the sandbox stays alive long enough for reconnection flows
+      await this.sandbox.setTimeout(timeoutMs);
+
+      // Ensure working directory exists before instantiating helpers
+      try {
+        await this.sandbox.commands.run(
+          `mkdir -p ${DEFAULT_WORKING_DIRECTORY}`,
+          {
+            cwd: "/home/user",
+          },
+        );
+      } catch (error) {
+        console.warn(
+          `[E2B] Failed to ensure working directory ${DEFAULT_WORKING_DIRECTORY}:`,
+          error,
+        );
+      }
+
+      this.fs = new FileSystem(this.sandbox, this);
+      this.bash = new Bash(this.sandbox, this);
+      this.git = new Git(this.sandbox, this);
+
+      if (githubToken) {
+        await this.git.setAuthToken(githubToken);
+      }
+
+      this.active = true;
+      await this.refreshHeartbeat();
+    } catch (error) {
+      console.error(`[E2B] Failed to connect to sandbox ${sandboxId}:`, error);
+      this.sandbox = null;
+      this.active = false;
+      throw error;
+    }
   }
 
   /**

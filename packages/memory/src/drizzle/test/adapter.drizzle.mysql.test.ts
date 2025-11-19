@@ -13,7 +13,6 @@ import type { AgentStartOptions } from "@agentstart/types";
 import { drizzle } from "drizzle-orm/mysql2";
 import { createPool, type Pool } from "mysql2/promise";
 import { afterAll, describe, expect, test } from "vitest";
-import { getMigrations } from "../../get-migration";
 import { runAdapterTest } from "../../test";
 import { drizzleMemoryAdapter } from "../drizzle-adapter";
 import * as schema from "./schema.mysql";
@@ -56,8 +55,48 @@ describeFn("Drizzle Adapter Tests (MySQL)", async () => {
   }
 
   const opts = createTestOptions(pool);
-  const { runMigrations } = await getMigrations(opts);
-  await runMigrations();
+  const setupTables = async () => {
+    await pool.query("SET FOREIGN_KEY_CHECKS=0");
+    await pool.query("DROP TABLE IF EXISTS message");
+    await pool.query("DROP TABLE IF EXISTS todo");
+    await pool.query("DROP TABLE IF EXISTS thread");
+    await pool.query("SET FOREIGN_KEY_CHECKS=1");
+    await pool.query(`
+      CREATE TABLE thread (
+        id VARCHAR(255) PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        userId VARCHAR(255) NOT NULL,
+        visibility VARCHAR(32) NOT NULL,
+        lastContext JSON NULL,
+        createdAt DATETIME NOT NULL,
+        updatedAt DATETIME NOT NULL
+      ) ENGINE=InnoDB;
+    `);
+    await pool.query(`
+      CREATE TABLE message (
+        id VARCHAR(255) PRIMARY KEY,
+        threadId VARCHAR(255) NOT NULL,
+        role VARCHAR(64) NOT NULL,
+        parts JSON NOT NULL,
+        attachments JSON NULL,
+        metadata JSON NULL,
+        createdAt DATETIME NOT NULL,
+        updatedAt DATETIME NOT NULL,
+        CONSTRAINT fk_message_thread FOREIGN KEY (threadId) REFERENCES thread(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB;
+    `);
+    await pool.query(`
+      CREATE TABLE todo (
+        id VARCHAR(255) PRIMARY KEY,
+        threadId VARCHAR(255) NOT NULL,
+        todos JSON NOT NULL,
+        createdAt DATETIME NOT NULL,
+        updatedAt DATETIME NOT NULL,
+        CONSTRAINT fk_todo_thread FOREIGN KEY (threadId) REFERENCES thread(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB;
+    `);
+  };
+  await setupTables();
 
   afterAll(async () => {
     await cleanupDatabase(pool);

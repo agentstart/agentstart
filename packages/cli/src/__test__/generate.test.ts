@@ -10,7 +10,8 @@ SEARCHABLE: packages, cli, src, test, generate, vitest
 agent-frontmatter:end */
 
 import type { AgentStartOptions } from "agentstart";
-import { drizzleMemoryAdapter, prismaMemoryAdapter } from "agentstart/memory";
+import { drizzleMemoryAdapter } from "agentstart/memory/drizzle";
+import { prismaMemoryAdapter } from "agentstart/memory/prisma";
 import Database from "better-sqlite3";
 import { describe, expect, it } from "vitest";
 import { generateDrizzleSchema } from "../generators/drizzle";

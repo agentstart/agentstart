@@ -253,9 +253,9 @@ describe("createBaseTemplate", () => {
       context: [{ title: "TEAM", content: "5 developers" }],
     });
 
-    expect(template.context).toHaveLength(1);
-    expect(template.context?.[0].title).toBe("TEAM");
-    expect(template.context?.[0].content).toBe("5 developers");
+    expect(template.context).toEqual([
+      { title: "TEAM", content: "5 developers" },
+    ]);
   });
 
   it("should be usable with generateFromTemplate", () => {
