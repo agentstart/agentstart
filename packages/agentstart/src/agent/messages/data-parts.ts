@@ -39,6 +39,12 @@ export const dataPartSchema = z.object({
     error: z.string(),
   }),
   "agentstart-usage": usageSchema,
+  "agentstart-max_turns_reached": z.object({
+    threadId: z.string(),
+    maxTurns: z.number().int().positive(),
+    usedTurns: z.number().int().nonnegative(),
+    message: z.string().optional(),
+  }),
 });
 
 export type AgentStartDataPart = z.infer<typeof dataPartSchema>;

@@ -25,6 +25,7 @@ import {
   PlusIcon,
   StopIcon,
   TrashIcon,
+  WarningIcon,
   XIcon,
 } from "@phosphor-icons/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -57,6 +58,12 @@ import {
   useRef,
   useState,
 } from "react";
+import {
+  Alert,
+  AlertAction,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Menu, MenuItem, MenuPopup, MenuTrigger } from "@/components/ui/menu";
 import {
@@ -100,11 +107,19 @@ import {
 // Types
 // ============================================================================
 
+export interface MaxTurnsReachedRenderContext {
+  maxTurns: number;
+  usedTurns: number;
+  threadId?: string;
+  onNavigateHome: () => void;
+}
+
 export interface PromptInputProps {
   className?: string;
   initialUsage?: AgentUsageSummary;
   layout?: PromptInputLayout;
   showUsage?: boolean;
+  renderMaxTurnsReached?: (context: MaxTurnsReachedRenderContext) => ReactNode;
 }
 
 type SendState = "idle" | "streaming" | "uploading";
@@ -119,10 +134,12 @@ type PromptActionButtonProps = {
   isPending: boolean;
   hasError: boolean;
   onStop?: () => void | Promise<void>;
+  disabled?: boolean;
 };
 
 type AddAttachmentsMenuProps = {
   onOpenFileDialog: () => void;
+  disabled?: boolean;
 };
 
 type UsageDisplayProps = {
@@ -169,6 +186,7 @@ type PromptInputFormProps = Omit<
     message: PromptInputMessage,
     event: FormEvent<HTMLFormElement>,
   ) => void | Promise<void>;
+  disabled?: boolean;
 };
 
 type PromptInputTextareaProps = React.ComponentProps<typeof Textarea> & {
@@ -223,14 +241,18 @@ function PromptActionButton({
   isPending,
   hasError,
   onStop,
+  disabled = false,
 }: PromptActionButtonProps) {
   const hasText = input.trim().length > 0;
   const hasAttachments = attachmentsCount > 0;
   const isStreaming = sendState === "streaming";
   const isUploading = sendState === "uploading";
-  const shouldDisable =
-    (!isStreaming && !hasText && !hasAttachments) || isUploading;
   const isStopButton = sendState === "streaming";
+  const forceDisable = disabled && !isStopButton;
+  const shouldDisable =
+    forceDisable ||
+    (!isStreaming && !hasText && !hasAttachments) ||
+    isUploading;
   const buttonType = isStopButton ? "button" : "submit";
 
   const icon = useMemo(() => {
@@ -256,12 +278,22 @@ function PromptActionButton({
   );
 }
 
-function AddAttachmentsMenu({ onOpenFileDialog }: AddAttachmentsMenuProps) {
+function AddAttachmentsMenu({
+  onOpenFileDialog,
+  disabled = false,
+}: AddAttachmentsMenuProps) {
   return (
     <div className="flex items-center gap-1">
       <Menu>
         <MenuTrigger
-          render={<Button size="icon-sm" type="button" variant="outline" />}
+          render={
+            <Button
+              disabled={disabled}
+              size="icon-sm"
+              type="button"
+              variant="outline"
+            />
+          }
         >
           <PlusIcon className="size-4" weight="bold" />
         </MenuTrigger>
@@ -269,8 +301,12 @@ function AddAttachmentsMenu({ onOpenFileDialog }: AddAttachmentsMenuProps) {
           <MenuItem
             onClick={(e) => {
               e.preventDefault();
+              if (disabled) {
+                return;
+              }
               onOpenFileDialog();
             }}
+            aria-disabled={disabled}
           >
             <ImageIcon className="mr-2 size-4" weight="duotone" /> Add photos or
             files
@@ -303,6 +339,49 @@ function UsageDisplay({ summary }: UsageDisplayProps) {
         </ContextContent>
       </Context>
     </div>
+  );
+}
+
+type MaxTurnsReachedNoticeProps = {
+  context: MaxTurnsReachedRenderContext;
+  message?: string;
+  render?: (context: MaxTurnsReachedRenderContext) => ReactNode;
+};
+
+function MaxTurnsReachedNotice({
+  context,
+  message,
+  render,
+}: MaxTurnsReachedNoticeProps) {
+  if (render) {
+    return <div className="mb-3 w-full">{render(context)}</div>;
+  }
+
+  const limitDescription =
+    message ??
+    `You have reached the maximum of ${context.maxTurns} turns in this conversation.`;
+
+  return (
+    <Alert className="mx-auto mb-3 w-[90%] bg-secondary sm:w-[95%] dark:bg-secondary">
+      <WarningIcon weight="duotone" className="size-4" />
+      <AlertTitle>Conversation limit reached</AlertTitle>
+      <AlertDescription>
+        <span className="text-muted-foreground text-xs">
+          Used {context.usedTurns}/{context.maxTurns} turns
+        </span>
+        {limitDescription}
+      </AlertDescription>
+      <AlertAction>
+        <Button
+          onClick={context.onNavigateHome}
+          size="sm"
+          type="button"
+          variant="outline"
+        >
+          Return home
+        </Button>
+      </AlertAction>
+    </Alert>
   );
 }
 
@@ -430,6 +509,7 @@ function PromptInputTextarea({
   className,
   layout = "default",
   placeholder = "Ask anything",
+  disabled = false,
   ...props
 }: PromptInputTextareaProps) {
   const [isComposing, setIsComposing] = useState(false);
@@ -458,6 +538,10 @@ function PromptInputTextarea({
   };
 
   const handlePaste: ClipboardEventHandler<HTMLTextAreaElement> = (event) => {
+    if (disabled) {
+      event.preventDefault();
+      return;
+    }
     const items = event.clipboardData?.items;
     if (!items) return;
 
@@ -491,6 +575,7 @@ function PromptInputTextarea({
       placeholder={placeholder}
       value={value}
       onChange={onChange}
+      disabled={disabled}
       {...props}
     />
   );
@@ -507,6 +592,7 @@ function PromptInputForm({
   fileInputRef,
   onSubmit,
   children,
+  disabled = false,
   ...props
 }: PromptInputFormProps) {
   const internalInputRef = useRef<HTMLInputElement | null>(null);
@@ -522,6 +608,7 @@ function PromptInputForm({
   }, []);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
     if (event.currentTarget.files) {
       onAddFiles(event.currentTarget.files);
     }
@@ -532,6 +619,10 @@ function PromptInputForm({
 
     const form = event.currentTarget;
     form.reset();
+
+    if (disabled) {
+      return;
+    }
 
     // Convert blob URLs to data URLs
     const convertedFiles = await Promise.all(
@@ -565,7 +656,7 @@ function PromptInputForm({
   // Drag & drop on form
   useEffect(() => {
     const form = formRef.current;
-    if (!form) return;
+    if (!form || disabled) return;
 
     const onDragOver = (e: DragEvent) => {
       if (e.dataTransfer?.types?.includes("Files")) {
@@ -586,11 +677,11 @@ function PromptInputForm({
       form.removeEventListener("dragover", onDragOver);
       form.removeEventListener("drop", onDrop);
     };
-  }, [onAddFiles]);
+  }, [disabled, onAddFiles]);
 
   // Global drop (opt-in)
   useEffect(() => {
-    if (!globalDrop) return;
+    if (!globalDrop || disabled) return;
 
     const onDragOver = (e: DragEvent) => {
       if (e.dataTransfer?.types?.includes("Files")) {
@@ -611,7 +702,7 @@ function PromptInputForm({
       document.removeEventListener("dragover", onDragOver);
       document.removeEventListener("drop", onDrop);
     };
-  }, [onAddFiles, globalDrop]);
+  }, [disabled, onAddFiles, globalDrop]);
 
   // Cleanup blob URLs
   useEffect(
@@ -635,9 +726,11 @@ function PromptInputForm({
         ref={inputRef}
         title="Upload files"
         type="file"
+        disabled={disabled}
       />
       <form
-        className={cn("w-full", className)}
+        aria-disabled={disabled}
+        className={cn("w-full", disabled ? "grayscale" : undefined, className)}
         onSubmit={handleSubmit}
         {...props}
       >
@@ -660,7 +753,7 @@ function MessageQueue({
   if (messageQueue.length === 0) return null;
 
   return (
-    <Queue className="relative mx-auto w-[95%] rounded-b-none border-none bg-secondary px-1 shadow-none">
+    <Queue className="relative mx-auto w-[90%] rounded-b-none border-none bg-secondary px-1 shadow-none sm:w-[95%]">
       <QueueSection>
         <QueueSectionTrigger className="py-1">
           <QueueSectionLabel count={messageQueue.length} label="Queued" />
@@ -762,8 +855,15 @@ export function PromptInput({
   initialUsage,
   layout = "default",
   showUsage = true,
+  renderMaxTurnsReached,
 }: PromptInputProps = {}) {
-  const { orpc, navigate, threadId, setThreadId } = useAgentStartContext();
+  const {
+    orpc,
+    navigate,
+    threadId,
+    setThreadId,
+    config: appConfig,
+  } = useAgentStartContext();
   const queryClient = useQueryClient();
   const isMobileLayout = layout === "mobile";
 
@@ -783,6 +883,7 @@ export function PromptInput({
   const stop = useAgentStore((state) => state.stop, storeKey);
   const sendMessage = useAgentStore((state) => state.sendMessage, storeKey);
   const messageQueue = useAgentStore((state) => state.messageQueue, storeKey);
+  const messages = useAgentStore((state) => state.messages, storeKey);
   const enqueueQueuedMessage = useAgentStore(
     (state) => state.enqueueQueuedMessage,
     storeKey,
@@ -814,6 +915,41 @@ export function PromptInput({
   const usageSummary = usagePart ?? initialUsage ?? null;
   const shouldShowUsage =
     showUsage && Boolean(threadId) && Boolean(usageSummary);
+
+  const [maxTurnsPart] = useDataPart<"data-agentstart-max_turns_reached">(
+    "data-agentstart-max_turns_reached",
+    storeKey,
+  );
+  const configuredMaxTurns = appConfig?.limits?.maxTurns ?? null;
+  const assistantTurns = useMemo(() => {
+    return messages.reduce((total, message) => {
+      return message.role === "assistant" ? total + 1 : total;
+    }, 0);
+  }, [messages]);
+  const effectiveMaxTurns = maxTurnsPart?.maxTurns ?? configuredMaxTurns;
+  const usedTurns = maxTurnsPart?.usedTurns ?? assistantTurns;
+  const hasReachedMaxTurns =
+    typeof effectiveMaxTurns === "number" &&
+    effectiveMaxTurns > 0 &&
+    usedTurns >= effectiveMaxTurns;
+  const maxTurnsContext = useMemo(() => {
+    if (!hasReachedMaxTurns || typeof effectiveMaxTurns !== "number") {
+      return null;
+    }
+
+    return {
+      maxTurns: effectiveMaxTurns,
+      usedTurns: Math.min(usedTurns, effectiveMaxTurns),
+      threadId,
+      onNavigateHome: () => navigate("/"),
+    } satisfies MaxTurnsReachedRenderContext;
+  }, [effectiveMaxTurns, hasReachedMaxTurns, navigate, threadId, usedTurns]);
+  const maxTurnsMessage =
+    maxTurnsPart?.message ??
+    (typeof effectiveMaxTurns === "number"
+      ? `This conversation reached the maximum of ${effectiveMaxTurns} turns.`
+      : undefined);
+  const isInputDisabled = Boolean(maxTurnsContext);
 
   // Blob files
   const {
@@ -862,6 +998,7 @@ export function PromptInput({
   };
 
   const openFileDialog = () => {
+    if (isInputDisabled) return;
     fileInputRef.current?.click();
   };
 
@@ -882,6 +1019,8 @@ export function PromptInput({
     text?: string;
     files?: BlobFileList;
   }) => {
+    if (isInputDisabled) return;
+
     let files: FileList | FileUIPart[] | undefined;
 
     if (message?.files && Array.isArray(message.files)) {
@@ -907,6 +1046,9 @@ export function PromptInput({
   };
 
   const handleSubmit = async (message: PromptInputMessage) => {
+    if (isInputDisabled) {
+      return;
+    }
     const isBusy = ["streaming", "submitted"].includes(status);
     const hasText = Boolean(message.text?.trim());
     const hasAttachments = Boolean(blobFiles.length);
@@ -1011,7 +1153,7 @@ export function PromptInput({
       : "idle";
 
   const handleSendQueuedMessage = async (queuedId: string) => {
-    if (!threadId) return;
+    if (!threadId || isInputDisabled) return;
     const queued = takeQueuedMessageById(queuedId);
     if (!queued) return;
     if (["streaming", "submitted"].includes(status)) {
@@ -1036,7 +1178,7 @@ export function PromptInput({
   };
 
   useEffect(() => {
-    if (!threadId || !id || !newThreadDraft) return;
+    if (!threadId || !id || !newThreadDraft || isInputDisabled) return;
 
     const { text, files } = newThreadDraft;
     const storedText = text?.trim() ?? "";
@@ -1058,10 +1200,24 @@ export function PromptInput({
         setNewThreadDraft({ text: storedText, files });
       }
     })();
-  }, [id, newThreadDraft, setNewThreadDraft, threadId, handleMessageSubmit]);
+  }, [
+    handleMessageSubmit,
+    id,
+    isInputDisabled,
+    newThreadDraft,
+    setNewThreadDraft,
+    threadId,
+  ]);
 
   return (
     <div className="mx-auto flex w-full flex-col px-4 sm:min-w-[390px] sm:max-w-3xl">
+      {maxTurnsContext ? (
+        <MaxTurnsReachedNotice
+          context={maxTurnsContext}
+          message={maxTurnsMessage}
+          render={renderMaxTurnsReached}
+        />
+      ) : null}
       <MessageQueue
         messageQueue={messageQueue}
         onSend={handleSendQueuedMessage}
@@ -1076,6 +1232,7 @@ export function PromptInput({
         onClearFiles={clearAttachments}
         fileInputRef={fileInputRef}
         onSubmit={handleSubmit}
+        disabled={isInputDisabled}
         className={cn(
           "mx-auto w-full max-w-full rounded-[22px] bg-secondary p-1.5 *:data-[slot=input-group]:rounded-[22px] sm:min-w-[390px] sm:max-w-3xl",
           className,
@@ -1104,7 +1261,10 @@ export function PromptInput({
           {isMobileLayout ? (
             <>
               <div className="flex h-7 items-center gap-1">
-                <AddAttachmentsMenu onOpenFileDialog={openFileDialog} />
+                <AddAttachmentsMenu
+                  disabled={isInputDisabled}
+                  onOpenFileDialog={openFileDialog}
+                />
                 <ModelSelector />
               </div>
               <PromptInputTextarea
@@ -1117,6 +1277,7 @@ export function PromptInput({
                 onAddFiles={addFiles}
                 autoFocus
                 layout={layout}
+                disabled={isInputDisabled}
               />
               <div className="flex h-7 shrink-0 items-center gap-2">
                 {shouldShowUsage && usageSummary ? (
@@ -1130,6 +1291,7 @@ export function PromptInput({
                   isPending={isPending}
                   hasError={hasError}
                   onStop={stop}
+                  disabled={isInputDisabled}
                 />
               </div>
             </>
@@ -1145,10 +1307,14 @@ export function PromptInput({
                 onAddFiles={addFiles}
                 autoFocus
                 layout={layout}
+                disabled={isInputDisabled}
               />
               <div className="flex w-full items-center justify-between gap-1 px-4 pb-3">
                 <div className="flex items-center gap-1">
-                  <AddAttachmentsMenu onOpenFileDialog={openFileDialog} />
+                  <AddAttachmentsMenu
+                    disabled={isInputDisabled}
+                    onOpenFileDialog={openFileDialog}
+                  />
                   <ModelSelector />
                 </div>
                 <div className="flex items-center gap-2">
@@ -1163,6 +1329,7 @@ export function PromptInput({
                     isPending={isPending}
                     hasError={hasError}
                     onStop={stop}
+                    disabled={isInputDisabled}
                   />
                 </div>
               </div>

@@ -19,6 +19,7 @@ import { streamToEventIterator } from "@orpc/server";
 import z from "zod";
 import type { AgentStartUIMessage } from "@/agent";
 import { getThreads, loadThread, Run } from "@/agent";
+import { normalizeMaxTurns } from "@/agent/limits/max-turns";
 import { metadataSchema } from "@/agent/messages/metadata";
 import type { RunFinishEvent } from "@/agent/run";
 import { publicProcedure } from "@/api/procedures";
@@ -496,6 +497,24 @@ export function createThreadRouter(procedure = publicProcedure) {
           }
 
           const memory = await getAdapter(context);
+          const normalizedMaxTurns = normalizeMaxTurns(context.maxTurns);
+
+          if (normalizedMaxTurns !== null) {
+            const assistantTurns = await memory.count({
+              model: "message",
+              where: [
+                { field: "threadId", value: input.threadId },
+                { field: "role", value: "assistant" },
+              ],
+            });
+
+            if (assistantTurns >= normalizedMaxTurns) {
+              throw errors.FORBIDDEN({
+                message:
+                  "This conversation reached the maximum number of turns.",
+              });
+            }
+          }
 
           const run = new Run(context);
 

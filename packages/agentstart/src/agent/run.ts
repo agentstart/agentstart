@@ -36,6 +36,7 @@ import {
   mergeUsageSummaries,
 } from "@/agent/usage";
 import type { BaseAgent } from "./agent";
+import { countAssistantTurns, normalizeMaxTurns } from "./limits/max-turns";
 import {
   type AgentStartUIMessage,
   dataPartSchema,
@@ -181,6 +182,11 @@ export class Run {
       threadId: options.runtimeContext.threadId,
     })) ?? [options.input.message];
 
+    const normalizedMaxTurns = normalizeMaxTurns(
+      this.agentStartOptions.maxTurns,
+    );
+    const assistantTurnsBeforeRun = countAssistantTurns(uiMessages);
+
     const threadRecord = await options.runtimeContext.memory.findOne<DBThread>({
       model: "thread",
       where: [{ field: "id", value: options.runtimeContext.threadId }],
@@ -319,6 +325,28 @@ export class Run {
 
                 // No need to emit the incremental usage; the aggregated summary
                 // reflects the total usage across the thread.
+              }
+
+              const responseMessage = setting.responseMessage;
+              if (
+                normalizedMaxTurns !== null &&
+                responseMessage &&
+                responseMessage.role === "assistant" &&
+                responseMessage.parts.length > 0
+              ) {
+                const projectedTurns = assistantTurnsBeforeRun + 1;
+                if (projectedTurns >= normalizedMaxTurns) {
+                  writer.write({
+                    type: "data-agentstart-max_turns_reached",
+                    data: {
+                      threadId: options.runtimeContext.threadId,
+                      maxTurns: normalizedMaxTurns,
+                      usedTurns: Math.min(projectedTurns, normalizedMaxTurns),
+                      message: `This conversation reached the maximum of ${normalizedMaxTurns} turns.`,
+                    },
+                    transient: true,
+                  });
+                }
               }
             },
           }),

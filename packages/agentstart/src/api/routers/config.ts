@@ -13,6 +13,7 @@ agent-frontmatter:end */
 
 import { getBlob } from "@agentstart/blob";
 import { z } from "zod";
+import { normalizeMaxTurns } from "@/agent/limits/max-turns";
 import { publicProcedure } from "@/api/procedures";
 import { handleRouterError } from "@/api/utils/error-handler";
 
@@ -70,6 +71,10 @@ const blobConfigSchema = z.object({
   provider: providerEnum.nullable(),
 });
 
+const conversationLimitsSchema = z.object({
+  maxTurns: z.number().nullable(),
+});
+
 const appConfigSchema = z.object({
   appName: z.string().nullable(),
   logo: logoConfigSchema,
@@ -82,6 +87,7 @@ const appConfigSchema = z.object({
     })
     .nullable(),
   blob: blobConfigSchema,
+  limits: conversationLimitsSchema,
 });
 
 /**
@@ -158,6 +164,8 @@ export function createConfigRouter(procedure = publicProcedure) {
             provider: adapter?.provider ?? null,
           };
 
+          const normalizedMaxTurns = normalizeMaxTurns(context.maxTurns);
+
           return {
             appName: context.appName ?? null,
             logo: logo ?? null,
@@ -174,6 +182,9 @@ export function createConfigRouter(procedure = publicProcedure) {
                 }
               : null,
             blob: blobConfig,
+            limits: {
+              maxTurns: normalizedMaxTurns,
+            },
           };
         } catch (error) {
           console.error("Error fetching app config:", error);

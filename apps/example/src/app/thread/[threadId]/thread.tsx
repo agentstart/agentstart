@@ -66,10 +66,7 @@ export default function Thread({
       <div className="flex flex-1 overflow-hidden">
         {/* Main Content */}
         <div className="mx-auto flex h-full w-full max-w-full flex-1 flex-col">
-          <Conversation
-            initialMessages={initialMessages}
-            contentClassName="pb-48"
-          />
+          <Conversation initialMessages={initialMessages} />
 
           <div className="sticky inset-x-0 bottom-0 pb-4">
             <PromptInput className="mx-auto" initialUsage={initialUsage} />

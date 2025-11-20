@@ -179,6 +179,7 @@ export const start = agentStart({
   blob: blobAdapter,
   appName: "example-nextjs",
   agent,
+  maxTurns: 3,
   models: {
     default: openrouter("x-ai/grok-4-fast"),
     available: [

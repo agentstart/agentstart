@@ -335,6 +335,13 @@ export interface AgentStartOptions {
    * ```
    */
   welcome?: AgentWelcomeOptions;
+  /**
+   * Maximum number of assistant responses allowed per thread.
+   * Conversations that hit this limit emit a max-turn data part and reject
+   * additional user messages until the thread is reset.
+   * @type {number | undefined}
+   */
+  maxTurns?: number;
 }
 
 export type AgentStartOptionsWithoutAgent = Omit<AgentStartOptions, "agent"> & {

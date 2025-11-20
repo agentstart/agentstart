@@ -27,7 +27,7 @@ import {
   useThinkingExtractor,
 } from "agentstart/client";
 import type { ComponentProps, ReactNode } from "react";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useStickToBottom } from "use-stick-to-bottom";
 import { Button } from "@/components/ui/button";
 import {
@@ -59,6 +59,8 @@ const hasNewThreadDraftContent = (draft: unknown): boolean => {
   const fileCount = getFileCount(d.files);
   return hasText || fileCount > 0;
 };
+
+const tailwindSpacingToPx = (value: number): number => value * 4;
 
 // Internal hook: Safe store access with fallback when useThread is not used
 type SetMessagesFn = (
@@ -237,12 +239,53 @@ export function Conversation({
 }: ConversationProps) {
   const { orpc, threadId } = useAgentStartContext();
   const isMobileLayout = layout === "mobile";
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const [promptFooterHeight, setPromptFooterHeight] = useState<number | null>(
+    null,
+  );
 
   const { scrollRef, contentRef, isAtBottom, scrollToBottom } =
     useStickToBottom({
       initial: "instant",
       resize: "instant",
     });
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    const footer = root.nextElementSibling;
+    if (!(footer instanceof HTMLElement)) {
+      setPromptFooterHeight(null);
+      return;
+    }
+
+    const updateHeight = () => {
+      const measured = Math.ceil(footer.getBoundingClientRect().height);
+      setPromptFooterHeight((previous) =>
+        previous === measured ? previous : measured,
+      );
+    };
+
+    updateHeight();
+
+    if (typeof ResizeObserver === "undefined") {
+      const resizeListener = () => updateHeight();
+      window.addEventListener("resize", resizeListener);
+      return () => {
+        window.removeEventListener("resize", resizeListener);
+      };
+    }
+
+    const observer = new ResizeObserver(() => {
+      updateHeight();
+    });
+    observer.observe(footer);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   const resolvedStoreId = threadId ?? "default";
 
@@ -278,6 +321,21 @@ export function Conversation({
   >((state) => state.thinkingStatus, resolvedStoreId);
   const hasQueue = messageQueue.length > 0;
   const hasNewThreadDraft = hasNewThreadDraftContent(newThreadDraft);
+  const fallbackContentPaddingPx = isMobileLayout
+    ? tailwindSpacingToPx(22)
+    : tailwindSpacingToPx(48);
+  const fallbackButtonOffsetPx = isMobileLayout
+    ? tailwindSpacingToPx(hasQueue ? 27 : 22)
+    : tailwindSpacingToPx(hasQueue ? 52 : 42);
+  const measuredFooterHeight = promptFooterHeight ?? 0;
+  const contentPaddingPx = Math.max(
+    measuredFooterHeight + (isMobileLayout ? 16 : 24),
+    fallbackContentPaddingPx,
+  );
+  const scrollButtonOffsetPx = Math.max(
+    measuredFooterHeight + (isMobileLayout ? 12 : 16),
+    fallbackButtonOffsetPx,
+  );
 
   const queryResult = useQuery(
     orpc.message.get.queryOptions({
@@ -397,6 +455,7 @@ export function Conversation({
   return (
     <ScrollAreaPrimitive.Root
       className={cn("relative flex size-full flex-col", className)}
+      ref={rootRef}
       {...props}
     >
       <ScrollAreaPrimitive.Viewport
@@ -410,9 +469,9 @@ export function Conversation({
           ref={contentRef}
           className={cn(
             "mx-auto flex flex-col gap-4 px-4 py-2 sm:min-w-[390px]! sm:max-w-3xl",
-            isMobileLayout ? "pb-22" : "pb-48",
             contentClassName,
           )}
+          style={{ paddingBottom: `${contentPaddingPx}px` }}
         >
           {resolvedErrorState ? (
             resolvedErrorState
@@ -495,11 +554,9 @@ export function Conversation({
       </ScrollAreaPrimitive.Scrollbar>
 
       <ConversationScrollButton
-        className={cn(isMobileLayout ? "bottom-22" : "bottom-42", {
-          [isMobileLayout ? "bottom-27" : "bottom-52"]: hasQueue,
-        })}
         isAtBottom={isAtBottom}
         scrollToBottom={scrollToBottom}
+        style={{ bottom: `${scrollButtonOffsetPx}px` }}
       />
     </ScrollAreaPrimitive.Root>
   );
