@@ -16,10 +16,7 @@
     "@coss/menu",
     "@coss/empty",
     "@coss/scroll-area",
-    "sidebar",
-    "@coss/tooltip",
-    "@coss/provider",
-    "theme-switch"
+    "@coss/tooltip"
   ],
   "files": [
     {
@@ -51,6 +48,12 @@
       "content": "/* agent-frontmatter:start\nAGENT: Sidebar footer\nPURPOSE: Render optional footer content for the agent sidebar\nUSAGE: <SidebarFooter footer={footerContent} />\nEXPORTS: SidebarFooter, SidebarFooterProps\nFEATURES:\n  - Wraps custom footer nodes in the shadcn sidebar footer element\n  - Conditionally renders only when footer content is provided\n  - Maintains consistent sidebar layout structure\nSEARCHABLE: agent sidebar, footer slot, layout footer\nagent-frontmatter:end */\n\n\"use client\";\n\nimport type { ReactNode } from \"react\";\nimport { SidebarFooter as ShadcnSidebarFooter } from \"@/components/ui/sidebar\";\n\nexport type SidebarFooterProps = {\n  footer?: ReactNode;\n};\n\nexport function SidebarFooter({ footer }: SidebarFooterProps) {\n  if (!footer) {\n    return null;\n  }\n\n  return <ShadcnSidebarFooter>{footer}</ShadcnSidebarFooter>;\n}\n",
       "type": "registry:component",
       "target": "components/agent/sidebar/sidebar-footer.tsx"
+    },
+    {
+      "path": "src/registry/agentstart/theme-switch.tsx",
+      "content": "/* agent-frontmatter:start\nAGENT: Theme switcher components\nPURPOSE: Toggle between light/dark/system themes\nUSAGE: <SimpleThemeSwitch /> or <ThemeSwitch />\nEXPORTS: SimpleThemeSwitch, ThemeSwitch\nFEATURES:\n  - Icon button for quick theme toggle (SimpleThemeSwitch)\n  - Tab-based theme selector (ThemeSwitch)\n  - System theme detection and display\n  - Smooth transitions between themes\nSEARCHABLE: theme toggle, dark mode, light mode, theme switcher\nagent-frontmatter:end */\n\n\"use client\";\n\nimport { MonitorIcon, MoonIcon, SunIcon } from \"@phosphor-icons/react\";\nimport { useTheme } from \"agentstart/client\";\nimport type React from \"react\";\nimport { useEffect, useState } from \"react\";\nimport { Button } from \"@/components/ui/button\";\nimport { Tabs, TabsList, TabsTrigger } from \"@/components/ui/tabs\";\n\nexport function SimpleThemeSwitch() {\n  const { theme, setTheme } = useTheme();\n  const [mounted, setMounted] = useState(false);\n\n  // Prevent hydration mismatch - use default until mounted\n  useEffect(() => {\n    setMounted(true);\n  }, []);\n\n  if (!mounted) {\n    return (\n      <Button\n        variant=\"ghost\"\n        size=\"icon\"\n        className=\"size-8 rounded-full text-foreground transition-colors\"\n      >\n        <SunIcon weight=\"duotone\" className=\"size-4\" />\n      </Button>\n    );\n  }\n\n  // Resolve system theme to actual theme\n  const resolvedTheme =\n    theme === \"system\"\n      ? window.matchMedia(\"(prefers-color-scheme: dark)\").matches\n        ? \"dark\"\n        : \"light\"\n      : theme;\n\n  const icon =\n    resolvedTheme === \"dark\" ? (\n      <MoonIcon weight=\"duotone\" className=\"size-4\" />\n    ) : (\n      <SunIcon weight=\"duotone\" className=\"size-4\" />\n    );\n\n  const nextTheme = resolvedTheme === \"light\" ? \"dark\" : \"light\";\n\n  return (\n    <Button\n      variant=\"ghost\"\n      size=\"icon\"\n      className=\"size-8 rounded-full text-foreground transition-colors\"\n      onClick={() => {\n        setTheme(nextTheme);\n      }}\n    >\n      {icon}\n    </Button>\n  );\n}\n\nexport function ThemeSwitch() {\n  const { theme, setTheme } = useTheme();\n  const [mounted, setMounted] = useState(false);\n\n  // Prevent hydration mismatch - use a default value until mounted\n  useEffect(() => {\n    setMounted(true);\n  }, []);\n\n  const currentTheme = mounted ? theme : \"system\";\n\n  return (\n    <Tabs\n      value={currentTheme}\n      onValueChange={(value) => setTheme(value as any)}\n    >\n      <TabsList className=\"h-8 overflow-hidden\">\n        <ThemeSwitchTrigger value=\"system\">\n          <MonitorIcon className=\"size-4\" />\n        </ThemeSwitchTrigger>\n        <ThemeSwitchTrigger value=\"light\">\n          <SunIcon weight=\"duotone\" className=\"size-4\" />\n        </ThemeSwitchTrigger>\n        <ThemeSwitchTrigger value=\"dark\">\n          <MoonIcon weight=\"duotone\" className=\"size-4\" />\n        </ThemeSwitchTrigger>\n      </TabsList>\n    </Tabs>\n  );\n}\n\nfunction ThemeSwitchTrigger({\n  children,\n  value,\n}: React.PropsWithChildren<{ value: string }>) {\n  return (\n    <TabsTrigger\n      className=\"flex size-[26px] items-center justify-center rounded-full p-0 transition-colors data-[state=active]:border-none data-[state=inactive]:border-none data-[state=active]:bg-white dark:data-[state=active]:bg-input\"\n      value={value}\n    >\n      {children}\n    </TabsTrigger>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "components/agent/theme-switch.tsx"
     }
   ]
 }

@@ -12,7 +12,7 @@
   ],
   "registryDependencies": [
     "@coss/button",
-    "spinner"
+    "@coss/spinner"
   ],
   "files": [
     {

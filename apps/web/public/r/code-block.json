@@ -7,6 +7,7 @@
   "dependencies": [
     "@phosphor-icons/react",
     "@shikijs/transformers",
+    "agentstart",
     "shiki",
     "react"
   ],

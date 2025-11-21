@@ -11,7 +11,7 @@
   "registryDependencies": [
     "@coss/collapsible",
     "@coss/scroll-area",
-    "spinner"
+    "@coss/spinner"
   ],
   "files": [
     {

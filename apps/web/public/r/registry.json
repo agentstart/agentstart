@@ -33,6 +33,11 @@
           "path": "src/registry/agentstart/sidebar/sidebar-footer.tsx",
           "type": "registry:component",
           "target": "components/agent/sidebar/sidebar-footer.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/theme-switch.tsx",
+          "type": "registry:component",
+          "target": "components/agent/theme-switch.tsx"
         }
       ],
       "dependencies": [
@@ -47,10 +52,7 @@
         "@coss/menu",
         "@coss/empty",
         "@coss/scroll-area",
-        "sidebar",
-        "@coss/tooltip",
-        "@coss/provider",
-        "theme-switch"
+        "@coss/tooltip"
       ]
     },
     {
@@ -63,6 +65,11 @@
           "path": "src/registry/agentstart/header.tsx",
           "type": "registry:component",
           "target": "components/agent/header.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/relative-time.tsx",
+          "type": "registry:component",
+          "target": "components/agent/relative-time.tsx"
         }
       ],
       "dependencies": [
@@ -75,8 +82,7 @@
         "@coss/button",
         "@coss/menu",
         "@coss/skeleton",
-        "@coss/tooltip",
-        "relative-time"
+        "@coss/tooltip"
       ]
     },
     {
@@ -94,6 +100,96 @@
           "path": "src/registry/agentstart/conversation/conversation-message.tsx",
           "type": "registry:component",
           "target": "components/agent/conversation/conversation-message.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/relative-time.tsx",
+          "type": "registry:component",
+          "target": "components/agent/relative-time.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/message.tsx",
+          "type": "registry:component",
+          "target": "components/agent/message.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/response.tsx",
+          "type": "registry:component",
+          "target": "components/agent/response.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/code-block.tsx",
+          "type": "registry:component",
+          "target": "components/agent/code-block.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/sources.tsx",
+          "type": "registry:component",
+          "target": "components/agent/sources.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/shimmer.tsx",
+          "type": "registry:component",
+          "target": "components/agent/shimmer.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/suggested-prompts.tsx",
+          "type": "registry:component",
+          "target": "components/agent/suggested-prompts.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/welcome-message.tsx",
+          "type": "registry:component",
+          "target": "components/agent/welcome-message.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/tools/message-part-view.tsx",
+          "type": "registry:component",
+          "target": "components/agent/tools/message-part-view.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/tools/bash.tsx",
+          "type": "registry:component",
+          "target": "components/agent/tools/bash.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/tools/glob.tsx",
+          "type": "registry:component",
+          "target": "components/agent/tools/glob.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/tools/grep.tsx",
+          "type": "registry:component",
+          "target": "components/agent/tools/grep.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/tools/ls.tsx",
+          "type": "registry:component",
+          "target": "components/agent/tools/ls.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/tools/read.tsx",
+          "type": "registry:component",
+          "target": "components/agent/tools/read.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/tools/write.tsx",
+          "type": "registry:component",
+          "target": "components/agent/tools/write.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/tools/edit.tsx",
+          "type": "registry:component",
+          "target": "components/agent/tools/edit.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/tools/todo.tsx",
+          "type": "registry:component",
+          "target": "components/agent/tools/todo.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/tools/reasoning.tsx",
+          "type": "registry:component",
+          "target": "components/agent/tools/reasoning.tsx"
         }
       ],
       "dependencies": [
@@ -106,19 +202,10 @@
         "use-stick-to-bottom"
       ],
       "registryDependencies": [
-        "spinner",
         "@coss/button",
         "@coss/empty",
-        "@coss/avatar",
-        "@coss/provider",
-        "message",
-        "response",
-        "sources",
-        "message-part-view",
-        "shimmer",
-        "suggested-prompts",
-        "welcome-message",
-        "relative-time"
+        "@coss/skeleton",
+        "@coss/avatar"
       ]
     },
     {
@@ -131,6 +218,21 @@
           "path": "src/registry/agentstart/prompt-input.tsx",
           "type": "registry:component",
           "target": "components/agent/prompt-input.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/context.tsx",
+          "type": "registry:component",
+          "target": "components/agent/context.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/model-selector.tsx",
+          "type": "registry:component",
+          "target": "components/agent/model-selector.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/queue.tsx",
+          "type": "registry:component",
+          "target": "components/agent/queue.tsx"
         }
       ],
       "dependencies": [
@@ -146,10 +248,8 @@
         "@coss/menu",
         "@coss/preview-card",
         "@coss/textarea",
-        "spinner",
-        "context",
-        "model-selector",
-        "queue"
+        "@coss/alert",
+        "@coss/spinner"
       ]
     },
     {
@@ -170,7 +270,7 @@
         "motion",
         "react"
       ],
-      "registryDependencies": ["@coss/button", "spinner"]
+      "registryDependencies": ["@coss/button", "@coss/spinner"]
     },
     {
       "name": "welcome-message",
@@ -182,6 +282,86 @@
           "path": "src/registry/agentstart/welcome-message.tsx",
           "type": "registry:component",
           "target": "components/agent/welcome-message.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/conversation/conversation-message.tsx",
+          "type": "registry:component",
+          "target": "components/agent/conversation/conversation-message.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/message.tsx",
+          "type": "registry:component",
+          "target": "components/agent/message.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/relative-time.tsx",
+          "type": "registry:component",
+          "target": "components/agent/relative-time.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/response.tsx",
+          "type": "registry:component",
+          "target": "components/agent/response.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/code-block.tsx",
+          "type": "registry:component",
+          "target": "components/agent/code-block.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/sources.tsx",
+          "type": "registry:component",
+          "target": "components/agent/sources.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/tools/message-part-view.tsx",
+          "type": "registry:component",
+          "target": "components/agent/tools/message-part-view.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/tools/bash.tsx",
+          "type": "registry:component",
+          "target": "components/agent/tools/bash.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/tools/glob.tsx",
+          "type": "registry:component",
+          "target": "components/agent/tools/glob.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/tools/grep.tsx",
+          "type": "registry:component",
+          "target": "components/agent/tools/grep.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/tools/ls.tsx",
+          "type": "registry:component",
+          "target": "components/agent/tools/ls.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/tools/read.tsx",
+          "type": "registry:component",
+          "target": "components/agent/tools/read.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/tools/write.tsx",
+          "type": "registry:component",
+          "target": "components/agent/tools/write.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/tools/edit.tsx",
+          "type": "registry:component",
+          "target": "components/agent/tools/edit.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/tools/todo.tsx",
+          "type": "registry:component",
+          "target": "components/agent/tools/todo.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/tools/reasoning.tsx",
+          "type": "registry:component",
+          "target": "components/agent/tools/reasoning.tsx"
         }
       ],
       "dependencies": [
@@ -191,11 +371,7 @@
         "motion",
         "react"
       ],
-      "registryDependencies": [
-        "@coss/button",
-        "spinner",
-        "conversation"
-      ]
+      "registryDependencies": ["@coss/button", "@coss/spinner"]
     },
     {
       "name": "code-block",
@@ -212,13 +388,11 @@
       "dependencies": [
         "@phosphor-icons/react",
         "@shikijs/transformers",
+        "agentstart",
         "shiki",
         "react"
       ],
-      "registryDependencies": [
-        "@coss/button",
-        "@coss/scroll-area"
-      ]
+      "registryDependencies": ["@coss/button", "@coss/scroll-area"]
     },
     {
       "name": "shimmer",
@@ -262,11 +436,7 @@
           "target": "components/agent/message.tsx"
         }
       ],
-      "dependencies": [
-        "ai",
-        "class-variance-authority",
-        "react"
-      ],
+      "dependencies": ["ai", "class-variance-authority", "react"],
       "registryDependencies": ["@coss/avatar"]
     },
     {
@@ -279,10 +449,21 @@
           "path": "src/registry/agentstart/response.tsx",
           "type": "registry:component",
           "target": "components/agent/response.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/code-block.tsx",
+          "type": "registry:component",
+          "target": "components/agent/code-block.tsx"
         }
       ],
-      "dependencies": ["react", "streamdown"],
-      "registryDependencies": ["code-block"]
+      "dependencies": [
+        "@phosphor-icons/react",
+        "react",
+        "react-medium-image-zoom",
+        "shiki",
+        "streamdown"
+      ],
+      "registryDependencies": []
     },
     {
       "name": "sources",
@@ -296,10 +477,7 @@
           "target": "components/agent/sources.tsx"
         }
       ],
-      "dependencies": [
-        "@phosphor-icons/react",
-        "react"
-      ],
+      "dependencies": ["@phosphor-icons/react", "react"],
       "registryDependencies": ["@coss/collapsible"]
     },
     {
@@ -356,7 +534,7 @@
       "registryDependencies": [
         "@coss/collapsible",
         "@coss/scroll-area",
-        "spinner"
+        "@coss/spinner"
       ]
     },
     {
@@ -369,10 +547,30 @@
           "path": "src/registry/agentstart/tools/reasoning.tsx",
           "type": "registry:component",
           "target": "components/agent/tools/reasoning.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/steps.tsx",
+          "type": "registry:component",
+          "target": "components/agent/steps.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/shimmer.tsx",
+          "type": "registry:component",
+          "target": "components/agent/shimmer.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/response.tsx",
+          "type": "registry:component",
+          "target": "components/agent/response.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/code-block.tsx",
+          "type": "registry:component",
+          "target": "components/agent/code-block.tsx"
         }
       ],
       "dependencies": ["@phosphor-icons/react", "react"],
-      "registryDependencies": ["steps", "shimmer", "response"]
+      "registryDependencies": []
     },
     {
       "name": "message-part-view",
@@ -424,6 +622,21 @@
           "path": "src/registry/agentstart/tools/write.tsx",
           "type": "registry:component",
           "target": "components/agent/tools/write.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/response.tsx",
+          "type": "registry:component",
+          "target": "components/agent/response.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/code-block.tsx",
+          "type": "registry:component",
+          "target": "components/agent/code-block.tsx"
+        },
+        {
+          "path": "src/registry/agentstart/tools/reasoning.tsx",
+          "type": "registry:component",
+          "target": "components/agent/tools/reasoning.tsx"
         }
       ],
       "dependencies": [
@@ -434,11 +647,7 @@
         "react",
         "react-fast-compare"
       ],
-      "registryDependencies": [
-        "@coss/tooltip",
-        "reasoning",
-        "response"
-      ]
+      "registryDependencies": ["@coss/tooltip"]
     },
     {
       "name": "theme-switch",
@@ -452,11 +661,7 @@
           "target": "components/agent/theme-switch.tsx"
         }
       ],
-      "dependencies": [
-        "@phosphor-icons/react",
-        "agentstart",
-        "react"
-      ],
+      "dependencies": ["@phosphor-icons/react", "agentstart", "react"],
       "registryDependencies": ["@coss/button", "@coss/tabs"]
     },
     {
@@ -471,16 +676,8 @@
           "target": "components/agent/model-selector.tsx"
         }
       ],
-      "dependencies": [
-        "@phosphor-icons/react",
-        "agentstart",
-        "react"
-      ],
-      "registryDependencies": [
-        "@coss/button",
-        "@coss/command",
-        "@coss/dialog"
-      ]
+      "dependencies": ["@phosphor-icons/react", "agentstart", "react"],
+      "registryDependencies": ["@coss/button", "@coss/command", "@coss/dialog"]
     },
     {
       "name": "file-explorer",
