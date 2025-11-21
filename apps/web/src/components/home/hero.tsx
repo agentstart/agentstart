@@ -144,7 +144,11 @@ export function Hero() {
                 <TabsList>
                   {CODE_TABS.map((tab) => {
                     return (
-                      <TabsTab key={tab.id} value={tab.id}>
+                      <TabsTab
+                        className="font-mono"
+                        key={tab.id}
+                        value={tab.id}
+                      >
                         {tab.label}
                       </TabsTab>
                     );

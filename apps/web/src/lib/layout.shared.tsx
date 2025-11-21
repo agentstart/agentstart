@@ -17,7 +17,7 @@ export function baseOptions(): BaseLayoutProps {
           AgentStart
         </div>
       ),
-      transparentMode: "top",
+      transparentMode: "always",
     },
     githubUrl: "https://github.com/agentstart/agentstart",
     // see https://fumadocs.dev/docs/ui/navigation/links

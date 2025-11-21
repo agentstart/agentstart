@@ -12,10 +12,10 @@ agent-frontmatter:end */
 import {
   CloudArrowUpIcon,
   CodeIcon,
-  CpuIcon,
+  CodesandboxLogoIcon,
   DatabaseIcon,
-  TerminalWindowIcon,
-  UsersThreeIcon,
+  OpenAiLogoIcon,
+  ShapesIcon,
 } from "@phosphor-icons/react/ssr";
 import type { ReactElement } from "react";
 import { BentoCard, BentoGrid } from "@/components/bento-grid";
@@ -25,7 +25,7 @@ export type FeatureCard = {
   description: string;
   href: string;
   cta: string;
-  Icon: typeof CpuIcon;
+  Icon: typeof OpenAiLogoIcon;
   className: string;
   background?: ReactElement | null;
 };
@@ -37,11 +37,14 @@ export const featureCards = [
       "AI SDK-powered runtime with oRPC endpoints so the server and client stay type-safe from agentStart() to start.api.*.",
     href: "/docs/basic-usage",
     cta: "Runtime docs",
-    Icon: CpuIcon,
+    Icon: OpenAiLogoIcon,
     className: "col-span-3 lg:col-span-1",
     background: (
       <div className="pointer-events-none absolute inset-0">
-        <CpuIcon className="-right-4 -top-6 absolute h-32 w-32 text-foreground/10" />
+        <OpenAiLogoIcon
+          className="-right-4 -top-6 absolute h-32 w-32 text-foreground/10"
+          weight="duotone"
+        />
       </div>
     ),
   },
@@ -60,30 +63,30 @@ export const featureCards = [
     ),
   },
   {
+    name: "UI Components",
+    description:
+      "Prebuilt conversation, prompt input, and sidebar components wired to the agent provider for drop-in chat surfaces.",
+    href: "/docs/components/overview",
+    cta: "Components docs",
+    Icon: ShapesIcon,
+    className: "col-span-3 lg:col-span-2",
+    background: (
+      <div className="pointer-events-none absolute inset-0">
+        <ShapesIcon className="-right-4 absolute top-6 h-28 w-28 text-foreground/10" />
+      </div>
+    ),
+  },
+  {
     name: "Tools & Sandbox",
     description:
       "Ship built-in todo tools, or extend with Node.js and E2B sandboxes for filesystem, bash, and git APIs.",
     href: "/docs/concepts/sandbox",
     cta: "Sandbox docs",
-    Icon: TerminalWindowIcon,
-    className: "col-span-3 lg:col-span-2",
-    background: (
-      <div className="pointer-events-none absolute inset-0">
-        <TerminalWindowIcon className="-right-6 -top-6 absolute h-32 w-32 text-foreground/10" />
-      </div>
-    ),
-  },
-  {
-    name: "Client Hooks",
-    description:
-      "React hooks and SSE helpers hydrate chat UIs, upload files, and expose agent status instantly.",
-    href: "/docs/concepts/client",
-    cta: "Client docs",
-    Icon: UsersThreeIcon,
+    Icon: CodesandboxLogoIcon,
     className: "col-span-3 lg:col-span-1",
     background: (
       <div className="pointer-events-none absolute inset-0">
-        <UsersThreeIcon className="-right-4 absolute top-6 h-28 w-28 text-foreground/10" />
+        <CodesandboxLogoIcon className="-right-6 -top-6 absolute h-32 w-32 text-foreground/10" />
       </div>
     ),
   },
@@ -102,11 +105,11 @@ export const featureCards = [
     ),
   },
   {
-    name: "SDK Access",
+    name: "Templates & Integrations",
     description:
-      "Use the generated oRPC SDK anywhere on the server to list, create, or hydrate threads with strict typing.",
-    href: "/docs/concepts/sdk",
-    cta: "SDK docs",
+      "Ready-to-ship handlers for Next.js, Tanstack Start. so you can drop the agent into any API surface quickly.",
+    href: "/docs/integrations/next",
+    cta: "Integration guides",
     Icon: CodeIcon,
     className: "col-span-3 lg:col-span-2",
     background: (
