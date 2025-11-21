@@ -9,5 +9,6 @@
   "typescript.preferences.autoImportFileExcludePatterns": [
     "zod/dist/types/index.d.ts"
   ],
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "cSpell.words": ["agentstart"]
 }

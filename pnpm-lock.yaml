@@ -8,10 +8,10 @@ catalogs:
   default:
     '@ai-sdk/deepseek':
       specifier: beta
-      version: 2.0.0-beta.34
+      version: 2.0.0-beta.35
     '@ai-sdk/react':
       specifier: beta
-      version: 3.0.0-beta.99
+      version: 3.0.0-beta.105
     '@babel/preset-react':
       specifier: ^7.28.5
       version: 7.28.5
@@ -61,7 +61,7 @@ catalogs:
       specifier: ^1.11.3
       version: 1.11.3
     '@phosphor-icons/react':
-      specifier: ^2.1.10
+      specifier: 2.1.10
       version: 2.1.10
     '@prisma/client':
       specifier: ^7.0.0
@@ -155,7 +155,7 @@ catalogs:
       version: 5.1.1
     ai:
       specifier: beta
-      version: 6.0.0-beta.99
+      version: 6.0.0-beta.105
     aws4fetch:
       specifier: ^1.0.20
       version: 1.0.20
@@ -439,7 +439,7 @@ importers:
         version: link:../../packages/utils
       '@ai-sdk/deepseek':
         specifier: 'catalog:'
-        version: 2.0.0-beta.34(effect@3.18.4)(zod@4.1.12)
+        version: 2.0.0-beta.35(effect@3.18.4)(zod@4.1.12)
       '@base-ui-components/react':
         specifier: 'catalog:'
         version: 1.0.0-beta.4(@types/react@19.2.6)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -451,7 +451,7 @@ importers:
         version: 1.0.2
       '@openrouter/ai-sdk-provider':
         specifier: 'catalog:'
-        version: 1.2.3(@tanstack/react-query@5.90.10(react@19.2.0))(ai@6.0.0-beta.99(effect@3.18.4)(zod@4.1.12))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(zod@4.1.12)
+        version: 1.2.3(@tanstack/react-query@5.90.10(react@19.2.0))(ai@6.0.0-beta.105(effect@3.18.4)(zod@4.1.12))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(zod@4.1.12)
       '@orpc/server':
         specifier: 'catalog:'
         version: 1.11.3(@opentelemetry/api@1.9.0)(ws@8.18.3)
@@ -493,7 +493,7 @@ importers:
         version: link:../../packages/agentstart
       ai:
         specifier: 'catalog:'
-        version: 6.0.0-beta.99(effect@3.18.4)(zod@4.1.12)
+        version: 6.0.0-beta.105(effect@3.18.4)(zod@4.1.12)
       canvas-confetti:
         specifier: 'catalog:'
         version: 1.9.4
@@ -626,7 +626,7 @@ importers:
         version: link:../../packages/utils
       '@ai-sdk/react':
         specifier: 'catalog:'
-        version: 3.0.0-beta.99(effect@3.18.4)(react@19.2.0)(zod@4.1.12)
+        version: 3.0.0-beta.105(effect@3.18.4)(react@19.2.0)(zod@4.1.12)
       '@base-ui-components/react':
         specifier: 'catalog:'
         version: 1.0.0-beta.4(@types/react@19.2.6)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -635,7 +635,7 @@ importers:
         version: 1.0.2
       '@openrouter/ai-sdk-provider':
         specifier: 'catalog:'
-        version: 1.2.3(@tanstack/react-query@5.90.10(react@19.2.0))(ai@6.0.0-beta.99(effect@3.18.4)(zod@4.1.12))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(zod@4.1.12)
+        version: 1.2.3(@tanstack/react-query@5.90.10(react@19.2.0))(ai@6.0.0-beta.105(effect@3.18.4)(zod@4.1.12))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(zod@4.1.12)
       '@orpc/server':
         specifier: 'catalog:'
         version: 1.11.3(@opentelemetry/api@1.9.0)(ws@8.18.3)
@@ -656,7 +656,7 @@ importers:
         version: link:../../packages/agentstart
       ai:
         specifier: 'catalog:'
-        version: 6.0.0-beta.99(effect@3.18.4)(zod@4.1.12)
+        version: 6.0.0-beta.105(effect@3.18.4)(zod@4.1.12)
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -810,7 +810,7 @@ importers:
         version: link:../../packages/agentstart
       ai:
         specifier: 'catalog:'
-        version: 6.0.0-beta.99(effect@3.18.4)(zod@4.1.12)
+        version: 6.0.0-beta.105(effect@3.18.4)(zod@4.1.12)
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -961,7 +961,7 @@ importers:
         version: link:../utils
       '@ai-sdk/react':
         specifier: 'catalog:'
-        version: 3.0.0-beta.99(effect@3.18.4)(react@19.2.0)(zod@4.1.12)
+        version: 3.0.0-beta.105(effect@3.18.4)(react@19.2.0)(zod@4.1.12)
       '@orpc/client':
         specifier: 'catalog:'
         version: 1.11.3(@opentelemetry/api@1.9.0)
@@ -1016,7 +1016,7 @@ importers:
         version: 19.2.6
       ai:
         specifier: 'catalog:'
-        version: 6.0.0-beta.99(effect@3.18.4)(zod@4.1.12)
+        version: 6.0.0-beta.105(effect@3.18.4)(zod@4.1.12)
       better-sqlite3:
         specifier: 'catalog:'
         version: 12.4.1
@@ -1192,7 +1192,7 @@ importers:
         version: link:../utils
       '@ai-sdk/react':
         specifier: 'catalog:'
-        version: 3.0.0-beta.99(effect@3.18.4)(react@19.2.0)(zod@4.1.12)
+        version: 3.0.0-beta.105(effect@3.18.4)(react@19.2.0)(zod@4.1.12)
       '@base-ui-components/react':
         specifier: 'catalog:'
         version: 1.0.0-beta.4(@types/react@19.2.6)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -1222,7 +1222,7 @@ importers:
         version: link:../agentstart
       ai:
         specifier: 'catalog:'
-        version: 6.0.0-beta.99(effect@3.18.4)(zod@4.1.12)
+        version: 6.0.0-beta.105(effect@3.18.4)(zod@4.1.12)
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -1471,7 +1471,7 @@ importers:
         version: 2.0.0
       ai:
         specifier: 'catalog:'
-        version: 6.0.0-beta.99(effect@3.18.4)(zod@4.1.12)
+        version: 6.0.0-beta.105(effect@3.18.4)(zod@4.1.12)
       better-sqlite3:
         specifier: 'catalog:'
         version: 12.4.1
@@ -1541,14 +1541,14 @@ packages:
   '@acemir/cssom@0.9.23':
     resolution: {integrity: sha512-2kJ1HxBKzPLbmhZpxBiTZggjtgCwKg1ma5RHShxvd6zgqhDEdEkzpiwe7jLkI2p2BrZvFCXIihdoMkl1H39VnA==}
 
-  '@ai-sdk/deepseek@2.0.0-beta.34':
-    resolution: {integrity: sha512-OtEz0w5+xz0dhw3r0ENvcx5UI5QvWNMEboVDseg3avntjCJUdij2YPLUyu/ZHBOXv7e1lcUA3pjysTpBRtYTUg==}
+  '@ai-sdk/deepseek@2.0.0-beta.35':
+    resolution: {integrity: sha512-Jxyj7E5MFQRFlt6xhzcwhYUpzIsGmEZvvhQRZrE0/1kQPEPInyiOG8QweQMztEopxqu8MIckmnM5SDl5oOh9Ow==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/gateway@2.0.0-beta.52':
-    resolution: {integrity: sha512-xH1J+Fn7sLjDQVB2XPMsha/gCWUhJ+DvNvLzhbNf7P1XdTRsHY3HMx3xnZLXfaHBXOVCJ+JtAtxS3+3xGa2u2A==}
+  '@ai-sdk/gateway@2.0.0-beta.57':
+    resolution: {integrity: sha512-ZSqa1QKKU87gY4ivgTiH+8P5EL3KfaqwK0WlwAizKS+S6mgBt0m9zuYVjg0PWRyiRhynz2zORQULGpcLEwlNag==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -1579,8 +1579,8 @@ packages:
     resolution: {integrity: sha512-R62Z0fziX467Eu6MtVhkmHm0VFtJrq4vPGo8w4mcc4LhSPncHwn+b9yoyxv3f2pkWyUAhPR4ttgWyZoFG/lXIA==}
     engines: {node: '>=18'}
 
-  '@ai-sdk/react@3.0.0-beta.99':
-    resolution: {integrity: sha512-adFSYMZOE+vUmwlebfBVgQu87eOgNVayyD6sx8jRJwVnyMYJc+QRvfDZBsk1+5xyUfMeOlpJZTo3KhkMTZixGw==}
+  '@ai-sdk/react@3.0.0-beta.105':
+    resolution: {integrity: sha512-jtpae/nRYGrPBfpYbOTJKvl88A0o5tiYm077Ev+WkCaB31JeMw62RRBQRTFlAcB0VGAMqqpLU+KvNgx18kcg3Q==}
     engines: {node: '>=18'}
     peerDependencies:
       react: ^18 || ^19 || ^19.0.0-rc
@@ -5582,8 +5582,8 @@ packages:
     resolution: {integrity: sha512-pKT8fRnfyYk2MgvyB6fn6ipJPCdfZwiKDdw7vB+HL50rjboEBHDVBEcnwfkEpVSp2AjNtoaOUH7zG+bVC/rvSg==}
     engines: {node: '>=14.6'}
 
-  '@vercel/oidc@3.0.3':
-    resolution: {integrity: sha512-yNEQvPcVrK9sIe637+I0jD6leluPxzwJKx/Haw6F4H77CdDsszUn5V3o96LPziXkSNE2B83+Z3mjqGKBK/R6Gg==}
+  '@vercel/oidc@3.0.5':
+    resolution: {integrity: sha512-fnYhv671l+eTTp48gB4zEsTW/YtRgRPnkI2nT7x6qw5rkI1Lq2hTmQIpHPgyThI0znLK+vX2n9XxKdXZ7BUbbw==}
     engines: {node: '>= 20'}
 
   '@vitejs/plugin-react@5.1.1':
@@ -5661,8 +5661,8 @@ packages:
     resolution: {integrity: sha512-kja8j7PjmncONqaTsB8fQ+wE2mSU2DJ9D4XKoJ5PFWIdRMa6SLSN1ff4mOr4jCbfRSsxR4keIiySJU0N9T5hIQ==}
     engines: {node: '>= 8.0.0'}
 
-  ai@6.0.0-beta.99:
-    resolution: {integrity: sha512-Z/TQByUwZepN2425FepmvDNNpqVufNtqv1QJju6tGL8uiWLwHc9HKN36+joSuCozeZq9JE77FaQ0TBuRh6Hh/A==}
+  ai@6.0.0-beta.105:
+    resolution: {integrity: sha512-KXnP0s5ztyUVdHRM8hQiRMXr4Afg3zr3UlX3S31pP7tWRAo962EpVRavh5wzmAzmi6EN98rcRQdbCHZ0m81ptQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -9789,7 +9789,7 @@ snapshots:
 
   '@acemir/cssom@0.9.23': {}
 
-  '@ai-sdk/deepseek@2.0.0-beta.34(effect@3.18.4)(zod@4.1.12)':
+  '@ai-sdk/deepseek@2.0.0-beta.35(effect@3.18.4)(zod@4.1.12)':
     dependencies:
       '@ai-sdk/openai-compatible': 2.0.0-beta.34(effect@3.18.4)(zod@4.1.12)
       '@ai-sdk/provider': 3.0.0-beta.16
@@ -9800,11 +9800,11 @@ snapshots:
       - arktype
       - effect
 
-  '@ai-sdk/gateway@2.0.0-beta.52(effect@3.18.4)(zod@4.1.12)':
+  '@ai-sdk/gateway@2.0.0-beta.57(effect@3.18.4)(zod@4.1.12)':
     dependencies:
       '@ai-sdk/provider': 3.0.0-beta.16
       '@ai-sdk/provider-utils': 4.0.0-beta.33(effect@3.18.4)(zod@4.1.12)
-      '@vercel/oidc': 3.0.3
+      '@vercel/oidc': 3.0.5
       zod: 4.1.12
     transitivePeerDependencies:
       - '@valibot/to-json-schema'
@@ -9834,10 +9834,10 @@ snapshots:
     dependencies:
       json-schema: 0.4.0
 
-  '@ai-sdk/react@3.0.0-beta.99(effect@3.18.4)(react@19.2.0)(zod@4.1.12)':
+  '@ai-sdk/react@3.0.0-beta.105(effect@3.18.4)(react@19.2.0)(zod@4.1.12)':
     dependencies:
       '@ai-sdk/provider-utils': 4.0.0-beta.33(effect@3.18.4)(zod@4.1.12)
-      ai: 6.0.0-beta.99(effect@3.18.4)(zod@4.1.12)
+      ai: 6.0.0-beta.105(effect@3.18.4)(zod@4.1.12)
       react: 19.2.0
       swr: 2.3.6(react@19.2.0)
       throttleit: 2.1.0
@@ -12219,10 +12219,10 @@ snapshots:
       - encoding
       - supports-color
 
-  '@openrouter/ai-sdk-provider@1.2.3(@tanstack/react-query@5.90.10(react@19.2.0))(ai@6.0.0-beta.99(effect@3.18.4)(zod@4.1.12))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(zod@4.1.12)':
+  '@openrouter/ai-sdk-provider@1.2.3(@tanstack/react-query@5.90.10(react@19.2.0))(ai@6.0.0-beta.105(effect@3.18.4)(zod@4.1.12))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(zod@4.1.12)':
     dependencies:
       '@openrouter/sdk': 0.1.11(@tanstack/react-query@5.90.10(react@19.2.0))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
-      ai: 6.0.0-beta.99(effect@3.18.4)(zod@4.1.12)
+      ai: 6.0.0-beta.105(effect@3.18.4)(zod@4.1.12)
       zod: 4.1.12
     transitivePeerDependencies:
       - '@tanstack/react-query'
@@ -14768,7 +14768,7 @@ snapshots:
     dependencies:
       '@upstash/redis': 1.35.6
 
-  '@vercel/oidc@3.0.3': {}
+  '@vercel/oidc@3.0.5': {}
 
   '@vitejs/plugin-react@5.1.1(rolldown-vite@7.2.5(@types/node@24.10.1)(esbuild@0.25.12)(jiti@2.6.1)(terser@5.16.9)(tsx@4.20.6)(yaml@2.8.1))':
     dependencies:
@@ -14851,9 +14851,9 @@ snapshots:
     dependencies:
       humanize-ms: 1.2.1
 
-  ai@6.0.0-beta.99(effect@3.18.4)(zod@4.1.12):
+  ai@6.0.0-beta.105(effect@3.18.4)(zod@4.1.12):
     dependencies:
-      '@ai-sdk/gateway': 2.0.0-beta.52(effect@3.18.4)(zod@4.1.12)
+      '@ai-sdk/gateway': 2.0.0-beta.57(effect@3.18.4)(zod@4.1.12)
       '@ai-sdk/provider': 3.0.0-beta.16
       '@ai-sdk/provider-utils': 4.0.0-beta.33(effect@3.18.4)(zod@4.1.12)
       '@opentelemetry/api': 1.9.0

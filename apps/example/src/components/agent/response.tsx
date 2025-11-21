@@ -11,8 +11,10 @@ agent-frontmatter:end */
 
 "use client";
 
-import { MagnifyingGlassPlusIcon } from "@phosphor-icons/react";
-import { MagnifyingGlassMinusIcon } from "@phosphor-icons/react/dist/ssr";
+import {
+  MagnifyingGlassMinusIcon,
+  MagnifyingGlassPlusIcon,
+} from "@phosphor-icons/react";
 import { type ComponentProps, memo } from "react";
 import Zoom from "react-medium-image-zoom";
 import type { BundledLanguage } from "shiki/bundle/web";
