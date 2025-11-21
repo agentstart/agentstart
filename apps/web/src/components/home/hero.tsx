@@ -5,7 +5,6 @@ import Link from "next/link";
 import { CodeBlock } from "@/components/agent/code-block";
 import { Button } from "@/components/ui/button";
 import { Frame, FramePanel } from "@/components/ui/frame";
-import { LightRays } from "@/components/ui/light-rays";
 import { rainbowButtonVariants } from "@/components/ui/rainbow-button";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
@@ -56,14 +55,15 @@ export { useAgentStore, useThreadStore };`,
 
 export function Hero() {
   return (
-    <section className="relative flex min-h-[90vh] flex-col justify-center overflow-hidden bg-background pt-12 pb-12 md:pt-24 md:pb-32 lg:pt-32 lg:pb-40">
+    <section className="relative flex min-h-[90vh] flex-col justify-center overflow-hidden pt-12 pb-12 md:pt-24 md:pb-32 lg:pt-32 lg:pb-40">
       <div className="container relative z-10 mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 lg:items-center lg:gap-16">
           {/* Left Column */}
           <div className="flex flex-col items-start space-y-10 text-left">
             <h1 className="mb-8 max-w-2xl font-medium font-serif text-5xl text-foreground leading-[1.1] tracking-tight">
-              Batteries-included TypeScript framework for{" "}
-              <span className="text-muted-foreground/50">production-ready</span>{" "}
+              <span className="text-muted-foreground/50">
+                Batteries-included TypeScript framework for production-ready{" "}
+              </span>
               AI agents
             </h1>
 
@@ -138,9 +138,9 @@ export function Hero() {
           </div>
 
           {/* Right Column */}
-          <Frame className="mt-16 w-full lg:mt-0">
+          <Frame className="mt-16 w-full lg:mt-0 dark:bg-muted/50">
             <Tabs defaultValue={CODE_TABS[0].id}>
-              <div className="flex justify-end pt-1">
+              <div className="flex justify-end px-1 pt-1">
                 <TabsList>
                   {CODE_TABS.map((tab) => {
                     return (
@@ -170,8 +170,6 @@ export function Hero() {
           </Frame>
         </div>
       </div>
-
-      <LightRays />
     </section>
   );
 }

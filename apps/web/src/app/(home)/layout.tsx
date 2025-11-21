@@ -6,10 +6,13 @@ import {
   NavbarMenuTrigger,
 } from "fumadocs-ui/layouts/home/navbar";
 import { featureCards } from "@/components/home/features";
+import { LightRays } from "@/components/ui/light-rays";
 import { baseOptions } from "@/lib/layout.shared";
 
 const links = featureCards.map((feature) => (
-  <NavbarMenuLink href={feature.href}>{feature.name}</NavbarMenuLink>
+  <NavbarMenuLink href={feature.href} key={feature.name}>
+    {feature.name}
+  </NavbarMenuLink>
 ));
 
 export default async function Layout({ children }: LayoutProps<"/">) {
@@ -30,6 +33,7 @@ export default async function Layout({ children }: LayoutProps<"/">) {
         },
       ]}
     >
+      <LightRays className="-mt-8" />
       {children}
     </HomeLayout>
   );

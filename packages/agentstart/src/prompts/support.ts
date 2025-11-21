@@ -21,7 +21,7 @@ import type { PromptFactory, SupportPromptConfig } from "./types";
  * ```typescript
  * const prompt = createSupportPrompt({
  *   product: 'AgentStart Framework',
- *   documentation: 'https://agentstart.dev/docs',
+ *   documentation: 'https://agentstart.ai/docs',
  *   commonIssues: ['installation problems', 'configuration errors'],
  *   escalationRules: 'Escalate to maintainers for confirmed bugs',
  *   tone: 'friendly'

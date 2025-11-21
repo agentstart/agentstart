@@ -1,4 +1,5 @@
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
+import { Logo } from "@/components/logo";
 
 /**
  * Shared layout configurations
@@ -12,7 +13,7 @@ export function baseOptions(): BaseLayoutProps {
     nav: {
       title: (
         <div className="flex items-center gap-2">
-          <span className="text-3xl">❖</span>
+          <Logo />
           AgentStart
         </div>
       ),

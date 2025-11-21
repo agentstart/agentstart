@@ -5,6 +5,7 @@ import {
 } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { GitHubStars } from "@/components/github-stars";
+import { Logo } from "@/components/logo";
 
 export function Footer() {
   return (
@@ -16,7 +17,7 @@ export function Footer() {
             href="/"
             className="mb-4 flex items-center gap-2 font-medium font-serif md:mb-0"
           >
-            <span className="text-4xl">❖</span>
+            <Logo className="size-10" />
           </Link>
 
           <div className="flex flex-col gap-4">
