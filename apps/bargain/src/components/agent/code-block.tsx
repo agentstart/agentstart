@@ -5,6 +5,7 @@ USAGE: <CodeBlock code={code} language="typescript" showLineNumbers copyCode={or
 EXPORTS: CodeBlock, CodeBlockCopyButton, highlightCode
 FEATURES:
   - Dual-theme syntax highlighting (light/dark) using Shiki
+  - Optional single Shiki theme override applied to both modes
   - Optional line number display
   - Copy-to-clipboard button with success feedback
   - Separate copyCode prop to copy original content without diff markers
@@ -28,6 +29,7 @@ import {
 } from "react";
 import {
   type BundledLanguage,
+  type BundledTheme,
   codeToHtml,
   type ShikiTransformer,
 } from "shiki/bundle/web";
@@ -41,6 +43,8 @@ type CodeBlockProps = HTMLAttributes<HTMLDivElement> & {
   showLineNumbers?: boolean;
   showCopyButton?: boolean;
   showDiff?: boolean;
+  /** Optional Shiki theme applied to both light and dark modes */
+  theme?: BundledTheme;
   /** Original code without diff markers for copying */
   copyCode?: string;
 };
@@ -81,13 +85,17 @@ export async function highlightCode({
   language,
   showLineNumbers = false,
   showDiff = false,
+  theme,
 }: {
   code: string;
   language: BundledLanguage;
   showLineNumbers: boolean;
   showDiff: boolean;
+  theme?: BundledTheme;
 }) {
   const transformers: ShikiTransformer[] = [];
+  const resolvedLightTheme = theme ?? "vitesse-light";
+  const resolvedDarkTheme = theme ?? "vesper";
 
   if (showLineNumbers) {
     transformers.push(lineNumberTransformer);
@@ -100,12 +108,12 @@ export async function highlightCode({
   return await Promise.all([
     codeToHtml(code, {
       lang: language,
-      theme: "vitesse-light",
+      theme: resolvedLightTheme,
       transformers,
     }),
     codeToHtml(code, {
       lang: language,
-      theme: "vesper",
+      theme: resolvedDarkTheme,
       transformers,
     }),
   ]);
@@ -117,6 +125,7 @@ export const CodeBlock = ({
   showLineNumbers = false,
   showCopyButton = true,
   showDiff = false,
+  theme,
   copyCode,
   className,
   children,
@@ -126,22 +135,27 @@ export const CodeBlock = ({
   const [darkHtml, setDarkHtml] = useState<string>("");
   const mounted = useRef(false);
   const { resolvedTheme } = useTheme();
+  const isDarkTheme = resolvedTheme === "dark";
 
   useEffect(() => {
-    highlightCode({ code, language, showLineNumbers, showDiff }).then(
-      ([light, dark]) => {
-        if (!mounted.current) {
-          setHtml(light);
-          setDarkHtml(dark);
-          mounted.current = true;
-        }
-      },
-    );
+    highlightCode({
+      code,
+      language,
+      showLineNumbers,
+      showDiff,
+      theme,
+    }).then(([light, dark]) => {
+      if (!mounted.current) {
+        setHtml(light);
+        setDarkHtml(dark);
+        mounted.current = true;
+      }
+    });
 
     return () => {
       mounted.current = false;
     };
-  }, [code, language, showLineNumbers, showDiff]);
+  }, [code, language, showLineNumbers, showDiff, theme]);
 
   return (
     <CodeBlockContext.Provider value={{ code, copyCode: copyCode ?? code }}>
@@ -164,7 +178,7 @@ export const CodeBlock = ({
               "[&_.line]:relative [&_.line]:inline-block [&_.line]:w-full [&_.line]:px-4",
             )}
             dangerouslySetInnerHTML={{
-              __html: resolvedTheme === "dark" ? darkHtml : html,
+              __html: isDarkTheme ? darkHtml : html,
             }}
           />
           {children && (
