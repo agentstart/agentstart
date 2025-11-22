@@ -46,7 +46,7 @@ const createAgentModuleSource = (
   options?: { defaultExport?: boolean },
 ) => {
   return `import { agentStart } from "agentstart";
-import { prismaMemoryAdapter } from "agentstart/memory";
+import { prismaMemoryAdapter } from "agentstart/memory/prisma";
 import { db } from "${dbImportPath}";
 
 ${options?.defaultExport ? "export default" : "export const start ="} agentStart({

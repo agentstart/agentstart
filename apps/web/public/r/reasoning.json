@@ -6,7 +6,13 @@
   "description": "Reasoning disclosure widget that shows expandable reasoning traces with streaming-aware behavior. Auto-opens while streaming and auto-closes after completion.",
   "dependencies": [
     "@phosphor-icons/react",
-    "react"
+    "@shikijs/transformers",
+    "agentstart",
+    "motion",
+    "react",
+    "react-medium-image-zoom",
+    "shiki",
+    "streamdown"
   ],
   "registryDependencies": [],
   "files": [

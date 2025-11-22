@@ -17,9 +17,18 @@ import { runAdapterTest } from "../../test";
 import { drizzleMemoryAdapter } from "../drizzle-adapter";
 import * as schema from "./schema.mysql";
 
-const TEST_DB_MYSQL_URL = "mysql://user:password@localhost:3306/agentstart";
+const TEST_DB_MYSQL_URL =
+  process.env.TEST_DB_MYSQL_URL ?? process.env.MYSQL_URL;
 
-const createTestPool = () => createPool(TEST_DB_MYSQL_URL);
+const createTestPool = () => {
+  if (!TEST_DB_MYSQL_URL) {
+    console.warn(
+      "[drizzle-adapter] skipping MySQL tests: TEST_DB_MYSQL_URL not provided",
+    );
+    return null;
+  }
+  return createPool(TEST_DB_MYSQL_URL);
+};
 
 const cleanupDatabase = async (mysql: Pool) => {
   await mysql.query("DROP DATABASE IF EXISTS agentstart");
@@ -33,6 +42,9 @@ const createTestOptions = (pool: Pool): Omit<AgentStartOptions, "agent"> => ({
 
 const connection = await (async () => {
   const pool = createTestPool();
+  if (!pool) {
+    return { pool: null as Pool | null, skip: true as const };
+  }
   try {
     await pool.query("SELECT 1");
     return { pool, skip: false as const };

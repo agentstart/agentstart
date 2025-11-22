@@ -20,9 +20,15 @@ import { getMigrations } from "../../get-migration";
 import { runAdapterTest } from "../../test";
 import { kyselyMemoryAdapter } from "../kysely-adapter";
 
-const MYSQL_URL = "mysql://user:password@localhost:3306/agentstart";
+const MYSQL_URL = process.env.TEST_DB_MYSQL_URL ?? process.env.MYSQL_URL;
 
 const setupMysql = async () => {
+  if (!MYSQL_URL) {
+    console.warn(
+      "[kysely-adapter] skipping MySQL tests: TEST_DB_MYSQL_URL not provided",
+    );
+    return { pool: null as Pool | null, skip: true as const };
+  }
   const pool = createPool(MYSQL_URL);
   try {
     await pool.query("SELECT 1");

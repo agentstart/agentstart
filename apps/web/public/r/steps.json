@@ -5,8 +5,7 @@
   "title": "AgentStart Steps",
   "description": "Collapsible steps layout with optional loading/error indicators, scrollable content, and timeline bar styling.",
   "dependencies": [
-    "@phosphor-icons/react",
-    "react"
+    "@phosphor-icons/react"
   ],
   "registryDependencies": [
     "@coss/collapsible",

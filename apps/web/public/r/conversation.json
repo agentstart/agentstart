@@ -5,12 +5,21 @@
   "title": "AgentStart Conversation",
   "description": "Render thread messages with auto-scroll, welcome state, and tool-aware formatting. Loads thread transcripts with TanStack Query and displays AI responses and tool interactions.",
   "dependencies": [
+    "@agentstart/utils",
     "@base-ui-components/react",
     "@phosphor-icons/react",
+    "@shikijs/transformers",
     "@tanstack/react-query",
     "agentstart",
     "ai",
+    "class-variance-authority",
+    "date-fns",
+    "motion",
     "react",
+    "react-fast-compare",
+    "react-medium-image-zoom",
+    "shiki",
+    "streamdown",
     "use-stick-to-bottom"
   ],
   "registryDependencies": [

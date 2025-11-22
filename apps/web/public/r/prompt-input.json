@@ -10,7 +10,8 @@
     "agentstart",
     "ai",
     "nanoid",
-    "react"
+    "react",
+    "tokenlens"
   ],
   "registryDependencies": [
     "@coss/button",

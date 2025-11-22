@@ -8,8 +8,8 @@
     "@phosphor-icons/react",
     "@shikijs/transformers",
     "agentstart",
-    "shiki",
-    "react"
+    "react",
+    "shiki"
   ],
   "registryDependencies": [
     "@coss/button",

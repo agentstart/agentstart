@@ -6,6 +6,8 @@
   "description": "Markdown response renderer that renders assistant text parts using Streamdown with stable memoization. Applies consistent typography to markdown streams.",
   "dependencies": [
     "@phosphor-icons/react",
+    "@shikijs/transformers",
+    "agentstart",
     "react",
     "react-medium-image-zoom",
     "shiki",

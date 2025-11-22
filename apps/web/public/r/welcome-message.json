@@ -5,11 +5,20 @@
   "title": "AgentStart Welcome Message",
   "description": "Display welcome description and initial suggestions for new conversations with send-on-click behavior.",
   "dependencies": [
+    "@agentstart/utils",
     "@phosphor-icons/react",
+    "@shikijs/transformers",
     "@tanstack/react-query",
     "agentstart",
+    "ai",
+    "class-variance-authority",
+    "date-fns",
     "motion",
-    "react"
+    "react",
+    "react-fast-compare",
+    "react-medium-image-zoom",
+    "shiki",
+    "streamdown"
   ],
   "registryDependencies": [
     "@coss/button",

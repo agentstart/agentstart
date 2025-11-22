@@ -20,11 +20,12 @@ import viteReact from "@vitejs/plugin-react";
 
 const config = defineConfig(({ command }) => {
   const enableDevtools = command === "serve";
+  const isVitest = process.env.VITEST === "true";
 
   return {
     plugins: [
       ...(enableDevtools ? [devtools()] : []),
-      cloudflare({ viteEnvironment: { name: "ssr" } }),
+      ...(!isVitest ? [cloudflare({ viteEnvironment: { name: "ssr" } })] : []),
       // this is the plugin that enables path aliases
       viteTsConfigPaths(),
       tailwindcss(),
@@ -38,7 +39,7 @@ const config = defineConfig(({ command }) => {
       rollupOptions: {
         // Mark Node.js built-ins as external to be excluded from bundle
         // This prevents the "require is not defined" error in Workers
-        external: ["assert", "buffer", "stream", "util", "net", "tls", "http", "https"] as any,
+        external: ["assert", "buffer", "stream", "util", "net", "tls", "http", "https"],
       },
       minify: "oxc",
       cssMinify: "lightningcss",

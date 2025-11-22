@@ -76,6 +76,7 @@
         "@phosphor-icons/react",
         "@tanstack/react-query",
         "agentstart",
+        "date-fns",
         "react"
       ],
       "registryDependencies": [
@@ -193,12 +194,21 @@
         }
       ],
       "dependencies": [
+        "@agentstart/utils",
         "@base-ui-components/react",
         "@phosphor-icons/react",
+        "@shikijs/transformers",
         "@tanstack/react-query",
         "agentstart",
         "ai",
+        "class-variance-authority",
+        "date-fns",
+        "motion",
         "react",
+        "react-fast-compare",
+        "react-medium-image-zoom",
+        "shiki",
+        "streamdown",
         "use-stick-to-bottom"
       ],
       "registryDependencies": [
@@ -241,7 +251,8 @@
         "agentstart",
         "ai",
         "nanoid",
-        "react"
+        "react",
+        "tokenlens"
       ],
       "registryDependencies": [
         "@coss/button",
@@ -270,7 +281,10 @@
         "motion",
         "react"
       ],
-      "registryDependencies": ["@coss/button", "@coss/spinner"]
+      "registryDependencies": [
+        "@coss/button",
+        "@coss/spinner"
+      ]
     },
     {
       "name": "welcome-message",
@@ -365,13 +379,25 @@
         }
       ],
       "dependencies": [
+        "@agentstart/utils",
         "@phosphor-icons/react",
+        "@shikijs/transformers",
         "@tanstack/react-query",
         "agentstart",
+        "ai",
+        "class-variance-authority",
+        "date-fns",
         "motion",
-        "react"
+        "react",
+        "react-fast-compare",
+        "react-medium-image-zoom",
+        "shiki",
+        "streamdown"
       ],
-      "registryDependencies": ["@coss/button", "@coss/spinner"]
+      "registryDependencies": [
+        "@coss/button",
+        "@coss/spinner"
+      ]
     },
     {
       "name": "code-block",
@@ -389,10 +415,13 @@
         "@phosphor-icons/react",
         "@shikijs/transformers",
         "agentstart",
-        "shiki",
-        "react"
+        "react",
+        "shiki"
       ],
-      "registryDependencies": ["@coss/button", "@coss/scroll-area"]
+      "registryDependencies": [
+        "@coss/button",
+        "@coss/scroll-area"
+      ]
     },
     {
       "name": "shimmer",
@@ -406,7 +435,10 @@
           "target": "components/agent/shimmer.tsx"
         }
       ],
-      "dependencies": ["motion", "react"],
+      "dependencies": [
+        "motion",
+        "react"
+      ],
       "registryDependencies": []
     },
     {
@@ -421,8 +453,14 @@
           "target": "components/agent/relative-time.tsx"
         }
       ],
-      "dependencies": ["date-fns", "react"],
-      "registryDependencies": ["@coss/badge", "@coss/tooltip"]
+      "dependencies": [
+        "date-fns",
+        "react"
+      ],
+      "registryDependencies": [
+        "@coss/badge",
+        "@coss/tooltip"
+      ]
     },
     {
       "name": "message",
@@ -436,8 +474,14 @@
           "target": "components/agent/message.tsx"
         }
       ],
-      "dependencies": ["ai", "class-variance-authority", "react"],
-      "registryDependencies": ["@coss/avatar"]
+      "dependencies": [
+        "ai",
+        "class-variance-authority",
+        "react"
+      ],
+      "registryDependencies": [
+        "@coss/avatar"
+      ]
     },
     {
       "name": "response",
@@ -458,6 +502,8 @@
       ],
       "dependencies": [
         "@phosphor-icons/react",
+        "@shikijs/transformers",
+        "agentstart",
         "react",
         "react-medium-image-zoom",
         "shiki",
@@ -477,8 +523,13 @@
           "target": "components/agent/sources.tsx"
         }
       ],
-      "dependencies": ["@phosphor-icons/react", "react"],
-      "registryDependencies": ["@coss/collapsible"]
+      "dependencies": [
+        "@phosphor-icons/react",
+        "react"
+      ],
+      "registryDependencies": [
+        "@coss/collapsible"
+      ]
     },
     {
       "name": "context",
@@ -492,7 +543,11 @@
           "target": "components/agent/context.tsx"
         }
       ],
-      "dependencies": ["ai", "react", "tokenlens"],
+      "dependencies": [
+        "ai",
+        "react",
+        "tokenlens"
+      ],
       "registryDependencies": [
         "@coss/button",
         "@coss/preview-card",
@@ -511,7 +566,10 @@
           "target": "components/agent/queue.tsx"
         }
       ],
-      "dependencies": ["@phosphor-icons/react", "react"],
+      "dependencies": [
+        "@phosphor-icons/react",
+        "react"
+      ],
       "registryDependencies": [
         "@coss/button",
         "@coss/collapsible",
@@ -530,7 +588,9 @@
           "target": "components/agent/steps.tsx"
         }
       ],
-      "dependencies": ["@phosphor-icons/react", "react"],
+      "dependencies": [
+        "@phosphor-icons/react"
+      ],
       "registryDependencies": [
         "@coss/collapsible",
         "@coss/scroll-area",
@@ -569,7 +629,16 @@
           "target": "components/agent/code-block.tsx"
         }
       ],
-      "dependencies": ["@phosphor-icons/react", "react"],
+      "dependencies": [
+        "@phosphor-icons/react",
+        "@shikijs/transformers",
+        "agentstart",
+        "motion",
+        "react",
+        "react-medium-image-zoom",
+        "shiki",
+        "streamdown"
+      ],
       "registryDependencies": []
     },
     {
@@ -642,12 +711,18 @@
       "dependencies": [
         "@agentstart/utils",
         "@phosphor-icons/react",
+        "@shikijs/transformers",
         "agentstart",
         "ai",
         "react",
-        "react-fast-compare"
+        "react-fast-compare",
+        "react-medium-image-zoom",
+        "shiki",
+        "streamdown"
       ],
-      "registryDependencies": ["@coss/tooltip"]
+      "registryDependencies": [
+        "@coss/tooltip"
+      ]
     },
     {
       "name": "theme-switch",
@@ -661,8 +736,15 @@
           "target": "components/agent/theme-switch.tsx"
         }
       ],
-      "dependencies": ["@phosphor-icons/react", "agentstart", "react"],
-      "registryDependencies": ["@coss/button", "@coss/tabs"]
+      "dependencies": [
+        "@phosphor-icons/react",
+        "agentstart",
+        "react"
+      ],
+      "registryDependencies": [
+        "@coss/button",
+        "@coss/tabs"
+      ]
     },
     {
       "name": "model-selector",
@@ -676,8 +758,16 @@
           "target": "components/agent/model-selector.tsx"
         }
       ],
-      "dependencies": ["@phosphor-icons/react", "agentstart", "react"],
-      "registryDependencies": ["@coss/button", "@coss/command", "@coss/dialog"]
+      "dependencies": [
+        "@phosphor-icons/react",
+        "agentstart",
+        "react"
+      ],
+      "registryDependencies": [
+        "@coss/button",
+        "@coss/command",
+        "@coss/dialog"
+      ]
     },
     {
       "name": "file-explorer",

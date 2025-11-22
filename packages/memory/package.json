@@ -20,9 +20,11 @@
     "dev": "tsdown --watch",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "lint": "biome check --write --unsafe ./src",
+    "postinstall": "pnpm run prisma:generate",
     "typecheck": "tsc --noEmit",
     "test": "pnpm run prisma:push && vitest",
-    "prisma:push": "prisma db push --schema src/memory/prisma/test/schema.prisma",
+    "prisma:generate": "prisma generate --schema src/prisma/test/schema.prisma",
+    "prisma:push": "prisma db push --schema src/prisma/test/schema.prisma",
     "test:adapters": "pnpm run prisma:push && vitest adapters"
   },
   "dependencies": {

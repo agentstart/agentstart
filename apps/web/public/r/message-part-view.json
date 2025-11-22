@@ -7,10 +7,14 @@
   "dependencies": [
     "@agentstart/utils",
     "@phosphor-icons/react",
+    "@shikijs/transformers",
     "agentstart",
     "ai",
     "react",
-    "react-fast-compare"
+    "react-fast-compare",
+    "react-medium-image-zoom",
+    "shiki",
+    "streamdown"
   ],
   "registryDependencies": [
     "@coss/tooltip"

@@ -20,9 +20,18 @@ const createDb = async (connectionString: string, dbName: string) => {
   return client.db(dbName);
 };
 
+const MONGODB_URL =
+  process.env.TEST_MONGODB_URL ?? process.env.MONGODB_URL ?? null;
+
 const connection = await (async () => {
+  if (!MONGODB_URL) {
+    console.warn(
+      "[mongodb-adapter] skipping tests: TEST_MONGODB_URL not provided",
+    );
+    return { db: null as Db | null, skip: true as const };
+  }
   try {
-    const db = await createDb("mongodb://127.0.0.1:27017", "agentstart-tests");
+    const db = await createDb(MONGODB_URL, "agentstart-tests");
     return { db, skip: false as const };
   } catch (error) {
     const err = error as Error;
